@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.proposals import models
 from leaseslicensing.components.bookings.models import ApplicationFeeInvoice
 from leaseslicensing.components.proposals import forms
@@ -21,8 +21,6 @@ from leaseslicensing.components.main.models import (
     Question,
     GlobalSettings,
 )
-#from leaseslicensing.components.main.models import Activity, SubActivityLevel1, SubActivityLevel2, SubCategory
-from reversion.admin import VersionAdmin
 from django.conf.urls import url
 from django.template.response import TemplateResponse
 from django.http import HttpResponse, HttpResponseRedirect
@@ -46,7 +44,8 @@ class AmendmentReasonAdmin(admin.ModelAdmin):
     list_display = ['reason']
 
 @admin.register(models.Proposal)
-class ProposalAdmin(VersionAdmin):
+#class ProposalAdmin(VersionAdmin):
+class ProposalAdmin(admin.ModelAdmin):
     inlines =[ProposalDocumentInline,]
 
 @admin.register(models.ProposalAssessorGroup)
@@ -105,7 +104,7 @@ class ProposalStandardRequirementAdmin(admin.ModelAdmin):
 #@admin.register(models.HelpPage)
 class HelpPageAdmin(admin.ModelAdmin):
     list_display = ['application_type','help_type', 'description', 'version']
-    form = forms.CommercialOperatorHelpPageAdminForm
+    form = forms.LeasesLicensingHelpPageAdminForm
     change_list_template = "leaseslicensing/help_page_changelist.html"
     ordering = ('application_type', 'help_type', '-version')
     list_filter = ('application_type', 'help_type')
@@ -220,16 +219,6 @@ class ZoneAdmin(admin.ModelAdmin):
     filter_horizontal = ('allowed_activities',)
     ordering = ('name',)
 
-@admin.register(models.Vehicle)
-class VehicleAdmin(admin.ModelAdmin):
-    list_display = ['access_type','capacity', 'rego', 'license', 'rego_expiry']
-    ordering = ('access_type',)
-
-@admin.register(models.Vessel)
-class VesselAdmin(admin.ModelAdmin):
-    list_display = ['nominated_vessel','spv_no', 'hire_rego', 'craft_no', 'size', 'proposal']
-    ordering = ('nominated_vessel',)
-
 @admin.register(RequiredDocument)
 class RequiredDocumentAdmin(admin.ModelAdmin):
     list_display = ['park', 'activity', 'question']
@@ -295,52 +284,3 @@ class QuestionAdmin(admin.ModelAdmin):
 class SectionAdmin(admin.ModelAdmin):
     list_display = [f.name for f in ApplicationFeeInvoice._meta.fields]
 
-
-@admin.register(models.DistrictProposalAssessorGroup)
-class DistrictProposalAssessorGroupAdmin(admin.ModelAdmin):
-    list_display = ['name','default']
-    filter_horizontal = ('members',)
-    form = forms.DistrictProposalAssessorGroupAdminForm
-    #readonly_fields = ['default']
-    #readonly_fields = ['default', 'regions', 'activities']
-
-    def get_actions(self, request):
-        actions =  super(DistrictProposalAssessorGroupAdmin, self).get_actions(request)
-        if 'delete_selected' in actions:
-            del actions['delete_selected']
-        return actions
-
-    def has_delete_permission(self, request, obj=None):
-        if self.model.objects.count() == 1:
-            return False
-        return super(DistrictProposalAssessorGroupAdmin, self).has_delete_permission(request, obj)
-
-    # def has_add_permission(self, request):
-    #     if self.model.objects.count() > 0:
-    #         return False
-    #     return super(DistrictProposalAssessorGroupAdmin, self).has_add_permission(request)
-
-
-@admin.register(models.DistrictProposalApproverGroup)
-class DistrictProposalApproverGroupAdmin(admin.ModelAdmin):
-    list_display = ['name','default']
-    filter_horizontal = ('members',)
-    form = forms.DistrictProposalApproverGroupAdminForm
-    #readonly_fields = ['default']
-    #readonly_fields = ['default', 'regions', 'activities']
-
-    def get_actions(self, request):
-        actions =  super(DistrictProposalApproverGroupAdmin, self).get_actions(request)
-        if 'delete_selected' in actions:
-            del actions['delete_selected']
-        return actions
-
-    def has_delete_permission(self, request, obj=None):
-        if self.model.objects.count() == 1:
-            return False
-        return super(DistrictProposalApproverGroupAdmin, self).has_delete_permission(request, obj)
-
-    # def has_add_permission(self, request):
-    #     if self.model.objects.count() > 0:
-    #         return False
-    #     return super(DistrictProposalApproverGroupAdmin, self).has_add_permission(request)

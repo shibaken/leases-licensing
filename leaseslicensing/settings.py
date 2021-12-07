@@ -50,16 +50,16 @@ STATIC_URL = '/static/'
 
 
 INSTALLED_APPS += [
-    'reversion_compare',
+    #'reversion_compare',
     'bootstrap3',
     'leaseslicensing',
     'leaseslicensing.components.main',
-    #'leaseslicensing.components.organisations',
-    #'leaseslicensing.components.users',
-    #'leaseslicensing.components.proposals',
-    #'leaseslicensing.components.approvals',
-    #'leaseslicensing.components.compliances',
-    #'leaseslicensing.components.bookings',
+    'leaseslicensing.components.organisations',
+    'leaseslicensing.components.users',
+    'leaseslicensing.components.proposals',
+    'leaseslicensing.components.approvals',
+    'leaseslicensing.components.compliances',
+    'leaseslicensing.components.bookings',
     'taggit',
     'rest_framework',
     'rest_framework_datatables',

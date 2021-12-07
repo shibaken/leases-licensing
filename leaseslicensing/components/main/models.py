@@ -4,12 +4,155 @@ import os
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
-from django.utils.encoding import python_2_unicode_compatible
+#from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ValidationError
 #from ledger.accounts.models import EmailUser, Document, RevisionedMixin
-from ledger_api_client.models import EmailUser#, RevisionedMixin
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser#, RevisionedMixin
 from django.contrib.postgres.fields.jsonb import JSONField
 
+
+## TODO: remove ledger models
+
+from django_countries.fields import CountryField
+class BaseAddress(models.Model):
+    """Generic address model, intended to provide billing and shipping
+    addresses.
+    Taken from django-oscar address AbstrastAddress class.
+    """
+    STATE_CHOICES = (
+        ('ACT', 'ACT'),
+        ('NSW', 'NSW'),
+        ('NT', 'NT'),
+        ('QLD', 'QLD'),
+        ('SA', 'SA'),
+        ('TAS', 'TAS'),
+        ('VIC', 'VIC'),
+        ('WA', 'WA')
+    )
+
+    # Addresses consist of 1+ lines, only the first of which is
+    # required.
+    line1 = models.CharField('Line 1', max_length=255)
+    line2 = models.CharField('Line 2', max_length=255, blank=True)
+    line3 = models.CharField('Line 3', max_length=255, blank=True)
+    locality = models.CharField('Suburb / Town', max_length=255)
+    state = models.CharField(max_length=255, default='WA', blank=True)
+    country = CountryField(default='AU')
+    postcode = models.CharField(max_length=10)
+    # A field only used for searching addresses.
+    search_text = models.TextField(editable=False)
+    hash = models.CharField(max_length=255, db_index=True, editable=False)
+
+    def __str__(self):
+        return self.summary
+
+#    def __unicode__(self):
+#        return ''
+
+    class Meta:
+        abstract = True
+
+    def clean(self):
+        # Strip all whitespace
+        for field in ['line1', 'line2', 'line3',
+                      'locality', 'state']:
+            if self.__dict__[field]:
+                self.__dict__[field] = self.__dict__[field].strip()
+
+    def save(self, *args, **kwargs):
+        self._update_search_text()
+        self.hash = self.generate_hash()
+        super(BaseAddress, self).save(*args, **kwargs)
+
+    def _update_search_text(self):
+        search_fields = filter(
+            bool, [self.line1, self.line2, self.line3, self.locality,
+                   self.state, str(self.country.name), self.postcode])
+        self.search_text = ' '.join(search_fields)
+
+    @property
+    def summary(self):
+        """Returns a single string summary of the address, separating fields
+        using commas.
+        """
+        return u', '.join(self.active_address_fields())
+
+    # Helper methods
+#    def active_address_fields(self):
+#        """Return the non-empty components of the address.
+#        """
+#        fields = [self.line1, self.line2, self.line3,
+#                  self.locality, self.state, self.country, self.postcode]
+#        fields = [str(f).strip() for f in fields if f]
+#        
+#        return fields
+
+
+    # Helper methods
+    def active_address_fields(self):
+        """Return the non-empty components of the address.
+        """
+        fields = [self.line1, self.line2, self.line3,
+                  self.locality, self.state, self.country, self.postcode]
+        #for f in fields:
+        #    print unicode(f).encode('utf-8').decode('unicode-escape').strip()
+        #fields = [str(f).strip() for f in fields if f]
+        fields = [unicode_compatible(f).encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
+        
+        return fields
+
+    def join_fields(self, fields, separator=u', '):
+        """Join a sequence of fields using the specified separator.
+        """
+        field_values = []
+        for field in fields:
+            value = getattr(self, field)
+            field_values.append(value)
+        return separator.join(filter(bool, field_values))
+
+    def generate_hash(self):
+        """
+            Returns a hash of the address summary
+        """
+        return zlib.crc32(self.summary.strip().upper().encode('UTF8'))
+
+
+class Address(BaseAddress):
+    user = models.ForeignKey('EmailUser', related_name='profile_addresses', on_delete=models.CASCADE)
+    #oscar_address = models.ForeignKey(UserAddress, related_name='profile_addresses', on_delete=models.CASCADE)
+    class Meta:
+        verbose_name_plural = 'addresses'
+        unique_together = ('user','hash')
+
+
+#@python_2_unicode_compatible
+class Organisation(models.Model):
+    """This model represents the details of a company or other organisation.
+    Management of these objects will be delegated to 0+ EmailUsers.
+    """
+    name = models.CharField(max_length=128, unique=True)
+    abn = models.CharField(max_length=50, null=True, blank=True, verbose_name='ABN')
+    # TODO: business logic related to identification file upload/changes.
+    identification = models.FileField(upload_to='%Y/%m/%d', null=True, blank=True)
+    postal_address = models.ForeignKey('OrganisationAddress', related_name='org_postal_address', blank=True, null=True, on_delete=models.SET_NULL)
+    billing_address = models.ForeignKey('OrganisationAddress', related_name='org_billing_address', blank=True, null=True, on_delete=models.SET_NULL)
+    email = models.EmailField(blank=True, null=True,)
+    trading_name = models.CharField(max_length=256, null=True, blank=True)
+
+    def upload_identification(self, request):
+        with transaction.atomic():
+            self.identification = request.data.dict()['identification']
+            self.save()
+
+    def __str__(self):
+        return self.name
+
+class OrganisationAddress(BaseAddress):
+    organisation = models.ForeignKey(Organisation, null=True,blank=True, related_name='adresses', on_delete=models.CASCADE)
+    class Meta:
+        verbose_name_plural = 'organisation addresses'
+        unique_together = ('organisation','hash')
+#####
 
 class RevisionedMixin(models.Model):
     """
@@ -40,7 +183,7 @@ class RevisionedMixin(models.Model):
         abstract = True
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Region(models.Model):
     name = models.CharField(max_length=200, unique=True)
     forest_region = models.BooleanField(default=False)
@@ -57,9 +200,9 @@ class Region(models.Model):
     #     return District.objects.filter(region=self)
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class District(models.Model):
-    region = models.ForeignKey(Region, related_name='districts')
+    region = models.ForeignKey(Region, related_name='districts', on_delete=models.CASCADE)
     name = models.CharField(max_length=200, unique=True)
     code = models.CharField(max_length=3)
     archive_date = models.DateField(null=True, blank=True)
@@ -93,7 +236,7 @@ class District(models.Model):
 
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class AccessType(models.Model):
     name = models.CharField(max_length=200, blank=True)
     visible = models.BooleanField(default=True)
@@ -105,7 +248,7 @@ class AccessType(models.Model):
     def __str__(self):
         return self.name
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class ActivityType(models.Model):
     ACTIVITY_TYPE_CHOICES = (
         ('land', 'Land'),
@@ -123,7 +266,7 @@ class ActivityType(models.Model):
     def __str__(self):
         return self.type_name
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class ActivityCategory(models.Model):
     ACTIVITY_TYPE_CHOICES = (
         ('land', 'Land'),
@@ -145,11 +288,11 @@ class ActivityCategory(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Activity(models.Model):
     name = models.CharField(max_length=200, blank=True)
     visible = models.BooleanField(default=True)
-    activity_category = models.ForeignKey(ActivityCategory, related_name='activities')
+    activity_category = models.ForeignKey(ActivityCategory, related_name='activities', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['name']
@@ -160,14 +303,14 @@ class Activity(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Park(models.Model):
     PARK_TYPE_CHOICES = (
         ('land', 'Land'),
         ('marine', 'Marine'),
         ('Film', 'Film'),
     )
-    district = models.ForeignKey(District, related_name='parks')
+    district = models.ForeignKey(District, related_name='parks', on_delete=models.SET_NULL)
     name = models.CharField(max_length=200, unique=True)
     code = models.CharField(max_length=10, blank=True)
     park_type = models.CharField('Park Type', max_length=40, choices=PARK_TYPE_CHOICES,
@@ -212,11 +355,11 @@ class Park(models.Model):
             raise ValidationError('Unknown application type: {}'.format(application_type))
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Zone(models.Model):
     name = models.CharField(max_length=200, blank=True)
     visible = models.BooleanField(default=True)
-    park = models.ForeignKey(Park, related_name='zones')
+    park = models.ForeignKey(Park, related_name='zones', on_delete=models.CASCADE)
     allowed_activities = models.ManyToManyField(Activity, blank=True)
 
 
@@ -233,7 +376,7 @@ class Zone(models.Model):
 
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Trail(models.Model):
     name = models.CharField(max_length=200, unique=True)
     code = models.CharField(max_length=10, blank=True)
@@ -255,11 +398,11 @@ class Trail(models.Model):
     def allowed_activities_ids(self):
         return [i.id for i in self.allowed_activities.all()]
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Section(models.Model):
     name = models.CharField(max_length=200, blank=True)
     visible = models.BooleanField(default=True)
-    trail = models.ForeignKey(Trail, related_name='sections')
+    trail = models.ForeignKey(Trail, related_name='sections', on_delete=models.CASCADE)
     doc_url= models.CharField('Document URL',max_length=255, blank=True)
 
     class Meta:
@@ -269,11 +412,11 @@ class Section(models.Model):
     def __str__(self):
         return self.name
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class RequiredDocument(models.Model):
     question = models.TextField(blank=False)
-    activity = models.ForeignKey(Activity,null=True, blank=True)
-    park= models.ForeignKey(Park,null=True, blank=True)
+    activity = models.ForeignKey(Activity,null=True, blank=True, on_delete=models.SET_NULL)
+    park= models.ForeignKey(Park,null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -281,7 +424,7 @@ class RequiredDocument(models.Model):
     def __str__(self):
         return self.question
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class ApplicationType(models.Model):
     """
     for park in Park.objects.all().order_by('id'):
@@ -329,14 +472,14 @@ class ApplicationType(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class OracleCode(models.Model):
     CODE_TYPE_CHOICES = (
         (ApplicationType.TCLASS, ApplicationType.TCLASS),
         (ApplicationType.FILMING, ApplicationType.FILMING),
         (ApplicationType.EVENT, ApplicationType.EVENT),
     )
-    park = models.ForeignKey(Park, related_name='oracle_codes')
+    park = models.ForeignKey(Park, related_name='oracle_codes', on_delete=models.SET_NULL)
     code_type = models.CharField('Application Type', max_length=64, choices=CODE_TYPE_CHOICES,
                                         default=CODE_TYPE_CHOICES[0][0])
     code = models.CharField(max_length=50, blank=True)
@@ -349,7 +492,7 @@ class OracleCode(models.Model):
         return '{} - {}'.format(self.code_type, self.code)
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class ActivityMatrix(models.Model):
     name = models.CharField(verbose_name='Activity matrix name', max_length=24, choices=[('Commercial Operator', u'Commercial Operator')], default='Commercial Operator')
     description = models.CharField(max_length=256, blank=True, null=True)
@@ -367,11 +510,11 @@ class ActivityMatrix(models.Model):
         return '{} - v{}'.format(self.name, self.version)
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Tenure(models.Model):
     name = models.CharField(max_length=255, unique=True)
     order = models.PositiveSmallIntegerField(default=0)
-    application_type = models.ForeignKey(ApplicationType, related_name='tenure_app_types')
+    application_type = models.ForeignKey(ApplicationType, related_name='tenure_app_types', on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ['order', 'name']
@@ -380,7 +523,7 @@ class Tenure(models.Model):
     def __str__(self):
         return '{}: {}'.format(self.name, self.application_type)
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Question(models.Model):
     CORRECT_ANSWER_CHOICES = (
         ('answer_one', 'Answer one'), ('answer_two', 'Answer two'), ('answer_three', 'Answer three'),
@@ -393,7 +536,7 @@ class Question(models.Model):
     #answer_five = models.CharField(max_length=200, blank=True)
     correct_answer = models.CharField('Correct Answer', max_length=40, choices=CORRECT_ANSWER_CHOICES,
                                        default=CORRECT_ANSWER_CHOICES[0][0])
-    application_type = models.ForeignKey(ApplicationType, null=True, blank=True)
+    application_type = models.ForeignKey(ApplicationType, null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         #ordering = ['name']
@@ -407,9 +550,9 @@ class Question(models.Model):
         return getattr(self, self.correct_answer)
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class UserAction(models.Model):
-    who = models.ForeignKey(EmailUser, null=False, blank=False)
+    who = models.ForeignKey(EmailUser, null=False, blank=False, on_delete=models.SET_NULL)
     when = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     what = models.TextField(blank=False)
 
@@ -450,8 +593,8 @@ class CommunicationsLogEntry(models.Model):
     subject = models.CharField(max_length=200, blank=True, verbose_name="Subject / Description")
     text = models.TextField(blank=True)
 
-    customer = models.ForeignKey(EmailUser, null=True, related_name='+')
-    staff = models.ForeignKey(EmailUser, null=True, related_name='+')
+    customer = models.ForeignKey(EmailUser, null=True, related_name='+', on_delete=models.SET_NULL)
+    staff = models.ForeignKey(EmailUser, null=True, related_name='+', on_delete=models.SET_NULL)
 
     created = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
@@ -459,7 +602,7 @@ class CommunicationsLogEntry(models.Model):
         app_label = 'leaseslicensing'
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Document(models.Model):
     name = models.CharField(max_length=255, blank=True,
                             verbose_name='name', help_text='')
@@ -513,7 +656,7 @@ class GlobalSettings(models.Model):
         verbose_name_plural = "Global Settings"
 
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class SystemMaintenance(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -535,7 +678,7 @@ class SystemMaintenance(models.Model):
 
 class UserSystemSettings(models.Model):
     one_row_per_park = models.BooleanField(default=False) #Setting for user if they want to see Payment (Park Entry Fees Dashboard) by one row per park or one row per booking
-    user = models.ForeignKey(EmailUser, unique=True, related_name='system_settings')
+    user = models.ForeignKey(EmailUser, unique=True, related_name='system_settings', on_delete=models.CASCADE)
     event_training_completed = models.BooleanField(default=False)
     event_training_date= models.DateField(blank=True, null=True)
 
@@ -544,27 +687,27 @@ class UserSystemSettings(models.Model):
         verbose_name_plural = "User System Settings"
 
 
-import reversion
-reversion.register(Region, follow=['districts'])
-reversion.register(District, follow=['parks'])
-#reversion.register(AccessType)
-reversion.register(AccessType, follow=['park_set', 'proposalparkaccess_set', 'vehicles'])
-reversion.register(ActivityType)
-reversion.register(ActivityCategory, follow=['activities'])
-#reversion.register(Activity, follow=['park_set', 'zone_set', 'trail_set', 'requireddocument_set'])
-reversion.register(Activity, follow=['park_set', 'zone_set', 'trail_set', 'requireddocument_set', 'proposalparkactivity_set','proposalparkzoneactivity_set', 'proposaltrailsectionactivity_set'])
-#reversion.register(Park, follow=['zones', 'requireddocument_set', 'proposals', 'park_entries', 'bookings'])
-reversion.register(Park, follow=['zones', 'requireddocument_set', 'proposals'])
-reversion.register(Zone, follow=['proposal_zones'])
-reversion.register(Trail, follow=['sections', 'proposals'])
-reversion.register(Section, follow=['proposal_trails'])
-reversion.register(RequiredDocument)
-reversion.register(ApplicationType, follow=['tenure_app_types', 'helppage_set'])
-reversion.register(ActivityMatrix)
-reversion.register(Tenure)
-reversion.register(Question)
-reversion.register(UserAction)
-reversion.register(CommunicationsLogEntry)
-reversion.register(Document)
-reversion.register(SystemMaintenance)
+#import reversion
+#reversion.register(Region, follow=['districts'])
+#reversion.register(District, follow=['parks'])
+##reversion.register(AccessType)
+#reversion.register(AccessType, follow=['park_set', 'proposalparkaccess_set', 'vehicles'])
+#reversion.register(ActivityType)
+#reversion.register(ActivityCategory, follow=['activities'])
+##reversion.register(Activity, follow=['park_set', 'zone_set', 'trail_set', 'requireddocument_set'])
+#reversion.register(Activity, follow=['park_set', 'zone_set', 'trail_set', 'requireddocument_set', 'proposalparkactivity_set','proposalparkzoneactivity_set', 'proposaltrailsectionactivity_set'])
+##reversion.register(Park, follow=['zones', 'requireddocument_set', 'proposals', 'park_entries', 'bookings'])
+#reversion.register(Park, follow=['zones', 'requireddocument_set', 'proposals'])
+#reversion.register(Zone, follow=['proposal_zones'])
+#reversion.register(Trail, follow=['sections', 'proposals'])
+#reversion.register(Section, follow=['proposal_trails'])
+#reversion.register(RequiredDocument)
+#reversion.register(ApplicationType, follow=['tenure_app_types', 'helppage_set'])
+#reversion.register(ActivityMatrix)
+#reversion.register(Tenure)
+#reversion.register(Question)
+#reversion.register(UserAction)
+#reversion.register(CommunicationsLogEntry)
+#reversion.register(Document)
+#reversion.register(SystemMaintenance)
 

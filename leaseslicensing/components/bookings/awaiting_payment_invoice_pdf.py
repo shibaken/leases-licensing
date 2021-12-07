@@ -2,7 +2,7 @@ import os
 
 from decimal import Decimal as D
 from io import BytesIO
-from oscar.templatetags.currency_filters import currency
+#from oscar.templatetags.currency_filters import currency
 from reportlab.lib import enums
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Table, TableStyle, ListFlowable, \
@@ -17,7 +17,7 @@ from reportlab.lib import colors
 from django.core.files import File
 from django.conf import settings
 
-from ledger.checkout.utils import calculate_excl_gst
+#from ledger.checkout.utils import calculate_excl_gst
 from leaseslicensing.components.main.utils import to_local_tz
 
 DPAW_HEADER_LOGO = os.path.join(settings.PROJECT_DIR, 'payments','static', 'payments', 'img','dbca_logo.jpg')
@@ -239,10 +239,8 @@ def _create_header(canvas, doc, draw_page_number=True):
     canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 5, 'Payment Due Date')
     canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 5, filming_fee.deferred_payment_date.strftime(DATE_FORMAT))
     canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 6, 'Outstanding (AUD)')
-    canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 6, currency(total_amount))
-#    if hasattr(booking, 'booking_type'):
-#        canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 5, 'Booking No.')
-#        canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 5, booking.admission_number)
+    #TODO: find alt currency lib
+    #canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 6, currency(total_amount))
     canvas.restoreState()
 
 
@@ -307,8 +305,9 @@ def _create_invoice(invoice_buffer, proposal):
                 val,
                 Paragraph(item['ledger_description'], s),
                 item['quantity'],
-                currency(item['price_incl_tax']),
-                currency(amount),
+                #TODO: find alt currency lib
+                #currency(item['price_incl_tax']),
+                #currency(amount),
             ]
         )
         total_amount += amount
@@ -319,7 +318,8 @@ def _create_invoice(invoice_buffer, proposal):
             'Total',
             '',
             '',
-            currency(total_amount)
+            #TODO: find alt currency lib
+            #currency(total_amount)
         ]
     )
 

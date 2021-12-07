@@ -2,7 +2,8 @@ import logging
 
 from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.utils.encoding import smart_text
-from django.core.urlresolvers import reverse
+#from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
