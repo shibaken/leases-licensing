@@ -3,7 +3,7 @@ from django.conf import settings
 
 from django.apps import AppConfig
 
-class CommercialOperatorConfig(AppConfig):
+class LeasesLicensingConfig(AppConfig):
     name = 'leaseslicensing'
     verbose_name = settings.SYSTEM_NAME
 

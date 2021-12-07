@@ -5,7 +5,6 @@ import datetime
 from django.db import models,transaction
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
-from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.utils import timezone
@@ -15,12 +14,11 @@ from django.db.models import Q
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase
 #from ledger.accounts.models import Organisation as ledger_organisation
-from ledger_api_client.models import EmailUser
-from mooringlicensing.components.main.models import RevisionedMixin
-from ledger.licence.models import  Licence
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
+from leaseslicensing.components.main.models import RevisionedMixin
 from leaseslicensing import exceptions
 from leaseslicensing.components.organisations.models import Organisation
-from leaseslicensing.components.proposals.models import Proposal, ProposalUserAction, DistrictProposal, RequirementDocument
+from leaseslicensing.components.proposals.models import Proposal, ProposalUserAction, RequirementDocument
 from leaseslicensing.components.main.models import CommunicationsLogEntry, UserAction, Document, ApplicationType
 from leaseslicensing.components.approvals.email import (
     send_approval_expire_email_notification,
@@ -42,7 +40,7 @@ def update_approval_comms_log_filename(instance, filename):
 
 
 class ApprovalDocument(Document):
-    approval = models.ForeignKey('Approval',related_name='documents')
+    approval = models.ForeignKey('Approval',related_name='documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_approval_doc_filename, max_length=512)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
 
@@ -77,16 +75,16 @@ class Approval(RevisionedMixin):
     lodgement_number = models.CharField(max_length=9, blank=True, default='')
     status = models.CharField(max_length=40, choices=STATUS_CHOICES,
                                        default=STATUS_CHOICES[0][0])
-    licence_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='licence_document')
-    cover_letter_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='cover_letter_document')
-    replaced_by = models.ForeignKey('self', blank=True, null=True)
+    licence_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='licence_document', on_delete=models.SET_NULL)
+    cover_letter_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='cover_letter_document', on_delete=models.SET_NULL)
+    replaced_by = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
     #current_proposal = models.ForeignKey(Proposal,related_name = '+')
-    current_proposal = models.ForeignKey(Proposal,related_name='approvals', null=True)
+    current_proposal = models.ForeignKey(Proposal,related_name='approvals', null=True, on_delete=models.SET_NULL)
 #    activity = models.CharField(max_length=255)
 #    region = models.CharField(max_length=255)
 #    tenure = models.CharField(max_length=255,null=True)
 #    title = models.CharField(max_length=255)
-    renewal_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='renewal_document')
+    renewal_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='renewal_document', on_delete=models.SET_NULL)
     renewal_sent = models.BooleanField(default=False)
     issue_date = models.DateTimeField()
     original_issue_date = models.DateField(auto_now_add=True)
@@ -572,7 +570,7 @@ class PreviewTempApproval(Approval):
 
 
 class ApprovalLogEntry(CommunicationsLogEntry):
-    approval = models.ForeignKey(Approval, related_name='comms_logs')
+    approval = models.ForeignKey(Approval, related_name='comms_logs', on_delete=models.CASCADE)
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -584,7 +582,7 @@ class ApprovalLogEntry(CommunicationsLogEntry):
         super(ApprovalLogEntry, self).save(**kwargs)
 
 class ApprovalLogDocument(Document):
-    log_entry = models.ForeignKey('ApprovalLogEntry',related_name='documents', null=True,)
+    log_entry = models.ForeignKey('ApprovalLogEntry',related_name='documents', null=True, on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_approval_comms_log_filename, null=True, max_length=512)
 
     class Meta:
@@ -615,7 +613,7 @@ class ApprovalUserAction(UserAction):
             what=str(action)
         )
 
-    approval= models.ForeignKey(Approval, related_name='action_logs')
+    approval= models.ForeignKey(Approval, related_name='action_logs', on_delete=models.CASCADE)
 
 @receiver(pre_delete, sender=Approval)
 def delete_documents(sender, instance, *args, **kwargs):
@@ -624,62 +622,4 @@ def delete_documents(sender, instance, *args, **kwargs):
             document.delete()
         except:
             pass
-
-#Filming Models
-class DistrictApproval(RevisionedMixin):
-    STATUS_CHOICES = (
-        ('current','Current'),
-        ('expired','Expired'),
-        ('cancelled','Cancelled'),
-        ('surrendered','Surrendered'),
-        ('suspended','Suspended'),
-        ('extended','extended'),
-    )
-    lodgement_number = models.CharField(max_length=9, blank=True, default='')
-    status = models.CharField(max_length=40, choices=STATUS_CHOICES,
-                                       default=STATUS_CHOICES[0][0])
-    licence_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='district_licence_document')
-    #cover_letter_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='cover_letter_document')
-    replaced_by = models.ForeignKey('self', blank=True, null=True)
-    current_district_proposal = models.ForeignKey(DistrictProposal,related_name='district_approvals', null=True)
-    renewal_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='district_renewal_document')
-    renewal_sent = models.BooleanField(default=False)
-    issue_date = models.DateTimeField()
-    original_issue_date = models.DateField(auto_now_add=True)
-    start_date = models.DateField()
-    expiry_date = models.DateField()
-    surrender_details = JSONField(blank=True,null=True)
-    suspension_details = JSONField(blank=True,null=True)
-    #submitter = models.ForeignKey(EmailUser, on_delete=models.PROTECT, blank=True, null=True, related_name='leaseslicensing_approvals')
-    #org_applicant = models.ForeignKey(Organisation,on_delete=models.PROTECT, blank=True, null=True, related_name='org_approvals')
-    #proxy_applicant = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True, related_name='proxy_approvals')
-    extracted_fields = JSONField(blank=True, null=True)
-    cancellation_details = models.TextField(blank=True)
-    extend_details = models.TextField(blank=True)
-    cancellation_date = models.DateField(blank=True, null=True)
-    set_to_cancel = models.BooleanField(default=False)
-    set_to_suspend = models.BooleanField(default=False)
-    set_to_surrender = models.BooleanField(default=False)
-    renewal_count = models.PositiveSmallIntegerField('Number of times an Approval has been renewed', default=0)
-    migrated=models.BooleanField(default=False)
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        unique_together= ('lodgement_number', 'issue_date')
-
-#import reversion
-#reversion.register(Approval, follow=['documents', 'approval_set', 'action_logs'])
-#reversion.register(ApprovalDocument)
-#reversion.register(ApprovalLogDocument, follow=['documents'])
-#reversion.register(ApprovalLogEntry)
-#reversion.register(ApprovalUserAction)
-
-import reversion
-reversion.register(Approval, follow=['compliances', 'documents', 'comms_logs', 'action_logs'])
-reversion.register(ApprovalDocument, follow=['licence_document', 'cover_letter_document', 'renewal_document'])
-reversion.register(ApprovalLogEntry, follow=['documents'])
-reversion.register(ApprovalLogDocument)
-reversion.register(ApprovalUserAction)
-reversion.register(DistrictApproval)
-
 

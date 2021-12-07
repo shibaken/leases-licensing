@@ -2,11 +2,11 @@ import logging
 
 from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.utils.encoding import smart_text
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 
 from leaseslicensing.components.emails.emails import TemplateEmailBase
-from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 
 logger = logging.getLogger(__name__)
 

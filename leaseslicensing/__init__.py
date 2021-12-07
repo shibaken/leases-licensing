@@ -1,1 +1,1 @@
-default_app_config = 'leaseslicensing.apps.CommercialOperatorConfig'
+default_app_config = 'leaseslicensing.apps.LeasesLicensingConfig'

@@ -4,12 +4,12 @@ from django.db import models, transaction
 from django.contrib.sites.models import Site
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
-from django.utils.encoding import python_2_unicode_compatible
+#from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
-from ledger.accounts.models import Organisation as ledger_organisation
-from ledger.accounts.models import EmailUser,RevisionedMixin #,Document
+from leaseslicensing.components.main.models import Organisation as ledger_organisation, RevisionedMixin
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.main.models import UserAction,CommunicationsLogEntry, Document
 from leaseslicensing.components.organisations.utils import random_generator, can_admin_org, has_atleast_one_admin
 from leaseslicensing.components.organisations.emails import (
@@ -28,9 +28,9 @@ from leaseslicensing.components.organisations.emails import (
 
             )
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class Organisation(models.Model):
-    organisation = models.ForeignKey(ledger_organisation)
+    organisation = models.ForeignKey(ledger_organisation, on_delete=models.SET_NULL)
     # TODO: business logic related to delegate changes.
     delegates = models.ManyToManyField(EmailUser, blank=True, through='UserDelegation', related_name='leaseslicensing_organisations')
     #pin_one = models.CharField(max_length=50,blank=True)
@@ -475,7 +475,7 @@ class Organisation(models.Model):
     def first_five(self):
         return ','.join([user.get_full_name() for user in self.delegates.all()[:5] if can_admin_org(self, user)])
 
-@python_2_unicode_compatible
+#@python_2_unicode_compatible
 class OrganisationContact(models.Model):
     USER_STATUS_CHOICES = (('draft', 'Draft'),
         ('pending', 'Pending'),
@@ -492,7 +492,7 @@ class OrganisationContact(models.Model):
     user_status = models.CharField('Status', max_length=40, choices=USER_STATUS_CHOICES,default=USER_STATUS_CHOICES[0][0])
     user_role = models.CharField('Role', max_length=40, choices=USER_ROLE_CHOICES,default='organisation_user')
     is_admin = models.BooleanField(default= False)
-    organisation = models.ForeignKey(Organisation, related_name='contacts')
+    organisation = models.ForeignKey(Organisation, related_name='contacts', on_delete=models.CASCADE)
     email = models.EmailField(blank=False)
     first_name = models.CharField(max_length=128, blank=False, verbose_name='Given name(s)')
     last_name = models.CharField(max_length=128, blank=False)
@@ -525,8 +525,8 @@ class OrganisationContact(models.Model):
         return self.user_status == 'active' and self.user_role =='consultant'
 
 class OrganisationContactDeclinedDetails(models.Model):
-    request = models.ForeignKey(OrganisationContact)
-    officer = models.ForeignKey(EmailUser, null=False)
+    request = models.ForeignKey(OrganisationContact, on_delete=models.SET_NULL)
+    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.SET_NULL)
     # reason = models.TextField(blank=True)
 
     class Meta:
@@ -534,8 +534,8 @@ class OrganisationContactDeclinedDetails(models.Model):
 
 
 class UserDelegation(models.Model):
-    organisation = models.ForeignKey(Organisation)
-    user = models.ForeignKey(EmailUser)
+    organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE)
+    user = models.ForeignKey(EmailUser, on_delete=models.SET_NULL)
 
     class Meta:
         unique_together = (('organisation','user'),)
@@ -581,7 +581,7 @@ class OrganisationAction(UserAction):
             what=str(action)
         )
 
-    organisation = models.ForeignKey(Organisation,related_name='action_logs')
+    organisation = models.ForeignKey(Organisation,related_name='action_logs', on_delete=models.CASCADE)
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -591,7 +591,7 @@ def update_organisation_comms_log_filename(instance, filename):
 
 
 class OrganisationLogDocument(Document):
-    log_entry = models.ForeignKey('OrganisationLogEntry',related_name='documents')
+    log_entry = models.ForeignKey('OrganisationLogEntry',related_name='documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_organisation_comms_log_filename, max_length=512)
 
     class Meta:
@@ -599,7 +599,7 @@ class OrganisationLogDocument(Document):
 
 
 class OrganisationLogEntry(CommunicationsLogEntry):
-    organisation = models.ForeignKey(Organisation, related_name='comms_logs')
+    organisation = models.ForeignKey(Organisation, related_name='comms_logs', on_delete=models.CASCADE)
 
     def save(self, **kwargs):
         # save the request id if the reference not provided
@@ -623,8 +623,8 @@ class OrganisationRequest(models.Model):
     )
     name = models.CharField(max_length=128)
     abn = models.CharField(max_length=50, null=True, blank=True, verbose_name='ABN')
-    requester = models.ForeignKey(EmailUser)
-    assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='org_request_assignee')
+    requester = models.ForeignKey(EmailUser, on_delete=models.SET_NULL)
+    assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='org_request_assignee', on_delete=models.SET_NULL)
     identification = models.FileField(upload_to='organisation/requests/%Y/%m/%d', max_length=512, null=True, blank=True)
     status = models.CharField(max_length=100,choices=STATUS_CHOICES, default="with_assessor")
     lodgement_date = models.DateTimeField(auto_now_add=True)
@@ -726,7 +726,7 @@ class OrganisationRequest(models.Model):
         return OrganisationRequestUserAction.log_action(self, action, request.user)
 
 class OrganisationAccessGroup(models.Model):
-    site = models.OneToOneField(Site, default='1')
+    site = models.OneToOneField(Site, default='1', on_delete=models.CASCADE)
     members = models.ManyToManyField(EmailUser)
 
     def __str__(self):
@@ -765,15 +765,15 @@ class OrganisationRequestUserAction(UserAction):
             what=str(action)
         )
 
-    request = models.ForeignKey(OrganisationRequest,related_name='action_logs')
+    request = models.ForeignKey(OrganisationRequest,related_name='action_logs', on_delete=models.CASCADE)
 
     class Meta:
         app_label = 'leaseslicensing'
 
 
 class OrganisationRequestDeclinedDetails(models.Model):
-    request = models.ForeignKey(OrganisationRequest)
-    officer = models.ForeignKey(EmailUser, null=False)
+    request = models.ForeignKey(OrganisationRequest, on_delete=models.CASCADE)
+    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.SET_NULL)
     reason = models.TextField(blank=True)
 
     class Meta:
@@ -784,14 +784,14 @@ def update_organisation_request_comms_log_filename(instance, filename):
 
 
 class OrganisationRequestLogDocument(Document):
-    log_entry = models.ForeignKey('OrganisationRequestLogEntry',related_name='documents')
+    log_entry = models.ForeignKey('OrganisationRequestLogEntry',related_name='documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_organisation_request_comms_log_filename, max_length=512)
 
     class Meta:
         app_label = 'leaseslicensing'
 
 class OrganisationRequestLogEntry(CommunicationsLogEntry):
-    request = models.ForeignKey(OrganisationRequest, related_name='comms_logs')
+    request = models.ForeignKey(OrganisationRequest, related_name='comms_logs', on_delete=models.CASCADE)
 
     def save(self, **kwargs):
         # save the request id if the reference not provided

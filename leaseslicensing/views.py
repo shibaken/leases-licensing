@@ -1,5 +1,5 @@
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -15,13 +15,11 @@ from datetime import datetime, timedelta
 
 from leaseslicensing.helpers import is_internal
 from leaseslicensing.forms import *
-from leaseslicensing.components.proposals.models import Referral, Proposal, HelpPage, DistrictProposal
+from leaseslicensing.components.proposals.models import Referral, Proposal, HelpPage
 from leaseslicensing.components.compliances.models import Compliance
 from leaseslicensing.components.proposals.mixins import ReferralOwnerMixin
-from leaseslicensing.components.main.models import Park
-from leaseslicensing.components.bookings.email import send_invoice_tclass_email_notification, send_confirmation_tclass_email_notification
 
-from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+#from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
 from django.core.management import call_command
 import json
 from decimal import Decimal
@@ -67,11 +65,7 @@ class InternalComplianceView(DetailView):
     model = Compliance
     template_name = 'leaseslicensing/dash/index.html'
 
-class DistrictProposalView(DetailView):
-    model = DistrictProposal
-    template_name = 'leaseslicensing/dash/index.html'
-
-class CommercialOperatorRoutingView(TemplateView):
+class LeasesLicensingRoutingView(TemplateView):
     template_name = 'leaseslicensing/index.html'
 
     def get(self, *args, **kwargs):
@@ -80,12 +74,12 @@ class CommercialOperatorRoutingView(TemplateView):
                 return redirect('internal')
             return redirect('external')
         kwargs['form'] = LoginForm
-        return super(CommercialOperatorRoutingView, self).get(*args, **kwargs)
+        return super(LeasesLicensingRoutingView, self).get(*args, **kwargs)
 
-class CommercialOperatorContactView(TemplateView):
+class LeasesLicensingContactView(TemplateView):
     template_name = 'leaseslicensing/contact.html'
 
-class CommercialOperatorFurtherInformationView(TemplateView):
+class LeasesLicensingFurtherInformationView(TemplateView):
     template_name = 'leaseslicensing/further_info.html'
 
 class InternalProposalView(DetailView):
@@ -100,7 +94,7 @@ class InternalProposalView(DetailView):
                 return super(InternalProposalView, self).get(*args, **kwargs)
             return redirect('external-proposal-detail')
         kwargs['form'] = LoginForm
-        return super(CommercialOperatorRoutingDetailView, self).get(*args, **kwargs)
+        return super(LeasesLicensingRoutingDetailView, self).get(*args, **kwargs)
 
 
 @login_required(login_url='ds_home')

@@ -1,6 +1,6 @@
 import ExternalDashboard from '../dashboard.vue'
 import Proposal from '../proposal.vue'
-//import CommercialOperatorLicence from '../commercial_operator_licence.vue'
+//import LeasesLicensingLicence from '../commercial_operator_licence.vue'
 import ProposalApply from '../proposal_apply.vue'
 import ProposalSubmit from '../proposal_submit.vue'
 import Organisation from '../organisations/manage.vue'
@@ -79,7 +79,7 @@ export default
                 },
                 //{
                 //    path: ':proposal_id',
-                //    component: CommercialOperatorLicence,
+                //    component: LeasesLicensingLicence,
                 //    name:"draft_commercial_operator_licence"
                 //},
             ]
