@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 from datetime import datetime, timedelta
 from django.db import models, transaction
 from django.utils import timezone
-from django.contrib.postgres.fields.jsonb import JSONField
+#from django.contrib.postgres.fields.jsonb import JSONField
+from django.db.models import JSONField
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.compliances.models import Compliance
@@ -116,7 +117,8 @@ class Booking(Payment):
     proposal = models.ForeignKey(Proposal, on_delete=models.PROTECT, blank=True, null=True, related_name='bookings')
     booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
     admission_number = models.CharField(max_length=9, blank=True, default='')
-    created_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_booking')
+    #created_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_booking')
+    created_by = models.IntegerField() #EmailUserRO
 
     def __str__(self):
         return 'Application {} : Invoice {}'.format(self.proposal, self.invoices.last())
@@ -225,7 +227,7 @@ class BookingInvoice(RevisionedMixin):
     payment_method = models.SmallIntegerField(choices=PAYMENT_METHOD_CHOICES, default=0) # duplicating from ledger Invoice model to allow easier filtering on payment dashboard
     deferred_payment_date = models.DateField(blank=True, null=True)
     payment_due_notification_sent = models.BooleanField(default=False)
-    property_cache = JSONField(null=True, blank=True, default={})
+    property_cache = JSONField(null=True, blank=True, default=dict)
 
     def __str__(self):
         return 'Booking {} : Invoice #{}'.format(self.id,self.invoice_reference)
@@ -334,7 +336,8 @@ class ApplicationFee(Payment):
     proposal = models.ForeignKey(Proposal, on_delete=models.PROTECT, blank=True, null=True, related_name='application_fees')
     payment_type = models.SmallIntegerField(choices=PAYMENT_TYPE_CHOICES, default=0)
     cost = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
-    created_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_application_fee')
+    #created_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_application_fee')
+    created_by = models.IntegerField() #EmailUserRO
 
     def __str__(self):
         return 'Application {} : Invoice {}'.format(self.proposal, self.application_fee_invoices.last())
@@ -392,7 +395,8 @@ class ComplianceFee(Payment):
     compliance = models.ForeignKey(Compliance, on_delete=models.PROTECT, blank=True, null=True, related_name='compliance_fees')
     payment_type = models.SmallIntegerField(choices=PAYMENT_TYPE_CHOICES, default=0)
     cost = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
-    created_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_compliance_fee')
+    #created_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_compliance_fee')
+    created_by = models.IntegerField() #EmailUserRO
 
     def __str__(self):
         return 'Compliance {} : Invoice {}'.format(self.compliance, self.compliance_fee_invoices.last())

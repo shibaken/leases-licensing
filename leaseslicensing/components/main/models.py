@@ -8,46 +8,47 @@ from django.db.models.signals import pre_delete
 from django.core.exceptions import ValidationError
 #from ledger.accounts.models import EmailUser, Document, RevisionedMixin
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, BaseAddress#, RevisionedMixin
-from django.contrib.postgres.fields.jsonb import JSONField
+#from django.contrib.postgres.fields.jsonb import JSONField
+from django.db.models import JSONField
 
 
 ## TODO: remove ledger models
 
-#@python_2_unicode_compatible
-class Organisation(models.Model):
-    """This model represents the details of a company or other organisation.
-    Management of these objects will be delegated to 0+ EmailUsers.
-    """
-    name = models.CharField(max_length=128, unique=True)
-    abn = models.CharField(max_length=50, null=True, blank=True, verbose_name='ABN')
-    # TODO: business logic related to identification file upload/changes.
-    identification = models.FileField(upload_to='%Y/%m/%d', null=True, blank=True)
-    postal_address = models.ForeignKey('OrganisationAddress', related_name='org_postal_address', blank=True, null=True, on_delete=models.SET_NULL)
-    billing_address = models.ForeignKey('OrganisationAddress', related_name='org_billing_address', blank=True, null=True, on_delete=models.SET_NULL)
-    email = models.EmailField(blank=True, null=True,)
-    trading_name = models.CharField(max_length=256, null=True, blank=True)
-
-    def upload_identification(self, request):
-        with transaction.atomic():
-            self.identification = request.data.dict()['identification']
-            self.save()
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        #abstract = True
-        managed = False
-
-class OrganisationAddress(BaseAddress):
-    organisation = models.ForeignKey(Organisation, null=True,blank=True, related_name='adresses', on_delete=models.CASCADE)
-    class Meta:
-        verbose_name_plural = 'organisation addresses'
-        unique_together = ('organisation','hash')
-
-    class Meta:
-        #abstract = True
-        managed = False
+##@python_2_unicode_compatible
+#class Organisation(models.Model):
+#    """This model represents the details of a company or other organisation.
+#    Management of these objects will be delegated to 0+ EmailUsers.
+#    """
+#    name = models.CharField(max_length=128, unique=True)
+#    abn = models.CharField(max_length=50, null=True, blank=True, verbose_name='ABN')
+#    # TODO: business logic related to identification file upload/changes.
+#    identification = models.FileField(upload_to='%Y/%m/%d', null=True, blank=True)
+#    postal_address = models.ForeignKey('OrganisationAddress', related_name='org_postal_address', blank=True, null=True, on_delete=models.SET_NULL)
+#    billing_address = models.ForeignKey('OrganisationAddress', related_name='org_billing_address', blank=True, null=True, on_delete=models.SET_NULL)
+#    email = models.EmailField(blank=True, null=True,)
+#    trading_name = models.CharField(max_length=256, null=True, blank=True)
+#
+#    def upload_identification(self, request):
+#        with transaction.atomic():
+#            self.identification = request.data.dict()['identification']
+#            self.save()
+#
+#    def __str__(self):
+#        return self.name
+#
+#    class Meta:
+#        #abstract = True
+#        managed = False
+#
+#class OrganisationAddress(BaseAddress):
+#    organisation = models.ForeignKey(Organisation, null=True,blank=True, related_name='adresses', on_delete=models.CASCADE)
+#    class Meta:
+#        verbose_name_plural = 'organisation addresses'
+#        unique_together = ('organisation','hash')
+#
+#    class Meta:
+#        #abstract = True
+#        managed = False
 
 #####
 
@@ -166,8 +167,8 @@ class Question(models.Model):
 
 #@python_2_unicode_compatible
 class UserAction(models.Model):
-    #who = models.ForeignKey(EmailUser, null=False, blank=False, on_delete=models.SET_NULL)
-    who = models.ForeignKey(EmailUser, null=True, blank=True, on_delete=models.SET_NULL)
+    #who = models.ForeignKey(EmailUser, null=True, blank=True, on_delete=models.SET_NULL)
+    who = models.IntegerField() #EmailUserRO
     when = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     what = models.TextField(blank=False)
 
@@ -208,8 +209,10 @@ class CommunicationsLogEntry(models.Model):
     subject = models.CharField(max_length=200, blank=True, verbose_name="Subject / Description")
     text = models.TextField(blank=True)
 
-    customer = models.ForeignKey(EmailUser, null=True, related_name='+', on_delete=models.SET_NULL)
-    staff = models.ForeignKey(EmailUser, null=True, related_name='+', on_delete=models.SET_NULL)
+    #customer = models.ForeignKey(EmailUser, null=True, related_name='+', on_delete=models.SET_NULL)
+    customer = models.IntegerField() #EmailUserRO
+    #staff = models.ForeignKey(EmailUser, null=True, related_name='+', on_delete=models.SET_NULL)
+    staff = models.IntegerField() #EmailUserRO
 
     created = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
@@ -293,7 +296,8 @@ class SystemMaintenance(models.Model):
 
 class UserSystemSettings(models.Model):
     one_row_per_park = models.BooleanField(default=False) #Setting for user if they want to see Payment (Park Entry Fees Dashboard) by one row per park or one row per booking
-    user = models.ForeignKey(EmailUser, unique=True, related_name='system_settings', on_delete=models.CASCADE)
+    #user = models.OneToOneField(EmailUser, related_name='system_settings', on_delete=models.CASCADE)
+    user = models.IntegerField(unique=True) #EmailUserRO
     event_training_completed = models.BooleanField(default=False)
     event_training_date= models.DateField(blank=True, null=True)
 

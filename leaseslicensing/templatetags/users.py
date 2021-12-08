@@ -31,10 +31,11 @@ def is_model_backend(context):
     request = context['request']
     return leaseslicensing_helpers.is_model_backend(request)
 
-#@register.simple_tag(takes_context=True)
-#def is_payment_officer(context):
-#    request = context['request']
-#    return is_payment_admin(request.user)
+@register.simple_tag(takes_context=True)
+def is_payment_officer(context):
+    request = context['request']
+    #TODO: fix this
+    return False #is_payment_admin(request.user)
 
 @register.simple_tag()
 def system_maintenance_due():

@@ -102,8 +102,8 @@ REST_FRAMEWORK = {
 
 
 MIDDLEWARE_CLASSES += [
-    'leaseslicensing.middleware.BookingTimerMiddleware',
-    'leaseslicensing.middleware.FirstTimeNagScreenMiddleware',
+    #'leaseslicensing.middleware.BookingTimerMiddleware',
+    #'leaseslicensing.middleware.FirstTimeNagScreenMiddleware',
     #'leaseslicensing.middleware.RevisionOverrideMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
@@ -212,5 +212,4 @@ LOGGING['loggers']['leaseslicensing'] = {
             'handlers': ['file'],
             'level': 'INFO'
         }
-
-
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'

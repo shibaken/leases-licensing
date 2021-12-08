@@ -7,17 +7,16 @@ from django.db import models,transaction
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from django.core.exceptions import ValidationError
-from django.contrib.postgres.fields.jsonb import JSONField
+#from django.contrib.postgres.fields.jsonb import JSONField
+from django.db.models import JSONField
 from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.conf import settings
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase
-from leaseslicensing.components.main.models import Organisation as ledger_organisation, RevisionedMixin
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing import exceptions
-from leaseslicensing.components.organisations.models import Organisation
-from leaseslicensing.components.main.models import CommunicationsLogEntry, UserAction, Document
+from leaseslicensing.components.main.models import CommunicationsLogEntry, UserAction, Document, RevisionedMixin
 from leaseslicensing.components.proposals.models import ProposalRequirement, AmendmentReason
 from leaseslicensing.components.compliances.email import (
                         send_compliance_accept_email_notification,
@@ -63,11 +62,12 @@ class Compliance(RevisionedMixin):
     num_participants = models.SmallIntegerField('Number of participants', blank=True, null=True)
     processing_status = models.CharField(choices=PROCESSING_STATUS_CHOICES,max_length=20)
     customer_status = models.CharField(choices=CUSTOMER_STATUS_CHOICES,max_length=20, default=CUSTOMER_STATUS_CHOICES[1][0])
-    assigned_to = models.ForeignKey(EmailUser,related_name='leaseslicensing_compliance_assignments',null=True,blank=True, on_delete=models.SET_NULL)
-    #requirement = models.TextField(null=True,blank=True)
+    #assigned_to = models.ForeignKey(EmailUser,related_name='leaseslicensing_compliance_assignments',null=True,blank=True, on_delete=models.SET_NULL)
+    assigned_to = models.IntegerField() #EmailUserRO
     requirement = models.ForeignKey(ProposalRequirement, blank=True, null=True, related_name='compliance_requirement', on_delete=models.SET_NULL)
     lodgement_date = models.DateTimeField(blank=True, null=True)
-    submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_compliances', on_delete=models.SET_NULL)
+    #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_compliances', on_delete=models.SET_NULL)
+    submitter = models.IntegerField() #EmailUserRO
     reminder_sent = models.BooleanField(default=False)
     post_reminder_sent = models.BooleanField(default=False)
     fee_invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
@@ -319,7 +319,8 @@ class CompRequest(models.Model):
     compliance = models.ForeignKey(Compliance, on_delete=models.CASCADE)
     subject = models.CharField(max_length=200, blank=True)
     text = models.TextField(blank=True)
-    officer = models.ForeignKey(EmailUser, null=True, on_delete=models.SET_NULL)
+    #officer = models.ForeignKey(EmailUser, null=True, on_delete=models.SET_NULL)
+    officer = models.IntegerField() # EmailUserRO
 
     class Meta:
         app_label = 'leaseslicensing'

@@ -26,7 +26,7 @@ from datetime import datetime, timedelta
 from collections import OrderedDict
 from django.core.cache import cache
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
-from leaseslicensing.components.main.models import Organisation as ledger_org
+#from leaseslicensing.components.main.models import Organisation as ledger_org
 from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from django.urls import reverse

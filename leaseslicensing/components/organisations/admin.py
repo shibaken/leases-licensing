@@ -15,7 +15,7 @@ class OrganisationRequestAdmin(admin.ModelAdmin):
 
 @admin.register(models.OrganisationAccessGroup)
 class OrganisationAccessGroupAdmin(admin.ModelAdmin):
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     exclude = ('site',)
     actions = None
 

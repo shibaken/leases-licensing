@@ -1,10 +1,13 @@
 from django.conf import settings
-from django.contrib import admin
+#from django.contrib import admin
+from leaseslicensing.admin import admin
 from django.conf.urls import url, include
+from django.urls import path
+from django.contrib.auth.views import LogoutView, LoginView
 from django.conf.urls.static import static
 from rest_framework import routers
 from leaseslicensing import views
-from leaseslicensing.admin import leaseslicensing_admin_site
+#from leaseslicensing.admin import leaseslicensing_admin_site
 from leaseslicensing.components.proposals import views as proposal_views
 from leaseslicensing.components.organisations import views as organisation_views
 from leaseslicensing.components.bookings import views as booking_views
@@ -52,7 +55,7 @@ api_patterns = [
     url(r'^api/countries$', users_api.GetCountries.as_view(), name='get-countries'),
     url(r'^api/department_users$', users_api.DepartmentUserList.as_view(), name='department-users-list'),
     url(r'^api/filtered_users$', users_api.UserListFilterView.as_view(), name='filtered_users'),
-    url(r'^api/filtered_organisations$', org_api.OrganisationListFilterView.as_view(), name='filtered_organisations'),
+    #url(r'^api/filtered_organisations$', org_api.OrganisationListFilterView.as_view(), name='filtered_organisations'),
     url(r'^api/filtered_payments$', approval_api.ApprovalPaymentFilterViewSet.as_view(), name='filtered_payments'),
     url(r'^api/proposal_type$', proposal_api.GetProposalType.as_view(), name='get-proposal-type'),
     url(r'^api/empty_list$', proposal_api.GetEmptyList.as_view(), name='get-empty-list'),
@@ -73,24 +76,24 @@ api_patterns = [
 urlpatterns = [
     #url(r'^admin/', include(leaseslicensing_admin_site.urls)),
     #url(r'^admin/', leaseslicensing_admin_site.urls),
-    url(r'^ledger/admin/', admin.site.urls, name='ledger_admin'),
-    url(r'', include(api_patterns)),
-    url(r'^$', views.LeasesLicensingRoutingView.as_view(), name='ds_home'),
-    url(r'^contact/', views.LeasesLicensingContactView.as_view(), name='ds_contact'),
-    url(r'^further_info/', views.LeasesLicensingFurtherInformationView.as_view(), name='ds_further_info'),
-    url(r'^internal/', views.InternalView.as_view(), name='internal'),
-    url(r'^internal/proposal/(?P<proposal_pk>\d+)/referral/(?P<referral_pk>\d+)/$', views.ReferralView.as_view(), name='internal-referral-detail'),
-    url(r'^external/', views.ExternalView.as_view(), name='external'),
-    url(r'^firsttime/$', views.first_time, name='first_time'),
-    url(r'^account/$', views.ExternalView.as_view(), name='manage-account'),
-    url(r'^profiles/', views.ExternalView.as_view(), name='manage-profiles'),
-    url(r'^help/(?P<application_type>[^/]+)/(?P<help_type>[^/]+)/$', views.HelpView.as_view(), name='help'),
-    url(r'^mgt-commands/$', views.ManagementCommandsView.as_view(), name='mgt-commands'),
-    url(r'test-emails/$', proposal_views.TestEmailView.as_view(), name='test-emails'),
-    #url(r'^external/organisations/manage/$', views.ExternalView.as_view(), name='manage-org'),
-    #following url is used to include url path when sending Proposal amendment request to user.
-    url(r'^proposal/$', proposal_views.ProposalView.as_view(), name='proposal'),
-    url(r'^preview/licence-pdf/(?P<proposal_pk>\d+)',proposal_views.PreviewLicencePDFView.as_view(), name='preview_licence_pdf'),
+    path(r'admin/', admin.site.urls),
+    url(r'^login/', LoginView.as_view(),name='login'),
+    url(r'^logout/$', LogoutView.as_view(), {'next_page': '/'}, name='logout'),
+    #url(r'', include(api_patterns)),
+    #url(r'^$', views.LeasesLicensingRoutingView.as_view(), name='ds_home'),
+    #url(r'^contact/', views.LeasesLicensingContactView.as_view(), name='ds_contact'),
+    #url(r'^further_info/', views.LeasesLicensingFurtherInformationView.as_view(), name='ds_further_info'),
+    #url(r'^internal/', views.InternalView.as_view(), name='internal'),
+    #url(r'^internal/proposal/(?P<proposal_pk>\d+)/referral/(?P<referral_pk>\d+)/$', views.ReferralView.as_view(), name='internal-referral-detail'),
+    #url(r'^external/', views.ExternalView.as_view(), name='external'),
+    #url(r'^firsttime/$', views.first_time, name='first_time'),
+    #url(r'^account/$', views.ExternalView.as_view(), name='manage-account'),
+    #url(r'^profiles/', views.ExternalView.as_view(), name='manage-profiles'),
+    #url(r'^help/(?P<application_type>[^/]+)/(?P<help_type>[^/]+)/$', views.HelpView.as_view(), name='help'),
+    #url(r'^mgt-commands/$', views.ManagementCommandsView.as_view(), name='mgt-commands'),
+    #url(r'test-emails/$', proposal_views.TestEmailView.as_view(), name='test-emails'),
+    #url(r'^proposal/$', proposal_views.ProposalView.as_view(), name='proposal'),
+    #url(r'^preview/licence-pdf/(?P<proposal_pk>\d+)',proposal_views.PreviewLicencePDFView.as_view(), name='preview_licence_pdf'),
 
     ## payment related urls
     #url(r'^application_fee/(?P<proposal_pk>\d+)/$', booking_views.ApplicationFeeView.as_view(), name='application_fee'),
@@ -138,8 +141,8 @@ urlpatterns = [
 if settings.DEBUG:  # Serve media locally in development.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-if settings.SHOW_DEBUG_TOOLBAR:
-    import debug_toolbar
-    urlpatterns = [
-        url('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns
+#if settings.SHOW_DEBUG_TOOLBAR:
+#    import debug_toolbar
+#    urlpatterns = [
+#        url('__debug__/', include(debug_toolbar.urls)),
+#    ] + urlpatterns

@@ -4,9 +4,7 @@ from ledger_api_client.ledger_models import (
         EmailIdentity, 
         #EmailUserAction, EmailUserLogEntry
         )
-from leaseslicensing.components.main.models import (
-                                    Organisation,
-                                )
+from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.main.models import UserSystemSettings, Document, ApplicationType, CommunicationsLogEntry
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.organisations.utils import can_admin_org, is_consultant

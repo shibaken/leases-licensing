@@ -1,6 +1,7 @@
 from django.conf import settings
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
-from leaseslicensing.components.main.models import ApplicationType, Organisation
+from leaseslicensing.components.main.models import ApplicationType
+from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.proposals.models import (
                                     ProposalType,
                                     Proposal,
@@ -493,16 +494,15 @@ class SaveProposalSerializer(BaseProposalSerializer):
 
 
 class ApplicantSerializer(serializers.ModelSerializer):
-    from leaseslicensing.components.organisations.serializers import OrganisationAddressSerializer
-    address = OrganisationAddressSerializer(read_only=True)
-    #address = OrganisationAddressSerializer()
+    #from leaseslicensing.components.organisations.serializers import OrganisationAddressSerializer
+    #address = OrganisationAddressSerializer(read_only=True)
     class Meta:
         model = Organisation
         fields = (
                     'id',
                     'name',
                     'abn',
-                    'address',
+                    #'address',
                     'email',
                     'phone_number',
                 )

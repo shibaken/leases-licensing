@@ -10,7 +10,9 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from django.core.exceptions import ValidationError, MultipleObjectsReturned
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.contrib.postgres.fields.jsonb import JSONField
+#from django.contrib.postgres.fields.jsonb import JSONField
+from django.contrib.postgres.fields import ArrayField
+from django.db.models import JSONField
 from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -22,7 +24,7 @@ from ledger_api_client.country_models import Country
 from leaseslicensing import exceptions
 from leaseslicensing.components.organisations.models import Organisation, OrganisationContact, UserDelegation
 from leaseslicensing.components.main.models import (
-        Organisation as ledger_organisation, OrganisationAddress,
+        #Organisation as ledger_organisation, OrganisationAddress,
         CommunicationsLogEntry, UserAction, Document, 
         ApplicationType, 
         RequiredDocument, RevisionedMixin
@@ -92,16 +94,9 @@ def application_type_choicelist():
         return ( ('T Class', 'T Class'), )
 
 class ProposalType(models.Model):
-    #name = models.CharField(verbose_name='Application name (eg. leaseslicensing, Apiary)', max_length=24)
-    #application_type = models.ForeignKey(ApplicationType, related_name='aplication_types')
     description = models.CharField(max_length=256, blank=True, null=True)
-    #name = models.CharField(verbose_name='Application name (eg. leaseslicensing, Apiary)', max_length=24, choices=application_type_choicelist(), default=application_type_choicelist()[0][0])
     name = models.CharField(verbose_name='Application name (eg. T Class, Filming, Event, E Class)', max_length=64, choices=application_type_choicelist(), default='T Class')
-    schema = JSONField(default=[{}])
-    #activities = TaggableManager(verbose_name="Activities",help_text="A comma-separated list of activities.")
-    #site = models.OneToOneField(Site, default='1')
     replaced_by = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
-    #replaced_by = models.ForeignKey('self', blank=True, null=True)
     version = models.SmallIntegerField(default=1, blank=False, null=False)
 
     def __str__(self):
@@ -114,7 +109,8 @@ class ProposalType(models.Model):
 
 class ProposalAssessorGroup(models.Model):
     name = models.CharField(max_length=255)
-    members = models.ManyToManyField(EmailUser)
+    #members = models.ManyToManyField(EmailUser)
+    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
     default = models.BooleanField(default=False)
 
     class Meta:
@@ -161,7 +157,8 @@ class ProposalApproverGroup(models.Model):
     #members = models.ManyToManyField(EmailUser,blank=True)
     #regions = TaggableManager(verbose_name="Regions",help_text="A comma-separated list of regions.",through=TaggedProposalApproverGroupRegions,related_name = "+",blank=True)
     #activities = TaggableManager(verbose_name="Activities",help_text="A comma-separated list of activities.",through=TaggedProposalApproverGroupActivities,related_name = "+",blank=True)
-    members = models.ManyToManyField(EmailUser)
+    #members = models.ManyToManyField(EmailUser)
+    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
     default = models.BooleanField(default=False)
 
     class Meta:
@@ -437,12 +434,17 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     #lodgement_date = models.DateField(blank=True, null=True)
     lodgement_date = models.DateTimeField(blank=True, null=True)
 
-    proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
-    submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
+    #proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
+    proxy_applicant = models.IntegerField() #EmailUserRO
+    #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
+    submitter = models.IntegerField() #EmailUserRO
 
-    assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
-    assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
-    approved_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_approved_by', on_delete=models.SET_NULL)
+    #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
+    #assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
+    #approved_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_approved_by', on_delete=models.SET_NULL)
+    assigned_officer = models.IntegerField() #EmailUserRO
+    assigned_approver = models.IntegerField() #EmailUserRO
+    approved_by = models.IntegerField() #EmailUserRO
     processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES,
                                          default=PROCESSING_STATUS_CHOICES[1][0])
     prev_processing_status = models.CharField(max_length=30, blank=True, null=True)
@@ -1990,7 +1992,8 @@ class ApplicationFeeDiscount(RevisionedMixin):
     discount_type = models.CharField(max_length=40, choices=DISCOUNT_TYPE_CHOICES)
     discount = models.FloatField(validators=[MinValueValidator(0.0)])
     created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(EmailUser,on_delete=models.PROTECT, related_name='created_by_fee_discount')
+    #ser = models.ForeignKey(EmailUser,on_delete=models.PROTECT, related_name='created_by_fee_discount')
+    user = models.IntegerField() #EmailUserRO
     reset_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
@@ -2052,7 +2055,6 @@ class ProposalOtherDetails(models.Model):
     nominated_start_date= models.DateField(blank=True, null=True)
     insurance_expiry= models.DateField(blank=True, null=True)
     other_comments=models.TextField(blank=True)
-    mooring = JSONField(default=[''])
     #if credit facilities for payment of fees is required
     credit_fees=models.BooleanField(default=False)
     #if credit/ cash payment docket books are required
@@ -2086,7 +2088,8 @@ class ProposalRequest(models.Model):
     proposal = models.ForeignKey(Proposal, related_name='proposalrequest_set', on_delete=models.CASCADE)
     subject = models.CharField(max_length=200, blank=True)
     text = models.TextField(blank=True)
-    officer = models.ForeignKey(EmailUser, null=True, on_delete=models.SET_NULL)
+    #fficer = models.ForeignKey(EmailUser, null=True, on_delete=models.SET_NULL)
+    officer = models.IntegerField() #EmailUserRO
 
     def __str__(self):
         return '{} - {}'.format(self.subject, self.text)
@@ -2172,7 +2175,8 @@ class AmendmentRequest(ProposalRequest):
 class Assessment(ProposalRequest):
     STATUS_CHOICES = (('awaiting_assessment', 'Awaiting Assessment'), ('assessed', 'Assessed'),
                       ('assessment_expired', 'Assessment Period Expired'))
-    assigned_assessor = models.ForeignKey(EmailUser, blank=True, null=True, on_delete=models.SET_NULL)
+    #assigned_assessor = models.ForeignKey(EmailUser, blank=True, null=True, on_delete=models.SET_NULL)
+    assigned_assessor = models.IntegerField() #EmailUserRO
     status = models.CharField('Status', max_length=20, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
     date_last_reminded = models.DateField(null=True, blank=True)
     #requirements = models.ManyToManyField('Requirement', through='AssessmentRequirement')
@@ -2185,7 +2189,8 @@ class Assessment(ProposalRequest):
 class ProposalDeclinedDetails(models.Model):
     #proposal = models.OneToOneField(Proposal, related_name='declined_details')
     proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE)
-    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
+    #officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
+    officer = models.IntegerField() #EmailUserRO
     reason = models.TextField(blank=True)
     cc_email = models.TextField(null=True)
 
@@ -2195,7 +2200,8 @@ class ProposalDeclinedDetails(models.Model):
 class ProposalOnHold(models.Model):
     #proposal = models.OneToOneField(Proposal, related_name='onhold')
     proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE)
-    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
+    #officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
+    officer = models.IntegerField() #EmailUserRO
     comment = models.TextField(blank=True)
     documents = models.ForeignKey(ProposalDocument, blank=True, null=True, related_name='onhold_documents', on_delete=models.SET_NULL)
 
@@ -2366,7 +2372,8 @@ class ProposalUserAction(UserAction):
 class ReferralRecipientGroup(models.Model):
     #site = models.OneToOneField(Site, default='1')
     name = models.CharField(max_length=30, unique=True)
-    members = models.ManyToManyField(EmailUser)
+    #members = models.ManyToManyField(EmailUser)
+    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
 
     def __str__(self):
         #return 'Referral Recipient Group'
@@ -2396,7 +2403,8 @@ class ReferralRecipientGroup(models.Model):
 class QAOfficerGroup(models.Model):
     #site = models.OneToOneField(Site, default='1')
     name = models.CharField(max_length=30, unique=True)
-    members = models.ManyToManyField(EmailUser)
+    #members = models.ManyToManyField(EmailUser)
+    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
     default = models.BooleanField(default=False)
 
     def __str__(self):
@@ -2452,8 +2460,10 @@ class Referral(RevisionedMixin):
                                  )
     lodged_on = models.DateTimeField(auto_now_add=True)
     proposal = models.ForeignKey(Proposal,related_name='referrals', on_delete=models.CASCADE)
-    sent_by = models.ForeignKey(EmailUser,related_name='leaseslicensing_assessor_referrals', on_delete=models.CASCADE)
-    referral = models.ForeignKey(EmailUser,null=True,blank=True,related_name='leaseslicensing_referalls', on_delete=models.SET_NULL)
+    #sent_by = models.ForeignKey(EmailUser,related_name='leaseslicensing_assessor_referrals', on_delete=models.CASCADE)
+    sent_by = models.IntegerField() #EmailUserRO
+    #referral = models.ForeignKey(EmailUser,null=True,blank=True,related_name='leaseslicensing_referalls', on_delete=models.SET_NULL)
+    referral = models.IntegerField() #EmailUserRO
     referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
     linked = models.BooleanField(default=False)
     sent_from = models.SmallIntegerField(choices=SENT_CHOICES,default=SENT_CHOICES[0][0])
@@ -2462,7 +2472,8 @@ class Referral(RevisionedMixin):
     text = models.TextField(blank=True) #Assessor text
     referral_text = models.TextField(blank=True)
     document = models.ForeignKey(ReferralDocument, blank=True, null=True, related_name='referral_document', on_delete=models.SET_NULL)
-    assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_referrals_assigned', on_delete=models.SET_NULL)
+    #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_referrals_assigned', on_delete=models.SET_NULL)
+    assigned_officer = models.IntegerField() #EmailUserRO
 
 
     class Meta:
@@ -2844,7 +2855,8 @@ class ChecklistQuestion(RevisionedMixin):
 class ProposalAssessment(RevisionedMixin):
     proposal=models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
-    submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='proposal_assessment', on_delete=models.SET_NULL)
+    #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='proposal_assessment', on_delete=models.SET_NULL)
+    submitter = models.IntegerField() #EmailUserRO
     referral_assessment=models.BooleanField(default=False)
     referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='referral_assessment', on_delete=models.SET_NULL)
     referral=models.ForeignKey(Referral, related_name='assessment',blank=True, null=True, on_delete=models.SET_NULL)
@@ -2869,7 +2881,7 @@ class ProposalAssessment(RevisionedMixin):
 
 class ProposalAssessmentAnswer(RevisionedMixin):
     question=models.ForeignKey(ChecklistQuestion, related_name='answers', on_delete=models.CASCADE)
-    answer = models.NullBooleanField()
+    answer = models.BooleanField(null=True)
     assessment=models.ForeignKey(ProposalAssessment, related_name='answers', null=True, blank=True, on_delete=models.SET_NULL)
     text_answer= models.CharField(max_length=256, blank=True, null=True)
 
@@ -2894,8 +2906,10 @@ class QAOfficerReferral(RevisionedMixin):
                                  )
     lodged_on = models.DateTimeField(auto_now_add=True)
     proposal = models.ForeignKey(Proposal,related_name='qaofficer_referrals', on_delete=models.CASCADE)
-    sent_by = models.ForeignKey(EmailUser,related_name='assessor_qaofficer_referrals', on_delete=models.CASCADE)
-    qaofficer = models.ForeignKey(EmailUser, null=True, blank=True, related_name='qaofficers', on_delete=models.SET_NULL)
+    #sent_by = models.ForeignKey(EmailUser,related_name='assessor_qaofficer_referrals', on_delete=models.CASCADE)
+    sent_by = models.IntegerField() #EmailUserRO
+    #qaofficer = models.ForeignKey(EmailUser, null=True, blank=True, related_name='qaofficers', on_delete=models.SET_NULL)
+    qaofficer = models.IntegerField() #EmailUserRO
     qaofficer_group = models.ForeignKey(QAOfficerGroup,null=True,blank=True,related_name='qaofficer_groups', on_delete=models.SET_NULL)
     linked = models.BooleanField(default=False)
     sent_from = models.SmallIntegerField(choices=SENT_CHOICES,default=SENT_CHOICES[0][0])

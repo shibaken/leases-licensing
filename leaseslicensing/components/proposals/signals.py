@@ -29,7 +29,7 @@ class ProposalAssessorGroupListener(object):
         instance.full_clean()
 
     @staticmethod
-    @receiver(m2m_changed, sender=ProposalAssessorGroup.members.through)
+    #@receiver(m2m_changed, sender=ProposalAssessorGroup.members.through)
     def members_changed(sender,instance, action,**kwargs):
         if action == 'pre_remove':
             for o in EmailUser.objects.filter(id__in=kwargs.get('pk_set')):

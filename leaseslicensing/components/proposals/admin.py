@@ -41,7 +41,7 @@ class ProposalAdmin(admin.ModelAdmin):
 @admin.register(models.ProposalAssessorGroup)
 class ProposalAssessorGroupAdmin(admin.ModelAdmin):
     list_display = ['name','default']
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     form = forms.ProposalAssessorGroupAdminForm
     readonly_fields = ['default']
     #readonly_fields = ['regions', 'activities']
@@ -66,7 +66,7 @@ class ProposalAssessorGroupAdmin(admin.ModelAdmin):
 @admin.register(models.ProposalApproverGroup)
 class ProposalApproverGroupAdmin(admin.ModelAdmin):
     list_display = ['name','default']
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     form = forms.ProposalApproverGroupAdminForm
     readonly_fields = ['default']
     #readonly_fields = ['default', 'regions', 'activities']
@@ -153,7 +153,7 @@ class GlobalSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(models.ReferralRecipientGroup)
 class ReferralRecipientGroupAdmin(admin.ModelAdmin):
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     list_display = ['name']
     exclude = ('site',)
     actions = None
@@ -165,7 +165,7 @@ class ReferralRecipientGroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.QAOfficerGroup)
 class QAOfficerGroupAdmin(admin.ModelAdmin):
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     list_display = ['name']
     exclude = ('site',)
     actions = None

@@ -6,7 +6,8 @@ from django.db import models,transaction
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from django.core.exceptions import ValidationError
-from django.contrib.postgres.fields.jsonb import JSONField
+#from django.contrib.postgres.fields.jsonb import JSONField
+from django.db.models import JSONField
 from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -92,9 +93,11 @@ class Approval(RevisionedMixin):
     expiry_date = models.DateField()
     surrender_details = JSONField(blank=True,null=True)
     suspension_details = JSONField(blank=True,null=True)
-    submitter = models.ForeignKey(EmailUser, on_delete=models.PROTECT, blank=True, null=True, related_name='leaseslicensing_approvals')
+    #submitter = models.ForeignKey(EmailUser, on_delete=models.PROTECT, blank=True, null=True, related_name='leaseslicensing_approvals')
+    submitter = models.IntegerField() #EmailUserRo
     org_applicant = models.ForeignKey(Organisation,on_delete=models.PROTECT, blank=True, null=True, related_name='org_approvals')
-    proxy_applicant = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True, related_name='proxy_approvals')
+    #proxy_applicant = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True, related_name='proxy_approvals')
+    proxy_applicant = models.IntegerField() #EmailUserRO
     extracted_fields = JSONField(blank=True, null=True)
     cancellation_details = models.TextField(blank=True)
     extend_details = models.TextField(blank=True)
