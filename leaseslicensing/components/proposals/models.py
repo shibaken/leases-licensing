@@ -16,13 +16,17 @@ from django.contrib.sites.models import Site
 from django.conf import settings
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase
-from leaseslicensing.components.main.models import Organisation as ledger_organisation, OrganisationAddress, RevisionedMixin
 #from ledger.accounts.models import OrganisationAddress
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from ledger_api_client.country_models import Country
 from leaseslicensing import exceptions
 from leaseslicensing.components.organisations.models import Organisation, OrganisationContact, UserDelegation
-from leaseslicensing.components.main.models import CommunicationsLogEntry, UserAction, Document, Region, District, Tenure, ApplicationType, Park, Activity, ActivityCategory, AccessType, Trail, Section, Zone, RequiredDocument#, RevisionedMixin
+from leaseslicensing.components.main.models import (
+        Organisation as ledger_organisation, OrganisationAddress,
+        CommunicationsLogEntry, UserAction, Document, 
+        ApplicationType, 
+        RequiredDocument, RevisionedMixin
+        )
 from leaseslicensing.components.main.utils import get_department_user
 from leaseslicensing.components.proposals.email import (
     send_referral_email_notification,
@@ -111,7 +115,6 @@ class ProposalType(models.Model):
 class ProposalAssessorGroup(models.Model):
     name = models.CharField(max_length=255)
     members = models.ManyToManyField(EmailUser)
-    region = models.ForeignKey(Region, null=True, blank=True, on_delete=models.SET_NULL)
     default = models.BooleanField(default=False)
 
     class Meta:
@@ -159,7 +162,6 @@ class ProposalApproverGroup(models.Model):
     #regions = TaggableManager(verbose_name="Regions",help_text="A comma-separated list of regions.",through=TaggedProposalApproverGroupRegions,related_name = "+",blank=True)
     #activities = TaggableManager(verbose_name="Activities",help_text="A comma-separated list of activities.",through=TaggedProposalApproverGroupActivities,related_name = "+",blank=True)
     members = models.ManyToManyField(EmailUser)
-    region = models.ForeignKey(Region, null=True, blank=True, on_delete=models.SET_NULL)
     default = models.BooleanField(default=False)
 
     class Meta:
@@ -248,7 +250,7 @@ class ProposalRequiredDocument(Document):
     _file = models.FileField(upload_to=update_proposal_required_doc_filename, max_length=512)
     input_name = models.CharField(max_length=255,null=True,blank=True)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
-    required_doc = models.ForeignKey('RequiredDocument',related_name='proposals', on_delete=models.SET_NULL)
+    required_doc = models.ForeignKey('RequiredDocument',related_name='proposals', on_delete=models.CASCADE)
     can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
     hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
 
@@ -307,64 +309,6 @@ class ProposalApplicantDetails(models.Model):
 
     class Meta:
         app_label = 'leaseslicensing'
-
-
-class ProposalActivitiesLand(models.Model):
-    activities_land = models.CharField(max_length=24, blank=True, default='')
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        verbose_name = "Application Activity (Land)"
-        verbose_name_plural = "Application Activities (Land)"
-
-
-class ProposalActivitiesMarine(models.Model):
-    activities_marine = models.CharField(max_length=24, blank=True, default='')
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        verbose_name = "Application Activity (Marine)"
-        verbose_name_plural = "Application Activities (Marine)"
-
-
-class ParkEntry(models.Model):
-    park = models.ForeignKey('Park', related_name='park_entries', on_delete=models.CASCADE)
-    proposal = models.ForeignKey('Proposal', related_name='park_entries', on_delete=models.SET_NULL)
-    arrival_date = models.DateField()
-    number_adults = models.PositiveSmallIntegerField('No. of Adults', null=True, blank=True)
-    number_children = models.PositiveSmallIntegerField('No. of Children', null=True, blank=True)
-    number_seniors = models.PositiveSmallIntegerField('No. of Senior Citizens', null=True, blank=True)
-    number_free_of_charge = models.PositiveSmallIntegerField('No. of Individuals Free of Charge', null=True, blank=True)
-
-    class Meta:
-        ordering = ['park__name']
-        app_label = 'leaseslicensing'
-        verbose_name = "Park Entry"
-        verbose_name_plural = "Park Entries"
-        #unique_together = ('id', 'proposal',)
-
-    def __str__(self):
-        return self.park.name
-
-    @property
-    def park_prices(self):
-        return self.park.park_prices
-
-    @property
-    def price_adult(self):
-        return (self.park_prices.adult * self.number_adults)
-
-    @property
-    def price_child(self):
-        return (self.park_prices.child * self.number_children)
-
-    @property
-    def price_senior(self):
-        return (self.park_prices.senior * self.number_senior)
-
-    @property
-    def price_net(self):
-        return (self.price_adult + self.price_child + self.price_senior)
 
 
 class Proposal(DirtyFieldsMixin, RevisionedMixin):
@@ -517,18 +461,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     #previous_application = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
     previous_application = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
     proposed_decline_status = models.BooleanField(default=False)
-    #qaofficer_referral = models.BooleanField(default=False)
-    #qaofficer_referral = models.OneToOneField('QAOfficerReferral', blank=True, null=True)
     # Special Fields
     title = models.CharField(max_length=255,null=True,blank=True)
-    activity = models.CharField(max_length=255,null=True,blank=True)
-    #region = models.CharField(max_length=255,null=True,blank=True)
-    tenure = models.CharField(max_length=255,null=True,blank=True)
-    #activity = models.ForeignKey(Activity, null=True, blank=True)
-    region = models.ForeignKey(Region, null=True, blank=True, on_delete=models.SET_NULL)
-    district = models.ForeignKey(District, null=True, blank=True, on_delete=models.SET_NULL)
-    #tenure = models.ForeignKey(Tenure, null=True, blank=True)
-    application_type = models.ForeignKey(ApplicationType, on_delete=models.SET_NULL)
+    application_type = models.ForeignKey(ApplicationType, on_delete=models.PROTECT)
     approval_level = models.CharField('Activity matrix approval level', max_length=255,null=True,blank=True)
     approval_level_document = models.ForeignKey(ProposalDocument, blank=True, null=True, related_name='approval_level_document', on_delete=models.SET_NULL)
     approval_comment = models.TextField(blank=True)
@@ -2250,7 +2185,7 @@ class Assessment(ProposalRequest):
 class ProposalDeclinedDetails(models.Model):
     #proposal = models.OneToOneField(Proposal, related_name='declined_details')
     proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE)
-    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.SET_NULL)
+    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
     reason = models.TextField(blank=True)
     cc_email = models.TextField(null=True)
 
@@ -2260,7 +2195,7 @@ class ProposalDeclinedDetails(models.Model):
 class ProposalOnHold(models.Model):
     #proposal = models.OneToOneField(Proposal, related_name='onhold')
     proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE)
-    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.SET_NULL)
+    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
     comment = models.TextField(blank=True)
     documents = models.ForeignKey(ProposalDocument, blank=True, null=True, related_name='onhold_documents', on_delete=models.SET_NULL)
 
@@ -2503,29 +2438,6 @@ class QAOfficerGroup(models.Model):
         assessable_states = ['with_qa_officer']
         return Proposal.objects.filter(processing_status__in=assessable_states)
 
-#
-#class ReferralRequestUserAction(UserAction):
-#    ACTION_LODGE_REQUEST = "Lodge request {}"
-#    ACTION_ASSIGN_TO = "Assign to {}"
-#    ACTION_UNASSIGN = "Unassign"
-#    ACTION_DECLINE_REQUEST = "Decline request"
-#    # Assessors
-#
-#    ACTION_CONCLUDE_REQUEST = "Conclude request {}"
-#
-#    @classmethod
-#    def log_action(cls, request, action, user):
-#        return cls.objects.create(
-#            request=request,
-#            who=user,
-#            what=str(action)
-#        )
-#
-#    request = models.ForeignKey(ReferralRequest,related_name='action_logs')
-#
-#    class Meta:
-#        app_label = 'leaseslicensing'
-
 
 #class Referral(models.Model):
 class Referral(RevisionedMixin):
@@ -2540,7 +2452,7 @@ class Referral(RevisionedMixin):
                                  )
     lodged_on = models.DateTimeField(auto_now_add=True)
     proposal = models.ForeignKey(Proposal,related_name='referrals', on_delete=models.CASCADE)
-    sent_by = models.ForeignKey(EmailUser,related_name='leaseslicensing_assessor_referrals', on_delete=models.SET_NULL)
+    sent_by = models.ForeignKey(EmailUser,related_name='leaseslicensing_assessor_referrals', on_delete=models.CASCADE)
     referral = models.ForeignKey(EmailUser,null=True,blank=True,related_name='leaseslicensing_referalls', on_delete=models.SET_NULL)
     referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
     linked = models.BooleanField(default=False)
@@ -2851,12 +2763,6 @@ class ProposalRequirement(OrderedModel):
     #To determine if requirement has been added by referral and the group of referral who added it
     #Null if added by an assessor
     referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='requirement_referral_groups', on_delete=models.SET_NULL)
-    #order = models.IntegerField(default=1)
-    #application_type = models.ForeignKey(ApplicationType, null=True, blank=True)
-    #fee_invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
-    #To determing requirements related to district Proposal
-    district_proposal = models.ForeignKey('DistrictProposal',null=True,blank=True,related_name='district_proposal_requirements', on_delete=models.SET_NULL)
-    district = models.ForeignKey(District, related_name='district_requirements', null=True,blank=True, on_delete=models.SET_NULL)
     notification_only = models.BooleanField(default=False)
 
     class Meta:
@@ -2988,7 +2894,7 @@ class QAOfficerReferral(RevisionedMixin):
                                  )
     lodged_on = models.DateTimeField(auto_now_add=True)
     proposal = models.ForeignKey(Proposal,related_name='qaofficer_referrals', on_delete=models.CASCADE)
-    sent_by = models.ForeignKey(EmailUser,related_name='assessor_qaofficer_referrals', on_delete=models.SET_NULL)
+    sent_by = models.ForeignKey(EmailUser,related_name='assessor_qaofficer_referrals', on_delete=models.CASCADE)
     qaofficer = models.ForeignKey(EmailUser, null=True, blank=True, related_name='qaofficers', on_delete=models.SET_NULL)
     qaofficer_group = models.ForeignKey(QAOfficerGroup,null=True,blank=True,related_name='qaofficer_groups', on_delete=models.SET_NULL)
     linked = models.BooleanField(default=False)
@@ -3011,165 +2917,6 @@ class QAOfficerReferral(RevisionedMixin):
     @property
     def latest_qaofficer_referrals(self):
         return QAOfficer.objects.filter(sent_by=self.qaofficer, proposal=self.proposal)[:2]
-
-#    @property
-#    def can_be_completed(self):
-#        #Referral cannot be completed until second level referral sent by referral has been completed/recalled
-#        qs=Referral.objects.filter(sent_by=self.referral, proposal=self.proposal, processing_status='with_referral')
-#        if qs:
-#            return False
-#        else:
-#            return True
-#
-#    def recall(self,request):
-#        with transaction.atomic():
-#            if not self.proposal.can_assess(request.user):
-#                raise exceptions.ProposalNotAuthorized()
-#            self.processing_status = 'recalled'
-#            self.save()
-#            # TODO Log proposal action
-#            self.proposal.log_user_action(ProposalUserAction.RECALL_REFERRAL.format(self.id,self.proposal.id),request)
-#            # TODO log organisation action
-#            self.proposal.applicant.log_user_action(ProposalUserAction.RECALL_REFERRAL.format(self.id,self.proposal.id),request)
-#
-#    def remind(self,request):
-#        with transaction.atomic():
-#            if not self.proposal.can_assess(request.user):
-#                raise exceptions.ProposalNotAuthorized()
-#            # Create a log entry for the proposal
-#            #self.proposal.log_user_action(ProposalUserAction.ACTION_REMIND_REFERRAL.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-#            self.proposal.log_user_action(ProposalUserAction.ACTION_REMIND_REFERRAL.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
-#            # Create a log entry for the organisation
-#            self.proposal.applicant.log_user_action(ProposalUserAction.ACTION_REMIND_REFERRAL.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
-#            # send email
-#            recipients = self.referral_group.members_list
-#            send_referral_email_notification(self,recipients,request,reminder=True)
-#
-#    def resend(self,request):
-#        with transaction.atomic():
-#            if not self.proposal.can_assess(request.user):
-#                raise exceptions.ProposalNotAuthorized()
-#            self.processing_status = 'with_referral'
-#            self.proposal.processing_status = 'with_referral'
-#            self.proposal.save()
-#            self.sent_from = 1
-#            self.save()
-#            # Create a log entry for the proposal
-#            #self.proposal.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-#            self.proposal.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
-#            # Create a log entry for the organisation
-#            #self.proposal.applicant.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-#            self.proposal.applicant.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
-#            # send email
-#            recipients = self.referral_group.members_list
-#            send_referral_email_notification(self,recipients,request)
-#
-#    def complete(self,request):
-#        with transaction.atomic():
-#            try:
-#                #if request.user != self.referral:
-#                group =  ReferralRecipientGroup.objects.filter(name=self.referral_group)
-#                if group and group[0] in u.referralrecipientgroup_set.all():
-#                    raise exceptions.ReferralNotAuthorized()
-#                self.processing_status = 'completed'
-#                self.referral = request.user
-#                self.referral_text = request.user.get_full_name() + ': ' + request.data.get('referral_comment')
-#                self.add_referral_document(request)
-#                self.save()
-#                # TODO Log proposal action
-#                #self.proposal.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-#                self.proposal.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(request.user.get_full_name(), self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
-#                # TODO log organisation action
-#                #self.proposal.applicant.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-#                self.proposal.applicant.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(request.user.get_full_name(), self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
-#                send_referral_complete_email_notification(self,request)
-#            except:
-#                raise
-#
-#    def add_referral_document(self, request):
-#        with transaction.atomic():
-#            try:
-#                referral_document = request.data['referral_document']
-#                if referral_document != 'null':
-#                    try:
-#                        document = self.referral_documents.get(input_name=str(referral_document))
-#                    except ReferralDocument.DoesNotExist:
-#                        document = self.referral_documents.get_or_create(input_name=str(referral_document), name=str(referral_document))[0]
-#                    document.name = str(referral_document)
-#                    # commenting out below tow lines - we want to retain all past attachments - reversion can use them
-#                    #if document._file and os.path.isfile(document._file.path):
-#                    #    os.remove(document._file.path)
-#                    document._file = referral_document
-#                    document.save()
-#                    d=ReferralDocument.objects.get(id=document.id)
-#                    self.referral_document = d
-#                    comment = 'Referral Document Added: {}'.format(document.name)
-#                else:
-#                    self.referral_document = None
-#                    comment = 'Referral Document Deleted: {}'.format(request.data['referral_document_name'])
-#                #self.save()
-#                self.save(version_comment=comment) # to allow revision to be added to reversion history
-#                self.proposal.log_user_action(ProposalUserAction.ACTION_REFERRAL_DOCUMENT.format(self.id),request)
-#                # Create a log entry for the organisation
-#                self.proposal.applicant.log_user_action(ProposalUserAction.ACTION_REFERRAL_DOCUMENT.format(self.id),request)
-#                return self
-#            except:
-#                raise
-#
-#
-#    def send_referral(self,request,referral_email,referral_text):
-#        with transaction.atomic():
-#            try:
-#                if self.proposal.processing_status == 'with_referral':
-#                    if request.user != self.referral:
-#                        raise exceptions.ReferralNotAuthorized()
-#                    if self.sent_from != 1:
-#                        raise exceptions.ReferralCanNotSend()
-#                    self.proposal.processing_status = 'with_referral'
-#                    self.proposal.save()
-#                    referral = None
-#                    # Check if the user is in ledger
-#                    try:
-#                        user = EmailUser.objects.get(email__icontains=referral_email)
-#                    except EmailUser.DoesNotExist:
-#                        # Validate if it is a deparment user
-#                        department_user = get_department_user(referral_email)
-#                        if not department_user:
-#                            raise ValidationError('The user you want to send the referral to is not a member of the department')
-#                        # Check if the user is in ledger or create
-#
-#                        user,created = EmailUser.objects.get_or_create(email=department_user['email'].lower())
-#                        if created:
-#                            user.first_name = department_user['given_name']
-#                            user.last_name = department_user['surname']
-#                            user.save()
-#                    qs=Referral.objects.filter(sent_by=user, proposal=self.proposal)
-#                    if qs:
-#                        raise ValidationError('You cannot send referral to this user')
-#                    try:
-#                        Referral.objects.get(referral=user,proposal=self.proposal)
-#                        raise ValidationError('A referral has already been sent to this user')
-#                    except Referral.DoesNotExist:
-#                        # Create Referral
-#                        referral = Referral.objects.create(
-#                            proposal = self.proposal,
-#                            referral=user,
-#                            sent_by=request.user,
-#                            sent_from=2,
-#                            text=referral_text
-#                        )
-#                    # Create a log entry for the proposal
-#                    self.proposal.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.proposal.id,'{}({})'.format(user.get_full_name(),user.email)),request)
-#                    # Create a log entry for the organisation
-#                    self.proposal.applicant.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.proposal.id,'{}({})'.format(user.get_full_name(),user.email)),request)
-#                    # send email
-#                    recipients = self.email_group.members_list
-#                    send_referral_email_notification(referral,recipients,request)
-#                else:
-#                    raise exceptions.ProposalReferralCannotBeSent()
-#            except:
-#                raise
-
 
     # Properties
     @property
@@ -3419,283 +3166,6 @@ def duplicate_object(self):
 
     return self
 
-def duplicate_tclass(p):
-    original_proposal=copy.deepcopy(p)
-    p.id=None
-    p.save()
-    print ('new proposal',p)
-
-    for park in original_proposal.parks.all():
-
-        original_park=copy.deepcopy(park)
-        park.id=None
-        park.proposal=p
-        park.save()
-        print('new park', park,park.id, original_park, original_park.id, park.proposal)
-        for activity in original_park.activities.all():
-            activity.id=None
-            activity.proposal_park=park
-            activity.save()
-            print('new activity', activity, activity.id, park)
-            #new_activities_list.append(new_ac)
-        for access in original_park.access_types.all():
-            access.id=None
-            access.proposal_park=park
-            access.save()
-            print('new access', access, park)
-            #new_access_list.append(new_ac)
-        for zone in original_park.zones.all():
-            original_zone=copy.deepcopy(zone)
-            zone.id=None
-            zone.proposal_park=park
-            zone.save()
-            print('new zone',zone)
-            for acz in original_zone.park_activities.all():
-                acz.id=None
-                acz.park_zone=zone
-                acz.save()
-                print('new zone activity', acz, zone)
-
-    for trail in original_proposal.trails.all():
-        original_trail=copy.deepcopy(trail)
-        trail.id=None
-        trail.proposal=p
-        trail.save()
-
-        for section in original_trail.sections.all():
-            original_section=copy.deepcopy(section)
-            section.id=None
-            section.proposal_trail=trail
-            section.save()
-            print('new section', section, trail)
-            for act in original_section.trail_activities.all():
-                act.id=None
-                act.trail_section=section
-                act.save()
-                print('new trail activity', act, section)
-
-    try:
-        other_details=ProposalOtherDetails.objects.get(proposal=original_proposal)
-        new_accreditations=[]
-        print('proposal:',original_proposal, original_proposal.other_details.id, other_details.id)
-        print('accreditations', other_details.accreditations.all())
-        for acc in other_details.accreditations.all():
-            acc.id=None
-            acc.save()
-            new_accreditations.append(acc)
-        other_details.id=None
-        other_details.proposal=p
-        other_details.save()
-        for new_acc in new_accreditations:
-            new_acc.proposal_other_details=other_details
-            new_acc.save()
-    except ProposalOtherDetails.DoesNotExist:
-        other_details=ProposalOtherDetails.objects.create(proposal=p)
-
-    for vehicle in original_proposal.vehicles.all():
-        vehicle.id=None
-        vehicle.proposal=p
-        vehicle.save()
-    for vessel in original_proposal.vessels.all():
-        vessel.id=None
-        vessel.proposal=p
-        vessel.save()
-
-    return p
-
-def duplicate_filming(p):
-    original_proposal=copy.deepcopy(p)
-    p.id=None
-    p.save()
-    print ('new proposal',p)
-
-    for park in original_proposal.filming_parks.all():
-
-        original_park=copy.deepcopy(park)
-        park.id=None
-        park.proposal=p
-        park.save()
-        for park_document in FilmingParkDocument.objects.filter(filming_park=original_park.id):
-            park_document.filming_park = park
-            park_document.id = None
-            park_document._file.name = u'{}/proposals/{}/filming_park_documents/{}'.format(settings.MEDIA_APP_DIR, p.id, park_document.name)
-            park_document.can_delete = True
-            park_document.save()
-
-    try:
-        other_details=ProposalFilmingOtherDetails.objects.get(proposal=original_proposal)
-        other_details.id=None
-        other_details.proposal=p
-        other_details.save()
-        #print('proposal:',original_proposal, original_proposal.filming_other_details.id, other_details.id)
-    except ProposalFilmingOtherDetails.DoesNotExist:
-        other_details=ProposalFilmingOtherDetails.objects.create(proposal=p)
-
-    try:
-        filming_activity=ProposalFilmingActivity.objects.get(proposal=original_proposal)
-        filming_activity.id=None
-        filming_activity.proposal=p
-        filming_activity.save()
-    except ProposalFilmingActivity.DoesNotExist:
-        filming_activity=ProposalFilmingActivity.objects.create(proposal=p)
-
-    try:
-        filming_access=ProposalFilmingAccess.objects.get(proposal=original_proposal)
-        filming_access.id=None
-        filming_access.proposal=p
-        filming_access.save()
-    except ProposalFilmingAccess.DoesNotExist:
-        filming_access=ProposalFilmingAccess.objects.create(proposal=p)
-
-    try:
-        filming_equipment=ProposalFilmingEquipment.objects.get(proposal=original_proposal)
-        filming_equipment.id=None
-        filming_equipment.proposal=p
-        filming_equipment.save()
-    except ProposalFilmingEquipment.DoesNotExist:
-        filming_equipment=ProposalFilmingEquipment.objects.create(proposal=p)
-
-    # for trail in original_proposal.trails.all():
-    #     original_trail=copy.deepcopy(trail)
-    #     trail.id=None
-    #     trail.proposal=p
-    #     trail.save()
-
-    #     for section in original_trail.sections.all():
-    #         original_section=copy.deepcopy(section)
-    #         section.id=None
-    #         section.proposal_trail=trail
-    #         section.save()
-    #         print('new section', section, trail)
-    #         for act in original_section.trail_activities.all():
-    #             act.id=None
-    #             act.trail_section=section
-    #             act.save()
-    #             print('new trail activity', act, section)
-
-    for vehicle in original_proposal.vehicles.all():
-        vehicle.id=None
-        vehicle.proposal=p
-        vehicle.save()
-    for vessel in original_proposal.vessels.all():
-        vessel.id=None
-        vessel.proposal=p
-        vessel.save()
-
-    return p
-
-def duplicate_event(p):
-    original_proposal=copy.deepcopy(p)
-    p.id=None
-    p.save()
-    print ('new proposal',p)
-
-    for park in original_proposal.events_parks.all():
-
-        original_park=copy.deepcopy(park)
-        park.id=None
-        park.proposal=p
-        park.save()
-        #copy manytomany field activities_assessor values.
-        if original_park.activities_assessor:
-            park.activities_assessor.set(original_park.activities_assessor.all())
-            park.save()
-        for park_document in EventsParkDocument.objects.filter(events_park=original_park.id):
-            park_document.events_park = park
-            park_document.id = None
-            park_document._file.name = u'{}/proposals/{}/events_park_documents/{}'.format(settings.MEDIA_APP_DIR, p.id, park_document.name)
-            park_document.can_delete = True
-            park_document.save()
-
-    for park in original_proposal.pre_event_parks.all():
-
-        original_park=copy.deepcopy(park)
-        park.id=None
-        park.proposal=p
-        park.save()
-        for park_document in PreEventsParkDocument.objects.filter(pre_event_park=original_park.id):
-            park_document.pre_event_park = park
-            park_document.id = None
-            park_document._file.name = u'{}/proposals/{}/pre_event_park_documents/{}'.format(settings.MEDIA_APP_DIR, p.id, park_document.name)
-            park_document.can_delete = True
-            park_document.save()
-
-    try:
-        other_details=ProposalEventOtherDetails.objects.get(proposal=original_proposal)
-        other_details.id=None
-        other_details.proposal=p
-        other_details.save()
-        #print('proposal:',original_proposal, original_proposal.filming_other_details.id, other_details.id)
-    except ProposalEventOtherDetails.DoesNotExist:
-        other_details=ProposalEventOtherDetails.objects.create(proposal=p)
-
-    try:
-        event_activity=ProposalEventActivities.objects.get(proposal=original_proposal)
-        new_abseiling=[]
-        for acc in event_activity.abseiling_climbing_activity_data.all():
-            acc.id=None
-            acc.save()
-            new_abseiling.append(acc)
-
-        event_activity.id=None
-        event_activity.proposal=p
-        event_activity.save()
-        for new_acc in new_abseiling:
-            new_acc.event_activities=event_activity
-            new_acc.proposal=p
-            new_acc.save()
-    except ProposalEventActivities.DoesNotExist:
-        event_activity=ProposalEventActivities.objects.create(proposal=p)
-
-    try:
-        event_vehicle_vessel=ProposalEventVehiclesVessels.objects.get(proposal=original_proposal)
-        event_vehicle_vessel.id=None
-        event_vehicle_vessel.proposal=p
-        event_vehicle_vessel.save()
-    except ProposalEventVehiclesVessels.DoesNotExist:
-        event_vehicle_vessel=ProposalEventVehiclesVessels.objects.create(proposal=p)
-
-    try:
-        event_management=ProposalEventManagement.objects.get(proposal=original_proposal)
-        event_management.id=None
-        event_management.proposal=p
-        event_management.save()
-    except ProposalEventManagement.DoesNotExist:
-        event_management=ProposalEventManagement.objects.create(proposal=p)
-
-    for vehicle in original_proposal.vehicles.all():
-        vehicle.id=None
-        vehicle.proposal=p
-        vehicle.save()
-    for vessel in original_proposal.vessels.all():
-        vessel.id=None
-        vessel.proposal=p
-        vessel.save()
-
-    for trail in original_proposal.events_trails.all():
-        original_trail=copy.deepcopy(trail)
-        trail.id=None
-        trail.proposal=p
-        trail.save()
-        if original_trail.activities_assessor:
-            trail.activities_assessor.set(original_trail.activities_assessor.all())
-            trail.save()
-
-        # for section in original_trail.sections.all():
-        #     original_section=copy.deepcopy(section)
-        #     section.id=None
-        #     section.proposal_trail=trail
-        #     section.save()
-        #     print('new section', section, trail)
-        #     for act in original_section.trail_activities.all():
-        #         act.id=None
-        #         act.trail_section=section
-        #         act.save()
-        #         print('new trail activity', act, section)
-
-
-    return p
-
 def searchKeyWords(searchWords, searchProposal, searchApproval, searchCompliance, is_internal= True):
     from leaseslicensing.utils import search, search_approval, search_compliance
     from leaseslicensing.components.approvals.models import Approval
@@ -3784,7 +3254,7 @@ class HelpPage(models.Model):
         (HELP_TEXT_INTERNAL, 'Internal'),
     )
 
-    application_type = models.ForeignKey(ApplicationType, on_delete=models.SET_NULL)
+    application_type = models.ForeignKey(ApplicationType, null=True, on_delete=models.SET_NULL)
     content = RichTextField()
     description = models.CharField(max_length=256, blank=True, null=True)
     help_type = models.SmallIntegerField('Help Type', choices=HELP_TYPE_CHOICES, default=HELP_TEXT_EXTERNAL)

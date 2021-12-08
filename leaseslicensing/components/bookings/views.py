@@ -1,5 +1,5 @@
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
@@ -17,12 +17,11 @@ from dateutil.relativedelta import relativedelta
 
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.compliances.models import Compliance
-from leaseslicensing.components.main.models import Park, ApplicationType
+from leaseslicensing.components.main.models import ApplicationType
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.bookings.context_processors import leaseslicensing_url, template_context
 from leaseslicensing.components.bookings.invoice_pdf import create_invoice_pdf_bytes
 from leaseslicensing.components.bookings.invoice_compliance_pdf import create_invoice_compliance_pdf_bytes
-from leaseslicensing.components.bookings.invoice_filmingfee_pdf import create_invoice_filmingfee_pdf_bytes
 from leaseslicensing.components.bookings.confirmation_pdf import create_confirmation_pdf_bytes
 from leaseslicensing.components.bookings.monthly_confirmation_pdf import create_monthly_confirmation_pdf_bytes
 from leaseslicensing.components.bookings.awaiting_payment_invoice_pdf import create_awaiting_payment_invoice_pdf_bytes
@@ -64,31 +63,33 @@ from leaseslicensing.components.bookings.utils import (
 )
 from leaseslicensing.components.bookings.models import (
     Booking,
-    ParkBooking,
     BookingInvoice,
     ApplicationFee,
     ApplicationFeeInvoice,
     ComplianceFee,
     ComplianceFeeInvoice,
-    FilmingFee,
-    FilmingFeeInvoice,
 )
-
 from leaseslicensing.components.proposals.serializers import ProposalSerializer
 
-from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket, createCustomBasket
-from ledger.payments.utils import oracle_parser_on_invoice,update_payments
-from ledger.payments.invoice.utils import CreateInvoiceBasket
+#from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket, createCustomBasket
+from ledger_api_client.utils import (
+        create_basket_session, 
+        create_checkout_session, 
+        oracle_parser,
+        )
+#from ledger.payments.utils import oracle_parser_on_invoice,update_payments
+#from ledger.payments.invoice.utils import CreateInvoiceBasket
 import json
 from decimal import Decimal
 from collections import OrderedDict
 
-from ledger.payments.models import Invoice
-from ledger.basket.models import Basket
-from ledger.payments.mixins import InvoiceOwnerMixin
-from oscar.apps.order.models import Order
+from ledger_api_client.ledger_models import Invoice
+from ledger_api_client.order import Order
+#from ledger.basket.models import Basket
+#from ledger.payments.mixins import InvoiceOwnerMixin
+#from oscar.apps.order.models import Order
 from leaseslicensing.helpers import is_internal, is_leaseslicensing_admin, is_in_organisation_contacts
-from ledger.payments.helpers import is_payment_admin
+#from ledger.payments.helpers import is_payment_admin
 
 import logging
 logger = logging.getLogger('payment_checkout')

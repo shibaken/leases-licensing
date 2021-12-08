@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import redirect
 from django.utils.http import urlquote_plus
 
@@ -15,10 +15,11 @@ from reversion.views import _request_creates_revision
 CHECKOUT_PATH = re.compile('^/ledger/checkout/checkout')
 
 class FirstTimeNagScreenMiddleware(object):
-    def process_request(self, request):
-        #print ("FirstTimeNagScreenMiddleware: REQUEST SESSION")
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
         if request.user.is_authenticated() and request.method == 'GET' and 'api' not in request.path and 'admin' not in request.path:
-            #print('DEBUG: {}: {} == {}, {} == {}, {} == {}'.format(request.user, request.user.first_name, (not request.user.first_name), request.user.last_name, (not request.user.last_name), request.user.dob, (not request.user.dob) ))
             if (not request.user.first_name) or (not request.user.last_name):# or (not request.user.dob):
                 path_ft = reverse('first_time')
                 path_logout = reverse('accounts:logout')
@@ -27,20 +28,18 @@ class FirstTimeNagScreenMiddleware(object):
 
 
 class BookingTimerMiddleware(object):
-    def process_request(self, request):
-        #print ("BookingTimerMiddleware: REQUEST SESSION")
-        #print request.session['ps_booking']
-        if 'cols_app_invoice' in request.session:
-            #print ("BOOKING SESSION : "+str(request.session['ps_booking']))
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if 'lals_app_invoice' in request.session:
             try:
-                application_fee = ApplicationFee.objects.get(pk=request.session['cols_app_invoice'])
+                application_fee = ApplicationFee.objects.get(pk=request.session['lals_app_invoice'])
             except:
-                # no idea what object is in self.request.session['ps_booking'], ditch it
-                del request.session['cols_app_invoice']
+                del request.session['lals_app_invoice']
                 return
             if application_fee.payment_type != ApplicationFee.PAYMENT_TYPE_TEMPORARY:
-                # booking in the session is not a temporary type, ditch it
-                del request.session['cols_app_invoice']
+                del request.session['lals_app_invoice']
         return
 
 class RevisionOverrideMiddleware(RevisionMiddleware):

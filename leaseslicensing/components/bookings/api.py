@@ -16,7 +16,8 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from rest_framework import viewsets, serializers, status, generics, views
-from rest_framework.decorators import detail_route, list_route, renderer_classes
+from rest_framework.decorators import action as detail_route, renderer_classes
+from rest_framework.decorators import action as list_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
@@ -24,21 +25,18 @@ from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
 from collections import OrderedDict
 from django.core.cache import cache
-from ledger.accounts.models import EmailUser, Address
-from ledger.address.models import Country
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
+from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from leaseslicensing.components.proposals.models import Proposal, ApplicationType
 from leaseslicensing.components.bookings.models import (
     Booking,
-    ParkBooking,
     BookingInvoice,
 )
 from leaseslicensing.components.bookings.serializers import (
     BookingSerializer,
-    ParkBookingSerializer,
-    DTParkBookingSerializer,
     OverdueBookingInvoiceSerializer,
 #    BookingSerializer2,
 #    ParkBookingSerializer2,
@@ -65,7 +63,7 @@ class BookingPaginatedViewSet(viewsets.ModelViewSet):
             return  Booking.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = user) ).exclude(booking_type=Booking.BOOKING_TYPE_TEMPORARY)
         return Booking.objects.none()
 
-    @list_route(methods=['GET',])
+    @list_route(methods=['GET',], detail=False)
     def bookings_external(self, request, *args, **kwargs):
         """
         Paginated serializer for datatables - used by the internal and external dashboard (filtered by the get_queryset method)
@@ -112,51 +110,3 @@ class OverdueBookingInvoiceViewSet(viewsets.ModelViewSet):
             return [inv for inv in bi if inv.overdue]
         return BookingInvoice.objects.none()
 
-
-
-class ParkBookingViewSet(viewsets.ModelViewSet):
-    queryset = ParkBooking.objects.none()
-    serializer_class = ParkBookingSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        if is_internal(self.request):
-            return ParkBooking.objects.all().exclude(booking__booking_type=Booking.BOOKING_TYPE_TEMPORARY)
-        elif is_customer(self.request):
-            user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
-            return  ParkBooking.objects.filter( Q(booking__proposal__org_applicant_id__in = user_orgs) | Q(booking__proposal__submitter = user) ).exclude(booking__booking_type=Booking.BOOKING_TYPE_TEMPORARY)
-        return ParkBooking.objects.none()
-
-class ParkBookingPaginatedViewSet(viewsets.ModelViewSet):
-    filter_backends = (ProposalFilterBackend,)
-    pagination_class = DatatablesPageNumberPagination
-    renderer_classes = (ProposalRenderer,)
-    page_size = 10
-    queryset = ParkBooking.objects.none()
-    serializer_class = DTParkBookingSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        if is_internal(self.request):
-            return ParkBooking.objects.all().exclude(booking__booking_type=Booking.BOOKING_TYPE_TEMPORARY)
-        elif is_customer(self.request):
-            user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
-            return  ParkBooking.objects.filter( Q(booking__proposal__org_applicant_id__in = user_orgs) | Q(booking__proposal__submitter = user) ).exclude(booking__booking_type=Booking.BOOKING_TYPE_TEMPORARY)
-        return ParkBooking.objects.none()
-
-    @list_route(methods=['GET',])
-    def park_bookings(self, request, *args, **kwargs):
-        """
-        Paginated serializer for datatables - used by the internal and external dashboard (filtered by the get_queryset method)
-
-        To test:
-            http://localhost:8000/api/booking_paginated/bookings_external/?format=datatables&draw=1&length=2
-        """
-
-        qs = self.get_queryset()
-        qs = self.filter_queryset(qs)
-
-        self.paginator.page_size = qs.count()
-        result_page = self.paginator.paginate_queryset(qs, request)
-        serializer = DTParkBookingSerializer(result_page, context={'request':request}, many=True)
-        return self.paginator.get_paginated_response(serializer.data)

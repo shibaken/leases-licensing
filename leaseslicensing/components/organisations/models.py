@@ -30,7 +30,7 @@ from leaseslicensing.components.organisations.emails import (
 
 #@python_2_unicode_compatible
 class Organisation(models.Model):
-    organisation = models.ForeignKey(ledger_organisation, on_delete=models.SET_NULL)
+    organisation = models.ForeignKey(ledger_organisation, on_delete=models.CASCADE)
     # TODO: business logic related to delegate changes.
     delegates = models.ManyToManyField(EmailUser, blank=True, through='UserDelegation', related_name='leaseslicensing_organisations')
     #pin_one = models.CharField(max_length=50,blank=True)
@@ -525,8 +525,8 @@ class OrganisationContact(models.Model):
         return self.user_status == 'active' and self.user_role =='consultant'
 
 class OrganisationContactDeclinedDetails(models.Model):
-    request = models.ForeignKey(OrganisationContact, on_delete=models.SET_NULL)
-    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.SET_NULL)
+    request = models.ForeignKey(OrganisationContact, on_delete=models.CASCADE)
+    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
     # reason = models.TextField(blank=True)
 
     class Meta:
@@ -535,7 +535,7 @@ class OrganisationContactDeclinedDetails(models.Model):
 
 class UserDelegation(models.Model):
     organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE)
-    user = models.ForeignKey(EmailUser, on_delete=models.SET_NULL)
+    user = models.ForeignKey(EmailUser, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = (('organisation','user'),)
@@ -623,7 +623,7 @@ class OrganisationRequest(models.Model):
     )
     name = models.CharField(max_length=128)
     abn = models.CharField(max_length=50, null=True, blank=True, verbose_name='ABN')
-    requester = models.ForeignKey(EmailUser, on_delete=models.SET_NULL)
+    requester = models.ForeignKey(EmailUser, on_delete=models.CASCADE)
     assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='org_request_assignee', on_delete=models.SET_NULL)
     identification = models.FileField(upload_to='organisation/requests/%Y/%m/%d', max_length=512, null=True, blank=True)
     status = models.CharField(max_length=100,choices=STATUS_CHOICES, default="with_assessor")
@@ -773,7 +773,7 @@ class OrganisationRequestUserAction(UserAction):
 
 class OrganisationRequestDeclinedDetails(models.Model):
     request = models.ForeignKey(OrganisationRequest, on_delete=models.CASCADE)
-    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.SET_NULL)
+    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
     reason = models.TextField(blank=True)
 
     class Meta:

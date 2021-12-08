@@ -2,7 +2,7 @@ import os
 
 from decimal import Decimal as D
 from io import BytesIO
-from oscar.templatetags.currency_filters import currency
+#from oscar.templatetags.currency_filters import currency
 from reportlab.lib import enums
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Table, TableStyle, ListFlowable, \
@@ -17,7 +17,7 @@ from reportlab.lib import colors
 from django.core.files import File
 from django.conf import settings
 
-from ledger.checkout.utils import calculate_excl_gst
+#from ledger.checkout.utils import calculate_excl_gst
 from leaseslicensing.components.main.utils import to_local_tz
 
 DPAW_HEADER_LOGO = os.path.join(settings.PROJECT_DIR, 'payments','static', 'payments', 'img','dbca_logo.jpg')
@@ -171,8 +171,9 @@ class Remittance(Flowable):
         canvas.setFont(DEFAULT_FONTNAME, MEDIUM_FONTSIZE)
         canvas.drawString(current_x, current_y, self.invoice.reference)
         canvas.drawString(PAGE_WIDTH/4, current_y, self.invoice.created.strftime(DATE_FORMAT))
-        canvas.drawString((PAGE_WIDTH/4) * 2, current_y, currency(self.invoice.amount - calculate_excl_gst(self.invoice.amount) if not _is_gst_exempt(self.proposal, self.invoice) else 0.0))
-        canvas.drawString((PAGE_WIDTH/4) * 3, current_y, currency(self.invoice.amount))
+        # TODO find alt currency lib
+        #canvas.drawString((PAGE_WIDTH/4) * 2, current_y, currency(self.invoice.amount - calculate_excl_gst(self.invoice.amount) if not _is_gst_exempt(self.proposal, self.invoice) else 0.0))
+        #canvas.drawString((PAGE_WIDTH/4) * 3, current_y, currency(self.invoice.amount))
 
     def draw(self):
         #if settings.BPAY_ALLOWED:
@@ -241,13 +242,14 @@ def _create_header(canvas, doc, draw_page_number=True):
     canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 4, 'Invoice Number')
     canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 4, invoice.reference)
     canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 5, 'Total (AUD)')
-    canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 5, currency(invoice.amount))
+    # TODO: find alt currency lib
+    #canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 5, currency(invoice.amount))
     canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 6, 'GST included (AUD)')
-    canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 6, currency(invoice.amount - calculate_excl_gst(invoice.amount) if not _is_gst_exempt(proposal, invoice) else 0.0))
+    #canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 6, currency(invoice.amount - calculate_excl_gst(invoice.amount) if not _is_gst_exempt(proposal, invoice) else 0.0))
     canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 7, 'Paid (AUD)')
-    canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 7, currency(invoice.payment_amount))
+    #canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 7, currency(invoice.payment_amount))
     canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 8, 'Outstanding (AUD)')
-    canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 8, currency(invoice.balance))
+    #canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 8, currency(invoice.balance))
 
     if bi and bi[0].deferred_payment_date and invoice.payment_method in [invoice.PAYMENT_METHOD_MONTHLY_INVOICING, invoice.PAYMENT_METHOD_BPAY]:
         canvas.drawRightString(current_x + 20, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 9, 'Payment Due Date')
@@ -311,8 +313,8 @@ def _create_invoice(invoice_buffer, invoice, proposal):
                 val,
                 Paragraph(item.description, s),
                 item.quantity,
-                currency(item.unit_price_incl_tax),
-                currency(item.line_price_before_discounts_incl_tax)
+                #currency(item.unit_price_incl_tax),
+                #currency(item.line_price_before_discounts_incl_tax)
             ]
         )
         val += 1

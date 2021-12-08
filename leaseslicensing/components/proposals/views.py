@@ -4,12 +4,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View, TemplateView
 from django.db.models import Q
 from leaseslicensing.components.proposals.utils import create_data_from_form
-from leaseslicensing.components.proposals.models import Proposal, Referral, ProposalType, HelpPage, DistrictProposal
+from leaseslicensing.components.proposals.models import Proposal, Referral, ProposalType, HelpPage
 from leaseslicensing.components.approvals.models import Approval
 from leaseslicensing.components.compliances.models import Compliance
 import json,traceback
-from reversion_compare.views import HistoryCompareDetailView
-from reversion.models import Version
 
 class ProposalView(TemplateView):
     template_name = 'leaseslicensing/proposal.html'
@@ -30,72 +28,72 @@ class ProposalView(TemplateView):
             return JsonResponse({error:"something went wrong"},safe=False,status=400)
 
 
-class ProposalHistoryCompareView(HistoryCompareDetailView):
-    """
-    View for reversion_compare
-    """
-    model = Proposal
-    template_name = 'leaseslicensing/reversion_history.html'
-
-
-class ProposalFilteredHistoryCompareView(HistoryCompareDetailView):
-    """
-    View for reversion_compare - with 'status' in the comment field only'
-    """
-    model = Proposal
-    template_name = 'leaseslicensing/reversion_history.html'
-
-    def _get_action_list(self,):
-        """ Get only versions when processing_status changed, and add the most recent (current) version """
-        current_revision_id = Version.objects.get_for_object(self.get_object()).first().revision_id
-        action_list = [
-            {"version": version, "revision": version.revision}
-            for version in self._order_version_queryset(
-                #Version.objects.get_for_object(self.get_object()).select_related("revision__user").filter(revision__comment__icontains='status')
-                Version.objects.get_for_object(self.get_object()).select_related("revision__user").filter(Q(revision__comment__icontains='status') | Q(revision_id=current_revision_id))
-            )
-        ]
-        return action_list
-
-class ReferralHistoryCompareView(HistoryCompareDetailView):
-    """
-    View for reversion_compare
-    """
-    model = Referral
-    template_name = 'leaseslicensing/reversion_history.html'
-
-
-class ApprovalHistoryCompareView(HistoryCompareDetailView):
-    """
-    View for reversion_compare
-    """
-    model = Approval
-    template_name = 'leaseslicensing/reversion_history.html'
-
-
-class ComplianceHistoryCompareView(HistoryCompareDetailView):
-    """
-    View for reversion_compare
-    """
-    model = Compliance
-    template_name = 'leaseslicensing/reversion_history.html'
-
-
-
-class ProposalTypeHistoryCompareView(HistoryCompareDetailView):
-    """
-    View for reversion_compare
-    """
-    model = ProposalType
-    template_name = 'leaseslicensing/reversion_history.html'
-
-
-class HelpPageHistoryCompareView(HistoryCompareDetailView):
-    """
-    View for reversion_compare
-    """
-    model = HelpPage
-    template_name = 'leaseslicensing/reversion_history.html'
+#class ProposalHistoryCompareView(HistoryCompareDetailView):
+#    """
+#    View for reversion_compare
+#    """
+#    model = Proposal
+#    template_name = 'leaseslicensing/reversion_history.html'
+#
+#
+#class ProposalFilteredHistoryCompareView(HistoryCompareDetailView):
+#    """
+#    View for reversion_compare - with 'status' in the comment field only'
+#    """
+#    model = Proposal
+#    template_name = 'leaseslicensing/reversion_history.html'
+#
+#    def _get_action_list(self,):
+#        """ Get only versions when processing_status changed, and add the most recent (current) version """
+#        current_revision_id = Version.objects.get_for_object(self.get_object()).first().revision_id
+#        action_list = [
+#            {"version": version, "revision": version.revision}
+#            for version in self._order_version_queryset(
+#                #Version.objects.get_for_object(self.get_object()).select_related("revision__user").filter(revision__comment__icontains='status')
+#                Version.objects.get_for_object(self.get_object()).select_related("revision__user").filter(Q(revision__comment__icontains='status') | Q(revision_id=current_revision_id))
+#            )
+#        ]
+#        return action_list
+#
+#class ReferralHistoryCompareView(HistoryCompareDetailView):
+#    """
+#    View for reversion_compare
+#    """
+#    model = Referral
+#    template_name = 'leaseslicensing/reversion_history.html'
+#
+#
+#class ApprovalHistoryCompareView(HistoryCompareDetailView):
+#    """
+#    View for reversion_compare
+#    """
+#    model = Approval
+#    template_name = 'leaseslicensing/reversion_history.html'
+#
+#
+#class ComplianceHistoryCompareView(HistoryCompareDetailView):
+#    """
+#    View for reversion_compare
+#    """
+#    model = Compliance
+#    template_name = 'leaseslicensing/reversion_history.html'
+#
+#
+#
+#class ProposalTypeHistoryCompareView(HistoryCompareDetailView):
+#    """
+#    View for reversion_compare
+#    """
+#    model = ProposalType
+#    template_name = 'leaseslicensing/reversion_history.html'
+#
+#
+#class HelpPageHistoryCompareView(HistoryCompareDetailView):
+#    """
+#    View for reversion_compare
+#    """
+#    model = HelpPage
+#    template_name = 'leaseslicensing/reversion_history.html'
 
 
 class PreviewLicencePDFView(View):

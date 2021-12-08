@@ -13,7 +13,10 @@ from leaseslicensing.components.users import api as users_api
 from leaseslicensing.components.organisations import api as org_api
 from leaseslicensing.components.main import api as main_api
 from leaseslicensing.components.bookings import api as booking_api
-from ledger.urls import urlpatterns as ledger_patterns
+from leaseslicensing.components.proposals import api as proposal_api
+from leaseslicensing.components.approvals import api as approval_api
+from leaseslicensing.components.compliances import api as compliances_api
+from ledger_api_client.urls import urlpatterns as ledger_patterns
 
 # API patterns
 router = routers.DefaultRouter()
@@ -38,11 +41,11 @@ router.register(r'users',users_api.UserViewSet)
 router.register(r'amendment_request',proposal_api.AmendmentRequestViewSet)
 router.register(r'compliance_amendment_request',compliances_api.ComplianceAmendmentRequestViewSet)
 router.register(r'global_settings', main_api.GlobalSettingsViewSet)
-router.register(r'application_types', main_api.ApplicationTypeViewSet)
+#router.register(r'application_types', main_api.ApplicationTypeViewSet)
 router.register(r'assessments', proposal_api.ProposalAssessmentViewSet)
 router.register(r'required_documents', main_api.RequiredDocumentViewSet)
 router.register(r'questions', main_api.QuestionViewSet)
-router.register(r'payment', main_api.PaymentViewSet)
+#router.register(r'payment', main_api.PaymentViewSet)
 
 api_patterns = [
     url(r'^api/profile$', users_api.GetProfile.as_view(), name='get-profile'),
@@ -59,12 +62,11 @@ api_patterns = [
     url(r'^api/compliance_amendment_reason_choices',compliances_api.ComplianceAmendmentReasonChoicesView.as_view(),name='amendment_request_reason_choices'),
     url(r'^api/search_keywords',proposal_api.SearchKeywordsView.as_view(),name='search_keywords'),
     url(r'^api/search_reference',proposal_api.SearchReferenceView.as_view(),name='search_reference'),
-    url(r'^api/accreditation_choices',proposal_api.AccreditationTypeView.as_view(),name='accreditation_choices'),
 
-    url(r'^api/oracle_job$',main_api.OracleJob.as_view(), name='get-oracle'),
+    #url(r'^api/oracle_job$',main_api.OracleJob.as_view(), name='get-oracle'),
 
 
-    url(r'^api/reports/booking_settlements$', main_api.BookingSettlementReportView.as_view(),name='booking-settlements-report'),
+    #url(r'^api/reports/booking_settlements$', main_api.BookingSettlementReportView.as_view(),name='booking-settlements-report'),
 ]
 
 # URL Patterns

@@ -1,15 +1,18 @@
 from django.conf import settings
-from ledger.accounts.models import EmailUser,Address, Profile,EmailIdentity, EmailUserAction, EmailUserLogEntry, CommunicationsLogEntry
-from leaseslicensing.components.organisations.models import (
+from ledger_api_client.ledger_models import (
+        EmailUserRO as EmailUser,Address, #Profile,
+        EmailIdentity, 
+        #EmailUserAction, EmailUserLogEntry
+        )
+from leaseslicensing.components.main.models import (
                                     Organisation,
                                 )
-from leaseslicensing.components.main.models import UserSystemSettings, Document, ApplicationType
+from leaseslicensing.components.main.models import UserSystemSettings, Document, ApplicationType, CommunicationsLogEntry
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.organisations.utils import can_admin_org, is_consultant
-from leaseslicensing.helpers import is_leaseslicensing_admin 
+from leaseslicensing.helpers import is_leaseslicensing_admin, in_dbca_domain
 from rest_framework import serializers
-from ledger.accounts.utils import in_dbca_domain
-from ledger.payments.helpers import is_payment_admin
+#from ledger.payments.helpers import is_payment_admin
 from django.utils import timezone
 from datetime import date, timedelta
 from leaseslicensing.components.approvals.models import Approval
@@ -119,9 +122,8 @@ class UserSerializer(serializers.ModelSerializer):
     address_details = serializers.SerializerMethodField()
     contact_details = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
-    #identification = DocumentSerializer()
     is_department_user = serializers.SerializerMethodField()
-    is_payment_admin = serializers.SerializerMethodField()
+    #is_payment_admin = serializers.SerializerMethodField()
     system_settings= serializers.SerializerMethodField()
     is_payment_admin = serializers.SerializerMethodField()
     is_leaseslicensing_admin = serializers.SerializerMethodField()    
@@ -143,7 +145,7 @@ class UserSerializer(serializers.ModelSerializer):
             'contact_details',
             'full_name',
             'is_department_user',
-            'is_payment_admin',
+            #'is_payment_admin',
             'is_staff',
             'system_settings',
             'is_leaseslicensing_admin',
@@ -174,8 +176,8 @@ class UserSerializer(serializers.ModelSerializer):
         else:
             return False
 
-    def get_is_payment_admin(self, obj):
-        return is_payment_admin(obj)
+    #def get_is_payment_admin(self, obj):
+     #   return is_payment_admin(obj)
 
     def get_leaseslicensing_organisations(self, obj):
         leaseslicensing_organisations = obj.leaseslicensing_organisations
@@ -231,17 +233,17 @@ class ContactSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('You must provide a mobile/phone number')
         return obj
 
-class EmailUserActionSerializer(serializers.ModelSerializer):
-    who = serializers.CharField(source='who.get_full_name')
+#class EmailUserActionSerializer(serializers.ModelSerializer):
+#    who = serializers.CharField(source='who.get_full_name')
+#
+#    class Meta:
+#        model = EmailUserAction
+#        fields = '__all__'
 
-    class Meta:
-        model = EmailUserAction
-        fields = '__all__'
-
-class EmailUserCommsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EmailUserLogEntry
-        fields = '__all__'
+#class EmailUserCommsSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = EmailUserLogEntry
+#        fields = '__all__'
 
 class CommunicationLogEntrySerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(queryset=EmailUser.objects.all(),required=False)
@@ -267,14 +269,14 @@ class CommunicationLogEntrySerializer(serializers.ModelSerializer):
     def get_documents(self,obj):
         return [[d.name,d._file.url] for d in obj.documents.all()]
 
-class EmailUserLogEntrySerializer(CommunicationLogEntrySerializer):
-    documents = serializers.SerializerMethodField()
-    class Meta:
-        model = EmailUserLogEntry
-        fields = '__all__'
-        read_only_fields = (
-            'customer',
-        )
-
-    def get_documents(self,obj):
-        return [[d.name,d._file.url] for d in obj.documents.all()]
+#class EmailUserLogEntrySerializer(CommunicationLogEntrySerializer):
+#    documents = serializers.SerializerMethodField()
+#    class Meta:
+#        model = EmailUserLogEntry
+#        fields = '__all__'
+#        read_only_fields = (
+#            'customer',
+#        )
+#
+#    def get_documents(self,obj):
+#        return [[d.name,d._file.url] for d in obj.documents.all()]

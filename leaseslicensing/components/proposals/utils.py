@@ -416,7 +416,7 @@ from leaseslicensing.components.proposals.models import Proposal, Referral, Amen
 from leaseslicensing.components.approvals.models import Approval
 from leaseslicensing.components.compliances.models import Compliance
 from leaseslicensing.components.bookings.models import ApplicationFee, Booking
-from ledger.payments.models import Invoice
+from ledger_api_client.ledger_models import Invoice
 from leaseslicensing.components.proposals import email as proposal_email
 from leaseslicensing.components.approvals import email as approval_email
 from leaseslicensing.components.compliances import email as compliance_email

@@ -7,123 +7,11 @@ from django.db.models.signals import pre_delete
 #from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ValidationError
 #from ledger.accounts.models import EmailUser, Document, RevisionedMixin
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser#, RevisionedMixin
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, BaseAddress#, RevisionedMixin
 from django.contrib.postgres.fields.jsonb import JSONField
 
 
 ## TODO: remove ledger models
-
-from django_countries.fields import CountryField
-class BaseAddress(models.Model):
-    """Generic address model, intended to provide billing and shipping
-    addresses.
-    Taken from django-oscar address AbstrastAddress class.
-    """
-    STATE_CHOICES = (
-        ('ACT', 'ACT'),
-        ('NSW', 'NSW'),
-        ('NT', 'NT'),
-        ('QLD', 'QLD'),
-        ('SA', 'SA'),
-        ('TAS', 'TAS'),
-        ('VIC', 'VIC'),
-        ('WA', 'WA')
-    )
-
-    # Addresses consist of 1+ lines, only the first of which is
-    # required.
-    line1 = models.CharField('Line 1', max_length=255)
-    line2 = models.CharField('Line 2', max_length=255, blank=True)
-    line3 = models.CharField('Line 3', max_length=255, blank=True)
-    locality = models.CharField('Suburb / Town', max_length=255)
-    state = models.CharField(max_length=255, default='WA', blank=True)
-    country = CountryField(default='AU')
-    postcode = models.CharField(max_length=10)
-    # A field only used for searching addresses.
-    search_text = models.TextField(editable=False)
-    hash = models.CharField(max_length=255, db_index=True, editable=False)
-
-    def __str__(self):
-        return self.summary
-
-#    def __unicode__(self):
-#        return ''
-
-    class Meta:
-        abstract = True
-
-    def clean(self):
-        # Strip all whitespace
-        for field in ['line1', 'line2', 'line3',
-                      'locality', 'state']:
-            if self.__dict__[field]:
-                self.__dict__[field] = self.__dict__[field].strip()
-
-    def save(self, *args, **kwargs):
-        self._update_search_text()
-        self.hash = self.generate_hash()
-        super(BaseAddress, self).save(*args, **kwargs)
-
-    def _update_search_text(self):
-        search_fields = filter(
-            bool, [self.line1, self.line2, self.line3, self.locality,
-                   self.state, str(self.country.name), self.postcode])
-        self.search_text = ' '.join(search_fields)
-
-    @property
-    def summary(self):
-        """Returns a single string summary of the address, separating fields
-        using commas.
-        """
-        return u', '.join(self.active_address_fields())
-
-    # Helper methods
-#    def active_address_fields(self):
-#        """Return the non-empty components of the address.
-#        """
-#        fields = [self.line1, self.line2, self.line3,
-#                  self.locality, self.state, self.country, self.postcode]
-#        fields = [str(f).strip() for f in fields if f]
-#        
-#        return fields
-
-
-    # Helper methods
-    def active_address_fields(self):
-        """Return the non-empty components of the address.
-        """
-        fields = [self.line1, self.line2, self.line3,
-                  self.locality, self.state, self.country, self.postcode]
-        #for f in fields:
-        #    print unicode(f).encode('utf-8').decode('unicode-escape').strip()
-        #fields = [str(f).strip() for f in fields if f]
-        fields = [unicode_compatible(f).encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
-        
-        return fields
-
-    def join_fields(self, fields, separator=u', '):
-        """Join a sequence of fields using the specified separator.
-        """
-        field_values = []
-        for field in fields:
-            value = getattr(self, field)
-            field_values.append(value)
-        return separator.join(filter(bool, field_values))
-
-    def generate_hash(self):
-        """
-            Returns a hash of the address summary
-        """
-        return zlib.crc32(self.summary.strip().upper().encode('UTF8'))
-
-
-class Address(BaseAddress):
-    user = models.ForeignKey('EmailUser', related_name='profile_addresses', on_delete=models.CASCADE)
-    #oscar_address = models.ForeignKey(UserAddress, related_name='profile_addresses', on_delete=models.CASCADE)
-    class Meta:
-        verbose_name_plural = 'addresses'
-        unique_together = ('user','hash')
-
 
 #@python_2_unicode_compatible
 class Organisation(models.Model):
@@ -147,11 +35,20 @@ class Organisation(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        #abstract = True
+        managed = False
+
 class OrganisationAddress(BaseAddress):
     organisation = models.ForeignKey(Organisation, null=True,blank=True, related_name='adresses', on_delete=models.CASCADE)
     class Meta:
         verbose_name_plural = 'organisation addresses'
         unique_together = ('organisation','hash')
+
+    class Meta:
+        #abstract = True
+        managed = False
+
 #####
 
 class RevisionedMixin(models.Model):
@@ -184,239 +81,8 @@ class RevisionedMixin(models.Model):
 
 
 #@python_2_unicode_compatible
-class Region(models.Model):
-    name = models.CharField(max_length=200, unique=True)
-    forest_region = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['name']
-        app_label = 'leaseslicensing'
-
-    def __str__(self):
-        return self.name
-
-    # @property
-    # def districts(self):
-    #     return District.objects.filter(region=self)
-
-
-#@python_2_unicode_compatible
-class District(models.Model):
-    region = models.ForeignKey(Region, related_name='districts', on_delete=models.CASCADE)
-    name = models.CharField(max_length=200, unique=True)
-    code = models.CharField(max_length=3)
-    archive_date = models.DateField(null=True, blank=True)
-
-    class Meta:
-        ordering = ['name']
-        app_label = 'leaseslicensing'
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def parks(self):
-        return Parks.objects.filter(district=self)
-
-    @property
-    def land_parks(self):
-        return Park.objects.filter(district=self, park_type='land')
-
-    @property
-    def land_parks_external(self):
-        return Park.objects.filter(district=self, park_type='land').exclude(visible_to_external=False)
-
-    @property
-    def marine_parks(self):
-        return Park.objects.filter(district=self, park_type='marine')
-
-    @property
-    def marine_parks_external(self):
-        return Park.objects.filter(district=self, park_type='marine').exclude(visible_to_external=False)
-
-
-
-#@python_2_unicode_compatible
-class AccessType(models.Model):
-    name = models.CharField(max_length=200, blank=True)
-    visible = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ['name']
-        app_label = 'leaseslicensing'
-
-    def __str__(self):
-        return self.name
-
-#@python_2_unicode_compatible
-class ActivityType(models.Model):
-    ACTIVITY_TYPE_CHOICES = (
-        ('land', 'Land'),
-        ('marine', 'Marine'),
-        ('Film', 'Film'),
-    )
-    type_name = models.CharField('Activity Type', max_length=40, choices=ACTIVITY_TYPE_CHOICES,
-                                        default=ACTIVITY_TYPE_CHOICES[0][0])
-    visible = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ['type_name']
-        app_label = 'leaseslicensing'
-
-    def __str__(self):
-        return self.type_name
-
-#@python_2_unicode_compatible
-class ActivityCategory(models.Model):
-    ACTIVITY_TYPE_CHOICES = (
-        ('land', 'Land'),
-        ('marine', 'Marine'),
-        ('Film', 'Film'),
-        ('event', 'Event'),
-    )
-    name = models.CharField(max_length=200, blank=True)
-    visible = models.BooleanField(default=True)
-    activity_type = models.CharField('Activity Type', max_length=40, choices=ACTIVITY_TYPE_CHOICES,
-                                        default=ACTIVITY_TYPE_CHOICES[0][0])
-
-    class Meta:
-        ordering = ['name']
-        app_label = 'leaseslicensing'
-        verbose_name_plural= 'Activity Categories'
-
-    def __str__(self):
-        return self.name
-
-
-#@python_2_unicode_compatible
-class Activity(models.Model):
-    name = models.CharField(max_length=200, blank=True)
-    visible = models.BooleanField(default=True)
-    activity_category = models.ForeignKey(ActivityCategory, related_name='activities', on_delete=models.CASCADE)
-
-    class Meta:
-        ordering = ['name']
-        verbose_name_plural = "Activities"
-        app_label = 'leaseslicensing'
-
-    def __str__(self):
-        return self.name
-
-
-#@python_2_unicode_compatible
-class Park(models.Model):
-    PARK_TYPE_CHOICES = (
-        ('land', 'Land'),
-        ('marine', 'Marine'),
-        ('Film', 'Film'),
-    )
-    district = models.ForeignKey(District, related_name='parks', on_delete=models.SET_NULL)
-    name = models.CharField(max_length=200, unique=True)
-    code = models.CharField(max_length=10, blank=True)
-    park_type = models.CharField('Park Type', max_length=40, choices=PARK_TYPE_CHOICES,
-                                        default=PARK_TYPE_CHOICES[0][0])
-    allowed_activities = models.ManyToManyField(Activity, blank=True)
-    allowed_access = models.ManyToManyField(AccessType, blank=True)
-
-    adult_price = models.DecimalField('Adult (price per adult)', max_digits=5, decimal_places=2)
-    child_price = models.DecimalField('Child (price per child)', max_digits=5, decimal_places=2)
-    #oracle_code = models.CharField(max_length=50)
-
-    # editable=False --> related to invoice PDF generation, currently GST is computed assuming GST is payable for ALL parks.
-    # Must fix invoice calc. GST per park in pdf line_items, for net GST if editable is to be set to True
-    is_gst_exempt = models.BooleanField(default=False, editable=False)
-    visible_to_external= models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ['name']
-        app_label = 'leaseslicensing'
-        #unique_together = ('id', 'proposal',)
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def allowed_activities_ids(self):
-        return [i.id for i in self.allowed_activities.all()]
-
-    @property
-    def allowed_access_ids(self):
-        return [i.id for i in self.allowed_access.all()]
-
-    @property
-    def zone_ids(self):
-        return [i.id for i in self.zones.all()]
-
-    def oracle_code(self, application_type):
-        """ application_type - TClass/Filming/Event """
-        try:
-            return self.oracle_codes.get(code_type=application_type).code
-        except:
-            raise ValidationError('Unknown application type: {}'.format(application_type))
-
-
-#@python_2_unicode_compatible
-class Zone(models.Model):
-    name = models.CharField(max_length=200, blank=True)
-    visible = models.BooleanField(default=True)
-    park = models.ForeignKey(Park, related_name='zones', on_delete=models.CASCADE)
-    allowed_activities = models.ManyToManyField(Activity, blank=True)
-
-
-    class Meta:
-        ordering = ['name']
-        app_label = 'leaseslicensing'
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def allowed_activities_ids(self):
-        return [i.id for i in self.allowed_activities.all()]
-
-
-
-#@python_2_unicode_compatible
-class Trail(models.Model):
-    name = models.CharField(max_length=200, unique=True)
-    code = models.CharField(max_length=10, blank=True)
-    allowed_activities = models.ManyToManyField(Activity, blank=True)
-
-    class Meta:
-        ordering = ['name']
-        app_label = 'leaseslicensing'
-        #unique_together = ('id', 'proposal',)
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def section_ids(self):
-        return [i.id for i in self.sections.all()]
-
-    @property
-    def allowed_activities_ids(self):
-        return [i.id for i in self.allowed_activities.all()]
-
-#@python_2_unicode_compatible
-class Section(models.Model):
-    name = models.CharField(max_length=200, blank=True)
-    visible = models.BooleanField(default=True)
-    trail = models.ForeignKey(Trail, related_name='sections', on_delete=models.CASCADE)
-    doc_url= models.CharField('Document URL',max_length=255, blank=True)
-
-    class Meta:
-        ordering = ['name']
-        app_label = 'leaseslicensing'
-
-    def __str__(self):
-        return self.name
-
-#@python_2_unicode_compatible
 class RequiredDocument(models.Model):
     question = models.TextField(blank=False)
-    activity = models.ForeignKey(Activity,null=True, blank=True, on_delete=models.SET_NULL)
-    park= models.ForeignKey(Park,null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -444,26 +110,6 @@ class ApplicationType(models.Model):
     oracle_code_licence = models.CharField(max_length=50)
     is_gst_exempt = models.BooleanField(default=True)
 
-    # Events
-    events_park_fee = models.DecimalField('Events Park Fee (per participant, per park)', max_digits=6, decimal_places=2, default=0.0)
-
-    # filming
-    filming_fee_half_day = models.DecimalField('Filming half day fee', max_digits=6, decimal_places=2, default=0.0)
-    filming_fee_full_day = models.DecimalField('Filming full day fee', max_digits=6, decimal_places=2, default=0.0)
-    filming_fee_2days = models.DecimalField('Filming two days fee', max_digits=6, decimal_places=2, default=0.0)
-    filming_fee_3days = models.DecimalField('Filming 3 days or more fee', max_digits=6, decimal_places=2, default=0.0)
-
-    photography_fee_half_day = models.DecimalField('Photography half day fee', max_digits=6, decimal_places=2, default=0.0)
-    photography_fee_full_day = models.DecimalField('Photography full day fee', max_digits=6, decimal_places=2, default=0.0)
-    photography_fee_2days = models.DecimalField('Photography two days fee', max_digits=6, decimal_places=2, default=0.0)
-    photography_fee_3days = models.DecimalField('Photography 3 days or more fee', max_digits=6, decimal_places=2, default=0.0)
-
-    # T Class
-    max_renewals = models.PositiveSmallIntegerField('Maximum number of times an Approval can be renewed', null=True, blank=True)
-    max_renewal_period = models.PositiveSmallIntegerField('Maximum period of each Approval renewal (Years)', null=True, blank=True)
-    licence_fee_2mth = models.DecimalField('T Class Licence Fee (2 Months)', max_digits=6, decimal_places=2, default=0.0)
-    licence_fee_1yr = models.DecimalField('T Class Licence Fee (1 Year)', max_digits=6, decimal_places=2, default=0.0)
-
     class Meta:
         ordering = ['order', 'name']
         app_label = 'leaseslicensing'
@@ -479,7 +125,6 @@ class OracleCode(models.Model):
         (ApplicationType.FILMING, ApplicationType.FILMING),
         (ApplicationType.EVENT, ApplicationType.EVENT),
     )
-    park = models.ForeignKey(Park, related_name='oracle_codes', on_delete=models.SET_NULL)
     code_type = models.CharField('Application Type', max_length=64, choices=CODE_TYPE_CHOICES,
                                         default=CODE_TYPE_CHOICES[0][0])
     code = models.CharField(max_length=50, blank=True)
@@ -491,37 +136,6 @@ class OracleCode(models.Model):
     def __str__(self):
         return '{} - {}'.format(self.code_type, self.code)
 
-
-#@python_2_unicode_compatible
-class ActivityMatrix(models.Model):
-    name = models.CharField(verbose_name='Activity matrix name', max_length=24, choices=[('Commercial Operator', u'Commercial Operator')], default='Commercial Operator')
-    description = models.CharField(max_length=256, blank=True, null=True)
-    schema = JSONField()
-    replaced_by = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
-    version = models.SmallIntegerField(default=1, blank=False, null=False)
-    ordered = models.BooleanField('Activities Ordered Alphabetically', default=False)
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        unique_together = ('name', 'version')
-        verbose_name_plural = "Activity matrix"
-
-    def __str__(self):
-        return '{} - v{}'.format(self.name, self.version)
-
-
-#@python_2_unicode_compatible
-class Tenure(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    order = models.PositiveSmallIntegerField(default=0)
-    application_type = models.ForeignKey(ApplicationType, related_name='tenure_app_types', on_delete=models.SET_NULL)
-
-    class Meta:
-        ordering = ['order', 'name']
-        app_label = 'leaseslicensing'
-
-    def __str__(self):
-        return '{}: {}'.format(self.name, self.application_type)
 
 #@python_2_unicode_compatible
 class Question(models.Model):
@@ -552,7 +166,8 @@ class Question(models.Model):
 
 #@python_2_unicode_compatible
 class UserAction(models.Model):
-    who = models.ForeignKey(EmailUser, null=False, blank=False, on_delete=models.SET_NULL)
+    #who = models.ForeignKey(EmailUser, null=False, blank=False, on_delete=models.SET_NULL)
+    who = models.ForeignKey(EmailUser, null=True, blank=True, on_delete=models.SET_NULL)
     when = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     what = models.TextField(blank=False)
 

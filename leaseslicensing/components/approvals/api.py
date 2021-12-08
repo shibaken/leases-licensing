@@ -16,7 +16,8 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from rest_framework import viewsets, serializers, status, generics, views
-from rest_framework.decorators import detail_route, list_route, renderer_classes
+from rest_framework.decorators import action as detail_route, renderer_classes
+from rest_framework.decorators import action as list_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
@@ -24,9 +25,9 @@ from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
 from collections import OrderedDict
 from django.core.cache import cache
-from ledger.accounts.models import EmailUser, Address
-from ledger.accounts.models import Organisation as ledger_org
-from ledger.address.models import Country
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
+from leaseslicensing.components.main.models import Organisation as ledger_org
+from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -120,7 +121,7 @@ class ApprovalPaginatedViewSet(viewsets.ModelViewSet):
 #        #response.data['regions'] = self.get_queryset().filter(region__isnull=False).values_list('region__name', flat=True).distinct()
 #        return response
 
-    @list_route(methods=['GET',])
+    @list_route(methods=['GET',], detail=False)
     def approvals_external(self, request, *args, **kwargs):
         """
         Paginated serializer for datatables - used by the internal and external dashboard (filtered by the get_queryset method)
@@ -177,7 +178,7 @@ class ApprovalPaymentFilterViewSet(generics.ListAPIView):
         approval_qs =  approval_qs.exclude(replaced_by__isnull=False) # get lastest licence, ignore the amended
         return approval_qs
 
-    @list_route(methods=['GET',])
+    @list_route(methods=['GET',], detail=False)
     def _list(self, request, *args, **kwargs):
         data =  []
         for approval in self.get_queryset():
@@ -213,7 +214,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    @list_route(methods=['GET',])
+    @list_route(methods=['GET',], detail=False)
     def filter_list(self, request, *args, **kwargs):
         """ Used by the external dashboard filters """
         region_qs =  self.get_queryset().filter(current_proposal__region__isnull=False).values_list('current_proposal__region__name', flat=True).distinct()
@@ -227,7 +228,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
         )
         return Response(data)
 
-    @detail_route(methods=['POST'])
+    @detail_route(methods=['POST'], detail=True)
     @renderer_classes((JSONRenderer,))
     def process_document(self, request, *args, **kwargs):
             instance = self.get_object()
@@ -261,7 +262,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
 
             return  Response( [dict(input_name=d.input_name, name=d.name,file=d._file.url, id=d.id, can_delete=d.can_delete) for d in instance.qaofficer_documents.filter(input_name=section, visible=True) if d._file] )
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     @renderer_classes((JSONRenderer,))
     def add_eclass_licence(self, request, *args, **kwargs):
 
@@ -328,7 +329,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
 
 
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def approval_extend(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -350,7 +351,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def approval_cancellation(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -372,7 +373,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def approval_suspension(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -395,7 +396,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError(str(e))
 
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def approval_reinstate(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -415,7 +416,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def approval_surrender(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -437,7 +438,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def action_log(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -454,7 +455,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def comms_log(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -471,7 +472,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     @renderer_classes((JSONRenderer,))
     def add_comms_log(self, request, *args, **kwargs):
         try:

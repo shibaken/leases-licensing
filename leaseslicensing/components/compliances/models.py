@@ -17,7 +17,7 @@ from leaseslicensing.components.main.models import Organisation as ledger_organi
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing import exceptions
 from leaseslicensing.components.organisations.models import Organisation
-from leaseslicensing.components.main.models import CommunicationsLogEntry, Region, UserAction, Document
+from leaseslicensing.components.main.models import CommunicationsLogEntry, UserAction, Document
 from leaseslicensing.components.proposals.models import ProposalRequirement, AmendmentReason
 from leaseslicensing.components.compliances.email import (
                         send_compliance_accept_email_notification,

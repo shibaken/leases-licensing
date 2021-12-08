@@ -7,7 +7,7 @@ from django.contrib.postgres.fields.jsonb import JSONField
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.compliances.models import Compliance
-from leaseslicensing.components.main.models import Park, RevisionedMixin
+from leaseslicensing.components.main.models import RevisionedMixin
 from decimal import Decimal as D
 
 import logging
