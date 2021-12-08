@@ -69,7 +69,7 @@ class LeasesLicensingRoutingView(TemplateView):
     template_name = 'leaseslicensing/index.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if is_internal(self.request):
                 return redirect('internal')
             return redirect('external')
@@ -88,7 +88,7 @@ class InternalProposalView(DetailView):
     template_name = 'leaseslicensing/dash/index.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if is_internal(self.request):
                 #return redirect('internal-proposal-detail')
                 return super(InternalProposalView, self).get(*args, **kwargs)
@@ -132,7 +132,7 @@ class HelpView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(HelpView, self).get_context_data(**kwargs)
 
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             application_type = kwargs.get('application_type', None)
             if kwargs.get('help_type', None)=='assessor':
                 if is_internal(self.request):

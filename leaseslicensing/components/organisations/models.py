@@ -6,9 +6,12 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 #from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ValidationError
-from django.contrib.postgres.fields.jsonb import JSONField
+#from django.contrib.postgres.fields.jsonb import JSONField
+from django.contrib.postgres.fields import ArrayField
+from django.db.models import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
-from leaseslicensing.components.main.models import Organisation as ledger_organisation, RevisionedMixin
+#from leaseslicensing.components.main.models import Organisation as ledger_organisation, RevisionedMixin
+from leaseslicensing.components.main.models import RevisionedMixin
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.main.models import UserAction,CommunicationsLogEntry, Document
 from leaseslicensing.components.organisations.utils import random_generator, can_admin_org, has_atleast_one_admin
@@ -30,11 +33,11 @@ from leaseslicensing.components.organisations.emails import (
 
 #@python_2_unicode_compatible
 class Organisation(models.Model):
-    organisation = models.ForeignKey(ledger_organisation, on_delete=models.SET_NULL)
+    #organisation = models.ForeignKey(ledger_organisation, on_delete=models.CASCADE)
+    organisation = models.IntegerField() #Ledger Organisation
     # TODO: business logic related to delegate changes.
-    delegates = models.ManyToManyField(EmailUser, blank=True, through='UserDelegation', related_name='leaseslicensing_organisations')
-    #pin_one = models.CharField(max_length=50,blank=True)
-    #pin_two = models.CharField(max_length=50,blank=True)
+    #delegates = models.ManyToManyField(EmailUser, blank=True, through='UserDelegation', related_name='leaseslicensing_organisations')
+    delegates = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
     admin_pin_one = models.CharField(max_length=50,blank=True)
     admin_pin_two = models.CharField(max_length=50,blank=True)
     user_pin_one = models.CharField(max_length=50,blank=True)
@@ -525,9 +528,9 @@ class OrganisationContact(models.Model):
         return self.user_status == 'active' and self.user_role =='consultant'
 
 class OrganisationContactDeclinedDetails(models.Model):
-    request = models.ForeignKey(OrganisationContact, on_delete=models.SET_NULL)
-    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.SET_NULL)
-    # reason = models.TextField(blank=True)
+    request = models.ForeignKey(OrganisationContact, on_delete=models.CASCADE)
+    #officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
+    officer = models.IntegerField() #EmailUserRO
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -535,7 +538,8 @@ class OrganisationContactDeclinedDetails(models.Model):
 
 class UserDelegation(models.Model):
     organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE)
-    user = models.ForeignKey(EmailUser, on_delete=models.SET_NULL)
+    #user = models.ForeignKey(EmailUser, on_delete=models.CASCADE)
+    user = models.IntegerField() #EmailUserRO
 
     class Meta:
         unique_together = (('organisation','user'),)
@@ -623,8 +627,10 @@ class OrganisationRequest(models.Model):
     )
     name = models.CharField(max_length=128)
     abn = models.CharField(max_length=50, null=True, blank=True, verbose_name='ABN')
-    requester = models.ForeignKey(EmailUser, on_delete=models.SET_NULL)
-    assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='org_request_assignee', on_delete=models.SET_NULL)
+    #requester = models.ForeignKey(EmailUser, on_delete=models.CASCADE)
+    requester = models.IntegerField() #EmailUserRO
+    #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='org_request_assignee', on_delete=models.SET_NULL)
+    assigned_officer = models.IntegerField() #EmailUserRO
     identification = models.FileField(upload_to='organisation/requests/%Y/%m/%d', max_length=512, null=True, blank=True)
     status = models.CharField(max_length=100,choices=STATUS_CHOICES, default="with_assessor")
     lodgement_date = models.DateTimeField(auto_now_add=True)
@@ -726,8 +732,9 @@ class OrganisationRequest(models.Model):
         return OrganisationRequestUserAction.log_action(self, action, request.user)
 
 class OrganisationAccessGroup(models.Model):
-    site = models.OneToOneField(Site, default='1', on_delete=models.CASCADE)
-    members = models.ManyToManyField(EmailUser)
+    #site = models.OneToOneField(Site, default='1', on_delete=models.CASCADE)
+    #members = models.ManyToManyField(EmailUser)
+    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
 
     def __str__(self):
         return 'Organisation Access Group'
@@ -773,7 +780,8 @@ class OrganisationRequestUserAction(UserAction):
 
 class OrganisationRequestDeclinedDetails(models.Model):
     request = models.ForeignKey(OrganisationRequest, on_delete=models.CASCADE)
-    officer = models.ForeignKey(EmailUser, null=False, on_delete=models.SET_NULL)
+    #officer = models.ForeignKey(EmailUser, null=False, on_delete=models.CASCADE)
+    officer = models.IntegerField() #EmailUserRO
     reason = models.TextField(blank=True)
 
     class Meta:
@@ -804,18 +812,18 @@ class OrganisationRequestLogEntry(CommunicationsLogEntry):
 
 
 
-import reversion
-reversion.register(ledger_organisation, follow=['organisation_set'])
-reversion.register(Organisation, follow=['org_approvals', 'contacts', 'userdelegation_set', 'action_logs', 'comms_logs'])
-reversion.register(OrganisationContact)
-reversion.register(OrganisationAction)
-reversion.register(OrganisationLogEntry, follow=['documents'])
-reversion.register(OrganisationLogDocument)
-reversion.register(OrganisationRequest, follow=['action_logs', 'organisationrequestdeclineddetails_set', 'comms_logs'])
-reversion.register(OrganisationAccessGroup)
-reversion.register(OrganisationRequestUserAction)
-reversion.register(OrganisationRequestDeclinedDetails)
-reversion.register(OrganisationRequestLogDocument)
-reversion.register(OrganisationRequestLogEntry, follow=['documents'])
-reversion.register(UserDelegation)
+#import reversion
+#reversion.register(ledger_organisation, follow=['organisation_set'])
+#reversion.register(Organisation, follow=['org_approvals', 'contacts', 'userdelegation_set', 'action_logs', 'comms_logs'])
+#reversion.register(OrganisationContact)
+#reversion.register(OrganisationAction)
+#reversion.register(OrganisationLogEntry, follow=['documents'])
+#reversion.register(OrganisationLogDocument)
+#reversion.register(OrganisationRequest, follow=['action_logs', 'organisationrequestdeclineddetails_set', 'comms_logs'])
+#reversion.register(OrganisationAccessGroup)
+#reversion.register(OrganisationRequestUserAction)
+#reversion.register(OrganisationRequestDeclinedDetails)
+#reversion.register(OrganisationRequestLogDocument)
+#reversion.register(OrganisationRequestLogEntry, follow=['documents'])
+#reversion.register(UserDelegation)
 

@@ -1,5 +1,6 @@
 from django.conf import settings
-from ledger.accounts.models import EmailUser,OrganisationAddress
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
+#from leaseslicensing.components.main.models import Organisation, OrganisationAddress
 from leaseslicensing.components.organisations.models import (
                                 Organisation,
                                 OrganisationContact,
@@ -8,7 +9,7 @@ from leaseslicensing.components.organisations.models import (
                                 OrganisationAction,
                                 OrganisationRequestLogEntry,
                                 OrganisationLogEntry,
-                                ledger_organisation,
+                                #ledger_organisation,
                             )
 from leaseslicensing.components.organisations.utils import (
                                 can_manage_org,
@@ -24,35 +25,35 @@ from rest_framework import serializers, status
 import rest_framework_gis.serializers as gis_serializers
 
 
-class LedgerOrganisationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ledger_organisation
-        fields = '__all__'
+#class LedgerOrganisationSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = ledger_organisation
+#        fields = '__all__'
 
 
-class LedgerOrganisationFilterSerializer(serializers.ModelSerializer):
-    #address = serializers.SerializerMethodField(read_only=True)
-    email = serializers.SerializerMethodField(read_only=True)
-    org_id = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = ledger_organisation
-        fields = (
-            'id',     # ledger org id
-            'org_id', # cols org id
-            'name',
-            'email',
-            'trading_name',
-            #'address',
-        )
-
-    def get_email(self, obj):
-        return ''
-
-    def get_org_id(self, obj):
-        if len(obj.organisation_set.all()) > 0:
-            return obj.organisation_set.all()[0].id
-        return None
+#class LedgerOrganisationFilterSerializer(serializers.ModelSerializer):
+#    #address = serializers.SerializerMethodField(read_only=True)
+#    email = serializers.SerializerMethodField(read_only=True)
+#    org_id = serializers.SerializerMethodField(read_only=True)
+#
+#    class Meta:
+#        model = ledger_organisation
+#        fields = (
+#            'id',     # ledger org id
+#            'org_id', # cols org id
+#            'name',
+#            'email',
+#            'trading_name',
+#            #'address',
+#        )
+#
+#    def get_email(self, obj):
+#        return ''
+#
+#    def get_org_id(self, obj):
+#        if len(obj.organisation_set.all()) > 0:
+#            return obj.organisation_set.all()[0].id
+#        return None
 
 
 class OrganisationCheckSerializer(serializers.Serializer):
@@ -72,17 +73,17 @@ class OrganisationPinCheckSerializer(serializers.Serializer):
     pin1 = serializers.CharField()
     pin2 = serializers.CharField()
 
-class OrganisationAddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrganisationAddress
-        fields = (
-            'id',
-            'line1',
-            'locality',
-            'state',
-            'country',
-            'postcode'
-        )
+#class OrganisationAddressSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = OrganisationAddress
+#        fields = (
+#            'id',
+#            'line1',
+#            'locality',
+#            'state',
+#            'country',
+#            'postcode'
+#        )
 
 class DelegateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='get_full_name')
@@ -95,11 +96,11 @@ class DelegateSerializer(serializers.ModelSerializer):
         )
 
 class OrganisationSerializer(serializers.ModelSerializer):
-    address = OrganisationAddressSerializer(read_only=True)
+    #address = OrganisationAddressSerializer(read_only=True)
     pins = serializers.SerializerMethodField(read_only=True)
     #delegates = DelegateSerializer(many=True, read_only=True)
     delegates = serializers.SerializerMethodField(read_only=True)
-    organisation = LedgerOrganisationSerializer()
+    #organisation = LedgerOrganisationSerializer()
     trading_name = serializers.SerializerMethodField(read_only=True)
     apply_application_discount = serializers.SerializerMethodField(read_only=True)
     application_discount = serializers.SerializerMethodField(read_only=True)
@@ -115,9 +116,9 @@ class OrganisationSerializer(serializers.ModelSerializer):
             'name',
             'trading_name',
             'abn',
-            'address',
+            #'address',
             'email',
-            'organisation',
+            #'organisation',
             'phone_number',
             'pins',
             'delegates',
@@ -226,34 +227,30 @@ class MyOrganisationsSerializer(serializers.ModelSerializer):
         return can_admin_org(obj, user)
 
 
-class DetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ledger_organisation
-        fields = (
-            'id',
-            'name',
-            'trading_name',
-            'email',
-            'abn',
-#            'apply_application_discount',
-#            'application_discount',
-#            'apply_licence_discount',
-#            'licence_discount',
-        )
-
-    def validate(self, data):
-        request = self.context['request']
-        #user = request.user._wrapped if hasattr(request.user,'_wrapped') else request.user
-        new_abn=data['abn']
-        obj_id=self.instance.id
-        if new_abn and obj_id and new_abn!=self.instance.abn:
-            if not is_leaseslicensing_admin(request):
-                raise serializers.ValidationError('You are not authorised to change the ABN')
-            else:
-                existance = ledger_organisation.objects.filter(abn=new_abn).exclude(id=obj_id).exists()
-                if existance:
-                    raise serializers.ValidationError('An organisation with the same abn already exists')
-        return data
+#class DetailsSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = ledger_organisation
+#        fields = (
+#            'id',
+#            'name',
+#            'trading_name',
+#            'email',
+#            'abn',
+#        )
+#
+#    def validate(self, data):
+#        request = self.context['request']
+#        #user = request.user._wrapped if hasattr(request.user,'_wrapped') else request.user
+#        new_abn=data['abn']
+#        obj_id=self.instance.id
+#        if new_abn and obj_id and new_abn!=self.instance.abn:
+#            if not is_leaseslicensing_admin(request):
+#                raise serializers.ValidationError('You are not authorised to change the ABN')
+#            else:
+#                existance = ledger_organisation.objects.filter(abn=new_abn).exclude(id=obj_id).exists()
+#                if existance:
+#                    raise serializers.ValidationError('An organisation with the same abn already exists')
+#        return data
 
 class SaveDiscountSerializer(serializers.ModelSerializer):
     class Meta:

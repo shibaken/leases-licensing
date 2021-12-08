@@ -4,7 +4,7 @@ from django.template import Library
 from django.conf import settings
 from leaseslicensing import helpers as leaseslicensing_helpers
 from leaseslicensing.components.main.models import SystemMaintenance
-from ledger.payments.helpers import is_payment_admin
+#from ledger.payments.helpers import is_payment_admin
 from datetime import datetime, timedelta
 from django.utils import timezone
 import pytz
@@ -34,8 +34,8 @@ def is_model_backend(context):
 @register.simple_tag(takes_context=True)
 def is_payment_officer(context):
     request = context['request']
-    #user= request.user._wrapped if hasattr(request.user,'_wrapped') else request.user
-    return is_payment_admin(request.user)
+    #TODO: fix this
+    return False #is_payment_admin(request.user)
 
 @register.simple_tag()
 def system_maintenance_due():

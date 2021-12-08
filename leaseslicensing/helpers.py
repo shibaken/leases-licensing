@@ -24,7 +24,7 @@ def is_email_auth_backend(request):
 
 def is_leaseslicensing_admin(request):
     #logger.info('settings.ADMIN_GROUP: {}'.format(settings.ADMIN_GROUP))
-    return request.user.is_authenticated() and is_model_backend(request) and in_dbca_domain(request) and (belongs_to(request.user, settings.ADMIN_GROUP))
+    return request.user.is_authenticated and is_model_backend(request) and in_dbca_domain(request) and (belongs_to(request.user, settings.ADMIN_GROUP))
 
 def in_dbca_domain(request):
     user = request.user
@@ -41,10 +41,10 @@ def is_in_organisation_contacts(request, organisation):
     return request.user.email in organisation.contacts.all().values_list('email', flat=True)
 
 def is_departmentUser(request):
-    return request.user.is_authenticated() and is_model_backend(request) and in_dbca_domain(request)
+    return request.user.is_authenticated and is_model_backend(request) and in_dbca_domain(request)
 
 def is_customer(request):
-    return request.user.is_authenticated() and is_email_auth_backend(request)
+    return request.user.is_authenticated and is_email_auth_backend(request)
 
 def is_internal(request):
     return is_departmentUser(request)

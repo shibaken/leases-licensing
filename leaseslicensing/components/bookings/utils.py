@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect, HttpResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -8,17 +8,14 @@ from django.shortcuts import render
 from datetime import datetime, timedelta, date
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
-from leaseslicensing.components.main.models import Park, ApplicationType
+from leaseslicensing.components.main.models import ApplicationType
 from leaseslicensing.components.proposals.models import Proposal, ProposalUserAction
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.bookings.models import (
         Booking,
-        ParkBooking,
         BookingInvoice,
         ApplicationFee,
         ComplianceFee,
-        FilmingFee,
-        FilmingFeeInvoice,
 )
 
 from leaseslicensing.components.bookings.email import (
@@ -27,18 +24,21 @@ from leaseslicensing.components.bookings.email import (
         send_confirmation_tclass_email_notification,
         send_monthly_invoice_tclass_email_notification,
 )
-#from ledger.checkout.utils import create_basket_session, create_checkout_session, calculate_excl_gst, createCustomBasket
-from ledger.checkout.utils import create_basket_session, use_existing_basket_from_invoice, create_checkout_session, calculate_excl_gst, get_cookie_basket, createCustomBasket
-from ledger.payments.invoice.utils import CreateInvoiceBasket
-from ledger.accounts.models import EmailUser
-from ledger.payments.models import Invoice
-from ledger.payments.utils import oracle_parser
+from ledger_api_client.utils import (
+        create_basket_session, 
+        use_existing_basket_from_invoice, 
+        create_checkout_session, 
+        #calculate_excl_gst, 
+        #get_cookie_basket, 
+        #createCustomBasket,
+        #CreateInvoiceBasket,
+        oracle_parser
+        )
+#from ledger.payments.invoice.utils import CreateInvoiceBasket
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 import json
 import ast
 from decimal import Decimal
-
-
-from ledger.basket.middleware import BasketMiddleware
 
 import logging
 logger = logging.getLogger('payment_checkout')
@@ -443,13 +443,13 @@ def create_tclass_fee_lines(proposal, invoice_text=None, vouchers=[], internal=F
                 {   'ledger_description': 'Application Fee - {} - {}'.format(now, proposal.lodgement_number),
                         'oracle_code': proposal.application_type.oracle_code_application,
                         'price_incl_tax':  application_price,
-                        'price_excl_tax':  application_price if proposal.application_type.is_gst_exempt else calculate_excl_gst(application_price),
+                        #'price_excl_tax':  application_price if proposal.application_type.is_gst_exempt else calculate_excl_gst(application_price),
                         'quantity': 1,
                 },
                 {   'ledger_description': 'Licence Charge {} - {} - {}'.format(proposal.other_details.get_preferred_licence_period_display(), now, proposal.lodgement_number),
                         'oracle_code': proposal.application_type.oracle_code_licence,
                         'price_incl_tax':  licence_price,
-                        'price_excl_tax':  licence_price if proposal.application_type.is_gst_exempt else calculate_excl_gst(licence_price),
+                        #'price_excl_tax':  licence_price if proposal.application_type.is_gst_exempt else calculate_excl_gst(licence_price),
                         'quantity': 1,
                 }
         ]
@@ -507,7 +507,7 @@ def create_event_fee_lines(proposal, invoice_text=None, vouchers=[], internal=Fa
             {'ledger_description': 'Application Fee - {} - {}'.format(now, proposal.lodgement_number),
              'oracle_code': proposal.application_type.oracle_code_application,
              'price_incl_tax':  application_price,
-             'price_excl_tax':  application_price if proposal.application_type.is_gst_exempt else calculate_excl_gst(application_price),
+             #'price_excl_tax':  application_price if proposal.application_type.is_gst_exempt else calculate_excl_gst(application_price),
              'quantity': 1,
             },
         ]
@@ -600,7 +600,7 @@ def create_filming_fee_lines(proposal, invoice_text=None, vouchers=[], internal=
                         'ledger_description': '{} Application Fee - {}'.format(desc, proposal.lodgement_number),
                         'oracle_code': proposal.application_type.oracle_code_application,
                         'price_incl_tax':  str(application_fee),
-                        'price_excl_tax':  str(application_fee) if proposal.application_type.is_gst_exempt else str(calculate_excl_gst(application_fee)),
+                        #'price_excl_tax':  str(application_fee) if proposal.application_type.is_gst_exempt else str(calculate_excl_gst(application_fee)),
                         'quantity': 1
                 }
         ]
@@ -609,7 +609,7 @@ def create_filming_fee_lines(proposal, invoice_text=None, vouchers=[], internal=
                         'ledger_description': '{} Licence Fee ({} - {}) - {}'.format(desc, licence_text, filming_period, proposal.lodgement_number),
                         'oracle_code': proposal.application_type.oracle_code_licence, # this line is dummy, for aggregated (externally generated) invoice
                         'price_incl_tax': str( licence_fee),
-                        'price_excl_tax':  str(licence_fee) if proposal.application_type.is_gst_exempt else str(calculate_excl_gst(licence_fee)),
+                        #'price_excl_tax':  str(licence_fee) if proposal.application_type.is_gst_exempt else str(calculate_excl_gst(licence_fee)),
                         'quantity': 1
                 }
         ]
@@ -628,10 +628,9 @@ def create_lines(request, invoice_text=None, vouchers=[], internal=False):
                 if no_persons > 0:
                         return {
                                 'ledger_description': '{} - {} - {}'.format(park.name, arrival, age_group),
-                                #'oracle_code': park.oracle_code(ApplicationType.TCLASS).encode('utf-8'),
                                 'oracle_code': park.oracle_code(ApplicationType.TCLASS),
                                 'price_incl_tax':  price,
-                                'price_excl_tax':  price if park.is_gst_exempt else round(float(calculate_excl_gst(price)), 2),
+                                #'price_excl_tax':  price if park.is_gst_exempt else round(float(calculate_excl_gst(price)), 2),
                                 'quantity': no_persons,
                         }
                 return None

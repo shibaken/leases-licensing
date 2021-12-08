@@ -102,10 +102,13 @@ REST_FRAMEWORK = {
 
 
 MIDDLEWARE_CLASSES += [
-    'leaseslicensing.middleware.BookingTimerMiddleware',
-    'leaseslicensing.middleware.FirstTimeNagScreenMiddleware',
-    'leaseslicensing.middleware.RevisionOverrideMiddleware',
+    #'leaseslicensing.middleware.BookingTimerMiddleware',
+    #'leaseslicensing.middleware.FirstTimeNagScreenMiddleware',
+    #'leaseslicensing.middleware.RevisionOverrideMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+MIDDLEWARE = MIDDLEWARE_CLASSES
+MIDDLEWARE_CLASSES = None
 
 TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'leaseslicensing', 'templates'))
 TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'leaseslicensing','components','organisations', 'templates'))
@@ -209,5 +212,4 @@ LOGGING['loggers']['leaseslicensing'] = {
             'handlers': ['file'],
             'level': 'INFO'
         }
-
-
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'

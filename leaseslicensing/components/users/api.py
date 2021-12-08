@@ -15,7 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django_countries import countries
 from rest_framework import viewsets, serializers, status, generics, views
-from rest_framework.decorators import detail_route, list_route,renderer_classes
+from rest_framework.decorators import action as detail_route, renderer_classes
+from rest_framework.decorators import action as list_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
@@ -23,8 +24,8 @@ from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
 from collections import OrderedDict
 from django.core.cache import cache
-from ledger.accounts.models import EmailUser,Address, Profile, EmailIdentity, EmailUserAction
-from ledger.address.models import Country
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser,Address, EmailIdentity #EmailUserAction
+from ledger_api_client.country_models import Country
 from datetime import datetime,timedelta, date
 from leaseslicensing.components.organisations.models import  (
                                     Organisation,
@@ -36,9 +37,9 @@ from leaseslicensing.components.users.serializers import   (
                                                 UserAddressSerializer,
                                                 PersonalSerializer,
                                                 ContactSerializer,
-                                                EmailUserActionSerializer,
-                                                EmailUserCommsSerializer,
-                                                EmailUserLogEntrySerializer,
+                                                #EmailUserActionSerializer,
+                                                #EmailUserCommsSerializer,
+                                                #EmailUserLogEntrySerializer,
                                                 UserSystemSettingsSerializer,
                                             )
 from leaseslicensing.components.organisations.serializers import (
@@ -85,7 +86,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = EmailUser.objects.all()
     serializer_class = UserSerializer
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def update_personal(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -104,7 +105,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def update_contact(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -123,7 +124,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def update_address(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -151,7 +152,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def update_system_settings(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -177,7 +178,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def upload_id(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -198,7 +199,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET', ])
+    @detail_route(methods=['GET', ], detail=True)
     def pending_org_requests(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -218,7 +219,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET', ])
+    @detail_route(methods=['GET', ], detail=True)
     def action_log(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -236,7 +237,7 @@ class UserViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError(str(e))
 
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def comms_log(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -253,7 +254,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     @renderer_classes((JSONRenderer,))
     def add_comms_log(self, request, *args, **kwargs):
         try:

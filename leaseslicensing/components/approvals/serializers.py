@@ -1,5 +1,5 @@
 from django.conf import settings
-from ledger.accounts.models import EmailUser,Address
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser,Address
 from leaseslicensing.components.proposals.serializers import ProposalSerializer, InternalProposalSerializer, ProposalParkSerializer
 from leaseslicensing.components.main.serializers import ApplicationTypeSerializer
 from leaseslicensing.components.approvals.models import (

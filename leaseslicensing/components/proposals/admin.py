@@ -4,19 +4,9 @@ from leaseslicensing.components.proposals import models
 from leaseslicensing.components.bookings.models import ApplicationFeeInvoice
 from leaseslicensing.components.proposals import forms
 from leaseslicensing.components.main.models import (
-    ActivityMatrix,
     SystemMaintenance,
     ApplicationType,
-    Park,
     OracleCode,
-    #ParkPrice,
-    Trail,
-    ActivityType,
-    ActivityCategory,
-    Activity,
-    AccessType,
-    Section,
-    Zone,
     RequiredDocument,
     Question,
     GlobalSettings,
@@ -51,7 +41,7 @@ class ProposalAdmin(admin.ModelAdmin):
 @admin.register(models.ProposalAssessorGroup)
 class ProposalAssessorGroupAdmin(admin.ModelAdmin):
     list_display = ['name','default']
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     form = forms.ProposalAssessorGroupAdminForm
     readonly_fields = ['default']
     #readonly_fields = ['regions', 'activities']
@@ -76,7 +66,7 @@ class ProposalAssessorGroupAdmin(admin.ModelAdmin):
 @admin.register(models.ProposalApproverGroup)
 class ProposalApproverGroupAdmin(admin.ModelAdmin):
     list_display = ['name','default']
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     form = forms.ProposalApproverGroupAdminForm
     readonly_fields = ['default']
     #readonly_fields = ['default', 'regions', 'activities']
@@ -140,50 +130,10 @@ class SystemMaintenanceAdmin(admin.ModelAdmin):
 
 @admin.register(ApplicationType)
 class ApplicationTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'order', 'visible', 'max_renewals', 'max_renewal_period', 'application_fee']
+    #list_display = ['name', 'order', 'visible', 'max_renewals', 'max_renewal_period', 'application_fee']
     ordering = ('order',)
     readonly_fields = ['name']
 
-    def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ()
-        if obj.name == ApplicationType.EVENT:
-            self.exclude = (
-                "max_renewals", "max_renewal_period", "licence_fee_2mth", "licence_fee_1yr",
-                "filming_fee_half_day", "filming_fee_full_day", "filming_fee_2days", "filming_fee_3days",
-                "photography_fee_half_day", "photography_fee_full_day", "photography_fee_2days", "photography_fee_3days",
-            )
-        elif obj.name == ApplicationType.FILMING:
-            self.exclude = (
-                "max_renewals", "max_renewal_period", "licence_fee_2mth", "licence_fee_1yr",
-                "events_park_fee",
-            )
-        elif obj.name == ApplicationType.TCLASS:
-            self.exclude = (
-                "filming_fee_half_day", "filming_fee_full_day", "filming_fee_2days", "filming_fee_3days",
-                "photography_fee_half_day", "photography_fee_full_day", "photography_fee_2days", "photography_fee_3days",
-                "events_park_fee",
-            )
-        elif obj.name == ApplicationType.ECLASS:
-            self.exclude = (
-                "max_renewals", "max_renewal_period", "licence_fee_2mth", "licence_fee_1yr",
-                "filming_fee_half_day", "filming_fee_full_day", "filming_fee_2days", "filming_fee_3days",
-                "photography_fee_half_day", "photography_fee_full_day", "photography_fee_2days", "photography_fee_3days",
-                "events_park_fee",
-            )
-
-        form = super(ApplicationTypeAdmin, self).get_form(request, obj, **kwargs)
-        return form
-
-#    def get_fieldsets(self, request, obj=None):
-#        #import ipdb; ipdb.set_trace()
-#        fieldsets = super(ApplicationTypeAdmin, self).get_fieldsets(request, obj)
-#        fieldsets[0][1]['fields'] += ['photography_fee_half_day'] 
-#        return fieldsets
-#
-#    def get_exclude(self, request, obj=None):
-#        #import ipdb; ipdb.set_trace()
-#        if float(obj.application_fee)==117.0:
-#            return ['visible']
 
 class OracleCodeInline(admin.TabularInline):
     model = OracleCode
@@ -192,53 +142,9 @@ class OracleCodeInline(admin.TabularInline):
     max_num = 3
     can_delete = False
 
-@admin.register(Park)
-class ParkAdmin(admin.ModelAdmin):
-    inlines = [
-        OracleCodeInline,
-    ]
-    list_display = ['name', 'district']
-    #filter_horizontal = ('allowed_activities',)
-    filter_horizontal = ('allowed_activities', 'allowed_access')
-    ordering = ('name',)
-
-@admin.register(Trail)
-class TrailAdmin(admin.ModelAdmin):
-    list_display = ['name', 'code']
-    filter_horizontal = ('allowed_activities',)
-    ordering = ('name',)
-
-@admin.register(Section)
-class SectionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'visible', 'trail', 'doc_url']
-    ordering = ('name',)
-
-@admin.register(Zone)
-class ZoneAdmin(admin.ModelAdmin):
-    list_display = ['name', 'visible', 'park']
-    filter_horizontal = ('allowed_activities',)
-    ordering = ('name',)
-
 @admin.register(RequiredDocument)
 class RequiredDocumentAdmin(admin.ModelAdmin):
-    list_display = ['park', 'activity', 'question']
-    #filter_horizontal = ('allowed_activities',)
-    #ordering = ('name',)
-
-@admin.register(ActivityCategory)
-class ActivityCategory(admin.ModelAdmin):
-    list_display = ['name', 'visible', 'activity_type']
-    ordering = ('name',)
-
-@admin.register(Activity)
-class Activity(admin.ModelAdmin):
-    list_display = ['name', 'visible', 'activity_category']
-    ordering = ('name',)
-
-@admin.register(AccessType)
-class VehicleAdmin(admin.ModelAdmin):
-    list_display = ['id','name','visible']
-    ordering = ('id',)
+    pass
 
 @admin.register(GlobalSettings)
 class GlobalSettingsAdmin(admin.ModelAdmin):
@@ -247,7 +153,7 @@ class GlobalSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(models.ReferralRecipientGroup)
 class ReferralRecipientGroupAdmin(admin.ModelAdmin):
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     list_display = ['name']
     exclude = ('site',)
     actions = None
@@ -259,7 +165,7 @@ class ReferralRecipientGroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.QAOfficerGroup)
 class QAOfficerGroupAdmin(admin.ModelAdmin):
-    filter_horizontal = ('members',)
+    #filter_horizontal = ('members',)
     list_display = ['name']
     exclude = ('site',)
     actions = None
@@ -280,7 +186,4 @@ class QuestionAdmin(admin.ModelAdmin):
     list_display = ['question_text', 'answer_one', 'answer_two', 'answer_three', 'answer_four', 'application_type',]
     ordering = ('question_text',)
 
-@admin.register(ApplicationFeeInvoice)
-class SectionAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in ApplicationFeeInvoice._meta.fields]
 
