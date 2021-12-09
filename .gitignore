@@ -98,14 +98,9 @@ importo.py
 uwsgi*.ini
 *.djcache
 
-# npm locks
-#*-lock.json
+npm locks
+*-lock.json
 
-#leaseslicensing/static/leaseslicensing_vue/static/css/app.css
-#leaseslicensing/static/leaseslicensing_vue/static/js/app.js
-#leaseslicensing/static/leaseslicensing_vue/static/js/manifest.js
-#leaseslicensing/static/leaseslicensing_vue/static/js/vendor.js
-#leaseslicensing/static/leaseslicensing_vue/static/js/babel-polyfill.js
-#leaseslicensing/static/leaseslicensing_vue/static/fonts/*
-#leaseslicensing/static/leaseslicensing_vue/static/img/*
+# npm build files
+leaseslicensing/static/mooringlicensing_vue/static/*
 
