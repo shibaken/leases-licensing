@@ -1,0 +1,8 @@
+{%  extends 'leaseslicensing/emails/base_email.txt' %}
+
+{%  block content %}
+    Please note the following:
+    {{ compliance.reference }} {{compliance.requirement.requirement}}.
+   
+
+{%  endblock %}
