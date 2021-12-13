@@ -114,16 +114,15 @@ class UserFilterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    leaseslicensing_organisations = serializers.SerializerMethodField()
+    #leaseslicensing_organisations = serializers.SerializerMethodField()
     residential_address = UserAddressSerializer()
     personal_details = serializers.SerializerMethodField()
     address_details = serializers.SerializerMethodField()
     contact_details = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     is_department_user = serializers.SerializerMethodField()
-    #is_payment_admin = serializers.SerializerMethodField()
     system_settings= serializers.SerializerMethodField()
-    is_payment_admin = serializers.SerializerMethodField()
+    #is_payment_admin = serializers.SerializerMethodField()
     is_leaseslicensing_admin = serializers.SerializerMethodField()    
 
     class Meta:
@@ -137,7 +136,7 @@ class UserSerializer(serializers.ModelSerializer):
             'residential_address',
             'phone_number',
             'mobile_number',
-            'leaseslicensing_organisations',
+            #'leaseslicensing_organisations',
             'personal_details',
             'address_details',
             'contact_details',
@@ -170,19 +169,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_department_user(self, obj):
         if obj.email:
-            return in_dbca_domain(obj)
-        else:
-            return False
+            request = self.context['request'] if self.context else None
+            if request:
+                return in_dbca_domain(request)
+        return False
 
     #def get_is_payment_admin(self, obj):
      #   return is_payment_admin(obj)
 
-    def get_leaseslicensing_organisations(self, obj):
-        leaseslicensing_organisations = obj.leaseslicensing_organisations
-        serialized_orgs = UserOrganisationSerializer(
-            leaseslicensing_organisations, many=True, context={
-                'user_id': obj.id}).data
-        return serialized_orgs
+    #def get_leaseslicensing_organisations(self, obj):
+    #    leaseslicensing_organisations = obj.leaseslicensing_organisations
+    #    serialized_orgs = UserOrganisationSerializer(
+    #        leaseslicensing_organisations, many=True, context={
+    #            'user_id': obj.id}).data
+    #    return serialized_orgs
 
     def get_system_settings(self, obj):
         try:

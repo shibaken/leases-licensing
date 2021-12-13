@@ -1,4 +1,4 @@
-<template> -->
+<template>
     <div :class="classCompute" id="userInfo">
       <div class="col-sm-12">
         <div v-if="showCompletion" class="row">
@@ -35,17 +35,26 @@
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label">Given name(s)</label>
                             <div class="col-sm-6">
-                                <input type="text" class="form-control" id="first_name" name="Given name" placeholder="" v-model="profile.first_name" required="">
+                                <input :readonly="firstNameReadOnly" type="text" class="form-control" id="first_name" name="Given name" placeholder="" v-model="profile.first_name" required="">
                             </div>
                           </div>
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label" >Surname</label>
                             <div class="col-sm-6">
-                                <input type="text" class="form-control" id="surname" name="Surname" placeholder="" v-model="profile.last_name">
+                                <input :readonly="lastNameReadOnly" type="text" class="form-control" id="surname" name="Surname" placeholder="" v-model="profile.last_name">
                             </div>
                           </div>
+                          <div class="row form-group">
+                              <label for="" class="col-sm-3 control-label">Date of Birth</label>
+                              <div class="col-sm-3 input-group date" ref="dobDatePicker">
+                                  <input :disabled="dobReadOnly" type="text" class="form-control text-left ml-1" placeholder="DD/MM/YYYY" v-model="profile.dob"/>
+                                  <span class="input-group-addon">
+                                      <span class="glyphicon glyphicon-calendar ml-1"></span>
+                                  </span>
+                              </div>
+                          </div>
                           <div class="form-group">
-                            <div class="col-sm-12">
+                            <div v-if="!readonly" class="col-sm-12">
                                 <button v-if="!updatingPersonal" class="pull-right btn btn-primary" @click.prevent="updatePersonal()">Update</button>
                                 <button v-else disabled class="pull-right btn btn-primary"><i class="fa fa-spin fa-spinner"></i>&nbsp;Updating</button>
                             </div>
@@ -55,41 +64,6 @@
                 </div>
             </div>
         </div>
-<!-- 
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Identification <small>Upload your photo ID</small>
-                        <a class="panelClicker" :href="'#'+idBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="idBody">
-                            <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                        </a>
-                    </h3>
-                  </div>
-                  <div class="panel-body collapse" :id="idBody">
-                      <form class="form-horizontal" name="id_form" method="post">
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">Identification</label>
-                            <div class="col-sm-6">
-                                <img v-if="profile.identification" width="100%" name="identification" v-bind:src="profile.identification.file" />
-                            </div>
-                          </div>
-                          <div class="form-group">
-                            <div class="col-sm-12">
-                                output order in reverse due to pull-right at runtime -->
-                                <!---<button v-if="!uploadingID" class="pull-right btn btn-primary" @click.prevent="uploadID()">Upload</button>
-                                <button v-else disabled class="pull-right btn btn-primary"><i class="fa fa-spin fa-spinner"></i>&nbsp;Uploading</button>
-                                <span class="pull-right" style="margin-left:10px;margin-top:10px;margin-right:10px">{{uploadedIDFileName}}</span>
-                                <span class="btn btn-primary btn-file pull-right">
-                                    Select ID to Upload<input type="file" ref="uploadedID" @change="readFileID()"/>
-                                </span>
-                            </div>
-                          </div>
-                       </form>
-                  </div>
-                </div>
-            </div>
-        </div> -->
 
         <div class="row">
             <div class="col-sm-12">
@@ -106,39 +80,85 @@
                   <div v-if="loading.length == 0" class="panel-body collapse" :id="adBody">
                       <form class="form-horizontal" action="index.html" method="post">
                         <alert v-if="showAddressError" type="danger" style="color:red"><div v-for="item in errorListAddress"><strong>{{item}}</strong></div></alert>
+                      <div class="address-box">
                           <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">Street</label>
+                            <label for="" class="col-sm-3 control-label">Residential Address</label>
                             <div class="col-sm-6">
-                                <input type="text" class="form-control" id="line1" name="Street" placeholder="" v-model="profile.residential_address.line1">
+                                <input :readonly="readonly" type="text" class="form-control" id="line1" name="Street" placeholder="" v-model="profile.residential_address.line1">
                             </div>
                           </div>
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
                             <div class="col-sm-6">
-                                <input type="text" class="form-control" id="locality" name="Town/Suburb" placeholder="" v-model="profile.residential_address.locality">
+                                <input :readonly="readonly" type="text" class="form-control" id="locality" name="Town/Suburb" placeholder="" v-model="profile.residential_address.locality">
                             </div>
                           </div>
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label">State</label>
                             <div class="col-sm-3">
-                                <input type="text" class="form-control" id="state" name="State" placeholder="" v-model="profile.residential_address.state">
+                                <input :readonly="readonly" type="text" class="form-control" id="state" name="State" placeholder="" v-model="profile.residential_address.state">
                             </div>
                             <label for="" class="col-sm-1 control-label">Postcode</label>
                             <div class="col-sm-2">
-                                <input type="text" class="form-control" id="postcode" name="Postcode" placeholder="" v-model="profile.residential_address.postcode">
+                                <input :readonly="readonly" type="text" class="form-control" id="postcode" name="Postcode" placeholder="" v-model="profile.residential_address.postcode">
                             </div>
                           </div>
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label" >Country</label>
                             <div class="col-sm-4">
-                                <select class="form-control" id="country" name="Country" v-model="profile.residential_address.country">
-                                    <!-- <option v-for="c in countries" :value="c.alpha2Code">{{ c.name }}</option> -->
+                                <select :disabled="readonly" class="form-control" id="country" name="Country" v-model="profile.residential_address.country">
+                                    <!--option v-for="c in countries" :value="c.alpha2Code">{{ c.name }}</option-->
                                     <option v-for="c in countries" :value="c.code">{{ c.name }}</option>
                                 </select>
                             </div>
                           </div>
+                      </div>
+                          <!-- -->
+                      <div class="form-group"/>
+                      <div class="address-box">
                           <div class="form-group">
-                            <div class="col-sm-12">
+                            <div class="col-sm-3">
+                            </div>
+                            <div class="col-sm-6">
+                              <input :readonly="readonly" type="checkbox" id="postal_same_as_residential" v-model="profile.postal_same_as_residential"/>
+                              <label for="postal_same_as_residential" class="control-label">Same as residential address</label>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="" class="col-sm-3 control-label">Postal Address</label>
+                            <div class="col-sm-6">
+                                <input :readonly="postalAddressReadonly" type="text" class="form-control" id="postal_line1" name="Street" placeholder="" v-model="profile.postal_address.line1">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
+                            <div class="col-sm-6">
+                                <input :readonly="postalAddressReadonly" type="text" class="form-control" id="postal_locality" name="Town/Suburb" placeholder="" v-model="profile.postal_address.locality">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="" class="col-sm-3 control-label">State</label>
+                            <div class="col-sm-3">
+                                <input :readonly="postalAddressReadonly" type="text" class="form-control" id="postal_state" name="State" placeholder="" v-model="profile.postal_address.state">
+                            </div>
+                            <label for="" class="col-sm-1 control-label">Postcode</label>
+                            <div class="col-sm-2">
+                                <input :readonly="postalAddressReadonly" type="text" class="form-control" id="postal_postcode" name="Postcode" placeholder="" v-model="profile.postal_address.postcode">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="" class="col-sm-3 control-label" >Country</label>
+                            <div class="col-sm-4">
+                                <select :disabled="postalAddressReadonly" class="form-control" id="postal_country" name="Country" v-model="profile.postal_address.country">
+                                    <!--option v-for="c in countries" :value="c.alpha2Code">{{ c.name }}</option-->
+                                    <option v-for="c in countries" :value="c.code">{{ c.name }}</option>
+                                </select>
+                            </div>
+                          </div>
+                      </div>
+
+                          <div class="form-group">
+                            <div v-if="!readonly" class="col-sm-12">
                                 <button v-if="!updatingAddress" class="pull-right btn btn-primary" @click.prevent="updateAddress()">Update</button>
                                 <button v-else disabled class="pull-right btn btn-primary"><i class="fa fa-spin fa-spinner"></i>&nbsp;Updating</button>
                             </div>
@@ -166,7 +186,7 @@
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label">Phone (work)</label>
                             <div v-if="profile.is_department_user" class="col-sm-6">
-                               <input :readonly="phoneNumberReadonly" type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">           
+                               <input :readonly="phoneNumberReadonly || readonly" type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">           
                             </div>
                             <div v-else class="col-sm-6">
                                 <input type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">
@@ -175,7 +195,7 @@
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label" >Mobile</label>
                             <div v-if="profile.is_department_user" class="col-sm-6">
-                                <input :readonly="mobileNumberReadonly" type="text" class="form-control" id="mobile" name="Mobile" placeholder="" v-model="profile.mobile_number">
+                                <input :readonly="mobileNumberReadonly || readonly" type="text" class="form-control" id="mobile" name="Mobile" placeholder="" v-model="profile.mobile_number">
                             </div>
                             <div v-else class="col-sm-6">
                                 <input type="text" class="form-control" id="mobile" name="Mobile" placeholder="" v-model="profile.mobile_number">
@@ -184,11 +204,11 @@
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label" >Email</label>
                             <div class="col-sm-6">
-                                <input type="email" class="form-control" id="email" name="Email" placeholder="" v-model="profile.email">
+                                <input :readonly="emailReadOnly" type="email" class="form-control" id="email" name="Email" placeholder="" v-model="profile.email">
                             </div>
                           </div>
                           <div class="form-group">
-                            <div class="col-sm-12">
+                            <div v-if="!readonly" class="col-sm-12">
                                 <button v-if="!updatingContact" class="pull-right btn btn-primary" @click.prevent="updateContact()">Update</button>
                                 <button v-else disabled class="pull-right btn btn-primary"><i class="fa fa-spin fa-spinner"></i>&nbsp;Updating</button>
                             </div>
@@ -198,206 +218,40 @@
                 </div>
             </div>
         </div>
-
-        <div v-if="profile.is_staff" class="row">
-            <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">System Settings <small>Set up preferences in using this system</small>
-                        <a class="panelClicker" :href="'#'+sBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="sBody">
-                            <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                        </a>
-                    </h3>
-                  </div>
-                  <div class="panel-body collapse" :id="sBody">
-                      <form class="form-horizontal" action="index.html" method="post">
-                          <div class="form-group">
-                            <label for="" class="col-sm-3">Park Entry Fees dashboard view</label>
-                            <div class="col-sm-3">
-                               <label>
-                                    <input type="radio" value="true" v-model="profile.system_settings.one_row_per_park" />One row per Park
-                                </label>          
-                            </div>
-                            <div class="col-sm-3">
-                                <label>
-                                    <input type="radio" value="false" v-model="profile.system_settings.one_row_per_park"  />One row per Booking
-                                </label>   
-                            </div>
-                          </div>
-                          <div class="form-group">
-                            <div class="col-sm-12">
-                                <button v-if="!updatingSystemSettings" class="pull-right btn btn-primary" @click.prevent="updateSystemSettings()">Update</button>
-                                <button v-else disabled class="pull-right btn btn-primary"><i class="fa fa-spin fa-spinner"></i>&nbsp;Updating</button>
-                            </div>
-                          </div>
-                       </form>
-                  </div>
+        <FormSection v-if="showElectoralRoll" label="WA State Electoral Roll" :Index="electoralRollSectionIndex">
+            <div class="form-group">
+                <div class="col-sm-8 mb-3">
+                    <strong>
+                        You must be on the WA state electoral roll to make an application
+                    </strong>
+                </div>
+                <div class="col-sm-8">
+                    <input :disabled="readonly" type="radio" id="electoral_roll_yes" :value="false" v-model="silentElector"/>
+                    <label for="electoral_roll_yes">
+                        Yes, I am on the 
+                        <a href="/" @click.prevent="uploadProofElectoralRoll">WA state electoral roll</a>
+                    </label>
+                </div>
+                <div class="col-sm-8">
+                    <input :disabled="readonly" class="mb-3" type="radio" id="electoral_roll_silent" :value="true" v-model="silentElector"/>
+                    <label for="electoral_roll_silent">
+                        I am a silent elector
+                    </label>
+                    <div v-if="silentElector===true">
+                        <FileField
+                            :readonly="readonly"
+                            headerCSS="ml-3"
+                            label="Provide evidence"
+                            ref="electoral_roll_documents"
+                            name="electoral-roll-documents"
+                            :isRepeatable="true"
+                            :documentActionUrl="electoralRollDocumentUrl"
+                            :replace_button_by_text="true"
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div v-if="!isApplication" class="row">
-            <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Organisation <small>Link to the organisations you are an employee of and for which you are managing licences</small>
-                        <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
-                            <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                        </a>
-                    </h3>
-                  </div>
-                  <div class="panel-body collapse" :id="oBody">
-                      <form class="form-horizontal" name="orgForm" method="post">
-                          <div class="form-group">
-                            <label for="" class="col-sm-5 control-label">Do you manage licences on behalf of an organisation? <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="bottom" style="color:blue" title="Answer with Yes if you are applying for a licence in an organisation or incorporated body name.">&nbsp;</i></label>
-                            <div class="col-sm-4">
-                                <label class="radio-inline">
-                                  <input type="radio" name="behalf_of_org" v-model="managesOrg" value="Yes"> Yes
-                                </label>
-                                <label class="radio-inline">
-                                  <input :disabled="hasOrgs" type="radio" name="behalf_of_org" v-model="managesOrg" value="No" > No
-                                </label>
-                                <label class="radio-inline">
-                                  <input type="radio" name="behalf_of_org" v-model="managesOrg" value="Consultant"> Yes, as a consultant
-                                </label>
-                            </div>
-                          </div>
-                          <div class="form-group" v-if="managesOrg=='Yes'">
-                            <div class="col-sm-12">
-                                <button class="btn btn-primary pull-right" v-if="hasOrgs && !addingCompany" @click.prevent="addCompany()">Add Another Organisation</button>   
-                            </div>
-                          </div>
-
-                          <div v-for="org in profile.leaseslicensing_organisations">
-                              <div class="form-group">
-                                <label for="" class="col-sm-2 control-label" >Organisation</label>
-                                <div class="col-sm-3"> 
-                                    <input type="text" disabled class="form-control" name="organisation" v-model="org.name" placeholder="">
-                                </div>
-                                <label for="" class="col-sm-2 control-label" >ABN/ACN</label>
-                                <div class="col-sm-3"> 
-                                    <input type="text" disabled class="form-control" name="organisation" v-model="org.abn" placeholder="">
-                                </div>
-                                <a style="cursor:pointer;text-decoration:none;" @click.prevent="unlinkUser(org)"><i class="fa fa-chain-broken fa-2x" ></i>&nbsp;Unlink</a>
-                              </div>
-                          </div>
-
-                          <div v-for="orgReq in orgRequest_list">
-                              <div class="form-group">
-                                <label for="" class="col-sm-2 control-label" >Organisation</label>
-                                <div class="col-sm-3"> 
-                                    <input type="text" disabled class="form-control" name="organisation" v-model="orgReq.name" placeholder="">
-                                </div>
-                                <label for="" class="col-sm-2 control-label" >ABN/ACN</label>
-                                <div class="col-sm-3"> 
-                                    <input type="text" disabled class="form-control" name="organisation" v-model="orgReq.abn" placeholder="">
-                                </div>
-                                <lable>&nbsp;Pending for approval</lable>
-                              </div>
-                          </div>
-
-                           <div v-if="managesOrg=='Consultant'">
-                              <h3>New Organisation (as consultant)</h3>
-                              <div class="form-group">
-                                  <label for="" class="col-sm-2 control-label" >Organisation</label>
-                                  <div class="col-sm-6">
-                                      <input type="text" class="form-control" name="organisation" v-model="newOrg.name" placeholder="">
-                                  </div>
-                              </div>
-                              <div class="form-group">
-                                  <label for="" class="col-sm-2 control-label" >ABN/ACN</label>
-                                  <div class="col-sm-6">
-                                      <input type="text" class="form-control" name="abn" v-model="newOrg.abn" placeholder="">
-                                  </div>
-                                  <div class="col-sm-2">
-                                      <!--<button @click.prevent="checkOrganisation()" class="btn btn-primary">Check Details</button>-->
-                                      <button v-if="newOrg.detailsChecked" @click.prevent="checkOrganisation()" class="btn btn-primary">Check Details</button>
-                                  </div>
-                              </div>
-                              <!--<div class="form-group" v-if="newOrg.detailsChecked">-->
-                              <div class="form-group">
-                                    <label class="col-sm-12" style="text-align:left;">
-                                      Please upload a letter on organisation letter head stating that you are a consultant for the organisation.
-                                        <span class="btn btn-info btn-file">
-                                            Attach File <input type="file" ref="uploadedFile" @change="readFile()"/>
-                                        </span>
-                                        <span  style="margin-left:10px;margin-top:10px;">{{uploadedFileName}}</span>
-                                    </label>
-                                    </br>
-
-                                    <label for="" class="col-sm-10 control-label" style="text-align:left;">You will be notified by email once the Department has checked the organisation details.
-                                    </label>
-
-
-                                    <div class="col-sm-12">
-                                      <button v-if="!registeringOrg" @click.prevent="orgConsultRequest()" class="btn btn-primary pull-left">Submit</button>
-                                      <button v-else disabled class="btn btn-primary pull-right"><i class="fa fa-spin fa-spinner"></i>&nbsp;Submitting</button>
-                                    </div>
-                              </div>
-                           </div>
-
-
-                          <div style="margin-top:15px;" v-if="addingCompany">
-                              <h3> New Organisation</h3>
-                              <div class="form-group">
-                                <label for="" class="col-sm-2 control-label" >Organisation</label>
-                                <div class="col-sm-6">
-                                    <input type="text" class="form-control" name="organisation" v-model="newOrg.name" placeholder="">
-                                </div>
-                              </div>
-                              <div class="form-group">
-                                <label for="" class="col-sm-2 control-label" >ABN/ACN <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="bottom" style="color:blue" title="If you are applying as a sole trader please supply your ABN. If your businesses is not registered within Australia, please include the business registration number from the country the business is registered.">&nbsp;</i></label>
-                                <div class="col-sm-6">
-                                    <input type="text" class="form-control" name="abn" v-model="newOrg.abn" placeholder="" style="width: 40%">
-                                </div>
-                                <div class="col-sm-2">
-                                    <button :disabled="!isNewOrgDetails" @click.prevent="checkOrganisation()" class="btn btn-primary">Check Details</button>
-                                </div>
-                              </div>
-                              <div class="form-group" v-if="newOrg.exists && newOrg.detailsChecked">
-                                  <label class="col-sm-12" style="text-align:left;margin-bottom:20px;">
-                                    This organisation has already been  registered with the system.Please enter the two pin codes:</br>
-                                    These pin codes can be retrieved from ({{newOrg.first_five}})
-                                  </label>
-                                  <label for="" class="col-sm-2 control-label" >Pin 1</label>
-                                  <div class="col-sm-2">
-                                    <input type="text" class="form-control" name="abn" v-model="newOrg.pin1" placeholder="">
-                                  </div>
-                                  <label for="" class="col-sm-2 control-label" >Pin 2</label>
-                                  <div class="col-sm-2">
-                                    <input type="text" class="form-control" name="abn" v-model="newOrg.pin2" placeholder="">
-                                  </div>
-                                  <div class="col-sm-2">
-                                    <button v-if="!completedProfile && !validatingPins" disabled title="Please complete all the personal details." class="btn btn-primary pull-left">Validate</button>
-
-                                    <button v-else-if="!validatingPins && completedProfile" @click.prevent="validatePins()" class="btn btn-primary pull-left">Validate</button>
-                                    <button v-else class="btn btn-primary pull-left"><i class="fa fa-spin fa-spinner"></i>&nbsp;Validating Pins</button>
-                                  </div>
-                              </div>
-                              <div class="form-group" v-else-if="!newOrg.exists && newOrg.detailsChecked">
-                                  <label class="col-sm-12" style="text-align:left;">
-                                    This organisation has not yet been registered with this system. Please upload a letter on organisation head stating that you are an employee of this origanisation.</br>
-                                  </label>
-                                  <div class="col-sm-12">
-                                    <span class="btn btn-primary btn-file pull-left">
-                                        Attach File <input type="file" ref="uploadedFile" @change="readFile()"/>
-                                    </span>
-                                    <span class="pull-left" style="margin-left:10px;margin-top:10px;">{{uploadedFileName}}</span>
-                                  </div>
-                                  <label for="" class="col-sm-10 control-label" style="text-align:left;">You will be notified by email once the Department has checked the organisation details.</label>
-                                  <div class="col-sm-12">
-                                    <button v-if="!completedProfile" disabled title="Please complete details" class="btn btn-primary pull-right">Submit</button>
-                                    <button v-else-if="!registeringOrg" :disabled="!isFileUploaded" @click.prevent="orgRequest()" class="btn btn-primary pull-right">Submit</button>
-                                    <button v-else disabled class="btn btn-primary pull-right"><i class="fa fa-spin fa-spinner"></i>&nbsp;Submitting</button>
-                                  </div>
-                              </div>
-                              
-                        </div>
-                       </form>
-                  </div>
-                </div>
-            </div>
-        </div>
+        </FormSection>
       </div>
     </div>
 </template>
@@ -406,17 +260,44 @@
 import Vue from 'vue'
 import $ from 'jquery'
 import { api_endpoints, helpers } from '@/utils/hooks'
+import FormSection from '@/components/forms/section_toggle.vue'
+import FileField from '@/components/forms/filefield_immediate.vue'
+import 'eonasdan-bootstrap-datetimepicker';
+//require("moment");
+require('eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css');
+require('eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
+
 export default {
     name: 'Profile',
     props:{
-      isApplication:{
+        proposalId: {
+            type: Number,
+        },
+        submitterId: {
+            type: Number,
+        },
+        isApplication:{
                 type: Boolean,
                 default: false
             },
+        showElectoralRoll:{
+                type: Boolean,
+                default: false
+            },
+        storedSilentElector:{
+                type: Boolean,
+            },
+        readonly:{
+            type: Boolean,
+            default: false,
+        },
+
     },
     data () {
         let vm = this;
         return {
+            electoralRollSectionIndex: 'electoral_roll_' + vm._uid,
+            silentElector: null,
             adBody: 'adBody'+vm._uid,
             pBody: 'pBody'+vm._uid,
             cBody: 'cBody'+vm._uid,
@@ -424,10 +305,12 @@ export default {
             idBody: 'idBody'+vm._uid,
             sBody: 'sBody'+vm._uid,
             profile: {
-              first_name: '',
+                first_name: '',
                 last_name: '',
                 leaseslicensing_organisations:[],
-                residential_address : {}
+                residential_address : {},
+                postal_address : {},
+                electoral_roll: null,
             },
             newOrg: {
                 'detailsChecked': false,
@@ -456,7 +339,13 @@ export default {
             errorListContact:[],
             showContactError: false,
             role : null,
+            phoneNumberReadonly: false,
+            mobileNumberReadonly: false,
         }
+    },
+    components: {
+        FormSection,
+        FileField,
     },
     watch: {
         managesOrg: function() {
@@ -483,6 +372,49 @@ export default {
         },
     },
     computed: {
+        dobReadOnly: function() {
+            let readonly = false;
+            if (this.readonly || this.profile.readonly_dob) {
+                readonly = true;
+            }
+            return readonly
+        },
+        firstNameReadOnly: function() {
+            let readonly = false;
+            if (this.readonly || this.profile.readonly_first_name) {
+                readonly = true;
+            }
+            return readonly
+        },
+        lastNameReadOnly: function() {
+            let readonly = false;
+            if (this.readonly || this.profile.readonly_last_name) {
+                readonly = true;
+            }
+            return readonly
+        },
+        emailReadOnly: function() {
+            let readonly = false;
+            if (this.readonly || this.profile.readonly_email) {
+                readonly = true;
+            }
+            return readonly
+        },
+        postalAddressReadonly: function() {
+            if (this.readonly || this.profile.postal_same_as_residential) {
+                return true;
+            }
+        },
+        electoralRollDocumentUrl: function() {
+            let url = '';
+            if (this.profile && this.profile.id) {
+                url = helpers.add_endpoint_join(
+                    '/api/proposal/',
+                    this.proposalId + '/process_electoral_roll_document/'
+                )
+            }
+            return url;
+        },
         classCompute:function(){
           return this.isApplication? 'row' : 'container';
         },
@@ -509,6 +441,38 @@ export default {
         },
     },
     methods: {
+        addEventListeners: function () {
+            let vm = this;
+            let elDob = $(vm.$refs.dobDatePicker);
+            //const now = Date.now()
+
+            let options = {
+                format: "DD/MM/YYYY",
+                showClear: true ,
+                useCurrent: false,
+                maxDate: moment(),
+            };
+
+            elDob.datetimepicker(options);
+
+            elDob.on("dp.change", function(e) {
+                let selected_date = null;
+                if (e.date){
+                    // Date selected
+                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
+                    vm.profile.dob = selected_date;
+                    //elDob.data('DateTimePicker').maxDate(true);
+                } else {
+                    // Date not selected
+                    vm.profile.dob = selected_date;
+                    //elDob.data('DateTimePicker').maxDate(false);
+                }
+            });
+        },
+
+        uploadProofElectoralRoll: function() {
+            console.log("proof");
+        },
         readFile: function() {
             let vm = this;
             let _file = null;
@@ -583,6 +547,8 @@ export default {
                 vm.updatingPersonal = false;
                 vm.profile = response.body;
                 if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
+                if (vm.profile.postal_address == null){ vm.profile.postal_address = {}; }
+                if (vm.profile.dob) { vm.profile.dob = moment(vm.profile.dob).format('DD/MM/YYYY'); }
             }, (error) => {
                 console.log(error);
                 vm.updatingPersonal = false;
@@ -666,13 +632,15 @@ export default {
                 vm.updatingContact = false;
                 vm.profile = response.body;
                 if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
+                if (vm.profile.postal_address == null){ vm.profile.postal_address = {}; }
+                if (vm.profile.dob) { vm.profile.dob = moment(vm.profile.dob).format('DD/MM/YYYY'); }
             }, (error) => {
                 console.log(error);
                 vm.updatingContact = false;
             });
           }
         },
-        updateAddress: function() {
+        updateAddress: async function() {
             let vm = this;
 
             vm.missing_fields = [];
@@ -694,20 +662,31 @@ export default {
             }
             else{
               vm.showAddressError = false;
-            
 
             vm.updatingAddress = true;
-            vm.$http.post(helpers.add_endpoint_json(api_endpoints.users,(vm.profile.id+'/update_address')),JSON.stringify(vm.profile.residential_address),{
-                emulateJSON:true
-            }).then((response) => {
-                //console.log(response);
+            let payload = {}
+            payload.residential_address = Object.assign({}, vm.profile.residential_address);
+            payload.postal_address = Object.assign({}, vm.profile.postal_address);
+            if (vm.profile.postal_same_as_residential) {
+                payload.postal_same_as_residential = true;
+            }
+            try {
+                const response = await vm.$http.post(helpers.add_endpoint_json(api_endpoints.users,(vm.profile.id+'/update_address')), payload);
                 vm.updatingAddress = false;
                 vm.profile = response.body;
                 if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
-            }, (error) => {
-                console.log(error);
+                if (vm.profile.postal_address == null){ vm.profile.postal_address = {}; }
+                if (vm.profile.dob) { vm.profile.dob = moment(vm.profile.dob).format('DD/MM/YYYY'); }
+            } catch (error) {
+                swal({
+                    title: "Please fix these errors before saving",
+                    //text: error.bodyText,
+                    html: helpers.formatError(error),
+                    type:'error'
+                });
+
                 vm.updatingAddress = false;
-            });
+            }
           }
         },
         updateSystemSettings: function() {
@@ -720,6 +699,7 @@ export default {
                 vm.updatingSystemSettings=false;
                 vm.profile = response.body;
                 if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
+                if (vm.profile.postal_address == null){ vm.profile.postal_address = {}; }
             }, (error) => {
                 console.log(error);
                 vm.updatingSystemSettings=false;
@@ -774,6 +754,7 @@ export default {
                     Vue.http.get(api_endpoints.profile).then((response) => {
                         vm.profile = response.body
                         if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
+                        if (vm.profile.postal_address == null){ vm.profile.postal_address = {}; }
                         if ( vm.profile.leaseslicensing_organisations && vm.profile.leaseslicensing_organisations.length > 0 ) { vm.managesOrg = 'Yes' }
                     },(error) => {
                         console.log(error);
@@ -957,21 +938,20 @@ export default {
             },(error) => {
             }); 
         },
-        fetchProfile: function(){
-          let vm=this;
-          Vue.http.get(api_endpoints.profile).then((response) => {
-                    //vm.profile = response.body
-                    //if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
-
-                    vm.profile = Object.assign(response.body);
-                    if (vm.profile.residential_address == null){ vm.profile.residential_address = Object.assign({country:'AU'}); }
-
-                    if ( vm.profile.leaseslicensing_organisations && vm.profile.leaseslicensing_organisations.length > 0 ) { vm.managesOrg = 'Yes' }
-                    vm.phoneNumberReadonly = vm.profile.phone_number === '' || vm.profile.phone_number === null || vm.profile.phone_number === 0 ?  false : true;
-                    vm.mobileNumberReadonly = vm.profile.mobile_number === '' || vm.profile.mobile_number === null || vm.profile.mobile_number === 0 ?  false : true;
-        },(error) => {
-            console.log(error);
-        })
+        fetchProfile: async function(){
+            let response = null;
+            //let submitter_id = 666;
+            if (this.submitterId) {
+                response = await Vue.http.get(`${api_endpoints.submitter_profile}?submitter_id=${this.submitterId}`);
+            } else {
+                response = await Vue.http.get(api_endpoints.profile);
+            }
+            this.profile = Object.assign(response.body);
+            if (this.profile.residential_address == null){ this.profile.residential_address = Object.assign({country:'AU'}); }
+            if (this.profile.postal_address == null){ this.profile.postal_address = Object.assign({}); }
+            if (this.profile.dob) { this.profile.dob = moment(this.profile.dob).format('DD/MM/YYYY'); }
+            this.phoneNumberReadonly = this.profile.phone_number === '' || this.profile.phone_number === null || this.profile.phone_number === 0 ?  false : true;
+            this.mobileNumberReadonly = this.profile.mobile_number === '' || this.profile.mobile_number === null || this.profile.mobile_number === 0 ?  false : true;
 
         },
     },
@@ -982,13 +962,9 @@ export default {
             }
             else{
                 next(vm => {
-                    //vm.profile = response.body
-                    //if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
-
                     vm.profile = Object.assign(response.body);
                     if (vm.profile.residential_address == null){ vm.profile.residential_address = Object.assign({country: 'AU'}); }
-
-                    if ( vm.profile.leaseslicensing_organisations && vm.profile.leaseslicensing_organisations.length > 0 ) { vm.managesOrg = 'Yes' }
+                    if (vm.profile.postal_address == null){ vm.profile.postal_address = Object.assign({}); }
                 });
             }
         },(error) => {
@@ -996,17 +972,24 @@ export default {
         })
     },
 
-    mounted: function(){
+    mounted: async function(){
         this.fetchCountries();
         this.fetchOrgRequestList();
-        this.fetchProfile(); //beforeRouteEnter doesn't work when loading this component in Application.vue so adding an extra method to get profile details.
+        await this.fetchProfile(); //beforeRouteEnter doesn't work when loading this component in Application.vue so adding an extra method to get profile details.
+        await this.$nextTick(() => {
+            this.$emit('profile-fetched', this.profile);
+            this.addEventListeners();
+        });
         this.personal_form = document.forms.personal_form;
         $('.panelClicker[data-toggle="collapse"]').on('click', function () {
             var chev = $(this).children()[0];
             window.setTimeout(function () {
                 $(chev).toggleClass("glyphicon-chevron-down glyphicon-chevron-up");
             },100);
-        }); 
+        });
+        // read in storedSilentElector
+        //if (this.storedSilentElector !== null) {
+        this.silentElector = this.storedSilentElector;
     }
 }
 </script>
@@ -1031,5 +1014,34 @@ export default {
     background: white;
     cursor: inherit;
     display: block;
+}
+.mb-3 {
+    margin-bottom: 1em !important;
+}
+.ml-1 {
+    margin-left: 1em !important;
+}
+.electoral-label {
+    margin-bottom: 25px !important;
+}
+.label-right {
+    float: right;
+    text-align: left;
+    /*margin-right: 50%;*/
+}
+/*
+input[type=checkbox] {
+    transform: scale(0.4, 0.4);
+    float: left;
+}
+*/
+/*
+input[type=checkbox] {
+}
+*/
+.address-box {
+    border: 1px solid;
+    border-color: #DCDCDC;
+    padding: 15px;
 }
 </style>

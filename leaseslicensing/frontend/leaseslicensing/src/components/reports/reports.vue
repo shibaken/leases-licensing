@@ -262,6 +262,7 @@ export default {
                 districts:[]
             },
             oracle_override: false,
+            payment_system_id: '',
         };
     },
     watch:{
@@ -280,6 +281,10 @@ export default {
         }
     },
     methods:{
+        fetchPaymentSystemId: async function(){
+            const res = await this.$http.get(api_endpoints.payment_system_id)
+            this.payment_system_id = res.body.payment_system_id
+        },
         addEventListeners:function () {
             let vm = this;
             vm.form = $('#payments-form');
@@ -314,21 +319,21 @@ export default {
         },
         runOracleJob(){
             let vm = this;
-            
+
             if (vm.oracle_form.valid()){
                 let data = vm.oracleDatePicker.data("DateTimePicker").date().format('DD/MM/YYYY');
                 let override = vm.oracle_override ? 'true': 'false';
                 vm.$http.get('/api/oracle_job?date='+data+'&override='+override).then((response) => {
                     swal({
                         type: 'success',
-                        title: 'Job Success', 
-                        text: 'The oracle job was completed successfully', 
+                        title: 'Job Success',
+                        text: 'The oracle job was completed successfully',
                     })
                 },(error) => {
                     swal({
                         type: 'error',
-                        title: 'Oracle Job Error', 
-                        text: helpers.apiVueResourceError(error), 
+                        title: 'Oracle Job Error',
+                        text: helpers.apiVueResourceError(error),
                     })
                 })
             }
@@ -337,15 +342,18 @@ export default {
             let vm = this;
 
             if (vm.booking_settlements_form.valid()){
-                let data = vm.bookingSettlementsDatePicker.data("DateTimePicker").date().format('DD/MM/YYYY');
-                var url = '/api/reports/booking_settlements?date='+data; 
+                let data = vm.bookingSettlementsDatePicker.data("DateTimePicker").date()
+                console.log('=== data ===');
+                console.log(data);
+                data = data.format('DD/MM/YYYY');
+                var url = '/api/reports/booking_settlements?date='+data;
                 window.location.assign(url);
                 /*vm.$http.get(url).then((response) => {
                 },(error) => {
                     swal({
                         type: 'error',
-                        title: 'BPOINT Settlement Report Error', 
-                        text: helpers.apiVueResourceError(error), 
+                        title: 'BPOINT Settlement Report Error',
+                        text: helpers.apiVueResourceError(error),
                     })
                 })*/
             }
@@ -355,14 +363,14 @@ export default {
 
             if (vm.bookings_form.valid()){
                 let data = vm.bookingsDatePicker.data("DateTimePicker").date().format('DD/MM/YYYY');
-                var url = '/api/reports/bookings?date='+data; 
+                var url = '/api/reports/bookings?date='+data;
                 window.location.assign(url);
                 /*vm.$http.get(url).then((response) => {
                 },(error) => {
                     swal({
                         type: 'error',
-                        title: 'BPOINT Settlement Report Error', 
-                        text: helpers.apiVueResourceError(error), 
+                        title: 'BPOINT Settlement Report Error',
+                        text: helpers.apiVueResourceError(error),
                     })
                 })*/
             }
@@ -388,10 +396,11 @@ export default {
             }
         },
         generateValues:function () {
+            console.log('generateValues');
             let vm = this;
             if(vm.form.valid()){
                 var values = {
-                    "system":"S557",
+                    "system": vm.payment_system_id,
                     "start":(vm.region) ? vm.flatDateStartPicker.data("DateTimePicker").date().set({hour:0,minute:0,second:0,millisecond:0}).format('YYYY-MM-DD H:mm:ss'):vm.accountsDateStartPicker.data("DateTimePicker").date().set({hour:0,minute:0,second:0,millisecond:0}).format('YYYY-MM-DD H:mm:ss'),
                     "end":(vm.region) ? vm.flatDateEndPicker.data("DateTimePicker").date().set({hour:23,minute:59,second:59,millisecond:0}).format('YYYY-MM-DD H:mm:ss'):vm.accountsDateEndPicker.data("DateTimePicker").date().set({hour:23,minute:59,second:59,millisecond:0}).format('YYYY-MM-DD H:mm:ss'),
                     "banked_start":vm.flatDateStartPicker.data("DateTimePicker").date().set({hour:0,minute:0,second:0,millisecond:0}).format('YYYY-MM-DD H:mm:ss'),
@@ -408,6 +417,7 @@ export default {
             return false;
         },
         generateByAccount:function () {
+            console.log('generateByAccount');
             let vm = this;
             var values = vm.generateValues();
             if (values) {
@@ -432,6 +442,7 @@ export default {
 
         },
         getReport:function (values) {
+            console.log('getReport');
             let vm = this;
             //var url = "/ledger/payments/api/report?"+$.param(values);
             var url = "/ledger/payments/api/report?"+$.param(values);
@@ -523,7 +534,7 @@ export default {
             });
             vm.oracle_form.validate({
                 rules: {
-                    oracle_date:'required', 
+                    oracle_date:'required',
                 },
                 messages: {
                     oracle_date: "Field is required",
@@ -552,7 +563,7 @@ export default {
             });
             vm.booking_settlements_form.validate({
                 rules: {
-                    booking_settlement_date:'required', 
+                    booking_settlement_date:'required',
                 },
                 messages: {
                     booking_settlement_date: "Field is required",
@@ -581,7 +592,7 @@ export default {
             });
             vm.bookings_form.validate({
                 rules: {
-                    bookings_date:'required', 
+                    bookings_date:'required',
                 },
                 messages: {
                     bookings_date: "Field is required",
@@ -610,7 +621,10 @@ export default {
             });
         },
     },
-    mounted:function () {
+    created: async function(){
+        await this.fetchPaymentSystemId();
+    },
+    mounted: function () {
         let vm = this;
         vm.addEventListeners();
     }

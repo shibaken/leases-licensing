@@ -13,6 +13,7 @@ def belongs_to(user, group_name):
     :param group_name:
     :return:
     """
+    #import ipdb; ipdb.set_trace()
     belongs_to_value = cache.get('User-belongs_to'+str(user.id)+'group_name:'+group_name)
     if belongs_to_value:
         print ('From Cache - User-belongs_to'+str(user.id)+'group_name:'+group_name)
@@ -36,6 +37,7 @@ def is_leaseslicensing_admin(request):
     return request.user.is_authenticated and is_model_backend(request) and in_dbca_domain(request) and (belongs_to(request.user, settings.ADMIN_GROUP))
 
 def in_dbca_domain(request):
+    #import ipdb; ipdb.set_trace()
     user = request.user
     domain = user.email.split('@')[1]
     if domain in settings.DEPT_DOMAINS:

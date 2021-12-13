@@ -68,6 +68,7 @@ api_patterns = [
     url(r'^api/compliance_amendment_reason_choices',compliances_api.ComplianceAmendmentReasonChoicesView.as_view(),name='amendment_request_reason_choices'),
     url(r'^api/search_keywords',proposal_api.SearchKeywordsView.as_view(),name='search_keywords'),
     url(r'^api/search_reference',proposal_api.SearchReferenceView.as_view(),name='search_reference'),
+    #url(r'^api/applicants_dict$', proposal_api.GetApplicantsDict.as_view(), name='get-applicants-dict'),
 
     #url(r'^api/oracle_job$',main_api.OracleJob.as_view(), name='get-oracle'),
 
@@ -97,6 +98,12 @@ urlpatterns = [
     url(r'^mgt-commands/$', views.ManagementCommandsView.as_view(), name='mgt-commands'),
     #url(r'test-emails/$', proposal_views.TestEmailView.as_view(), name='test-emails'),
     url(r'^proposal/$', proposal_views.ProposalView.as_view(), name='proposal'),
+    url(r'^api/application_types$', proposal_api.GetApplicationTypeDescriptions.as_view(), name='get-application-type-descriptions'),
+    url(r'^api/application_types_dict$', proposal_api.GetApplicationTypeDict.as_view(), name='get-application-type-dict'),
+    url(r'^api/application_statuses_dict$', proposal_api.GetApplicationStatusesDict.as_view(), name='get-application-statuses-dict'),
+    url(r'^api/approval_types_dict$', approval_api.GetApprovalTypeDict.as_view(), name='get-approval-type-dict'),
+    url(r'^api/approval_statuses_dict$', approval_api.GetApprovalStatusesDict.as_view(), name='get-approval-statuses-dict'),
+    url(r'^api/compliance_statuses_dict$', compliances_api.GetComplianceStatusesDict.as_view(), name='get-compliance-statuses-dict'),
     #url(r'^preview/licence-pdf/(?P<proposal_pk>\d+)',proposal_views.PreviewLicencePDFView.as_view(), name='preview_licence_pdf'),
 
     ## payment related urls

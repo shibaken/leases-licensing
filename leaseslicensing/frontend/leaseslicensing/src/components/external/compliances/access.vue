@@ -2,36 +2,32 @@
 <div class="container" id="externalCompliance">
     <div v-if="isDiscarded" class="row" style="color:red;">
         <h3>You cannot access this Compliance with requirements as this has been discarded.</h3>
-        
     </div>
     <div v-else class="row">
         <div v-if="!isFinalised">
             <div v-if="hasAmendmentRequest" class="row" style="color:red;">
                 <div class="col-lg-12 pull-right">
                   <div class="panel panel-default">
-                    <div class="panel-heading">
-
+                      <div class="panel-heading">
                         <h3 class="panel-title" style="color:red;">An amendment has been requested for this Compliance with Requirements
-                          <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
+                            <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
                                 <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                             </a>
                         </h3>
                       </div>
                       <div class="panel-body collapse in" :id="oBody">
-                        <div v-for="a in amendment_request">
+                        <div v-for="a in amendment_request">                      
                           <p>Reason: {{a.reason}}</p>
-                          <p>Details: {{a.text}}</p>
+                          <p>Details: {{a.text}}</p>                        
+                        </div>
                       </div>
-                    </div>
                   </div>
                 </div>
-              </div>
-           </div>
+            </div>
+        </div>
 
         <h3><strong>Compliance with Requirements: {{ compliance.reference }}</strong></h3>
 
-      
-        
         <div class="col-md-12">
             <div class="row">
                 <div class="panel panel-default">
@@ -42,47 +38,49 @@
                                         </a>
                         </h3>
                     </div>
-                  <div class="panel-body panel-collapse in" :id="pdBody">
+                    <div class="panel-body panel-collapse in" :id="pdBody">
                         <div class="row">
                            <div class="col-md-12"> 
                             <form class="form-horizontal" name="complianceForm" method="post">
-                                <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
-                                
+                                <alert :show.sync="showError" type="danger">
+                                    <strong>{{errorString}}</strong>
+                                </alert>
                                 <div class="row">
-                                        
-                                            <div class="form-group">
-                                             <label class="col-sm-3 control-label pull-left"  for="Name">Requirement:</label>
-                                             <div class="col-sm-6">{{compliance.requirement}}</div>
-                                            </div>
-                                   
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label pull-left"  for="Name">Requirement:</label>
+                                        <div class="col-sm-6">
+                                            {{compliance.requirement}}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="form-group">
-                                            <label class="col-sm-3 control-label pull-left"  for="Name">Details:</label>
-                                            <div class="col-sm-6">
+                                        <label class="col-sm-3 control-label pull-left"  for="Name">Details:</label>
+                                        <div class="col-sm-6">
                                             <textarea :disabled="isFinalised" class="form-control" name="detail" placeholder="" v-model="compliance.text"></textarea>
-                                            </div>
-                                        </div>                                 
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="row">
-                                        
-                                            <!--<div v-if="isFinalised && hasDocuments" class="form-group"> -->
-                                            <div v-if="hasDocuments" class="form-group">
-                                             <div class="col-sm-3 control-label pull-left" >  
-                                             <label  for="Name">Documents:</label>
-                                             </div> 
-                                             <div class="col-sm-6">
-                                                <div class="row" v-for="d in compliance.documents">
-                                                    <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]   }}</a>
-                                                    <span v-if="!isFinalisedi && d.can_delete">
-                                                        <a @click="delete_document(d)" class="fa fa-trash-o control-label" title="Remove file" style="cursor: pointer; color:red;"></a>
-                                                    </span>
-                                                    <span v-else >    <i class="fa fa-info-circle" aria-hidden="true" title="Previously submitted documents cannot be deleted" style="cursor: pointer;"></i></span>
-                                                </div>
+                                    <!--<div v-if="isFinalised && hasDocuments" class="form-group"> -->
+                                    <div v-if="hasDocuments" class="form-group">
+                                        <div class="col-sm-3 control-label pull-left" >  
+                                            <label  for="Name">Documents:</label>
+                                        </div> 
+                                        <div class="col-sm-6">
+                                            <div class="row" v-for="d in compliance.documents">
+                                                <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]   }}</a>
+                                                <span v-if="!isFinalisedi && d.can_delete">
+                                                    <a @click="delete_document(d)" class="fa fa-trash-o control-label" title="Remove file" style="cursor: pointer; color:red;"></a>
+                                                </span>
+                                                <span v-else >
+                                                    <i class="fa fa-info-circle" aria-hidden="true" title="Previously submitted documents cannot be deleted" style="cursor: pointer;"></i>
+                                                </span>
                                             </div>
-                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="row">
@@ -112,63 +110,23 @@
                                     </div>
                                 </div>
 
-                                <div v-if="compliance.participant_number_required && !isFinalised && !compliance.fee_paid">
-                                    <div class="row">
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label pull-left"  for="Name">Number of participants:</label>
-                                            <div class="col-sm-6">
-                                                <input type="text" :disabled="isFinalised" class="form-control" name="num_participants" placeholder="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!--
-                                    <div class="row">
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label pull-left"  for="Name">Number of Children:</label>
-                                            <div class="col-sm-6">
-                                                <input type="text" :disabled="isFinalised" class="form-control" name="num_children" placeholder="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label pull-left"  for="Name">Number of Concession:</label>
-                                            <div class="col-sm-6">
-                                                <input type="text" :disabled="isFinalised" class="form-control" name="num_concession" placeholder="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label pull-left"  for="Name">Number of Free of charge:</label>
-                                            <div class="col-sm-6">
-                                                <input type="text" :disabled="isFinalised" class="form-control" name="num_free" placeholder="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    -->
-                                </div>
-
                                 <div class="row">
-                                    <div class="">
-                                    <div class="pull-right">
-                                        <button v-if="compliance.participant_number_required && !isFinalised && !compliance.fee_paid" @click.prevent="pay_and_submit()" class="btn btn-primary">Pay and Submit</button>
-                                        <button v-else-if="!isFinalised" @click.prevent="submit()" class="btn btn-primary">Submit</button>
-                                        <button v-if="!isFinalised" @click.prevent="close()" class="btn btn-primary">Close</button>
+                                    <div class="form-group">
+                                        <div class="col-lg-2 pull-right">
+                                            <button v-if="!isFinalised" @click.prevent="submit()" class="btn btn-primary">Submit</button>
+                                            <button v-if="!isFinalised" @click.prevent="close()" class="btn btn-primary">Close</button>
+                                        </div>
                                     </div>
-                                   
                                 </div>
-                                </div>
-
                             </form>
-                            </div>
+                           </div>
                         </div>
                     </div> 
                 </div>
             </div>
         </div>
     </div>
-
+</div>
 </template>
 <script>
 import $ from 'jquery'
@@ -240,21 +198,7 @@ export default {
     isDiscarded: function(){         
         return this.compliance && (this.compliance.customer_status == "Discarded");
     },
-    csrf_token: function() {
-      return helpers.getCookie('csrftoken')
-    },
-    compliance_fee_url: function() {
-      return (this.compliance) ? `/compliance_fee/${this.compliance.id}/` : '';
-    },
-    application_type_tclass: function(){
-      return api_endpoints.t_class;
-    },
-    application_type_filming: function(){
-      return api_endpoints.filming;
-    },
-    application_type_event: function(){
-      return api_endpoints.event;
-    }
+    
   },
   methods: {
     uploadFile(target,file_obj){
@@ -396,130 +340,6 @@ export default {
                     vm.addingCompliance = false;
                     vm.errorString = helpers.apiVueResourceError(error);
                 });     
-    },
-
-    pay_and_submit:function(){
-        let vm = this;
-        if($(vm.form).valid()){
-            vm.errors = false;
-            let data = new FormData(vm.form);
-            vm.addingComms = true;            
-
-            swal({
-                title: vm.submit_text() + " Compliance",
-                text: "Are you sure you want to " + vm.submit_text().toLowerCase()+ " this requirement?",
-                type: "question",
-                showCancelButton: true,
-                confirmButtonText: vm.submit_text()
-            }).then(() => {
- 
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/submit'),data,{
-                    emulateJSON:true
-                    }).then((response)=>{
-                        vm.addingCompliance = false;
-                        vm.refreshFromResponse(response);                   
-                        vm.compliance = response.body;
-
-                        /* after the above save, redirect to the Django post() method in ApplicationFeeView */
-                        vm.post_and_redirect(vm.compliance_fee_url, {'csrfmiddlewaretoken' : vm.csrf_token});
-                            
-                    },(error)=>{
-                        vm.errors = true;
-                        vm.addingCompliance = false;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                    });     
-            })
-        }
-    },
-
-    post_and_redirect: function(url, postData) {
-        /* http.post and ajax do not allow redirect from Django View (post method), 
-           this function allows redirect by mimicking a form submit.
-
-           usage:  vm.post_and_redirect(vm.application_fee_url, {'csrfmiddlewaretoken' : vm.csrf_token});
-        */
-        var postFormStr = "<form method='POST' action='" + url + "'>";
-
-        for (var key in postData) {
-            if (postData.hasOwnProperty(key)) {
-                postFormStr += "<input type='hidden' name='" + key + "' value='" + postData[key] + "'>";
-            }
-        }
-        postFormStr += "</form>";
-        var formElement = $(postFormStr);
-        $('body').append(formElement);
-        $(formElement).submit();
-    },
-
-
-    _sendData: function(){
-        let vm = this;
-        //let formData = vm.set_formData()
-        vm.errors = false;
-        let data = new FormData(vm.form);
-        vm.addingComms = true;            
-
-        /*
-        var missing_data= vm.can_submit();
-        if(missing_data!=true){
-          swal({
-            title: "Please fix following errors before submitting",
-            text: missing_data,
-            type:'error'
-          })
-          //vm.paySubmitting=false;
-          return false;
-        }
-        */
-
-        // remove the confirm prompt when navigating away from window (on button 'Submit' click)
-        vm.submitting = true;
-        vm.paySubmitting=true;
-
-        swal({
-            title: vm.submit_text() + " Compliance",
-            text: "Are you sure you want to " + vm.submit_text().toLowerCase()+ " this application?",
-            type: "question",
-            showCancelButton: true,
-            confirmButtonText: vm.submit_text()
-        }).then(() => {
-           
-            vm.$http.post(vm.proposal_form_url,formData).then(res=>{
-                /* after the above save, redirect to the Django post() method in ApplicationFeeView */
-                vm.post_and_redirect(vm.application_fee_url, {'csrfmiddlewaretoken' : vm.csrf_token});
-            },err=>{
-            });
-
-            // Filming has deferred payment once assessor decides whether 'Licence' (fee) or 'Lawful Authority' (no fee) is to be issued
-            // if (!vm.proposal.fee_paid || vm.proposal.application_type!='Filming') {
-            if (!vm.proposal.fee_paid && vm.proposal.application_type!=vm.application_type_filming) {
-                vm.save_and_redirect();
-
-            } else {
-                /* just save and submit - no payment required (probably application was pushed back by assessor for amendment */
-                vm.save_wo_confirm()
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,vm.proposal.id+'/submit'),formData).then(res=>{
-                    vm.proposal = res.body;
-                    vm.$router.push({
-                        name: 'submit_proposal',
-                        params: { proposal: vm.proposal}
-                    });
-                },err=>{
-                    swal(
-                        'Submit Error',
-                        helpers.apiVueResourceError(err),
-                        'error'
-                    )
-                });
-            }
-        },(error) => {
-          vm.paySubmitting=false;
-        });
-        //vm.paySubmitting=false;
-    },
-
-    submit_text: function() {
-      return 'Pay and Submit';
     },
 
     refreshFromResponse:function(response){

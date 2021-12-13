@@ -1,62 +1,86 @@
 <template>
-<div class="container" id="internalDash">
-    <ProposalDashTable level="internal" :url="proposals_url"/>
-    <ReferralDashTable :url="referrals_url"/>
-    <QAOfficerDashTable v-if="is_qaofficer" level="internal" :url="qaofficer_url"/>
-    <DistrictProposalDashTable level="internal" :url="district_proposals_url"/>
-
-</div>
+    <div class="container" id="externalDash">
+        <FormSection :formCollapse="false" label="Applications" Index="applications">
+            <ApplicationsTable
+                level="internal"
+            />
+        </FormSection>
+        <!--
+        <FormSection :formCollapse="false" label="Waiting List" Index="waiting_list">
+            <WaitingListTable
+                level="external"
+            />
+        </FormSection>
+        <FormSection :formCollapse="false" label="Licences and Permits" Index="licences_and_permits">
+            <LicencesAndPermitsTable
+                level="external"
+            />
+        </FormSection>
+        <FormSection :formCollapse="false" label="Compliances" Index="compliances">
+            <CompliancesTable
+                level="external"
+            />
+        </FormSection>
+        <FormSection :formCollapse="false" label="Authorised User Applications for my Endorsement" Index="authorised_user_applications_for_my_endorsement">
+            <AuthorisedUserApplicationsTable
+                level="external"
+            />
+        </FormSection>
+        -->
+    </div>
 </template>
-<script>
-import ProposalDashTable from '@common-utils/proposals_dashboard.vue'
-import ReferralDashTable from '@common-utils/referrals_dashboard.vue'
-import QAOfficerDashTable from '@common-utils/qaofficer_dashboard.vue'
-import DistrictProposalDashTable from '@common-utils/district_proposals_dashboard.vue'
 
-import {
-  api_endpoints,
-  helpers
-}
-from '@/utils/hooks'
+<script>
+import datatable from '@/utils/vue/datatable.vue'
+import FormSection from "@/components/forms/section_toggle.vue"
+import ApplicationsTable from "@/components/common/table_proposals"
+//import WaitingListTable from "@/components/common/table_approval_waiting_list"
+//import LicencesAndPermitsTable from "@/components/common/table_approval_licences_and_permits"
+//import CompliancesTable from "@/components/common/table_compliances"
+//import AuthorisedUserApplicationsTable from "@/components/common/table_approval_to_be_endorsed"
+import { api_endpoints, helpers } from '@/utils/hooks'
+
 export default {
-    name: 'ExternalDashboard',
+    name: 'InternalDashboard',
     data() {
         let vm = this;
         return {
-            proposals_url: api_endpoints.proposals_paginated_internal,
-            referrals_url: api_endpoints.referrals_paginated_internal,
-            qaofficer_url: api_endpoints.qaofficer_paginated_internal,
-            district_proposals_url: api_endpoints.district_proposals_paginated_internal,
-            is_qaofficer: false,
+            empty_list: '/api/empty_list',
+            //proposals_url: helpers.add_endpoint_json(api_endpoints.proposals,'user_list'),
+            //approvals_url: helpers.add_endpoint_json(api_endpoints.approvals,'user_list'),
+            //compliances_url: helpers.add_endpoint_json(api_endpoints.compliances,'user_list'),
+
+            proposals_url: api_endpoints.proposals_paginated_external,
+            approvals_url: api_endpoints.approvals_paginated_external,
+            compliances_url: api_endpoints.compliances_paginated_external,
+
+            system_name: api_endpoints.system_name,
         }
-    
     },
-    watch: {},
-    components: {
-        ProposalDashTable,
-        ReferralDashTable,
-        QAOfficerDashTable,
-        DistrictProposalDashTable
+    components:{
+        FormSection,
+        ApplicationsTable,
+        //WaitingListTable,
+        //LicencesAndPermitsTable,
+        //CompliancesTable,
+        //AuthorisedUserApplicationsTable,
+    },
+    watch: {
+
     },
     computed: {
-        dashboard_url: function(){
-            return '/api/proposal_paginated/qaofficer_info/'
+        is_external: function() {
+            return this.level == 'external'
         },
+
     },
     methods: {
-        check_qaofficer_membership: function(){
-            let vm = this;
-
-            //vm.$http.get(api_endpoints.filter_list).then((response) => {
-            vm.$http.get(vm.dashboard_url).then((response) => {
-                vm.is_qaofficer = response.body.data['QA_Officer'];
-            },(error) => {
-                console.log(error);
-            })
-        },
     },
     mounted: function () {
-        this.check_qaofficer_membership();
-    }
+
+    },
+    created: function() {
+
+    },
 }
 </script>
