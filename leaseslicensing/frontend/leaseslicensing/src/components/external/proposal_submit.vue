@@ -10,7 +10,7 @@
                         
                       </div>
                       <div v-else>
-                        <strong>Your application for a commercial operations licence has been successfully submitted.</strong>
+                        <strong>Your application for a ............... has been successfully submitted.</strong>
                         <br/>
                       </div>
                         <!-- <strong>Your application for a commercial operations licence has been successfully submitted.</strong>

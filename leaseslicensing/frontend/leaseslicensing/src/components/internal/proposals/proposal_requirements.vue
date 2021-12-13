@@ -1,26 +1,25 @@
 <template id="proposal_requirements">
-    <div class="col-md-12">
-        <div class="row">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Requirements
-                        <a class="panelClicker" :href="'#'+panelBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="panelBody">
-                            <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                        </a>
-                        <small v-if="proposal.application_type==application_type_filming"><br>Only add requirements that are additional to the general conditions in the Commercial Filming Handbook <a :href="commercial_filming_handbook" target="_blank">here</a>. Please ensure each condition added references a specific park or district and is written in a format consistent with the handbook.</small>
-                    </h3>
-                </div>
-                <div class="panel-body panel-collapse collapse in" :id="panelBody">
-                    <form class="form-horizontal" action="index.html" method="post">
-                        <div class="col-sm-12">
-                            <button v-if="hasAssessorMode || hasReferralMode || hasDistrictAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Requirement</button>
-                        </div>
-                        <datatable ref="requirements_datatable" :id="'requirements-datatable-'+_uid" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
-                    </form>
-                </div>
-            </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Conditions
+                <a class="panelClicker" :href="'#'+panelBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="panelBody">
+                    <span class="glyphicon glyphicon-chevron-down pull-right "></span>
+                </a>
+            </h3>
         </div>
-        <RequirementDetail ref="requirement_detail" :proposal_id="proposal.id" :requirements="requirements" :hasReferralMode="hasReferralMode" :referral_group="referral_group" :hasDistrictAssessorMode="hasDistrictAssessorMode" :district_proposal="district_proposal" :district="district"/>
+        <div class="panel-body panel-collapse collapse in" :id="panelBody">
+            <form class="form-horizontal" action="index.html" method="post">
+                <div class="col-sm-12">
+                    <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Condition</button>
+                </div>
+                <datatable ref="requirements_datatable" :id="'requirements-datatable-'+_uid" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
+            </form>
+        </div>
+        <RequirementDetail
+            ref="requirement_detail"
+            :proposal_id="proposal.id"
+            :requirements="requirements"
+        />
     </div>
 </template>
 <script>
@@ -30,41 +29,19 @@ import {
 }
 from '@/utils/hooks'
 import datatable from '@vue-utils/datatable.vue'
-import RequirementDetail from './proposal_add_requirement.vue'
+import RequirementDetail from '@/components/internal/proposals/proposal_add_requirement.vue'
+
 export default {
     name: 'InternalProposalRequirements',
     props: {
-        proposal: Object,
-        hasReferralMode:{
-            type:Boolean,
-            default: false
-        },
-        hasDistrictAssessorMode:{
-            type:Boolean,
-            default: false
-        },
-        referral_group:{
-            type:Number,
-            default: null
-        },
-        district_proposal:{
-            type:Number,
-            default: null
-
-        },
-        district:{
-            type:Number,
-            default: null
-
-        }
+        proposal: Object
     },
     data: function() {
         let vm = this;
         return {
-            global_settings:[],
             panelBody: "proposal-requirements-"+vm._uid,
             requirements: [],
-            requirement_headers:["Requirement","Due Date","Recurrence","Action","Order","Documents"],
+            requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
             requirement_options:{
                 autoWidth: false,
                 language: {
@@ -72,34 +49,18 @@ export default {
                 },
                 responsive: true,
                 ajax: {
-                    "url": helpers.add_endpoint_json(api_endpoints.proposals,vm.proposal.id+'/requirements'),
+                    "url": helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id+'/requirements'),
                     "dataSrc": ''
                 },
                 order: [],
                 dom: 'lBfrtip',
-                // buttons:[
-                // 'excel', 'csv', ], //'copy'
                 buttons:[
-                {
-                    extend: 'excelHtml5',
-                    text:"Excel",
-                    exportOptions:{
-                        orthogonal:'export'
-                    }
-                },
-                {
-                    extend: 'csv',
-                    text:"CSV",
-                    exportOptions:{
-                        orthogonal:'export'
-                    }
-                }
-                ], //'copy'
+                'excel', 'csv', ], //'copy'
                 columns: [
                     {
                         data: "requirement",
                         //orderable: false,
-                        'render': function (value, type) {
+                        'render': function (value) {
                             var ellipsis = '...',
                                 truncated = _.truncate(value, {
                                     length: 25,
@@ -121,17 +82,9 @@ export default {
                                 });
                             }
 
-                            //return result;
-                            return type=='export' ? value : result;
+                            return result;
                         },
                         'createdCell': helpers.dtPopoverCellFn,
-
-                        /*'createdCell': function (cell) {
-                            //TODO why this is not working?
-                            // the call to popover is done in the 'draw' event
-                            $(cell).popover();
-                        }*/
-
                     },
                     {
                         data: "due_date",
@@ -160,6 +113,7 @@ export default {
                         orderable: false
                     },
                     {
+                        data: "id",
                         mRender:function (data,type,full) {
                             let links = '';
                             if (vm.proposal.assessor_mode.has_assessor_mode){
@@ -170,29 +124,12 @@ export default {
                                 //links +=  `<a href='#' class="editRequirement" data-id="${full.id}">Edit</a><br/>`;
                                 links +=  `<a href='#' class="deleteRequirement" data-id="${full.id}">Delete</a><br/>`;
                             }
-                            else if(vm.hasReferralMode && full.can_referral_edit){
-                                    if(full.copied_from==null)
-                                {
-                                    links +=  `<a href='#' class="editRequirement" data-id="${full.id}">Edit</a><br/>`;
-                                }
-                                //links +=  `<a href='#' class="editRequirement" data-id="${full.id}">Edit</a><br/>`;
-                                links +=  `<a href='#' class="deleteRequirement" data-id="${full.id}">Delete</a><br/>`;
-                            }
-                            else{
-                                if(vm.hasDistrictAssessorMode && full.can_district_assessor_edit){
-                                    if(full.copied_from==null)
-                                {
-                                    links +=  `<a href='#' class="editRequirement" data-id="${full.id}">Edit</a><br/>`;
-                                }
-                                //links +=  `<a href='#' class="editRequirement" data-id="${full.id}">Edit</a><br/>`;
-                                links +=  `<a href='#' class="deleteRequirement" data-id="${full.id}">Delete</a><br/>`;
-                                }
-                            }
                             return links;
                         },
                         orderable: false
                     },
                     {
+                        data: "id",
                         mRender:function (data,type,full) {
                             let links = '';
                             // TODO check permission to change the order
@@ -200,31 +137,10 @@ export default {
                                 links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="fa fa-angle-up fa-2x"></i></a><br/>`;
                                 links +=  `<a class="dtMoveDown" data-id="${full.id}" href='#'><i class="fa fa-angle-down fa-2x"></i></a><br/>`;
                             }
-                            else{
-                                if(vm.hasReferralMode && full.can_referral_edit){
-                                    links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="fa fa-angle-up fa-2x"></i></a><br/>`;
-                                    links +=  `<a class="dtMoveDown" data-id="${full.id}" href='#'><i class="fa fa-angle-down fa-2x"></i></a><br/>`;
-                                }
-                                else if(vm.hasDistrictAssessorMode && full.can_district_assessor_edit){
-                                    links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="fa fa-angle-up fa-2x"></i></a><br/>`;
-                                    links +=  `<a class="dtMoveDown" data-id="${full.id}" href='#'><i class="fa fa-angle-down fa-2x"></i></a><br/>`;
-                                }
-                            }
                             return links;
                         },
                         orderable: false
-                    },
-                    {
-                        data: 'requirement_documents',
-                        mRender:function (data,type,full) {
-                            let links = '';
-                            _.forEach(data, function (doc) {
-                                links += '<a href="' + doc._file + '" target="_blank"><p>' + doc.name+ '</p></a><br>';
-                            });
-                            return links;
-                        }
-                    },
-
+                    }
                 ],
                 processing: true,
                 rowCallback: function ( row, data, index) {
@@ -246,7 +162,7 @@ export default {
                     $('.dtMoveUp').click(vm.moveUp);
                     $('.dtMoveDown').click(vm.moveDown);
                 },
-                preDrawCallback: function (settings) {
+                 preDrawCallback: function (settings) {
                     vm.setApplicationWorkflowState(true)
                     //vm.$emit('refreshRequirements',true);
                 }
@@ -258,7 +174,6 @@ export default {
             // reload the table
             this.updatedRequirements();
         }
-
     },
     components:{
         datatable,
@@ -267,43 +182,10 @@ export default {
     computed:{
         hasAssessorMode(){
             return this.proposal.assessor_mode.has_assessor_mode;
-        },
-        commercial_filming_handbook: function(){
-                let vm=this;
-                if(vm.global_settings){
-                    for(var i=0; i<vm.global_settings.length; i++){
-                        if(vm.global_settings[i].key=='commercial_filming_handbook'){
-                            return vm.global_settings[i].value;
-                        }
-                    }
-                }
-                return '';
-        },
-        application_type_tclass: function(){
-          return api_endpoints.t_class;
-        },
-        application_type_filming: function(){
-          return api_endpoints.filming;
-        },
-        application_type_event: function(){
-          return api_endpoints.event;
         }
-
     },
     methods:{
-        fetchGlobalSettings: function(){
-                let vm = this;
-                vm.$http.get('/api/global_settings.json').then((response) => {
-                    vm.global_settings = response.body;
-                    
-                },(error) => {
-                    console.log(error);
-                } );
-            },
         addRequirement(){
-            this.$refs.requirement_detail.requirement.referral_group=this.referral_group;
-            this.$refs.requirement_detail.requirement.district_proposal=this.district_proposal;
-            this.$refs.requirement_detail.requirement.district=this.district;
             this.$refs.requirement_detail.isModalOpen = true;
         },
         removeRequirement(_id){
@@ -334,9 +216,12 @@ export default {
             });
         },
         fetchRequirements(){
+            console.log('fetchRequirements')
             let vm = this;
-            
-            vm.$http.get(api_endpoints.proposal_standard_requirements).then((response) => {
+            let url = api_endpoints.proposal_standard_requirements
+            //let url = api_endpoints.proposal_requirements
+            console.log('url: ' + url)
+            vm.$http.get(url, {params: {'application_type_code': vm.proposal.application_type_code}}).then((response) => {
                 vm.requirements = response.body
             },(error) => {
                 console.log(error);
@@ -347,10 +232,6 @@ export default {
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id)).then((response) => {
                 this.$refs.requirement_detail.requirement = response.body;
                 this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
-                this.$refs.requirement_detail.requirement.referral_group=response.body.referral_group;
-                this.$refs.requirement_detail.requirement.district_proposal=response.body.district_proposal;
-                this.$refs.requirement_detail.requirement.district=response.body.district;
-                this.$refs.requirement_detail.requirement.requirement_documents=response.body.requirement_documents;
                 response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
                 this.addRequirement();
             },(error) => {
@@ -378,7 +259,7 @@ export default {
             this.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,req+'/'+movement)).then((response) => {
             },(error) => {
                 console.log(error);
-                
+
             })
         },
         moveUp(e) {
@@ -424,11 +305,11 @@ export default {
             //console.log('child', bool);
             vm.$emit('refreshRequirements',bool);
         }
+
     },
     mounted: function(){
         let vm = this;
         this.fetchRequirements();
-        vm.fetchGlobalSettings();
         vm.$nextTick(() => {
             this.eventListeners();
         });

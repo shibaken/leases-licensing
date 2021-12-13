@@ -41,7 +41,7 @@
 //import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
-import {helpers,api_endpoints} from "@/utils/hooks.js"
+import { helpers, api_endpoints, constants } from "@/utils/hooks.js"
 export default {
     name:'Decline-Proposal',
     components:{
@@ -49,14 +49,14 @@ export default {
         alert
     },
     props:{
-            proposal_id:{
-                type:Number,
-                required: true
-            },
-            processing_status:{
-                type:String,
-                required: true
-            },
+        proposal: {
+            type: Object,
+            default: null,
+        },
+        processing_status:{
+            type:String,
+            required: true
+        },
     },
     data:function () {
         let vm = this;
@@ -79,7 +79,20 @@ export default {
         },
         title: function(){
             return this.processing_status == 'With Approver' ? 'Decline': 'Proposed Decline';
-        }
+        },
+        callFinalDecline: function() {
+            let callFinalDecline = false
+            if (this.processing_status === constants.WITH_APPROVER){
+                callFinalDecline = true
+            }
+            if ([constants.WL_PROPOSAL, constants.AA_PROPOSAL].includes(this.proposal.application_type_dict.code)){
+                if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_REQUIREMENTS].includes(this.processing_status)){
+                    // For the WLA or AAA, assessor can final decline
+                    callFinalDecline = true
+                }
+            }
+            return callFinalDecline
+        },
     },
     methods:{
         ok:function () {
@@ -108,12 +121,26 @@ export default {
 
         },
         sendData:function(){
+            console.log('in sendData')
             let vm = this;
             vm.errors = false;
             let decline = JSON.parse(JSON.stringify(vm.decline));
             vm.decliningProposal = true;
-            if (vm.processing_status != 'With Approver'){
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,vm.proposal_id+'/proposed_decline'),JSON.stringify(decline),{
+            //if (vm.processing_status != 'With Approver'){
+            if (vm.callFinalDecline){
+                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id + '/final_decline'), JSON.stringify(decline), {
+                        emulateJSON:true,
+                    }).then((response)=>{
+                        vm.decliningProposal = false;
+                        vm.close();
+                        vm.$emit('refreshFromResponse',response);
+                    },(error)=>{
+                        vm.errors = true;
+                        vm.decliningProposal = false;
+                        vm.errorString = helpers.apiVueResourceError(error);
+                    });
+            } else {
+                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id + '/proposed_decline'), JSON.stringify(decline), {
                         emulateJSON:true,
                     }).then((response)=>{
                         vm.decliningProposal = false;
@@ -126,25 +153,12 @@ export default {
                         vm.errorString = helpers.apiVueResourceError(error);
                     });
             }
-            else{
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,vm.proposal_id+'/final_decline'),JSON.stringify(decline),{
-                        emulateJSON:true,
-                    }).then((response)=>{
-                        vm.decliningProposal = false;
-                        vm.close();
-                        vm.$emit('refreshFromResponse',response);
-                    },(error)=>{
-                        vm.errors = true;
-                        vm.decliningProposal = false;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                    });
-            }
         },
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
                 rules: {
-                    reason:"required",
+               //     reason:"required",
                 },
                 messages: {
                     arrival:"field is required",

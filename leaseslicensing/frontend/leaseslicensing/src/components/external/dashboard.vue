@@ -1,30 +1,76 @@
 <template>
-<div class="container" id="externalDash">
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="well well-sm">
-                <p>
-                    Welcome to the {{system_name}} dashboard.<br/><br/> From this page you can view existing applications, create new applications,<br/> view current licences, apply to amend a licence, check through conditions of your licence.
-                </p>
-            </div>
-        </div>
-    </div>
-    <ProposalDashTable level='external' :url='proposals_url'/>
-    <ApprovalDashTable level='external' :url='approvals_url'/>
-    <ComplianceDashTable level='external' :url='compliances_url'/>
-</div>
-</template>
-<script>
+    <div class="container" id="externalDash">
+        <FormSection 
+            :formCollapse="false" 
+            label="Applications" 
+            subtitle="- View existing applications and lodge new ones" 
+            Index="applications"
+        >
+            <ApplicationsTable
+                level="external"
+            />
+        </FormSection>
 
+        <FormSection 
+            :formCollapse="false" 
+            label="Waiting List" 
+            subtitle="- View and amend your waiting list allocation" 
+            Index="waiting_list"
+        >
+            <WaitingListTable
+                level="external"
+                :approvalTypeFilter="wlaApprovalTypeFilter"
+            />
+        </FormSection>
+
+        <FormSection 
+            :formCollapse="false" 
+            label="Licences and Permits" 
+            subtitle="- View existing licences / permits and renew them" 
+            Index="licences_and_permits"
+        >
+            <LicencesAndPermitsTable
+                level="external"
+                :approvalTypeFilter="allApprovalTypeFilter"
+            />
+        </FormSection>
+
+        <FormSection 
+            :formCollapse="false" 
+            label="Compliances" 
+            subtitle="- View submitted Compliances and submit new ones" 
+            Index="compliances"
+        >
+            <CompliancesTable
+                level="external"
+            />
+        </FormSection>
+
+        <FormSection 
+            :formCollapse="false" 
+            label="Authorised User Applications for my Endorsement" 
+            subtitle="" 
+            Index="authorised_user_applications_for_my_endorsement"
+        >
+            <AuthorisedUserApplicationsTable
+                level="external"
+            />
+        </FormSection>
+    </div>
+</template>
+
+<script>
 import datatable from '@/utils/vue/datatable.vue'
-import ProposalDashTable from '@common-utils/proposals_dashboard.vue'
-import ApprovalDashTable from '@common-utils/approvals_dashboard.vue'
-import ComplianceDashTable from '@common-utils/compliances_dashboard.vue'
-import {
-  api_endpoints,
-  helpers
-}
-from '@/utils/hooks'
+import FormSection from "@/components/forms/section_toggle.vue"
+import ApplicationsTable from "@/components/common/table_proposals"
+//import WaitingListTable from "@/components/common/table_approval_waiting_list"
+import WaitingListTable from "@/components/common/table_approvals"
+//import LicencesAndPermitsTable from "@/components/common/table_approval_licences_and_permits"
+import LicencesAndPermitsTable from "@/components/common/table_approvals"
+import CompliancesTable from "@/components/common/table_compliances"
+import AuthorisedUserApplicationsTable from "@/components/common/table_approval_to_be_endorsed"
+import { api_endpoints, helpers } from '@/utils/hooks'
+
 export default {
     name: 'ExternalDashboard',
     data() {
@@ -40,19 +86,34 @@ export default {
             compliances_url: api_endpoints.compliances_paginated_external,
 
             system_name: api_endpoints.system_name,
+            allApprovalTypeFilter: ['ml', 'aap', 'aup'],
+            wlaApprovalTypeFilter: ['wla',],
         }
     },
     components:{
-        ProposalDashTable,
-        ApprovalDashTable,
-        ComplianceDashTable
+        FormSection,
+        ApplicationsTable,
+        WaitingListTable,
+        LicencesAndPermitsTable,
+        CompliancesTable,
+        AuthorisedUserApplicationsTable,
     },
-    watch: {},
+    watch: {
+
+    },
     computed: {
+        is_external: function() {
+            return this.level == 'external'
+        },
+
     },
     methods: {
     },
     mounted: function () {
-    }
+
+    },
+    created: function() {
+
+    },
 }
 </script>

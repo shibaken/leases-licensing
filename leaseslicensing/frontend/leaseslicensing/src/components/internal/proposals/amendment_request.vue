@@ -7,23 +7,48 @@
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
-                                <div class="col-sm-offset-2 col-sm-8">
-                                    <div class="form-group">
-                                        <label class="control-label pull-left"  for="Name">Reason</label>
-                                        <select class="form-control" name="reason" ref="reason" v-model="amendment.reason">
+                                <div class="form-group">
+                                    <div class="col-sm-3">
+                                        <label class="control-label pull-right"  for="reason_select">Reason</label>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <select class="form-control" id="reason_select" ref="reason" v-model="amendment.reason">
                                             <option v-for="r in reason_choices" :value="r.key">{{r.value}}</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-sm-offset-2 col-sm-8">
-                                    <div class="form-group">
-                                        <label class="control-label pull-left"  for="Name">Details</label>
-                                        <textarea class="form-control" name="name" v-model="amendment.text" id="amendment_text"></textarea>
+                                <div class="form-group">
+                                    <div class="col-sm-3">
+                                        <label class="control-label pull-right" for="amendment_text">Details</label>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <textarea class="form-control" v-model="amendment.text" id="amendment_text"></textarea>
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="row">
+                                <div class="col-sm-offset-2 col-sm-8">
+                                    <div class="form-group">
+                                        <div class="input-group date" ref="add_attachments" style="width: 70%;">
+                                            <!--FileField ref="filefield" :uploaded_documents="amendment.amendment_request_documents" :delete_url="delete_url" :proposal_id="proposal_id" isRepeatable="true" name="amendment_request_file" @refreshFromResponse="refreshFromResponse"/-->
+                                            
+                                            <!-- false for now 17 May 2021 -->
+                                            <FileField v-if="false"
+                                                ref="filefield"
+                                                :uploaded_documents="amendment.amendment_request_documents"
+                                                :delete_url="delete_url"
+                                                :proposal_id="proposal.id"
+                                                :isRepeatable="true"
+                                                name="amendment_request_file"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </form>
                 </div>
@@ -37,18 +62,28 @@
 import Vue from 'vue'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
+import FileField from '@/components/forms/filefield_immediate.vue'
 
 import {helpers, api_endpoints} from "@/utils/hooks.js"
 export default {
     name:'amendment-request',
     components:{
         modal,
-        alert
+        alert,
+        FileField,
     },
     props:{
-            proposal_id:{
-                type:Number,
-            },
+        proposal: {
+            type: Object,
+            default: null,
+        },
+        //proposal_id:{
+        //    type:Number,
+        //},
+        is_apiary_proposal:{
+            type: Boolean,
+            default: false,
+        },
     },
     data:function () {
         let vm = this;
@@ -56,10 +91,13 @@ export default {
             isModalOpen:false,
             form:null,
             amendment: {
-            reason:'',
-            reason_id: null,
-            amendingProposal: false,
-            proposal: vm.proposal_id 
+                reason:'',
+                reason_id: null,
+                amendingProposal: false,
+                proposal: vm.proposal,
+                num_files: 0,
+                input_name: 'amendment_request_doc',
+                requirement_documents: [],
             },
             reason_choices: {},
             errors: false,
@@ -71,6 +109,9 @@ export default {
         showError: function() {
             var vm = this;
             return vm.errors;
+        },
+        delete_url: function() {
+            return (this.amendment.id) ? '/api/amendment_request/'+this.amendment.id+'/delete_document/' : '';
         }
     },
     methods:{
@@ -90,92 +131,83 @@ export default {
             this.amendment = {
                 reason: '',
                 reason_id: null,
-                proposal: this.proposal_id
+                proposal_id: this.proposal.id
             };
             this.errors = false;
             $(this.$refs.reason).val(null).trigger('change');
             $('.has-error').removeClass('has-error');
-            
+
             this.validation_form.resetForm();
         },
         fetchAmendmentChoices: function(){
             let vm = this;
             vm.$http.get('/api/amendment_request_reason_choices.json').then((response) => {
                 vm.reason_choices = response.body;
-                
+
             },(error) => {
                 console.log(error);
             } );
         },
         sendData:function(){
+            console.log('in sendData')
             let vm = this;
             vm.errors = false;
-            // if(vm.amendment.text){
-            //     vm.amendment.text= vm.formatText(vm.amendment.text)
-            // }
-            // console.log(vm.amendment.text);
-            let amendment = JSON.parse(JSON.stringify(vm.amendment));
-            vm.$http.post('/api/amendment_request.json',JSON.stringify(amendment),{
-                        emulateJSON:true,
-                    }).then((response)=>{
-                        //vm.$parent.loading.splice('processing contact',1);
-                        swal(
-                             'Sent',
-                             'An email has been sent to applicant with the request to amend this Application',
-                             'success'
-                        );
-                        vm.amendingProposal = true;
-                        vm.close();
-                        //vm.$emit('refreshFromResponse',response);
-                        Vue.http.get(`/api/proposal/${vm.proposal_id}/internal_proposal.json`).then((response)=>
-                        {
-                            vm.$emit('refreshFromResponse',response, vm.documents);
-                            
-                        },(error)=>{
-                            console.log(error);
-                        });
-                        vm.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
-                     
-                    },(error)=>{
-                        console.log(error);
-                        vm.errors = true;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                        vm.amendingProposal = true;
-                        
-                    });
-                
+            //let amendment = JSON.parse(JSON.stringify(vm.amendment));
+            //let formData = new FormData()
+            //var files = vm.$refs.filefield.files;
+            //$.each(files, function (idx, v) {
+            //    var file = v['file'];
+            //    var filename = v['name'];
+            //    var name = 'file-' + idx;
+            //    formData.append(name, file, filename);
+            //});
+            //amendment.num_files = files.length;
+            //amendment.input_name = 'requirement_doc';
+            ////amendment.proposal_id = vm.proposal.id;
+            //amendment.proposal = vm.proposal
+            //amendment.update = true;
 
-        },
-        formatText: function(text){
-            let s = text.replace(/\n/g,'<br/>')
-                    s = s.replace(/[\u2018|\u2019|\u201A]/g, "\'");
-                    // smart double quotes
-                    s = s.replace(/[\u201C|\u201D|\u201E]/g, "\"");
-                    // ellipsis
-                    s = s.replace(/\u2026/g, "...");
-                    // dashes
-                    s = s.replace(/[\u2013|\u2014]/g, "-");
-                    // circumflex
-                    s = s.replace(/\u02C6/g, "^");
-                    // open angle bracket
-                    s = s.replace(/\u2039/g, "<");
-                    // close angle bracket
-                    s = s.replace(/\u203A/g, ">");
-                    // spaces
-                    s = s.replace(/[\u02DC|\u00A0]/g, " ");
-                    return s;
+            //formData.append('data', JSON.stringify(amendment));
+            // vm.$http.post('/api/amendment_request.json',JSON.stringify(amendment),{
+            //vm.$http.post('/api/amendment_request.json', formData, { emulateJSON: true, }).then(
+            console.log('vm.amendment')
+            console.log(vm.amendment)
+            vm.$http.post('/api/amendment_request.json', vm.amendment).then(
+                response => {
+                    //vm.$parent.loading.splice('processing contact',1);
+                    swal(
+                         'Sent',
+                         'An email has been sent to the applicant with the request to amend this application',
+                         'success'
+                    );
+                    vm.amendingProposal = true;
+                    vm.close();
+                    //vm.$emit('refreshFromResponse',response);
+                    Vue.http.get(`/api/proposal/${vm.proposal.id}/internal_proposal.json`).then(
+                        response => {
+                            vm.$emit('refreshFromResponse', response);
+                        }, error => {
+                            console.log(error);
+                        }
+                    );
+                    vm.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
+                }, error => {
+                    console.log(error);
+                    vm.errors = true;
+                    vm.errorString = helpers.apiVueResourceError(error);
+                    vm.amendingProposal = true;
+
+                }
+            );
         },
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
                 rules: {
                     reason: "required"
-                    
-                     
                 },
-                messages: {              
+                messages: {
                     reason: "field is required",
-                                         
                 },
                 showErrors: function(errorMap, errorList) {
                     $.each(this.validElements(), function(index, element) {
@@ -199,7 +231,7 @@ export default {
        },
        eventListerners:function () {
             let vm = this;
-            
+
             // Intialise select2
             $(vm.$refs.reason).select2({
                 "theme": "bootstrap",
@@ -216,37 +248,6 @@ export default {
                 vm.amendment.reason = selected.val();
                 vm.amendment.reason_id = selected.val();
             });
-
-            // let amendmentTextField = $('#amendment_text');
-            // amendmentTextField.on(
-            //   'paste', 
-            //   (e) => {
-            //       //console.log("plain text only");
-            //       // cancel paste
-            //       e.preventDefault();
-            //       // get text representation of clipboard
-            //       let text = (e.originalEvent || e).clipboardData.getData('text/plain');
-            //       //let transformedText = text.replace(/\n/g,'<br/>')
-            //       let s = text.replace(/\n/g,'<br/>')
-            //         s = s.replace(/[\u2018|\u2019|\u201A]/g, "\'");
-            //         // smart double quotes
-            //         s = s.replace(/[\u201C|\u201D|\u201E]/g, "\"");
-            //         // ellipsis
-            //         s = s.replace(/\u2026/g, "...");
-            //         // dashes
-            //         s = s.replace(/[\u2013|\u2014]/g, "-");
-            //         // circumflex
-            //         s = s.replace(/\u02C6/g, "^");
-            //         // open angle bracket
-            //         s = s.replace(/\u2039/g, "<");
-            //         // close angle bracket
-            //         s = s.replace(/\u203A/g, ">");
-            //         // spaces
-            //         s = s.replace(/[\u02DC|\u00A0]/g, " ");
-            //       //console.log(s)
-            //       // insert text manually
-            //       document.execCommand("insertHTML", false, s);
-            //   });
        }
    },
    mounted:function () {
@@ -254,7 +255,7 @@ export default {
        vm.form = document.forms.amendForm;
        vm.fetchAmendmentChoices();
        vm.addFormValidations();
-       this.$nextTick(()=>{  
+       this.$nextTick(()=>{
             vm.eventListerners();
         });
     //console.log(validate);

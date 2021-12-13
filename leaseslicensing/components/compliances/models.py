@@ -35,8 +35,8 @@ from ledger_api_client.ledger_models import Invoice
 import logging
 logger = logging.getLogger(__name__)
 
-#class Compliance(models.Model):
-class Compliance(RevisionedMixin):
+class Compliance(models.Model):
+#class Compliance(RevisionedMixin):
 
     PROCESSING_STATUS_CHOICES = (('due', 'Due'),
                                  ('future', 'Future'),

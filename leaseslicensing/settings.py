@@ -140,8 +140,8 @@ if DEV_STATIC and not DEV_STATIC_URL:
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
 # Department details
-SYSTEM_NAME = env('SYSTEM_NAME', 'Leases and Licensing Licensing')
-SYSTEM_NAME_SHORT = env('SYSTEM_NAME_SHORT', 'COLS')
+SYSTEM_NAME = env('SYSTEM_NAME', 'Leases and Licensing')
+SYSTEM_NAME_SHORT = env('SYSTEM_NAME_SHORT', 'LALS')
 SITE_PREFIX = env('SITE_PREFIX')
 SITE_DOMAIN = env('SITE_DOMAIN')
 SUPPORT_EMAIL = env('SUPPORT_EMAIL', 'licensing@' + SITE_DOMAIN).lower()
@@ -160,7 +160,7 @@ SITE_URL = env('SITE_URL', 'https://' + SITE_PREFIX + '.' + SITE_DOMAIN)
 PUBLIC_URL=env('PUBLIC_URL', SITE_URL)
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', 'no-reply@' + SITE_DOMAIN).lower()
 MEDIA_APP_DIR = env('MEDIA_APP_DIR', 'cols')
-ADMIN_GROUP = env('ADMIN_GROUP', 'COLS Admin')
+ADMIN_GROUP = env('ADMIN_GROUP', 'LALS Admin')
 CRON_RUN_AT_TIMES = env('CRON_RUN_AT_TIMES', '04:05')
 CRON_EMAIL = env('CRON_EMAIL', 'cron@' + SITE_DOMAIN).lower()
 # for ORACLE Job Notification - override settings_base.py
@@ -213,3 +213,5 @@ LOGGING['loggers']['leaseslicensing'] = {
             'level': 'INFO'
         }
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+DEV_APP_BUILD_URL = env('DEV_APP_BUILD_URL')  # URL of the Dev app.js served by webpack & express
+LOV_CACHE_TIMEOUT=10800
