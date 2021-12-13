@@ -10,5 +10,6 @@ source venv/bin/activate &&
 ./manage.py collectstatic --no-input &&
 git log --pretty=medium -30 > ./ll_git_history &&
 docker image build --no-cache --tag $BUILD_TAG . &&
-git checkout working
-echo $BUILD_TAG
+git checkout working &&
+echo $BUILD_TAG &&
+docker push $BUILD_TAG
