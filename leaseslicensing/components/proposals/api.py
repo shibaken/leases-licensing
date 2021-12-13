@@ -107,6 +107,49 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+#class GetApplicantsDict(views.APIView):
+#    renderer_classes = [JSONRenderer, ]
+#
+#    def get(self, request, format=None):
+#        applicants = EmailUser.objects.filter(mooringlicensing_proposals__in=Proposal.objects.all()).order_by('first_name', 'last_name').distinct()
+#        return Response(EmailUserSerializer(applicants, many=True).data)
+
+
+class GetApplicationTypeDict(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        apply_page = request.GET.get('apply_page', 'false')
+        apply_page = True if apply_page.lower() in ['true', 'yes', 'y', ] else False
+        data = cache.get('application_type_dict')
+        if not data:
+            cache.set('application_type_dict',Proposal.application_types_dict(apply_page=apply_page), settings.LOV_CACHE_TIMEOUT)
+            data = cache.get('application_type_dict')
+        return Response(data)
+
+
+class GetApplicationTypeDescriptions(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        data = cache.get('application_type_descriptions')
+        if not data:
+            cache.set('application_type_descriptions',Proposal.application_type_descriptions(), settings.LOV_CACHE_TIMEOUT)
+            data = cache.get('application_type_descriptions')
+        return Response(data)
+
+class GetApplicationStatusesDict(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        data = {}
+        if not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
+            cache.set('application_internal_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.CUSTOMER_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+            cache.set('application_external_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+        data['external_statuses'] = cache.get('application_external_statuses_dict')
+        data['internal_statuses'] = cache.get('application_internal_statuses_dict')
+        return Response(data)
+
 class GetProposalType(views.APIView):
     renderer_classes = [JSONRenderer, ]
 
@@ -163,47 +206,6 @@ class ProposalFilterBackend(DatatablesFilterBackend):
                     return i[0]
             return None
 
-        # on the internal dashboard, the Region filter is multi-select - have to use the custom filter below
-        regions = request.GET.get('regions')
-        if regions:
-            if queryset.model is Proposal:
-                queryset = queryset.filter(region__name__iregex=regions.replace(',', '|'))
-            elif queryset.model is Referral or queryset.model is Compliance:
-                queryset = queryset.filter(proposal__region__name__iregex=regions.replace(',', '|'))
-
-        # on the internal dashboard, the Payment Status filter is a property field (not a DB field) - have to use the custom filter below
-        if queryset.model is Booking:
-            park = request.GET.get('park')
-            payment_method = request.GET.get('payment_method')
-            payment_status = request.GET.get('payment_status')
-
-            if park:
-                queryset = queryset.filter(park_bookings__park__id__in=[park])
-
-            if payment_method:
-                #queryset = queryset.filter(invoices__payment_method=payment_method)
-                queryset = queryset.filter(Q(invoices__payment_method=payment_method) | Q(booking_type=Booking.BOOKING_TYPE_MONTHLY_INVOICING))
-
-            if payment_status:
-                ids = []
-                if payment_status.lower() == 'overdue':
-                    for i in ParkBooking.objects.all():
-                        if (i.booking.invoices.last() and i.booking.invoices.last().payment_status=='Unpaid') or \
-                            not i.booking.invoices.last() and \
-                            i.booking.invoices.last() and i.booking.deferred_payment_date and i.booking.deferred_payment_date < timezone.now().date():
-
-                            ids.append(i.id)
-                if payment_status.lower() == 'unpaid':
-                    for i in ParkBooking.objects.all():
-                        if (i.booking.invoices.last() and i.booking.invoices.last().payment_status.lower()=='unpaid') or not i.booking.invoices.last():
-                            ids.append(i.id)
-                else:
-                    for i in ParkBooking.objects.all():
-                        if i.booking.invoices.last() and i.booking.invoices.last().payment_status and i.booking.invoices.last().payment_status.lower()==payment_status.lower().replace('_',' '):
-                            ids.append(i.id)
-
-                queryset = queryset.filter(park_bookings__in=ids)
-
         date_from = request.GET.get('date_from')
         date_to = request.GET.get('date_to')
         if queryset.model is Proposal:
@@ -225,26 +227,6 @@ class ProposalFilterBackend(DatatablesFilterBackend):
             if date_to:
                 queryset = queryset.filter(due_date__lte=date_to)
         elif queryset.model is Referral:
-            if date_from:
-                queryset = queryset.filter(proposal__lodgement_date__gte=date_from)
-
-            if date_to:
-                queryset = queryset.filter(proposal__lodgement_date__lte=date_to)
-        elif queryset.model is Booking:
-            if date_from and date_to:
-                queryset = queryset.filter(park_bookings__arrival__range=[date_from, date_to])
-            elif date_from:
-                queryset = queryset.filter(park_bookings__arrival__gte=date_from)
-            elif date_to:
-                queryset = queryset.filter(park_bookings__arrival__lte=date_to)
-        elif queryset.model is ParkBooking:
-            if date_from and date_to:
-                queryset = queryset.filter(arrival__range=[date_from, date_to])
-            elif date_from:
-                queryset = queryset.filter(arrival__gte=date_from)
-            elif date_to:
-                queryset = queryset.filter(arrival__lte=date_to)
-        elif queryset.model is DistrictProposal:
             if date_from:
                 queryset = queryset.filter(proposal__lodgement_date__gte=date_from)
 
@@ -296,14 +278,17 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
             return ApplicationType.objects.none()
 
     def get_queryset(self):
+        #import ipdb; ipdb.set_trace()
         user = self.request.user
         if is_internal(self.request): #user.is_authenticated():
-            qs= Proposal.objects.all().exclude(application_type=self.excluded_type)
-            return qs.exclude(migrated=True)
+            #qs= Proposal.objects.all().exclude(application_type=self.excluded_type)
+            #return qs.exclude(migrated=True)
+            return Proposal.objects.all()
         elif is_customer(self.request):
-            user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
-            qs= Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(application_type=self.excluded_type)
-            return qs.exclude(migrated=True)
+            #user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
+            #qs= Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(application_type=self.excluded_type)
+            #return qs.exclude(migrated=True)
+            return Proposal.objects.all()
         return Proposal.objects.none()
 
 #    def filter_queryset(self, request, queryset, view):
@@ -317,6 +302,19 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
 #        #response.data['regions'] = self.get_queryset().filter(region__isnull=False).values_list('region__name', flat=True).distinct()
 #        return response
 
+    def list(self, request, *args, **kwargs):
+        """
+        User is accessing /external/ page
+        """
+        qs = self.get_queryset()
+        qs = self.filter_queryset(qs)
+
+        self.paginator.page_size = qs.count()
+        result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
+        serializer = ListProposalSerializer(result_page, context={'request': request}, many=True)
+        return self.paginator.get_paginated_response(serializer.data)
+
+    # TODO: check if still required
     @list_route(methods=['GET',], detail=False)
     def proposals_internal(self, request, *args, **kwargs):
         """
