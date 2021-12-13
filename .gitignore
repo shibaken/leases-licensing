@@ -102,6 +102,6 @@ npm locks
 *-lock.json
 
 # npm build files
-leaseslicensing/static/leaseslicensing_vue/*
+leaseslicensing/static/leaseslicensing_vue/
 
 ll_git_history
