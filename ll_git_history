@@ -1,0 +1,116 @@
+commit f12bf0a1bc882700239eb07f16e3fb6f957e710c
+Merge: 12c2994 24ac4a4
+Author: Brendan Blackford <47347234+mintcoding@users.noreply.github.com>
+Date:   Sat Dec 11 14:25:49 2021 +0800
+
+    Merge pull request #2 from mintcoding/dev
+    
+    mintcoding/Dev to dbca-wa/dev
+
+commit 24ac4a4acd794e184792d390bb5b67d8c77ea3da
+Merge: 6344365 dc0fdcf
+Author: Brendan Blackford <47347234+mintcoding@users.noreply.github.com>
+Date:   Sat Dec 11 14:25:10 2021 +0800
+
+    Merge pull request #7 from mintcoding/working
+    
+    working to dev
+
+commit dc0fdcf4a6a51acd29c8e52893db7b198839b8bb
+Author: Brendan Blackford <brendan.blackford@dbca.wa.gov.au>
+Date:   Sat Dec 11 14:22:31 2021 +0800
+
+    add make_docker_image.sh
+
+commit 65c72836d4dad213eee1090e0e30c826b1266086
+Author: Brendan Blackford <brendan.blackford@dbca.wa.gov.au>
+Date:   Fri Dec 10 12:37:10 2021 +0800
+
+    Remove social auth refs
+
+commit 12c29941aeb87bf6178704d80a7ab58f5670551c
+Merge: 1238dfc 6344365
+Author: Brendan Blackford <47347234+mintcoding@users.noreply.github.com>
+Date:   Thu Dec 9 17:44:28 2021 +0800
+
+    Merge pull request #1 from mintcoding/dev
+    
+    mintcoding/Dev to dbca-wa/dev
+
+commit 6344365390e87181c8254178dc56653792a86e45
+Merge: f80ff32 9aeb655
+Author: Brendan Blackford <47347234+mintcoding@users.noreply.github.com>
+Date:   Thu Dec 9 17:02:26 2021 +0800
+
+    Merge pull request #6 from mintcoding/working
+    
+    Working to dev
+
+commit 9aeb6556baeb565a1ccbf1c0f955cf3697b976e7
+Author: Brendan Blackford <brendan.blackford@dbca.wa.gov.au>
+Date:   Thu Dec 9 16:55:19 2021 +0800
+
+    Add apply_initial_migrations.sh
+
+commit 4e48e4385887d862b06d3de8c9b9e3ffa6f595db
+Author: Brendan Blackford <brendan.blackford@dbca.wa.gov.au>
+Date:   Thu Dec 9 11:21:58 2021 +0800
+
+    Update Dockerfile
+
+commit f80ff328bd828cd4156844f47b3a96d29e04826d
+Merge: d902146 5b066f7
+Author: Brendan Blackford <47347234+mintcoding@users.noreply.github.com>
+Date:   Wed Dec 8 17:38:30 2021 +0800
+
+    Merge pull request #5 from mintcoding/working
+    
+    Working to dev
+
+commit 5b066f780ec6ee83492281ad7d2ddb0b3140633d
+Author: Brendan Blackford <brendan.blackford@dbca.wa.gov.au>
+Date:   Wed Dec 8 17:34:52 2021 +0800
+
+    Remove ledger_api_client models
+
+commit f7ddf89dd4aa39ab990379899d14ecb60664b466
+Author: Brendan Blackford <brendan.blackford@dbca.wa.gov.au>
+Date:   Wed Dec 8 13:53:31 2021 +0800
+
+    Remove redundant models, fix refs
+
+commit d90214690a14095b0386b30d77face8aafcbe74d
+Merge: 6c596d5 b6d954c
+Author: Brendan Blackford <47347234+mintcoding@users.noreply.github.com>
+Date:   Tue Dec 7 12:21:52 2021 +0800
+
+    Merge pull request #3 from mintcoding/main
+    
+    Fix model imports and on_delete
+
+commit b6d954c959fda65da4f8fa347adb0647591c70b5
+Author: Brendan Blackford <brendan.blackford@dbca.wa.gov.au>
+Date:   Tue Dec 7 12:20:41 2021 +0800
+
+    Fix model imports and on_delete
+
+commit 6c596d5ed091fa6daec8ca5deb2fd78b3cbfdbfe
+Merge: 1238dfc 699ea44
+Author: Brendan Blackford <47347234+mintcoding@users.noreply.github.com>
+Date:   Mon Dec 6 15:07:45 2021 +0800
+
+    Merge pull request #1 from mintcoding/main
+    
+    Initial commit
+
+commit 699ea44577754e796a1cd4c1589211eb5c5208cb
+Author: Brendan Blackford <brendan.blackford@dbca.wa.gov.au>
+Date:   Mon Dec 6 14:47:14 2021 +0800
+
+    Initial commit
+
+commit 1238dfc4e35ca0a7cd3d5d08c18cb2b57d893274
+Author: Jawaid Mushtaq <jawaid_mushtaq@yahoo.com>
+Date:   Mon Dec 6 11:45:11 2021 +0800
+
+    first commit
