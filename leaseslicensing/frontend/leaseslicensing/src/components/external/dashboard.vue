@@ -11,7 +11,7 @@
             />
         </FormSection>
 
-        <FormSection 
+        <!--FormSection 
             :formCollapse="false" 
             label="Waiting List" 
             subtitle="- View and amend your waiting list allocation" 
@@ -21,7 +21,7 @@
                 level="external"
                 :approvalTypeFilter="wlaApprovalTypeFilter"
             />
-        </FormSection>
+        </FormSection-->
 
         <FormSection 
             :formCollapse="false" 
@@ -46,7 +46,7 @@
             />
         </FormSection>
 
-        <FormSection 
+        <!--FormSection 
             :formCollapse="false" 
             label="Authorised User Applications for my Endorsement" 
             subtitle="" 
@@ -55,7 +55,7 @@
             <AuthorisedUserApplicationsTable
                 level="external"
             />
-        </FormSection>
+        </FormSection-->
     </div>
 </template>
 
@@ -63,12 +63,10 @@
 import datatable from '@/utils/vue/datatable.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
 import ApplicationsTable from "@/components/common/table_proposals"
-//import WaitingListTable from "@/components/common/table_approval_waiting_list"
-import WaitingListTable from "@/components/common/table_approvals"
-//import LicencesAndPermitsTable from "@/components/common/table_approval_licences_and_permits"
+//import WaitingListTable from "@/components/common/table_approvals"
 import LicencesAndPermitsTable from "@/components/common/table_approvals"
 import CompliancesTable from "@/components/common/table_compliances"
-import AuthorisedUserApplicationsTable from "@/components/common/table_approval_to_be_endorsed"
+//import AuthorisedUserApplicationsTable from "@/components/common/table_approval_to_be_endorsed"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
@@ -93,10 +91,10 @@ export default {
     components:{
         FormSection,
         ApplicationsTable,
-        WaitingListTable,
+        //WaitingListTable,
         LicencesAndPermitsTable,
         CompliancesTable,
-        AuthorisedUserApplicationsTable,
+        //AuthorisedUserApplicationsTable,
     },
     watch: {
 
