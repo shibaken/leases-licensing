@@ -10,189 +10,22 @@
             <div class="col-sm-12">
                 <form class="form-horizontal" name="personal_form" method="post">
                     <FormSection label="Apply for">
-                        <div>
-                            <div class="col-sm-12" style="margin-left:20px">
-                                <div class="form-group">
-                                    <label v-if="wlaChoices.length>0">Waiting List</label>
-                                    <div v-if="wlaApprovals.length<=1">
-                                        <div v-for="(application_type, index) in wlaChoices">
-                                            <input 
-                                            type="radio" 
-                                            name="applicationType" 
-                                            :id="application_type.code + '_' + index" 
-                                            value="application_type" 
-                                            @change="selectApplication(application_type)"
-                                            />
-                                            <label :for="application_type.code + '_' + index" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                        </div>
-                                    </div>
-                                    <div v-else>
-                                        <div class="row" v-for="application_type in wlaMultiple">
-                                            <div class="col-sm-5">
-                                                <input 
-                                                type="radio" 
-                                                name="applicationType" 
-                                                :id="application_type.code" 
-                                                value="application_type" 
-                                                @change="selectApplication(application_type)"
-                                                />
-                                                <label :for="application_type.code" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                            </div>
-                                            <span class="pull-left col-sm-2" v-if="application_type.multiple">
-                                                <select class="form-control" v-model="selectedCurrentProposal">
-                                                    <option v-for="approval in wlaApprovals" :value="approval.current_proposal_id">
-                                                        {{ approval.lodgement_number }}
-                                                    </option>
-                                                </select>
-                                            </span>
-                                        </div>
-                                    </div>
+                        <div class="col-sm-12" style="margin-left:20px">
+                            <div class="form-group">
+                                <div v-for="(application_type, index) in application_types">
+                                    <input 
+                                    type="radio" 
+                                    name="applicationType" 
+                                    :id="application_type.code + '_' + index" 
+                                    :value="application_type" 
+                                    v-model="selectedApplication"
+                                    />
+                                    <!--label :for="application_type.code + '_' + index" style="font-weight:normal">{{ application_type.new_application_text }}</label-->
+                                    <label :for="application_type.code + '_' + index" style="font-weight:normal">{{ application_type.description }}</label>
                                 </div>
-                                <div class="form-group">
-                                    <label>Annual Admission</label>
-                                    <div v-if="aaaApprovals.length<=1">
-                                        <div v-for="(application_type, index) in aaaChoices">
-                                            <input 
-                                            type="radio" 
-                                            name="applicationType" 
-                                            :id="application_type.code + '_' + index" 
-                                            value="application_type" 
-                                            @change="selectApplication(application_type)"
-                                            />
-                                            <label :for="application_type.code + '_' + index" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                        </div>
-                                    </div>
-                                    <div v-else>
-                                        <div class="row" v-for="application_type in aaaMultiple">
-                                            <div class="col-sm-5">
-                                                <input 
-                                                type="radio" 
-                                                name="applicationType" 
-                                                :id="application_type.code" 
-                                                value="application_type" 
-                                                @change="selectApplication(application_type)"
-                                                />
-                                                <label :for="application_type.code" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                            </div>
-                                            <span class="pull-left col-sm-2" v-if="application_type.multiple">
-                                                <select class="form-control" v-model="selectedCurrentProposal">
-                                                    <option v-for="approval in aaaApprovals" :value="approval.current_proposal_id">
-                                                        {{ approval.lodgement_number }}
-                                                    </option>
-                                                </select>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Authorised User</label>
-                                    <div v-if="auaApprovals.length<=1">
-                                        <div v-for="(application_type, index) in auaChoices">
-                                            <input 
-                                            type="radio" 
-                                            name="applicationType" 
-                                            :id="application_type.code + '_' + index" 
-                                            value="application_type" 
-                                            @change="selectApplication(application_type)"
-                                            />
-                                            <label :for="application_type.code + '_' + index" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                        </div>
-                                    </div>
-                                    <div v-else>
-                                        <div class="row" v-for="application_type in auaMultiple">
-                                            <div class="col-sm-5">
-                                                <input 
-                                                type="radio" 
-                                                name="applicationType" 
-                                                :id="application_type.code" 
-                                                value="application_type" 
-                                                @change="selectApplication(application_type)"
-                                                />
-                                                <label :for="application_type.code" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                            </div>
-                                            <span class="pull-left col-sm-2" v-if="application_type.multiple">
-                                                <select class="form-control" v-model="selectedCurrentProposal">
-                                                    <option v-for="approval in auaApprovals" :value="approval.current_proposal_id">
-                                                        {{ approval.lodgement_number }}
-                                                    </option>
-                                                </select>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div v-if="mlApprovals.length" class="form-group">
-                                    <label>Mooring Licence</label>
-                                    <div v-if="mlApprovals.length<=1">
-                                        <div v-for="(application_type, index) in mlChoices">
-                                            <input 
-                                            type="radio" 
-                                            name="applicationType" 
-                                            :id="application_type.code + '_' + index" 
-                                            value="application_type" 
-                                            @change="selectApplication(application_type)"
-                                            />
-                                            <label :for="application_type.code + '_' + index" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                        </div>
-                                    </div>
-                                    <div v-else>
-                                        <div class="row" v-for="application_type in mlMultiple">
-                                            <div class="col-sm-5">
-                                                <input 
-                                                type="radio" 
-                                                name="applicationType" 
-                                                :id="application_type.code" 
-                                                value="application_type" 
-                                                @change="selectApplication(application_type)"
-                                                />
-                                                <label :for="application_type.code" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                            </div>
-                                            <span class="pull-left col-sm-2" v-if="application_type.multiple">
-                                                <select class="form-control" v-model="selectedCurrentProposal">
-                                                    <option v-for="approval in mlApprovals" :value="approval.current_proposal_id">
-                                                        {{ approval.lodgement_number }}
-                                                    </option>
-                                                </select>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!--div class="form-group">
-                                    <label>Authorised User</label>
-                                    <div v-for="application_type in auaChoices">
-                                        <input 
-                                        type="radio" 
-                                        name="applicationType" 
-                                        :id="application_type.code" 
-                                        value="application_type" 
-                                        @change="selectApplication(application_type)"
-                                        />
-                                        <label :for="application_type.code" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Mooring Licence</label>
-                                    <div v-for="application_type in mlChoices">
-                                        <input 
-                                        type="radio" 
-                                        name="applicationType" 
-                                        :id="application_type.code" 
-                                        value="application_type" 
-                                        @change="selectApplication(application_type)"
-                                        />
-                                        <label :for="application_type.code" style="font-weight:normal">{{ application_type.new_application_text }}</label>
-                                    </div>
-                                </div-->
-
-
                             </div>
                         </div>
                     </FormSection>
-
-                    <!--div class="col-sm-12" v-show="has_active_proposals()">
-                        <p style="color:red;"> An active application already exists in the system: </p>
-                        <p style="color:red;"> {{ active_proposals() }}</p>
-                    </div-->
                     <div class="col-sm-12">
                         <button v-if="!creatingProposal" :disabled="isDisabled" @click.prevent="submit()" class="btn btn-primary pull-right">Continue</button>
                         <button v-else disabled class="pull-right btn btn-primary"><i class="fa fa-spin fa-spinner"></i>&nbsp;Creating</button>
@@ -226,20 +59,7 @@ export default {
         selectedCurrentProposal: null,
         //selected_application_name: '',
         application_types: [],
-        wlaChoices: [],
-        aaaChoices: [],
-        auaChoices: [],
-        mlChoices: [],
-        wlaApprovals: [],
-        aaaApprovals: [],
-        auaApprovals: [],
-        mlApprovals: [],
-        wlaMultiple: [],
-        aaaMultiple: [],
-        auaMultiple: [],
-        mlMultiple: [],
         creatingProposal: false,
-        newWlaAllowed: false,
         //site_url: (api_endpoints.site_url.endsWith("/")) ? (api_endpoints.site_url): (api_endpoints.site_url + "/"),
     }
   },
@@ -251,12 +71,6 @@ export default {
       return this.loading.length > 0
     },
     isDisabled: function() {
-        /*
-        let vm = this;
-        if ((vm.org_applicant == '' && vm.yourself=='') ||( vm.selected_application_id == '')){
-                return true;
-            }
-            */
         let disabled = true;
         if (this.selectedApplication && this.selectedApplication.code) {
             disabled = false;
@@ -279,135 +93,7 @@ export default {
 
   },
   methods: {
-      parseApprovals: function() {
-          this.application_types.forEach(app => {
-              if (app.code === 'wla' && app.lodgement_number) {
-                  this.wlaApprovals.push({
-                      lodgement_number: app.lodgement_number,
-                      current_proposal_id: app.current_proposal_id,
-                  });
-              } else if (app.code === 'aap' && app.lodgement_number) {
-                  this.aaaApprovals.push({
-                      lodgement_number: app.lodgement_number,
-                      current_proposal_id: app.current_proposal_id,
-                  });
-              } else if (app.code === 'aup' && app.lodgement_number) {
-                  this.auaApprovals.push({
-                      lodgement_number: app.lodgement_number,
-                      current_proposal_id: app.current_proposal_id,
-                  });
-              } else if (app.code === 'ml' && app.lodgement_number) {
-                  this.mlApprovals.push({
-                      lodgement_number: app.lodgement_number,
-                      current_proposal_id: app.current_proposal_id,
-                  });
-              }
-          });
-      },
-      parseWla: function() {
-          if (this.wlaApprovals.length>1) {
-              // new app
-              for (let app of this.application_types) {
-                  if (app.code === 'wla' && !app.approval_id) {
-                      this.wlaMultiple.push(app)
-                  }
-              }
-              // add generic
-              this.wlaMultiple.push({
-                  new_application_text: "I want to amend or renew my current waiting list allocation",
-                  description: "Waiting List Application",
-                  code: "wla_multiple",
-                  multiple: true
-              })
-          } else {
-              // add wla approval to wlaChoices
-              for (let app of this.application_types) {
-                  if (app.code === 'wla' && (this.newWlaAllowed || app.approval_id)) {
-                      this.wlaChoices.push(app);
-                  }
-              }
-          }
-      },
-      parseAaa: function() {
-          if (this.aaaApprovals.length>1) {
-              // new app
-              for (let app of this.application_types) {
-                  if (['aaa','aap'].includes(app.code) && !app.approval_id) {
-                  //if (app.code === 'wla' && !app.approval_id) {
-                      this.aaaMultiple.push(app)
-                  }
-              }
-              // add generic
-              this.aaaMultiple.push({
-                  new_application_text: "I want to amend or renew my current annual admission permit",
-                  description: "Annual Admission Application",
-                  code: "aaa_multiple",
-                  multiple: true
-              })
-          } else {
-              // add wla approval to wlaChoices
-              for (let app of this.application_types) {
-                  //if (app.code === 'wla') {
-                  if (['aaa','aap'].includes(app.code)) {
-                      this.aaaChoices.push(app);
-                  }
-              }
-          }
-      },
-      parseAua: function() {
-          if (this.auaApprovals.length>1) {
-              // new app
-              for (let app of this.application_types) {
-                  if (['aua','aup'].includes(app.code) && !app.approval_id) {
-                  //if (app.code === 'wla' && !app.approval_id) {
-                      this.auaMultiple.push(app)
-                  }
-              }
-              // add generic
-              this.auaMultiple.push({
-                  new_application_text: "I want to amend or renew my current authorised user permit",
-                  description: "Authorised User Application",
-                  code: "aua_multiple",
-                  multiple: true
-              })
-          } else {
-              // add wla approval to wlaChoices
-              for (let app of this.application_types) {
-                  //if (app.code === 'wla') {
-                  if (['aua','aup'].includes(app.code)) {
-                      this.auaChoices.push(app);
-                  }
-              }
-          }
-      },
-      parseMl: function() {
-          if (this.mlApprovals.length>1) {
-              /*
-              // new app
-              for (let app of this.application_types) {
-                  if (['aua','aup'].includes(app.code) && !app.approval_id) {
-                  //if (app.code === 'wla' && !app.approval_id) {
-                      this.auaMultiple.push(app)
-                  }
-              }
-              */
-              // add generic
-              this.mlMultiple.push({
-                  new_application_text: "I want to amend or renew my current mooring licence",
-                  description: "Mooring Licence Application",
-                  code: "ml_multiple",
-                  multiple: true
-              })
-          } else {
-              // add wla approval to wlaChoices
-              for (let app of this.application_types) {
-                  //if (app.code === 'wla') {
-                  if (app.code==="ml") {
-                      this.mlChoices.push(app);
-                  }
-              }
-          }
-      },
+      /*
     selectApplication(applicationType) {
         this.selectedCurrentProposal = null;
         this.selectedApplication = Object.assign({}, applicationType)
@@ -415,6 +101,7 @@ export default {
             this.selectedCurrentProposal = this.selectedApplication.current_proposal_id;
         }
     },
+    */
     submit: function() {
         //let vm = this;
         swal({
@@ -433,46 +120,16 @@ export default {
         },(error) => {
         });
     },
-      /*
-    createML: async function() {
-        const res = await this.$http.post(api_endpoints.mooringlicenceapplication);
-        const proposal = res.body;
-		this.$router.push({
-			name:"draft_proposal",
-			params:{proposal_id:proposal.id}
-		});
-        this.creatingProposal = false;
-    },
-    */
     createProposal: async function () {
         this.$nextTick(async () => {
             let res = null;
             try {
                 this.creatingProposal = true;
-                const url = helpers.add_endpoint_json(api_endpoints.proposal,(
-                    this.selectedCurrentProposal+'/renew_amend_approval_wrapper')
-                )
-                if (this.selectedApplication && ['wla', 'wla_multiple'].includes(this.selectedApplication.code)) {
-                    if (this.selectedCurrentProposal) {
-                        res = await this.$http.post(url);
-                    } else {
-                        res = await this.$http.post(api_endpoints.waitinglistapplication);
-                    }
-                } else if (this.selectedApplication && ['aaa','aap','aaa_multiple'].includes(this.selectedApplication.code)) {
-                    if (this.selectedCurrentProposal) {
-                        res = await this.$http.post(url);
-                    } else {
-                        res = await this.$http.post(api_endpoints.annualadmissionapplication);
-                    }
-                } else if (this.selectedApplication && ['aua','aup','aua_multiple'].includes(this.selectedApplication.code)) {
-                    if (this.selectedCurrentProposal) {
-                        res = await this.$http.post(url);
-                    } else {
-                        res = await this.$http.post(api_endpoints.authoriseduserapplication);
-                    }
-                } else if (this.selectedApplication && ['ml','ml_multiple'].includes(this.selectedApplication.code)) {
-                    res = await this.$http.post(url);
-                } 
+                const payload = {
+                    "application_type": this.selectedApplication,
+                }
+                console.log(payload)
+                res = await this.$http.post(api_endpoints.proposal, payload);
                 const proposal = res.body;
                 this.$router.push({
                     name:"draft_proposal",
@@ -482,7 +139,8 @@ export default {
             } catch(error) {
                 console.log(error)
                 await swal({
-                title: "Renew/Amend Approval",
+                //title: "Renew/Amend Approval",
+                title: "Create Proposal",
                 text: error.body,
                 type: "error",
                 });
@@ -500,35 +158,25 @@ export default {
         return [];
     },
     fetchApplicationTypes: async function(){
-        const response = await this.$http.get(api_endpoints.application_types_dict+'?apply_page=True');
+        //const response = await this.$http.get(api_endpoints.application_types_dict+'?apply_page=True');
+        const response = await this.$http.get(api_endpoints.application_types_dict);
         for (let app_type of response.body) {
             this.application_types.push(app_type)
         }
     },
+      /*
     fetchExistingLicences: async function(){
         const response = await this.$http.get(api_endpoints.existing_licences);
         for (let l of response.body) {
             this.application_types.push(l)
         }
     },
-    fetchWlaAllowed: async function(){
-        const response = await this.$http.get(api_endpoints.wla_allowed);
-        this.newWlaAllowed = response.body.wla_allowed;
-    },
-
+    */
   },
   mounted: async function() {
     this.applicationsLoading = true;
-    //let vm = this;
     await this.fetchApplicationTypes();
-    //await this.fetchExistingMooringLicences();
-    await this.fetchExistingLicences();
-    await this.fetchWlaAllowed();
-    this.parseApprovals();
-    this.parseWla();
-    this.parseAaa();
-    this.parseAua();
-    this.parseMl();
+    //await this.fetchExistingLicences();
     this.form = document.forms.new_proposal;
     this.applicationsLoading = false;
   },

@@ -59,7 +59,7 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalSerializer,
     InternalProposalSerializer,
     SaveProposalSerializer,
-    DTProposalSerializer,
+    CreateProposalSerializer,
     ProposalUserActionSerializer,
     ProposalLogEntrySerializer,
     DTReferralSerializer,
@@ -529,13 +529,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         try:
-            application_type = Proposal.objects.get(id=self.kwargs.get('id')).application_type.name
-            if application_type == ApplicationType.TCLASS:
-                return ProposalSerializer
-            elif application_type == ApplicationType.FILMING:
-                return ProposalFilmingSerializer
-            elif application_type == ApplicationType.EVENT:
-                return ProposalEventSerializer
+            return ProposalSerializer
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -892,7 +886,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET',], detail=False)
     def user_list(self, request, *args, **kwargs):
         qs = self.get_queryset().exclude(processing_status='discarded')
-        #serializer = DTProposalSerializer(qs, many=True)
         serializer = ListProposalSerializer(qs,context={'request':request}, many=True)
         return Response(serializer.data)
 
@@ -1457,108 +1450,30 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            http_status = status.HTTP_200_OK
-            application_type = request.data.get('application')
-            region = request.data.get('region')
-            district = request.data.get('district')
-            #tenure = request.data.get('tenure')
-            activity = request.data.get('activity')
-            sub_activity1 = request.data.get('sub_activity1')
-            sub_activity2 = request.data.get('sub_activity2')
-            category = request.data.get('category')
-            approval_level = request.data.get('approval_level')
-            selected_copy_from = request.data.get('selected_copy_from', None)
+            with transaction.atomic():
+                print("request.data")
+                print(request.data)
+                http_status = status.HTTP_200_OK
+                application_type_str = request.data.get("application_type", {}).get("code")
 
-            application_name = ApplicationType.objects.get(id=application_type).name
-            # Get most recent versions of the Proposal Types
-            qs_proposal_type = ProposalType.objects.all().order_by('name', '-version').distinct('name')
-            proposal_type = qs_proposal_type.get(name=application_name)
+                application_type = ApplicationType.objects.get(name=application_type_str)
+                proposal_type = ProposalType.objects.get(code='new')
 
-            if application_name==ApplicationType.EVENT and selected_copy_from:
-                copy_from_proposal=Proposal.objects.get(id=selected_copy_from)
-                instance=copy_from_proposal.reapply_event(request)
-
-            else:
                 data = {
-                    #'schema': qs_proposal_type.order_by('-version').first().schema,
-                    'schema': proposal_type.schema,
                     'submitter': request.user.id,
                     'org_applicant': request.data.get('org_applicant'),
-                    'application_type': application_type,
-                    'region': region,
-                    'district': district,
-                    'activity': activity,
-                    'approval_level': approval_level,
-                    #'other_details': {},
-                    #'tenure': tenure,
-                    'data': [
-                        {
-                            u'regionActivitySection': [{
-                                'Region': Region.objects.get(id=region).name if region else None,
-                                'District': District.objects.get(id=district).name if district else None,
-                                #'Tenure': Tenure.objects.get(id=tenure).name if tenure else None,
-                                #'ApplicationType': ApplicationType.objects.get(id=application_type).name
-                                'ActivityType': activity,
-                                'Sub-activity level 1': sub_activity1,
-                                'Sub-activity level 2': sub_activity2,
-                                'Management area': category,
-                            }]
-                        }
-
-                    ],
+                    'application_type_id': application_type.id,
+                    'proposal_type_id': proposal_type.id,
                 }
-                serializer = SaveProposalSerializer(data=data)
+                print(data)
+                print("before serializer")
+                serializer = CreateProposalSerializer(data=data)
                 serializer.is_valid(raise_exception=True)
                 #serializer.save()
                 instance=serializer.save()
-                #Create ProposalOtherDetails instance for T Class/Filming/Event licence
-                if application_name==ApplicationType.TCLASS:
-                    other_details_data={
-                        'proposal': instance.id
-                    }
-                    serializer=SaveProposalOtherDetailsSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                elif application_name==ApplicationType.FILMING:
-                    other_details_data={
-                        'proposal': instance.id
-                    }
-                    #serializer=SaveProposalOtherDetailsFilmingSerializer(data=other_details_data)
-                    serializer=ProposalFilmingActivitySerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                    serializer=ProposalFilmingAccessSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                    serializer=ProposalFilmingEquipmentSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                    serializer=ProposalFilmingOtherDetailsSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                elif application_name==ApplicationType.EVENT:
-                    other_details_data={
-                        'proposal': instance.id
-                    }
-                    serializer=ProposalEventOtherDetailsSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
 
-                    serializer=ProposalEventActivitiesSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-
-                    serializer=ProposalEventVehiclesVesselsSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-
-                    serializer=ProposalEventManagementSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-
-
-            serializer = SaveProposalSerializer(instance)
-            return Response(serializer.data)
+                serializer = SaveProposalSerializer(instance)
+                return Response(serializer.data)
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
