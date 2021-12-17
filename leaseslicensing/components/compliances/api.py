@@ -72,8 +72,10 @@ class CompliancePaginatedViewSet(viewsets.ModelViewSet):
             #return Compliance.objects.all()
             return Compliance.objects.all().exclude(processing_status='discarded')
         elif is_customer(self.request):
-            user_orgs = [org.id for org in self.request.user.leaseslicensing_organisations.all()]
-            queryset =  Compliance.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = self.request.user) ).exclude(processing_status='discarded')
+            # TODO: fix EmailUserRO issue here
+            #user_orgs = [org.id for org in self.request.user.leaseslicensing_organisations.all()]
+            #queryset =  Compliance.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = self.request.user) ).exclude(processing_status='discarded')
+            queryset =  Compliance.objects.filter( Q(proposal__submitter = self.request.user.id) ).exclude(processing_status='discarded')
             return queryset
         return Compliance.objects.none()
 
@@ -127,8 +129,10 @@ class ComplianceViewSet(viewsets.ModelViewSet):
         if is_internal(self.request):
             return Compliance.objects.all().exclude(processing_status='discarded')
         elif is_customer(self.request):
-            user_orgs = [org.id for org in self.request.user.leaseslicensing_organisations.all()]
-            queryset =  Compliance.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = self.request.user) ).exclude(processing_status='discarded')
+            # TODO: fix EmailUserRO issue here
+            #user_orgs = [org.id for org in self.request.user.leaseslicensing_organisations.all()]
+            #queryset =  Compliance.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = self.request.user) ).exclude(processing_status='discarded')
+            queryset =  Compliance.objects.filter( Q(proposal__submitter = self.request.user.id) ).exclude(processing_status='discarded')
             return queryset
         return Compliance.objects.none()
 
