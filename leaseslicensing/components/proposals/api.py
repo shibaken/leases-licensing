@@ -115,15 +115,31 @@ logger = logging.getLogger(__name__)
 #        return Response(EmailUserSerializer(applicants, many=True).data)
 
 
+#class GetApplicationTypeDict(views.APIView):
+#    renderer_classes = [JSONRenderer, ]
+#
+#    def get(self, request, format=None):
+#        apply_page = request.GET.get('apply_page', 'false')
+#        apply_page = True if apply_page.lower() in ['true', 'yes', 'y', ] else False
+#        data = cache.get('application_type_dict')
+#        if not data:
+#            cache.set('application_type_dict',Proposal.application_types_dict(apply_page=apply_page), settings.LOV_CACHE_TIMEOUT)
+#            data = cache.get('application_type_dict')
+#        return Response(data)
+
+
 class GetApplicationTypeDict(views.APIView):
     renderer_classes = [JSONRenderer, ]
 
     def get(self, request, format=None):
-        apply_page = request.GET.get('apply_page', 'false')
-        apply_page = True if apply_page.lower() in ['true', 'yes', 'y', ] else False
+        payload = {}
         data = cache.get('application_type_dict')
         if not data:
-            cache.set('application_type_dict',Proposal.application_types_dict(apply_page=apply_page), settings.LOV_CACHE_TIMEOUT)
+            cache.set(
+                    'application_type_dict', 
+                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES], 
+                        settings.LOV_CACHE_TIMEOUT
+                        )
             data = cache.get('application_type_dict')
         return Response(data)
 
@@ -134,7 +150,11 @@ class GetApplicationTypeDescriptions(views.APIView):
     def get(self, request, format=None):
         data = cache.get('application_type_descriptions')
         if not data:
-            cache.set('application_type_descriptions',Proposal.application_type_descriptions(), settings.LOV_CACHE_TIMEOUT)
+            cache.set(
+                    'application_type_descriptions', 
+                    [app_type[1] for app_type in settings.APPLICATION_TYPES], 
+                        settings.LOV_CACHE_TIMEOUT
+                        )
             data = cache.get('application_type_descriptions')
         return Response(data)
 

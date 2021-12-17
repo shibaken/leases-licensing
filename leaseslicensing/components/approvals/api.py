@@ -53,20 +53,20 @@ from leaseslicensing.components.proposals.api import ProposalFilterBackend, Prop
 from rest_framework_datatables.filters import DatatablesFilterBackend
 
 
-class GetApprovalTypeDict(views.APIView):
-    renderer_classes = [JSONRenderer, ]
-
-    def get(self, request, format=None):
-        include_codes = request.GET.get('include_codes', '')
-        include_codes = include_codes.split(',')
-        cache_title = 'approval_type_dict'
-        for code in include_codes:
-            cache_title += '_' + code
-        data = cache.get(cache_title)
-        if not data:
-            cache.set(cache_title, Approval.approval_types_dict(include_codes), settings.LOV_CACHE_TIMEOUT)
-            data = cache.get(cache_title)
-        return Response(data)
+#class GetApprovalTypeDict(views.APIView):
+#    renderer_classes = [JSONRenderer, ]
+#
+#    def get(self, request, format=None):
+#        include_codes = request.GET.get('include_codes', '')
+#        include_codes = include_codes.split(',')
+#        cache_title = 'approval_type_dict'
+#        for code in include_codes:
+#            cache_title += '_' + code
+#        data = cache.get(cache_title)
+#        if not data:
+#            cache.set(cache_title, Approval.approval_types_dict(include_codes), settings.LOV_CACHE_TIMEOUT)
+#            data = cache.get(cache_title)
+#        return Response(data)
 
 
 class GetApprovalStatusesDict(views.APIView):

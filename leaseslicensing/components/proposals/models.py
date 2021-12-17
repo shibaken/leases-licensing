@@ -495,25 +495,25 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def __str__(self):
         return str(self.id)
 
-    @classmethod
-    def application_types_dict(cls, apply_page):
-        type_list = []
-        for application_type in Proposal.__subclasses__():
-            if apply_page:
-                if application_type.apply_page_visibility:
-                    type_list.append({
-                        "code": application_type.code,
-                        "description": application_type.description,
-                        "new_application_text": application_type.new_application_text
-                        })
-            else:
-                type_list.append({
-                    "code": application_type.code,
-                    "description": application_type.description,
-                    "new_application_text": application_type.new_application_text
-                })
+    #@classmethod
+    #def application_types_dict(cls, apply_page):
+    #    type_list = []
+    #    for application_type in Proposal.__subclasses__():
+    #        if apply_page:
+    #            if application_type.apply_page_visibility:
+    #                type_list.append({
+    #                    "code": application_type.code,
+    #                    "description": application_type.description,
+    #                    "new_application_text": application_type.new_application_text
+    #                    })
+    #        else:
+    #            type_list.append({
+    #                "code": application_type.code,
+    #                "description": application_type.description,
+    #                "new_application_text": application_type.new_application_text
+    #            })
 
-        return type_list
+    #    return type_list
 
     #Append 'P' to Proposal id to generate Lodgement number. Lodgement number and lodgement sequence are used to generate Reference.
     def save(self, *args, **kwargs):
