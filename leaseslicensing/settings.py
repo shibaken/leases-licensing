@@ -215,3 +215,22 @@ LOGGING['loggers']['leaseslicensing'] = {
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 DEV_APP_BUILD_URL = env('DEV_APP_BUILD_URL')  # URL of the Dev app.js served by webpack & express
 LOV_CACHE_TIMEOUT=10800
+
+PROPOSAL_TYPE_NEW = 'new'
+PROPOSAL_TYPE_RENEWAL = 'renewal'
+PROPOSAL_TYPE_AMENDMENT = 'amendment'
+PROPOSAL_TYPES = [
+    (PROPOSAL_TYPE_NEW, 'New Application'),
+    (PROPOSAL_TYPE_AMENDMENT, 'Amendment'),
+    (PROPOSAL_TYPE_RENEWAL, 'Renewal'),
+]
+
+APPLICATION_TYPE_REGISTRATION_OF_INTEREST = 'registration_of_interest'
+APPLICATION_TYPE_LEASE = 'lease'
+APPLICATION_TYPE_LICENCE = 'licence'
+APPLICATION_TYPES = [
+    (APPLICATION_TYPE_REGISTRATION_OF_INTEREST, 'Registration of Interest'),
+    (APPLICATION_TYPE_LEASE, 'Lease'),
+    (APPLICATION_TYPE_LICENCE, 'Licence'),
+]
+

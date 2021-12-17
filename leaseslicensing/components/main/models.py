@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, BaseAddress#, RevisionedMixin
 #from django.contrib.postgres.fields.jsonb import JSONField
 from django.db.models import JSONField
+from leaseslicensing import settings
 
 
 ## TODO: remove ledger models
@@ -93,15 +94,6 @@ class RequiredDocument(models.Model):
 
 #@python_2_unicode_compatible
 class ApplicationType(models.Model):
-    """
-    for park in Park.objects.all().order_by('id'):
-        ParkPrice.objects.create(park=park, adult=10.0, child=7.50, senior=5.00)
-    """
-    #TCLASS = 'T Class'
-    TCLASS = 'Commercial operations'
-    ECLASS = 'E Class'
-    FILMING = 'Filming'
-    EVENT = 'Event'
     name = models.CharField(max_length=64, unique=True)
     order = models.PositiveSmallIntegerField(default=0)
     visible = models.BooleanField(default=True)
@@ -122,9 +114,12 @@ class ApplicationType(models.Model):
 #@python_2_unicode_compatible
 class OracleCode(models.Model):
     CODE_TYPE_CHOICES = (
-        (ApplicationType.TCLASS, ApplicationType.TCLASS),
-        (ApplicationType.FILMING, ApplicationType.FILMING),
-        (ApplicationType.EVENT, ApplicationType.EVENT),
+        (settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST, settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST),
+        (settings.APPLICATION_TYPE_LEASE, settings.APPLICATION_TYPE_LEASE),
+        (settings.APPLICATION_TYPE_LICENCE, settings.APPLICATION_TYPE_LICENCE),
+        #(ApplicationType.TCLASS, ApplicationType.TCLASS),
+        #(ApplicationType.FILMING, ApplicationType.FILMING),
+        #(ApplicationType.EVENT, ApplicationType.EVENT),
     )
     code_type = models.CharField('Application Type', max_length=64, choices=CODE_TYPE_CHOICES,
                                         default=CODE_TYPE_CHOICES[0][0])
@@ -251,19 +246,19 @@ class Document(models.Model):
 
 class GlobalSettings(models.Model):
     keys = (
-        ('credit_facility_link', 'Credit Facility Link'),
-        ('deed_poll', 'Deed poll'),
-        ('deed_poll_filming', 'Deed poll Filming'),
-        ('deed_poll_event', 'Deed poll Event'),
-        ('online_training_document', 'Online Training Document'),
-        ('park_finder_link', 'Park Finder Link'),
-        ('fees_and_charges', 'Fees and charges link'),
-        ('event_fees_and_charges', 'Event Fees and charges link'),
-        ('commercial_filming_handbook', 'Commercial Filming Handbook link'),
-        ('park_stay_link', 'Park Stay Link'),
-        ('event_traffic_code_of_practice', 'Event traffic code of practice'),
-        ('trail_section_map', 'Trail section map'),
-        ('dwer_application_form', 'DWER Application Form'),
+        #('credit_facility_link', 'Credit Facility Link'),
+        #('deed_poll', 'Deed poll'),
+        #('deed_poll_filming', 'Deed poll Filming'),
+        #('deed_poll_event', 'Deed poll Event'),
+        #('online_training_document', 'Online Training Document'),
+        #('park_finder_link', 'Park Finder Link'),
+        #('fees_and_charges', 'Fees and charges link'),
+        #('event_fees_and_charges', 'Event Fees and charges link'),
+        #('commercial_filming_handbook', 'Commercial Filming Handbook link'),
+        #('park_stay_link', 'Park Stay Link'),
+        #('event_traffic_code_of_practice', 'Event traffic code of practice'),
+        #('trail_section_map', 'Trail section map'),
+        #('dwer_application_form', 'DWER Application Form'),
 
     )
     key = models.CharField(max_length=255, choices=keys, blank=False, null=False,)
