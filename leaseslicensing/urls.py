@@ -23,6 +23,8 @@ from leaseslicensing.components.proposals import api as proposal_api
 from leaseslicensing.components.approvals import api as approval_api
 from leaseslicensing.components.compliances import api as compliances_api
 from ledger_api_client.urls import urlpatterns as ledger_patterns
+from leaseslicensing.management.default_data_manager import DefaultDataManager
+from leaseslicensing.utils import are_migrations_running
 
 # API patterns
 router = routers.DefaultRouter()
@@ -151,6 +153,9 @@ if settings.EMAIL_INSTANCE != 'PROD':
 
 if settings.DEBUG:  # Serve media locally in development.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if not are_migrations_running():
+    DefaultDataManager()
 
 #if settings.SHOW_DEBUG_TOOLBAR:
 #    import debug_toolbar

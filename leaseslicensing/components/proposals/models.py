@@ -93,18 +93,18 @@ def application_type_choicelist():
         # required because on first DB tables creation, there are no ApplicationType objects -- setting a default value
         return ( ('T Class', 'T Class'), )
 
-class ProposalType(models.Model):
-    description = models.CharField(max_length=256, blank=True, null=True)
-    name = models.CharField(verbose_name='Application name (eg. T Class, Filming, Event, E Class)', max_length=64, choices=application_type_choicelist(), default='T Class')
-    replaced_by = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
-    version = models.SmallIntegerField(default=1, blank=False, null=False)
-
-    def __str__(self):
-        return '{} - v{}'.format(self.name, self.version)
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        unique_together = ('name', 'version')
+#class ProposalType(models.Model):
+#    description = models.CharField(max_length=256, blank=True, null=True)
+#    name = models.CharField(verbose_name='Application name (eg. T Class, Filming, Event, E Class)', max_length=64, choices=application_type_choicelist(), default='T Class')
+#    replaced_by = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
+#    version = models.SmallIntegerField(default=1, blank=False, null=False)
+#
+#    def __str__(self):
+#        return '{} - v{}'.format(self.name, self.version)
+#
+#    class Meta:
+#        app_label = 'leaseslicensing'
+#        unique_together = ('name', 'version')
 
 
 class ProposalAssessorGroup(models.Model):
@@ -308,6 +308,19 @@ class ProposalApplicantDetails(models.Model):
         app_label = 'leaseslicensing'
 
 
+class ProposalType(models.Model):
+#class ProposalType(RevisionedMixin):
+    code = models.CharField(max_length=30, blank=True, null=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        # return 'id: {} code: {}'.format(self.id, self.code)
+        return self.description
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+
 class Proposal(DirtyFieldsMixin, RevisionedMixin):
 #class Proposal(DirtyFieldsMixin, models.Model):
     APPLICANT_TYPE_ORGANISATION = 'ORG'
@@ -403,15 +416,17 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         ('not_reviewed', 'Not Reviewed'), ('awaiting_amendments', 'Awaiting Amendments'), ('amended', 'Amended'),
         ('accepted', 'Accepted'))
 
-    APPLICATION_TYPE_CHOICES = (
-        ('new_proposal', 'New Application'),
-        ('amendment', 'Amendment'),
-        ('renewal', 'Renewal'),
-        ('external', 'External'),
-    )
+    #APPLICATION_TYPE_CHOICES = (
+    #PROPOSAL_TYPE_CHOICES = (
+    #    ('new_proposal', 'New Application'),
+    #    ('amendment', 'Amendment'),
+    #    ('renewal', 'Renewal'),
+    #    ('external', 'External'),
+    #)
 
-    proposal_type = models.CharField('Application Status Type', max_length=40, choices=APPLICATION_TYPE_CHOICES,
-                                        default=APPLICATION_TYPE_CHOICES[0][0])
+    proposal_type = models.ForeignKey(ProposalType, blank=True, null=True, on_delete=models.SET_NULL)
+    #proposal_type = models.CharField('Proposal Type', max_length=40, choices=PROPOSAL_TYPE_CHOICES,
+     #                                   default=PROPOSAL_TYPE_CHOICES[0][0])
     #proposal_state = models.PositiveSmallIntegerField('Proposal state', choices=PROPOSAL_STATE_CHOICES, default=1)
 
     data = JSONField(blank=True, null=True)
