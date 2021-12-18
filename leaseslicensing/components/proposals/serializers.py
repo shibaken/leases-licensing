@@ -250,8 +250,9 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         return obj.proposal_type.description
 
     def get_is_qa_officer(self,obj):
-        request = self.context['request']
-        return request.user.email in obj.qa_officers()
+        #request = self.context['request']
+        #return request.user.email in obj.qa_officers()
+        return True
 
     def get_fee_invoice_url(self,obj):
         return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
@@ -272,8 +273,8 @@ class ListProposalSerializer(BaseProposalSerializer):
     application_type = serializers.CharField(source='application_type.name', read_only=True)
     #region = serializers.CharField(source='region.name', read_only=True)
     #district = serializers.CharField(source='district.name', read_only=True)
-    region = serializers.SerializerMethodField(read_only=True)
-    district = serializers.SerializerMethodField(read_only=True)
+    #region = serializers.SerializerMethodField(read_only=True)
+    #district = serializers.SerializerMethodField(read_only=True)
 
     #tenure = serializers.CharField(source='tenure.name', read_only=True)
     assessor_process = serializers.SerializerMethodField(read_only=True)
@@ -289,8 +290,8 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'activity',
                 'approval_level',
                 'title',
-                'region',
-                'district',
+                #'region',
+                #'district',
                 'tenure',
                 'customer_status',
                 'processing_status',
@@ -326,7 +327,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'proposal_type',
                 'activity',
                 'title',
-                'region',
+                #'region',
                 'customer_status',
                 'processing_status',
                 'applicant',
@@ -352,15 +353,15 @@ class ListProposalSerializer(BaseProposalSerializer):
             return obj.assigned_officer.get_full_name()
         return None
 
-    def get_region(self,obj):
-        if obj.region:
-            return obj.region.name
-        return None
+    #def get_region(self,obj):
+    #    if obj.region:
+    #        return obj.region.name
+    #    return None
 
-    def get_district(self,obj):
-        if obj.district:
-            return obj.district.name
-        return None
+    #def get_district(self,obj):
+    #    if obj.district:
+    #        return obj.district.name
+    #    return None
 
     def get_assessor_process(self,obj):
         # Check if currently logged in user has access to process the proposal
@@ -671,7 +672,7 @@ class DTReferralSerializer(serializers.ModelSerializer):
     proposal_lodgement_date = serializers.CharField(source='proposal.lodgement_date')
     proposal_lodgement_number = serializers.CharField(source='proposal.lodgement_number')
     submitter = serializers.SerializerMethodField()
-    region = serializers.CharField(source='region.name', read_only=True)
+    #egion = serializers.CharField(source='region.name', read_only=True)
     #referral = EmailUserSerializer()
     referral = serializers.CharField(source='referral_group.name')
     document = serializers.SerializerMethodField()
@@ -681,8 +682,8 @@ class DTReferralSerializer(serializers.ModelSerializer):
         model = Referral
         fields = (
             'id',
-            'region',
-            'activity',
+            #'region',
+            #'activity',
             'title',
             'applicant',
             'submitter',

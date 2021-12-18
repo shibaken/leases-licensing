@@ -890,16 +890,16 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def __assessor_group(self):
         # TODO get list of assessor groups based on region and activity
-        if self.region and self.activity:
-            try:
-                check_group = ProposalAssessorGroup.objects.filter(
-                    #activities__name__in=[self.activity],
-                    region__name__in=self.regions_list
-                ).distinct()
-                if check_group:
-                    return check_group[0]
-            except ProposalAssessorGroup.DoesNotExist:
-                pass
+        #if self.region and self.activity:
+        #    try:
+        #        check_group = ProposalAssessorGroup.objects.filter(
+        #            #activities__name__in=[self.activity],
+        #            region__name__in=self.regions_list
+        #        ).distinct()
+        #        if check_group:
+        #            return check_group[0]
+        #    except ProposalAssessorGroup.DoesNotExist:
+        #        pass
         default_group = ProposalAssessorGroup.objects.get(default=True)
 
         return default_group
@@ -907,16 +907,16 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def __approver_group(self):
         # TODO get list of approver groups based on region and activity
-        if self.region and self.activity:
-            try:
-                check_group = ProposalApproverGroup.objects.filter(
-                    #activities__name__in=[self.activity],
-                    region__name__in=self.regions_list
-                ).distinct()
-                if check_group:
-                    return check_group[0]
-            except ProposalApproverGroup.DoesNotExist:
-                pass
+        #if self.region and self.activity:
+        #    try:
+        #        check_group = ProposalApproverGroup.objects.filter(
+        #            #activities__name__in=[self.activity],
+        #            region__name__in=self.regions_list
+        #        ).distinct()
+        #        if check_group:
+        #            return check_group[0]
+        #    except ProposalApproverGroup.DoesNotExist:
+        #        pass
         default_group = ProposalApproverGroup.objects.get(default=True)
 
         return default_group
