@@ -117,18 +117,18 @@ class Approval(RevisionedMixin):
         app_label = 'leaseslicensing'
         unique_together= ('lodgement_number', 'issue_date')
 
-    @classmethod
-    def approval_types_dict(cls, include_codes=[]):
-        type_list = []
-        for approval_type in Approval.__subclasses__():
-            if hasattr(approval_type, 'code'):
-                if approval_type.code in include_codes:
-                    type_list.append({
-                        "code": approval_type.code,
-                        "description": approval_type.description,
-                    })
+    #@classmethod
+    #def approval_types_dict(cls, include_codes=[]):
+    #    type_list = []
+    #    for approval_type in Approval.__subclasses__():
+    #        if hasattr(approval_type, 'code'):
+    #            if approval_type.code in include_codes:
+    #                type_list.append({
+    #                    "code": approval_type.code,
+    #                    "description": approval_type.description,
+    #                })
 
-        return type_list
+    #    return type_list
 
     @property
     def bpay_allowed(self):
