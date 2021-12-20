@@ -1,4 +1,20 @@
 module.exports = {
+    formatError: function(err) {
+        let returnStr = '';
+        // object {}
+        if (typeof(err.body) === 'object' && !err.body.hasOwnProperty('length')) {
+            for (const key of Object.keys(err.body)) {
+                returnStr += `${key}: ${err.body[key]} <br/>`;
+            }
+        // array
+        } else if (typeof(err.body) === 'object') {
+            returnStr = err.body[0];
+        // string
+        } else {
+            returnStr = err.body;
+        }
+        return returnStr;
+    },
   apiError: function ( resp ) {
     var error_str = '';
     if ( resp.status === 400 ) {
@@ -22,7 +38,6 @@ module.exports = {
         var error_str = '';
         var text = null;
         if (resp.status === 400) {
-
             if (Array.isArray(resp.body)){
                 text = resp.body[0];
             }
@@ -38,19 +53,7 @@ module.exports = {
                     error_str = text.non_field_errors[0].replace(/[\[\]"]/g, '');
                 }
                 else{
-                    //error_str = text;
-                    
-                    for(const key in text) {
-                      const element = text[key];
-                      if(Array.isArray(element)) {
-                        for(let message of element) {
-                          error_str = message;
-                        }
-                      }
-                      else {
-                        error_str = element;
-                      }
-                    }
+                    error_str = text;
                 }
             }
             else{
@@ -96,14 +99,18 @@ module.exports = {
         } );
     } );
   },
-  add_endpoint_json: function ( string, addition ) {
-    var res = string.split( ".json" )
-    return res[ 0 ] + '/' + addition + '.json';
-  },
-  add_endpoint_join: function ( api_string, addition ) {
-    // assumes api_string has trailing forward slash "/" character required for POST
-    return api_string + addition;
-  },
+    add_endpoint_json: function ( string, addition ) {
+        let res = string.split( ".json" )
+        let endpoint = res[ 0 ] + '/' + addition + '.json';
+        endpoint = endpoint.replace("//", "/")  // Remove duplicated '/' just in case
+        return endpoint
+    },
+    add_endpoint_join: function ( api_string, addition ) {
+        // assumes api_string has trailing forward slash "/" character required for POST
+        let endpoint = api_string + addition;
+        endpoint = endpoint.replace("//", "/")  // Remove duplicated '/' just in case
+        return endpoint
+    },
     dtPopover: function(value,truncate_length=30,trigger='hover'){
         var ellipsis = '...',
         truncated = _.truncate(value, {
@@ -134,5 +141,52 @@ module.exports = {
                 e.preventDefault();
                 return true;
             });
-    } 
+    },
+    processError: async function(err){
+        console.log(err)
+        let errorText = '';
+        if (err.body.non_field_errors) {
+            console.log('non_field_errors')
+            // When non field errors raised
+            for (let i=0; i<err.body.non_field_errors.length; i++){
+                errorText += err.body.non_field_errors[i] + '<br />';
+            }
+        } else if(Array.isArray(err.body)) {
+            console.log('isArray')
+            // When serializers.ValidationError raised
+            for (let i=0; i<err.body.length; i++){
+                errorText += err.body[i] + '<br />';
+            }
+        } else {
+            console.log('else')
+            // When field errors raised
+            for (let field_name in err.body){
+                if (err.body.hasOwnProperty(field_name)){
+                    errorText += field_name + ':<br />';
+                    for (let j=0; j<err.body[field_name].length; j++){
+                        errorText += err.body[field_name][j] + '<br />';
+                    }
+                }
+            }
+        }
+        await swal("Error", errorText, "error");
+    },
+    post_and_redirect: function(url, postData) {
+        /* http.post and ajax do not allow redirect from Django View (post method), 
+           this function allows redirect by mimicking a form submit.
+
+           usage:  vm.post_and_redirect(vm.application_fee_url, {'csrfmiddlewaretoken' : vm.csrf_token});
+        */
+        var postFormStr = "<form method='POST' action='" + url + "'>";
+
+        for (var key in postData) {
+            if (postData.hasOwnProperty(key)) {
+                postFormStr += "<input type='hidden' name='" + key + "' value='" + postData[key] + "'>";
+            }
+        }
+        postFormStr += "</form>";
+        var formElement = $(postFormStr);
+        $('body').append(formElement);
+        $(formElement).submit();
+    },
 };

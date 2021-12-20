@@ -93,18 +93,18 @@ def application_type_choicelist():
         # required because on first DB tables creation, there are no ApplicationType objects -- setting a default value
         return ( ('T Class', 'T Class'), )
 
-class ProposalType(models.Model):
-    description = models.CharField(max_length=256, blank=True, null=True)
-    name = models.CharField(verbose_name='Application name (eg. T Class, Filming, Event, E Class)', max_length=64, choices=application_type_choicelist(), default='T Class')
-    replaced_by = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
-    version = models.SmallIntegerField(default=1, blank=False, null=False)
-
-    def __str__(self):
-        return '{} - v{}'.format(self.name, self.version)
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        unique_together = ('name', 'version')
+#class ProposalType(models.Model):
+#    description = models.CharField(max_length=256, blank=True, null=True)
+#    name = models.CharField(verbose_name='Application name (eg. T Class, Filming, Event, E Class)', max_length=64, choices=application_type_choicelist(), default='T Class')
+#    replaced_by = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
+#    version = models.SmallIntegerField(default=1, blank=False, null=False)
+#
+#    def __str__(self):
+#        return '{} - v{}'.format(self.name, self.version)
+#
+#    class Meta:
+#        app_label = 'leaseslicensing'
+#        unique_together = ('name', 'version')
 
 
 class ProposalAssessorGroup(models.Model):
@@ -308,8 +308,21 @@ class ProposalApplicantDetails(models.Model):
         app_label = 'leaseslicensing'
 
 
-class Proposal(DirtyFieldsMixin, RevisionedMixin):
-#class Proposal(DirtyFieldsMixin, models.Model):
+class ProposalType(models.Model):
+#class ProposalType(RevisionedMixin):
+    code = models.CharField(max_length=30, blank=True, null=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        # return 'id: {} code: {}'.format(self.id, self.code)
+        return self.description
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+
+#class Proposal(DirtyFieldsMixin, RevisionedMixin):
+class Proposal(DirtyFieldsMixin, models.Model):
     APPLICANT_TYPE_ORGANISATION = 'ORG'
     APPLICANT_TYPE_PROXY = 'PRX'
     APPLICANT_TYPE_SUBMITTER = 'SUB'
@@ -403,21 +416,19 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         ('not_reviewed', 'Not Reviewed'), ('awaiting_amendments', 'Awaiting Amendments'), ('amended', 'Amended'),
         ('accepted', 'Accepted'))
 
-    APPLICATION_TYPE_CHOICES = (
-        ('new_proposal', 'New Application'),
-        ('amendment', 'Amendment'),
-        ('renewal', 'Renewal'),
-        ('external', 'External'),
-    )
+    #APPLICATION_TYPE_CHOICES = (
+    #PROPOSAL_TYPE_CHOICES = (
+    #    ('new_proposal', 'New Application'),
+    #    ('amendment', 'Amendment'),
+    #    ('renewal', 'Renewal'),
+    #    ('external', 'External'),
+    #)
 
-    proposal_type = models.CharField('Application Status Type', max_length=40, choices=APPLICATION_TYPE_CHOICES,
-                                        default=APPLICATION_TYPE_CHOICES[0][0])
+    proposal_type = models.ForeignKey(ProposalType, blank=True, null=True, on_delete=models.SET_NULL)
+    #proposal_type = models.CharField('Proposal Type', max_length=40, choices=PROPOSAL_TYPE_CHOICES,
+     #                                   default=PROPOSAL_TYPE_CHOICES[0][0])
     #proposal_state = models.PositiveSmallIntegerField('Proposal state', choices=PROPOSAL_STATE_CHOICES, default=1)
 
-    data = JSONField(blank=True, null=True)
-    assessor_data = JSONField(blank=True, null=True)
-    comment_data = JSONField(blank=True, null=True)
-    schema = JSONField(blank=False, null=False)
     proposed_issuance_approval = JSONField(blank=True, null=True)
     #hard_copy = models.ForeignKey(Document, blank=True, null=True, related_name='hard_copy')
 
@@ -435,16 +446,16 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     lodgement_date = models.DateTimeField(blank=True, null=True)
 
     #proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
-    proxy_applicant = models.IntegerField() #EmailUserRO
+    proxy_applicant = models.IntegerField(null=True) #EmailUserRO
     #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
     submitter = models.IntegerField() #EmailUserRO
 
     #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
     #assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
     #approved_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_approved_by', on_delete=models.SET_NULL)
-    assigned_officer = models.IntegerField() #EmailUserRO
-    assigned_approver = models.IntegerField() #EmailUserRO
-    approved_by = models.IntegerField() #EmailUserRO
+    assigned_officer = models.IntegerField(null=True) #EmailUserRO
+    assigned_approver = models.IntegerField(null=True) #EmailUserRO
+    approved_by = models.IntegerField(null=True) #EmailUserRO
     processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES,
                                          default=PROCESSING_STATUS_CHOICES[1][0])
     prev_processing_status = models.CharField(max_length=30, blank=True, null=True)
@@ -480,166 +491,130 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def __str__(self):
         return str(self.id)
 
+    #@classmethod
+    #def application_types_dict(cls, apply_page):
+    #    type_list = []
+    #    for application_type in Proposal.__subclasses__():
+    #        if apply_page:
+    #            if application_type.apply_page_visibility:
+    #                type_list.append({
+    #                    "code": application_type.code,
+    #                    "description": application_type.description,
+    #                    "new_application_text": application_type.new_application_text
+    #                    })
+    #        else:
+    #            type_list.append({
+    #                "code": application_type.code,
+    #                "description": application_type.description,
+    #                "new_application_text": application_type.new_application_text
+    #            })
+
+    #    return type_list
+
     #Append 'P' to Proposal id to generate Lodgement number. Lodgement number and lodgement sequence are used to generate Reference.
     def save(self, *args, **kwargs):
-        self.update_property_cache(False)
-        orig_processing_status = self._original_state['processing_status']
+        #self.update_property_cache(False)
+        #orig_processing_status = self._original_state['processing_status']
         super(Proposal, self).save(*args,**kwargs)
-        if self.processing_status != orig_processing_status:
-            self.save(version_comment='processing_status: {}'.format(self.processing_status))
+        #if self.processing_status != orig_processing_status:
+         #   self.save(version_comment='processing_status: {}'.format(self.processing_status))
 
-        if self.lodgement_number == '' and self.application_type.name != 'E Class':
+        if self.lodgement_number == '':
             new_lodgment_id = 'A{0:06d}'.format(self.pk)
             self.lodgement_number = new_lodgment_id
-            self.save(version_comment='processing_status: {}'.format(self.processing_status))
-
-    def get_property_cache(self):
-        '''
-        Get properties which were previously resolved.
-        '''
-        if len(self.property_cache) == 0:
-            self.update_property_cache()
-
-        if self.processing_status == self.PROCESSING_STATUS_AWAITING_PAYMENT:
-            self.update_property_cache()
-
-        return self.property_cache
-
-    def get_property_cache_key(self, key):
-        '''
-        Get properties which were previously resolved with key.
-        '''
-        try:
-
-            self.property_cache[key]
-
-        except KeyError:
-            self.update_property_cache()
-
-        return self.property_cache[key]
-
-    def update_property_cache(self, save=True):
-        '''
-        Refresh cached properties with updated properties.
-        '''
-        logger.debug('Proposal.update_property_cache()')
-
-        self.property_cache['fee_paid'] = self._fee_paid
-        self.set_property_cache_fee_amount(self._fee_amount)
-
-        if save is True:
+            #self.save(version_comment='processing_status: {}'.format(self.processing_status))
             self.save()
 
-        return self.property_cache
+    #def get_property_cache(self):
+    #    '''
+    #    Get properties which were previously resolved.
+    #    '''
+    #    if len(self.property_cache) == 0:
+    #        self.update_property_cache()
 
-    @property
-    def invoice(self):
-        """ specific to application fee invoices """
-        return Invoice.objects.get(reference=self.fee_invoice_reference) if self.fee_invoice_reference else None
+    #    if self.processing_status == self.PROCESSING_STATUS_AWAITING_PAYMENT:
+    #        self.update_property_cache()
 
-    @property
-    def fee_paid(self):
-        """ get cached value, if it exists """
-        if 'fee_paid' not in self.property_cache:
-            self.update_property_cache()
+    #    return self.property_cache
 
-        return self.get_property_cache_key('fee_paid')
+    #def get_property_cache_key(self, key):
+    #    '''
+    #    Get properties which were previously resolved with key.
+    #    '''
+    #    try:
 
-    @property
-    def _fee_paid(self):
-        if (self.invoice and self.invoice.payment_status in ['paid','over_paid']) or self.proposal_type=='amendment':
-            return True
-        return False
+    #        self.property_cache[key]
 
-    @property
-    def fee_amount(self):
-        """ get cached value, if it exists """
-        if 'fee_amount' not in self.property_cache:
-            self.update_property_cache()
+    #    except KeyError:
+    #        self.update_property_cache()
 
-        return self.get_property_cache_key('fee_amount')
+    #    return self.property_cache[key]
 
-    @property
-    def _fee_amount(self):
-        return self.invoice.amount if self.invoice and self._fee_paid else None
+    #def update_property_cache(self, save=True):
+    #    '''
+    #    Refresh cached properties with updated properties.
+    #    '''
+    #    logger.debug('Proposal.update_property_cache()')
 
-    def set_property_cache_fee_amount(self, amount):
-        '''
-        Setter for fee_amount on the property cache.
-        '''
-        import json
-        from decimal import Decimal as D
+    #    self.property_cache['fee_paid'] = self._fee_paid
+    #    self.set_property_cache_fee_amount(self._fee_amount)
 
-        class DecimalEncoder(json.JSONEncoder):
-            def default(self, obj):
-                if isinstance(obj, D):
-                    return float(obj)
-                return json.JSONEncoder.default(self, obj)
+    #    if save is True:
+    #        self.save()
 
-        if self.id:
-            data = DecimalEncoder().encode(amount)
-            self.property_cache['fee_amount'] = data
+    #    return self.property_cache
 
+    #@property
+    #def invoice(self):
+    #    """ specific to application fee invoices """
+    #    return Invoice.objects.get(reference=self.fee_invoice_reference) if self.fee_invoice_reference else None
 
-    @property
-    def filming_fee_invoice_reference(self):
-        try: 
-            filming_fee = self.filming_fees.order_by('-id').first()
-            return filming_fee.filming_fee_invoices.order_by('-id').first().invoice_reference
-        except:
-            return None
+    #@property
+    #def fee_paid(self):
+    #    """ get cached value, if it exists """
+    #    if 'fee_paid' not in self.property_cache:
+    #        self.update_property_cache()
+
+    #    return self.get_property_cache_key('fee_paid')
+
+    #@property
+    #def _fee_paid(self):
+    #    if (self.invoice and self.invoice.payment_status in ['paid','over_paid']) or self.proposal_type=='amendment':
+    #        return True
+    #    return False
+
+    #@property
+    #def fee_amount(self):
+    #    """ get cached value, if it exists """
+    #    if 'fee_amount' not in self.property_cache:
+    #        self.update_property_cache()
+
+    #    return self.get_property_cache_key('fee_amount')
+
+    #@property
+    #def _fee_amount(self):
+    #    return self.invoice.amount if self.invoice and self._fee_paid else None
+
+    #def set_property_cache_fee_amount(self, amount):
+    #    '''
+    #    Setter for fee_amount on the property cache.
+    #    '''
+    #    import json
+    #    from decimal import Decimal as D
+
+    #    class DecimalEncoder(json.JSONEncoder):
+    #        def default(self, obj):
+    #            if isinstance(obj, D):
+    #                return float(obj)
+    #            return json.JSONEncoder.default(self, obj)
+
+    #    if self.id:
+    #        data = DecimalEncoder().encode(amount)
+    #        self.property_cache['fee_amount'] = data
 
     @property
     def can_create_final_approval(self):
         return self.fee_paid and self.processing_status==Proposal.PROCESSING_STATUS_AWAITING_PAYMENT
-
-    @property
-    def licence_fee_amount(self):
-        if self.application_type.name==ApplicationType.TCLASS:
-            period = self.other_details.preferred_licence_period
-            if period.split('_')[1].endswith('months'):
-                return self.application_type.licence_fee_2mth
-            else:
-                return int(period.split('_')[0]) * self.application_type.licence_fee_1yr
-        if self.application_type.name==ApplicationType.EVENT:
-            return self.application_type.licence_fee_1yr
-
-    def reset_licence_discount(self, user):
-        """ reset when licence is issued"""
-        org = self.org_applicant
-        # if self.application_type.name=='T Class' and org and org.licence_discount > 0:
-        if self.application_type.name==ApplicationType.TCLASS and org and org.licence_discount > 0:
-            if org.licence_discount > 0:
-                lic_disc = self.fee_discounts.get(discount_type=ApplicationFeeDiscount.DISCOUNT_TYPE_LICENCE)
-                lic_disc.reset_date = timezone.now()
-                lic_disc.save()
-            org.apply_licence_discount = False
-            org.licence_discount = 0.0
-            org.save()
-
-    def reset_application_discount(self, user):
-        """ reset when application is submitted"""
-        org = self.org_applicant
-        #if self.application_type.name=='T Class' and org:
-        if self.application_type.name==ApplicationType.TCLASS and org:
-            if org.application_discount > 0 or org.licence_discount > 0:
-                app_disc = ApplicationFeeDiscount.objects.create(proposal=self, discount_type=ApplicationFeeDiscount.DISCOUNT_TYPE_APPLICATION, discount=org.application_discount, reset_date=timezone.now(), user=user)
-                lic_disc = ApplicationFeeDiscount.objects.create(proposal=self, discount_type=ApplicationFeeDiscount.DISCOUNT_TYPE_LICENCE, discount=org.licence_discount, user=user)
-
-            org.apply_application_discount = False
-            org.application_discount = 0.0
-            org.save()
-
-    @property
-    def allow_full_discount(self):
-        """ checks if a fee is payable after discount is applied """
-        org = self.org_applicant
-        if self.application_type.name==ApplicationType.TCLASS and self.other_details.preferred_licence_period and org:
-            application_fee = max( round(float(self.application_type.application_fee) - org.application_discount, 2), 0)
-            licence_fee = max( round(float(self.licence_fee_amount) - org.licence_discount, 2), 0)
-            if licence_fee == 0 and application_fee == 0:
-                return True
-        return False
 
     @property
     def reference(self):
@@ -915,16 +890,16 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     def __assessor_group(self):
         # TODO get list of assessor groups based on region and activity
-        if self.region and self.activity:
-            try:
-                check_group = ProposalAssessorGroup.objects.filter(
-                    #activities__name__in=[self.activity],
-                    region__name__in=self.regions_list
-                ).distinct()
-                if check_group:
-                    return check_group[0]
-            except ProposalAssessorGroup.DoesNotExist:
-                pass
+        #if self.region and self.activity:
+        #    try:
+        #        check_group = ProposalAssessorGroup.objects.filter(
+        #            #activities__name__in=[self.activity],
+        #            region__name__in=self.regions_list
+        #        ).distinct()
+        #        if check_group:
+        #            return check_group[0]
+        #    except ProposalAssessorGroup.DoesNotExist:
+        #        pass
         default_group = ProposalAssessorGroup.objects.get(default=True)
 
         return default_group
@@ -932,16 +907,16 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     def __approver_group(self):
         # TODO get list of approver groups based on region and activity
-        if self.region and self.activity:
-            try:
-                check_group = ProposalApproverGroup.objects.filter(
-                    #activities__name__in=[self.activity],
-                    region__name__in=self.regions_list
-                ).distinct()
-                if check_group:
-                    return check_group[0]
-            except ProposalApproverGroup.DoesNotExist:
-                pass
+        #if self.region and self.activity:
+        #    try:
+        #        check_group = ProposalApproverGroup.objects.filter(
+        #            #activities__name__in=[self.activity],
+        #            region__name__in=self.regions_list
+        #        ).distinct()
+        #        if check_group:
+        #            return check_group[0]
+        #    except ProposalApproverGroup.DoesNotExist:
+        #        pass
         default_group = ProposalApproverGroup.objects.get(default=True)
 
         return default_group

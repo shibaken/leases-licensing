@@ -50,6 +50,15 @@ from leaseslicensing.helpers import is_customer, is_internal
 from rest_framework_datatables.pagination import DatatablesPageNumberPagination
 from leaseslicensing.components.proposals.api import ProposalFilterBackend, ProposalRenderer
 
+
+class GetComplianceStatusesDict(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        data = [{'code': i[0], 'description': i[1]} for i in Compliance.CUSTOMER_STATUS_CHOICES]
+        return Response(data)
+
+
 class CompliancePaginatedViewSet(viewsets.ModelViewSet):
     filter_backends = (ProposalFilterBackend,)
     pagination_class = DatatablesPageNumberPagination
@@ -63,10 +72,26 @@ class CompliancePaginatedViewSet(viewsets.ModelViewSet):
             #return Compliance.objects.all()
             return Compliance.objects.all().exclude(processing_status='discarded')
         elif is_customer(self.request):
-            user_orgs = [org.id for org in self.request.user.leaseslicensing_organisations.all()]
-            queryset =  Compliance.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = self.request.user) ).exclude(processing_status='discarded')
+            # TODO: fix EmailUserRO issue here
+            #user_orgs = [org.id for org in self.request.user.leaseslicensing_organisations.all()]
+            #queryset =  Compliance.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = self.request.user) ).exclude(processing_status='discarded')
+            queryset =  Compliance.objects.filter( Q(proposal__submitter = self.request.user.id) ).exclude(processing_status='discarded')
             return queryset
         return Compliance.objects.none()
+
+    @list_route(methods=['GET',], detail=False)
+    def list_external(self, request, *args, **kwargs):
+        """
+        User is accessing /external/ page
+        """
+        qs = self.get_queryset()
+        qs = self.filter_queryset(qs)
+
+        self.paginator.page_size = qs.count()
+        result_page = self.paginator.paginate_queryset(qs, request)
+        #serializer = ListComplianceSerializer(result_page, context={'request': request}, many=True)
+        serializer = ComplianceSerializer(result_page, context={'request': request}, many=True)
+        return self.paginator.get_paginated_response(serializer.data)
 
     @list_route(methods=['GET',], detail=False)
     def compliances_external(self, request, *args, **kwargs):
@@ -104,8 +129,10 @@ class ComplianceViewSet(viewsets.ModelViewSet):
         if is_internal(self.request):
             return Compliance.objects.all().exclude(processing_status='discarded')
         elif is_customer(self.request):
-            user_orgs = [org.id for org in self.request.user.leaseslicensing_organisations.all()]
-            queryset =  Compliance.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = self.request.user) ).exclude(processing_status='discarded')
+            # TODO: fix EmailUserRO issue here
+            #user_orgs = [org.id for org in self.request.user.leaseslicensing_organisations.all()]
+            #queryset =  Compliance.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = self.request.user) ).exclude(processing_status='discarded')
+            queryset =  Compliance.objects.filter( Q(proposal__submitter = self.request.user.id) ).exclude(processing_status='discarded')
             return queryset
         return Compliance.objects.none()
 

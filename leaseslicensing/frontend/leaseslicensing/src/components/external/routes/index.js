@@ -1,14 +1,19 @@
-import ExternalDashboard from '../dashboard.vue'
-import Proposal from '../proposal.vue'
-//import LeasesLicensingLicence from '../commercial_operator_licence.vue'
-import ProposalApply from '../proposal_apply.vue'
-import ProposalSubmit from '../proposal_submit.vue'
-import Organisation from '../organisations/manage.vue'
+import ExternalDashboard from '@/components/external/dashboard.vue'
+import Proposal from '@/components/external/proposal.vue'
+import ProposalApply from '@/components/external/proposal_apply.vue'
+import ProposalSubmit from '@/components/external/proposal_submit.vue'
+import Organisation from '@/components/external/organisations/manage.vue'
+import DcvPermit from '@/components/external/dcv/dcv_permit.vue'
+import DcvAdmission from '@/components/external/dcv/dcv_admission.vue'
+import VesselsDashboard from '@/components/external/vessels_dashboard.vue'
+import ManageVessel from '@/components/external/manage_vessel.vue'
+import Compliance from '../compliances/access.vue'
+import ComplianceSubmit from '../compliances/submit.vue'
+/*
 import Compliance from '../compliances/access.vue'
 import ComplianceSubmit from '../compliances/submit.vue'
 import Approval from '../approvals/approval.vue'
-import PaymentOrder from '@/components/common/tclass/payment_order.vue'
-import PaymentDash from '@/components/common/payments_dashboard.vue'
+*/
 export default
 {
     path: '/external',
@@ -23,7 +28,7 @@ export default
         {
             path: '/',
             component: ExternalDashboard,
-            name: 'external-proposals-dash'
+            name: 'external-dashboard'
         },
         {
             path: 'organisations/manage/:org_id',
@@ -38,20 +43,12 @@ export default
             component: ComplianceSubmit,
             name:"submit_compliance"
         },
+        /*
         {
             path: 'approval/:approval_id',
             component: Approval,
         },
-        {
-            path: 'payment',
-            component: PaymentDash,
-            props: { level: 'external' }
-        },
-        {
-            path: 'payment_order',
-            component: PaymentOrder,
-            name:"payment_order"
-        },
+        */
         {
             path: 'proposal',
             component:
@@ -77,12 +74,45 @@ export default
                     component: Proposal,
                     name:"draft_proposal"
                 },
-                //{
-                //    path: ':proposal_id',
-                //    component: LeasesLicensingLicence,
-                //    name:"draft_commercial_operator_licence"
-                //},
             ]
-        }
+        },
+        {
+            path: 'dcv_permit',
+            component: DcvPermit,
+            name: 'dcv_permit'
+        },
+        {
+            path: 'dcv_admission',
+            component: DcvAdmission,
+            name: 'dcv_admission'
+        },
+        {
+            path: 'vessels',
+            component: VesselsDashboard,
+            name: 'vessels-dashboard'
+        },
+        {
+            path: 'vesselownership',
+            component:
+            {
+                render(c)
+                {
+                    return c('router-view')
+                }
+            },
+            children: [
+                {
+                    path: '/',
+                    component: ManageVessel,
+                    name:"new-vessel"
+                },
+                {
+                    path: ':vessel_id',
+                    component: ManageVessel,
+                    name:"manage-vessel"
+                },
+            ]
+        },
+
     ]
 }

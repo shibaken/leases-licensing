@@ -56,11 +56,7 @@ export default {
         disable_add_entry: {
             type: Boolean,
             default: true
-        },
-        is_user_log:{
-              type: Boolean,              
-              default: false
-        },
+        }
     },
     data() {
         let vm = this;
@@ -75,7 +71,7 @@ export default {
                 responsive: true,
                 deferRender: true, 
                 autowidth: true,
-				order: [[3, 'desc']], // order the non-formatted date as a hidden column
+                order: [[3, 'desc']], // order the non-formatted date as a hidden column
                 dom:
                     "<'row'<'col-sm-5'l><'col-sm-6'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
@@ -117,7 +113,7 @@ export default {
                 responsive: true,
                 deferRender: true, 
                 autowidth: true,
-				order: [[8, 'desc']], // order the non-formatted date as a hidden column
+                order: [[8, 'desc']], // order the non-formatted date as a hidden column
                 processing:true,
                 ajax: {
                     "url": vm.comms_url, 
@@ -128,17 +124,14 @@ export default {
                         title: 'Date',
                         data: 'created',
                         render: function (date) {
+                            //return moment(date).format("DD-MMM-YYYY HH:mm:ss");
                             //return moment(date).format(vm.DATE_TIME_FORMAT);
                             return moment(date).format(vm.dateFormat);
                         }
                     },
                     {
                         title: 'Type',
-                        //data: 'type'
-                        data: '',
-                        mRender:function(data,type,full){
-                           return vm.is_user_log  ? full.log_type: full.type;
-                        },
+                        data: 'type'
                     },
                     /*{
                         title: 'Reference',
@@ -341,6 +334,7 @@ export default {
                     <table id="${commsLogId}" class="hover table table-striped table-bordered dt-responsive " cellspacing="0" width="100%">
                     </table>`
                 },
+                sanitize:false,
                 html: true,
                 title: 'Communications Log',
                 container: 'body',
@@ -401,6 +395,7 @@ export default {
                         </tbody>
                     </table>`
                 },
+                sanitize:false,
                 html: true,
                 title: 'Action Log',
                 container: 'body',

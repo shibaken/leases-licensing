@@ -42,9 +42,10 @@ COPY timezone /etc/timezone
 ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-#COPY libgeos.py.patch /app/
-#RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/gis/geos/libgeos.py /app/libgeos.py.patch
-#RUN rm /app/libgeos.py.patch
+# Patch also required on local environments after a venv rebuild
+COPY admin.patch.additional /app/
+RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
+RUN rm /app/admin.patch.additional
 
 COPY cron /etc/cron.d/dockercron
 COPY startup.sh /

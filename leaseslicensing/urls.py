@@ -4,6 +4,9 @@ from leaseslicensing.admin import admin
 from django.conf.urls import url, include
 from django.urls import path
 from django.contrib.auth.views import LogoutView, LoginView
+
+from django.contrib.auth import logout, login # DEV ONLY
+
 from django.conf.urls.static import static
 from rest_framework import routers
 from leaseslicensing import views
@@ -20,6 +23,8 @@ from leaseslicensing.components.proposals import api as proposal_api
 from leaseslicensing.components.approvals import api as approval_api
 from leaseslicensing.components.compliances import api as compliances_api
 from ledger_api_client.urls import urlpatterns as ledger_patterns
+from leaseslicensing.management.default_data_manager import DefaultDataManager
+from leaseslicensing.utils import are_migrations_running
 
 # API patterns
 router = routers.DefaultRouter()
@@ -65,6 +70,7 @@ api_patterns = [
     url(r'^api/compliance_amendment_reason_choices',compliances_api.ComplianceAmendmentReasonChoicesView.as_view(),name='amendment_request_reason_choices'),
     url(r'^api/search_keywords',proposal_api.SearchKeywordsView.as_view(),name='search_keywords'),
     url(r'^api/search_reference',proposal_api.SearchReferenceView.as_view(),name='search_reference'),
+    #url(r'^api/applicants_dict$', proposal_api.GetApplicantsDict.as_view(), name='get-applicants-dict'),
 
     #url(r'^api/oracle_job$',main_api.OracleJob.as_view(), name='get-oracle'),
 
@@ -77,22 +83,30 @@ urlpatterns = [
     #url(r'^admin/', include(leaseslicensing_admin_site.urls)),
     #url(r'^admin/', leaseslicensing_admin_site.urls),
     path(r'admin/', admin.site.urls),
-    url(r'^login/', LoginView.as_view(),name='login'),
+    #url(r'^login/', LoginView.as_view(),name='login'),
+    #path('login/', login, name='login'),
     url(r'^logout/$', LogoutView.as_view(), {'next_page': '/'}, name='logout'),
-    #url(r'', include(api_patterns)),
-    #url(r'^$', views.LeasesLicensingRoutingView.as_view(), name='ds_home'),
-    #url(r'^contact/', views.LeasesLicensingContactView.as_view(), name='ds_contact'),
-    #url(r'^further_info/', views.LeasesLicensingFurtherInformationView.as_view(), name='ds_further_info'),
-    #url(r'^internal/', views.InternalView.as_view(), name='internal'),
-    #url(r'^internal/proposal/(?P<proposal_pk>\d+)/referral/(?P<referral_pk>\d+)/$', views.ReferralView.as_view(), name='internal-referral-detail'),
-    #url(r'^external/', views.ExternalView.as_view(), name='external'),
-    #url(r'^firsttime/$', views.first_time, name='first_time'),
-    #url(r'^account/$', views.ExternalView.as_view(), name='manage-account'),
-    #url(r'^profiles/', views.ExternalView.as_view(), name='manage-profiles'),
-    #url(r'^help/(?P<application_type>[^/]+)/(?P<help_type>[^/]+)/$', views.HelpView.as_view(), name='help'),
-    #url(r'^mgt-commands/$', views.ManagementCommandsView.as_view(), name='mgt-commands'),
+    url(r'', include(api_patterns)),
+    url(r'^$', views.LeasesLicensingRoutingView.as_view(), name='ds_home'),
+    url(r'^contact/', views.LeasesLicensingContactView.as_view(), name='ds_contact'),
+    url(r'^further_info/', views.LeasesLicensingFurtherInformationView.as_view(), name='ds_further_info'),
+    url(r'^internal/', views.InternalView.as_view(), name='internal'),
+    url(r'^internal/proposal/(?P<proposal_pk>\d+)/referral/(?P<referral_pk>\d+)/$', views.ReferralView.as_view(), name='internal-referral-detail'),
+    url(r'^external/', views.ExternalView.as_view(), name='external'),
+    url(r'^firsttime/$', views.first_time, name='first_time'),
+    url(r'^account/$', views.ExternalView.as_view(), name='manage-account'),
+    url(r'^profiles/', views.ExternalView.as_view(), name='manage-profiles'),
+    url(r'^help/(?P<application_type>[^/]+)/(?P<help_type>[^/]+)/$', views.HelpView.as_view(), name='help'),
+    url(r'^mgt-commands/$', views.ManagementCommandsView.as_view(), name='mgt-commands'),
     #url(r'test-emails/$', proposal_views.TestEmailView.as_view(), name='test-emails'),
-    #url(r'^proposal/$', proposal_views.ProposalView.as_view(), name='proposal'),
+    url(r'^proposal/$', proposal_views.ProposalView.as_view(), name='proposal'),
+    url(r'^api/application_types$', proposal_api.GetApplicationTypeDescriptions.as_view(), name='get-application-type-descriptions'),
+    url(r'^api/application_types_dict$', proposal_api.GetApplicationTypeDict.as_view(), name='get-application-type-dict'),
+    url(r'^api/application_statuses_dict$', proposal_api.GetApplicationStatusesDict.as_view(), name='get-application-statuses-dict'),
+    # Approval type should point to Approval.current_proposal.application_type
+    #url(r'^api/approval_types_dict$', approval_api.GetApprovalTypeDict.as_view(), name='get-approval-type-dict'),
+    url(r'^api/approval_statuses_dict$', approval_api.GetApprovalStatusesDict.as_view(), name='get-approval-statuses-dict'),
+    url(r'^api/compliance_statuses_dict$', compliances_api.GetComplianceStatusesDict.as_view(), name='get-compliance-statuses-dict'),
     #url(r'^preview/licence-pdf/(?P<proposal_pk>\d+)',proposal_views.PreviewLicencePDFView.as_view(), name='preview_licence_pdf'),
 
     ## payment related urls
@@ -121,9 +135,6 @@ urlpatterns = [
     #url(r'^external/compliance/(?P<compliance_pk>\d+)/$', views.ExternalComplianceView.as_view(), name='external-compliance-detail'),
     #url(r'^internal/compliance/(?P<compliance_pk>\d+)/$', views.InternalComplianceView.as_view(), name='internal-compliance-detail'),
 
-    ##filming
-    #url(r'^internal/proposal/(?P<proposal_pk>\d+)/district_proposal/(?P<district_proposal_pk>\d+)/$', views.DistrictProposalView.as_view(), name='internal-district-proposal-detail'),
-
     ##url(r'^organisations/(?P<pk>\d+)/confirm-delegate-access/(?P<uid>[0-9A-Za-z]+)-(?P<token>.+)/$', views.ConfirmDelegateAccess.as_view(), name='organisation_confirm_delegate_access'),
     ## reversion history-compare
     #url(r'^history/proposal/(?P<pk>\d+)/$', proposal_views.ProposalHistoryCompareView.as_view(), name='proposal_history'),
@@ -138,8 +149,14 @@ urlpatterns = [
 
 ] + ledger_patterns
 
+if settings.EMAIL_INSTANCE != 'PROD':
+    urlpatterns.append(path('accounts/', include('django.contrib.auth.urls')))
+
 if settings.DEBUG:  # Serve media locally in development.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if not are_migrations_running():
+    DefaultDataManager()
 
 #if settings.SHOW_DEBUG_TOOLBAR:
 #    import debug_toolbar

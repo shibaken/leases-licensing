@@ -120,23 +120,14 @@ class _ApprovalPaymentSerializer(serializers.ModelSerializer):
 
 
 class ApprovalSerializer(serializers.ModelSerializer):
-    #applicant = serializers.CharField(source='applicant.name')
     applicant = serializers.SerializerMethodField(read_only=True)
     applicant_type = serializers.SerializerMethodField(read_only=True)
     applicant_id = serializers.SerializerMethodField(read_only=True)
-    #applicant_id = serializers.ReadOnlyField(source='applicant.id')
     licence_document = serializers.CharField(source='licence_document._file.url')
-    #renewal_document = serializers.CharField(source='renewal_document._file.url')
     renewal_document = serializers.SerializerMethodField(read_only=True)
     status = serializers.CharField(source='get_status_display')
     allowed_assessors = EmailUserSerializer(many=True)
-    region = serializers.CharField(source='current_proposal.region.name')
-    district = serializers.CharField(source='current_proposal.district.name', allow_null=True)
-    #tenure = serializers.CharField(source='current_proposal.tenure.name')
-    activity = serializers.CharField(source='current_proposal.activity')
     title = serializers.CharField(source='current_proposal.title')
-    #current_proposal = InternalProposalSerializer(many=False)
-    #application_type = ApplicationTypeSerializer(many=True)
     application_type = serializers.SerializerMethodField(read_only=True)
     linked_applications = serializers.SerializerMethodField(read_only=True)
     can_renew = serializers.SerializerMethodField()
@@ -154,9 +145,6 @@ class ApprovalSerializer(serializers.ModelSerializer):
             'licence_document',
             'replaced_by',
             'current_proposal',
-            'activity',
-            'region',
-            'district',
             'tenure',
             'title',
             'renewal_document',
@@ -198,8 +186,6 @@ class ApprovalSerializer(serializers.ModelSerializer):
         # also require the following additional fields for some of the mRender functions
         datatables_always_serialize = (
             'id',
-            'activity',
-            'region',
             'title',
             'status',
             'reference',

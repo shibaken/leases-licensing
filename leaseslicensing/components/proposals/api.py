@@ -59,7 +59,7 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalSerializer,
     InternalProposalSerializer,
     SaveProposalSerializer,
-    DTProposalSerializer,
+    CreateProposalSerializer,
     ProposalUserActionSerializer,
     ProposalLogEntrySerializer,
     DTReferralSerializer,
@@ -106,6 +106,69 @@ from rest_framework.filters import BaseFilterBackend
 import logging
 logger = logging.getLogger(__name__)
 
+
+#class GetApplicantsDict(views.APIView):
+#    renderer_classes = [JSONRenderer, ]
+#
+#    def get(self, request, format=None):
+#        applicants = EmailUser.objects.filter(mooringlicensing_proposals__in=Proposal.objects.all()).order_by('first_name', 'last_name').distinct()
+#        return Response(EmailUserSerializer(applicants, many=True).data)
+
+
+#class GetApplicationTypeDict(views.APIView):
+#    renderer_classes = [JSONRenderer, ]
+#
+#    def get(self, request, format=None):
+#        apply_page = request.GET.get('apply_page', 'false')
+#        apply_page = True if apply_page.lower() in ['true', 'yes', 'y', ] else False
+#        data = cache.get('application_type_dict')
+#        if not data:
+#            cache.set('application_type_dict',Proposal.application_types_dict(apply_page=apply_page), settings.LOV_CACHE_TIMEOUT)
+#            data = cache.get('application_type_dict')
+#        return Response(data)
+
+
+class GetApplicationTypeDict(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        payload = {}
+        data = cache.get('application_type_dict')
+        if not data:
+            cache.set(
+                    'application_type_dict', 
+                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES], 
+                        settings.LOV_CACHE_TIMEOUT
+                        )
+            data = cache.get('application_type_dict')
+        return Response(data)
+
+
+class GetApplicationTypeDescriptions(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        data = cache.get('application_type_descriptions')
+        if not data:
+            cache.set(
+                    'application_type_descriptions', 
+                    [app_type[1] for app_type in settings.APPLICATION_TYPES], 
+                        settings.LOV_CACHE_TIMEOUT
+                        )
+            data = cache.get('application_type_descriptions')
+        return Response(data)
+
+class GetApplicationStatusesDict(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        data = {}
+        if not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
+            cache.set('application_internal_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.CUSTOMER_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+            cache.set('application_external_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+        data['external_statuses'] = cache.get('application_external_statuses_dict')
+        data['internal_statuses'] = cache.get('application_internal_statuses_dict')
+        return Response(data)
 
 class GetProposalType(views.APIView):
     renderer_classes = [JSONRenderer, ]
@@ -163,84 +226,6 @@ class ProposalFilterBackend(DatatablesFilterBackend):
                     return i[0]
             return None
 
-        # on the internal dashboard, the Region filter is multi-select - have to use the custom filter below
-        regions = request.GET.get('regions')
-        if regions:
-            if queryset.model is Proposal:
-                queryset = queryset.filter(region__name__iregex=regions.replace(',', '|'))
-            elif queryset.model is Referral or queryset.model is Compliance:
-                queryset = queryset.filter(proposal__region__name__iregex=regions.replace(',', '|'))
-
-        # on the internal dashboard, the Payment Status filter is a property field (not a DB field) - have to use the custom filter below
-        if queryset.model is Booking:
-            park = request.GET.get('park')
-            payment_method = request.GET.get('payment_method')
-            payment_status = request.GET.get('payment_status')
-
-            if park:
-                queryset = queryset.filter(park_bookings__park__id__in=[park])
-
-            if payment_method:
-                #queryset = queryset.filter(invoices__payment_method=payment_method)
-                queryset = queryset.filter(Q(invoices__payment_method=payment_method) | Q(booking_type=Booking.BOOKING_TYPE_MONTHLY_INVOICING))
-
-            if payment_status:
-                ids = []
-                if payment_status.lower() == 'overdue':
-                    for i in ParkBooking.objects.all():
-                        if (i.booking.invoices.last() and i.booking.invoices.last().payment_status=='Unpaid') or \
-                            not i.booking.invoices.last() and \
-                            i.booking.invoices.last() and i.booking.deferred_payment_date and i.booking.deferred_payment_date < timezone.now().date():
-
-                            ids.append(i.id)
-                if payment_status.lower() == 'unpaid':
-                    for i in ParkBooking.objects.all():
-                        if (i.booking.invoices.last() and i.booking.invoices.last().payment_status.lower()=='unpaid') or not i.booking.invoices.last():
-                            ids.append(i.id)
-                else:
-                    for i in ParkBooking.objects.all():
-                        if i.booking.invoices.last() and i.booking.invoices.last().payment_status and i.booking.invoices.last().payment_status.lower()==payment_status.lower().replace('_',' '):
-                            ids.append(i.id)
-
-                queryset = queryset.filter(park_bookings__in=ids)
-
-        #Filtering for ParkBooking dashboard
-        if queryset.model is ParkBooking:
-            park = request.GET.get('park')
-            payment_method = request.GET.get('payment_method')
-            payment_status = request.GET.get('payment_status')
-
-            if park:
-                queryset = queryset.filter(park__id__in=[park])
-
-            if payment_method:
-                if payment_method == str(BookingInvoice.PAYMENT_METHOD_MONTHLY_INVOICING):
-                    # for deferred payment where invoice not yet created (monthly invoicing), append the following qs
-                    queryset = queryset.filter(Q(booking__invoices__payment_method=payment_method) | Q(booking__booking_type=Booking.BOOKING_TYPE_MONTHLY_INVOICING))
-                else:
-                    queryset = queryset.filter(Q(booking__invoices__payment_method=payment_method))
-
-
-            if payment_status:
-                ids = []
-                if payment_status.lower() == 'overdue':
-                    for i in ParkBooking.objects.all():
-                        if (i.booking.invoices.last() and i.booking.invoices.last().payment_status=='Unpaid') or \
-                            not i.booking.invoices.last() and \
-                            i.booking.invoices.last() and i.booking.deferred_payment_date and i.booking.deferred_payment_date < timezone.now().date():
-
-                            ids.append(i.id)
-                if payment_status.lower() == 'unpaid':
-                    for i in ParkBooking.objects.all():
-                        if (i.booking.invoices.last() and i.booking.invoices.last().payment_status.lower()=='unpaid') or not i.booking.invoices.last():
-                            ids.append(i.id)
-                else:
-                    for i in ParkBooking.objects.all():
-                        if i.booking.invoices.last() and i.booking.invoices.last().payment_status and i.booking.invoices.last().payment_status.lower()==payment_status.lower().replace('_',' '):
-                            ids.append(i.id)
-
-                queryset = queryset.filter(id__in=ids)
-
         date_from = request.GET.get('date_from')
         date_to = request.GET.get('date_to')
         if queryset.model is Proposal:
@@ -262,26 +247,6 @@ class ProposalFilterBackend(DatatablesFilterBackend):
             if date_to:
                 queryset = queryset.filter(due_date__lte=date_to)
         elif queryset.model is Referral:
-            if date_from:
-                queryset = queryset.filter(proposal__lodgement_date__gte=date_from)
-
-            if date_to:
-                queryset = queryset.filter(proposal__lodgement_date__lte=date_to)
-        elif queryset.model is Booking:
-            if date_from and date_to:
-                queryset = queryset.filter(park_bookings__arrival__range=[date_from, date_to])
-            elif date_from:
-                queryset = queryset.filter(park_bookings__arrival__gte=date_from)
-            elif date_to:
-                queryset = queryset.filter(park_bookings__arrival__lte=date_to)
-        elif queryset.model is ParkBooking:
-            if date_from and date_to:
-                queryset = queryset.filter(arrival__range=[date_from, date_to])
-            elif date_from:
-                queryset = queryset.filter(arrival__gte=date_from)
-            elif date_to:
-                queryset = queryset.filter(arrival__lte=date_to)
-        elif queryset.model is DistrictProposal:
             if date_from:
                 queryset = queryset.filter(proposal__lodgement_date__gte=date_from)
 
@@ -333,14 +298,17 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
             return ApplicationType.objects.none()
 
     def get_queryset(self):
+        #import ipdb; ipdb.set_trace()
         user = self.request.user
         if is_internal(self.request): #user.is_authenticated():
-            qs= Proposal.objects.all().exclude(application_type=self.excluded_type)
-            return qs.exclude(migrated=True)
+            #qs= Proposal.objects.all().exclude(application_type=self.excluded_type)
+            #return qs.exclude(migrated=True)
+            return Proposal.objects.all()
         elif is_customer(self.request):
-            user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
-            qs= Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(application_type=self.excluded_type)
-            return qs.exclude(migrated=True)
+            #user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
+            #qs= Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(application_type=self.excluded_type)
+            #return qs.exclude(migrated=True)
+            return Proposal.objects.all()
         return Proposal.objects.none()
 
 #    def filter_queryset(self, request, queryset, view):
@@ -354,6 +322,19 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
 #        #response.data['regions'] = self.get_queryset().filter(region__isnull=False).values_list('region__name', flat=True).distinct()
 #        return response
 
+    def list(self, request, *args, **kwargs):
+        """
+        User is accessing /external/ page
+        """
+        qs = self.get_queryset()
+        qs = self.filter_queryset(qs)
+
+        self.paginator.page_size = qs.count()
+        result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
+        serializer = ListProposalSerializer(result_page, context={'request': request}, many=True)
+        return self.paginator.get_paginated_response(serializer.data)
+
+    # TODO: check if still required
     @list_route(methods=['GET',], detail=False)
     def proposals_internal(self, request, *args, **kwargs):
         """
@@ -548,13 +529,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         try:
-            application_type = Proposal.objects.get(id=self.kwargs.get('id')).application_type.name
-            if application_type == ApplicationType.TCLASS:
-                return ProposalSerializer
-            elif application_type == ApplicationType.FILMING:
-                return ProposalFilmingSerializer
-            elif application_type == ApplicationType.EVENT:
-                return ProposalEventSerializer
+            return ProposalSerializer
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -594,21 +569,12 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET',], detail=False)
     def filter_list(self, request, *args, **kwargs):
         """ Used by the internal/external dashboard filters """
-        region_qs =  self.get_queryset().filter(region__isnull=False).values_list('region__name', flat=True).distinct()
-        #district_qs =  self.get_queryset().filter(district__isnull=False).values_list('district__name', flat=True).distinct()
-        activity_qs =  self.get_queryset().filter(activity__isnull=False).values_list('activity', flat=True).distinct()
         submitter_qs = self.get_queryset().filter(submitter__isnull=False).distinct('submitter__email').values_list('submitter__first_name','submitter__last_name','submitter__email')
         submitters = [dict(email=i[2], search_term='{} {} ({})'.format(i[0], i[1], i[2])) for i in submitter_qs]
         application_types=ApplicationType.objects.filter(visible=True).values_list('name', flat=True)
         data = dict(
-            regions=region_qs,
-            #districts=district_qs,
-            activities=activity_qs,
             submitters=submitters,
             application_types=application_types,
-            #processing_status_choices = [i[1] for i in Proposal.PROCESSING_STATUS_CHOICES],
-            #processing_status_id_choices = [i[0] for i in Proposal.PROCESSING_STATUS_CHOICES],
-            #customer_status_choices = [i[1] for i in Proposal.CUSTOMER_STATUS_CHOICES],
             approval_status_choices = [i[1] for i in Approval.STATUS_CHOICES],
         )
         return Response(data)
@@ -911,7 +877,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET',], detail=False)
     def user_list(self, request, *args, **kwargs):
         qs = self.get_queryset().exclude(processing_status='discarded')
-        #serializer = DTProposalSerializer(qs, many=True)
         serializer = ListProposalSerializer(qs,context={'request':request}, many=True)
         return Response(serializer.data)
 
@@ -1476,108 +1441,30 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            http_status = status.HTTP_200_OK
-            application_type = request.data.get('application')
-            region = request.data.get('region')
-            district = request.data.get('district')
-            #tenure = request.data.get('tenure')
-            activity = request.data.get('activity')
-            sub_activity1 = request.data.get('sub_activity1')
-            sub_activity2 = request.data.get('sub_activity2')
-            category = request.data.get('category')
-            approval_level = request.data.get('approval_level')
-            selected_copy_from = request.data.get('selected_copy_from', None)
+            with transaction.atomic():
+                print("request.data")
+                print(request.data)
+                http_status = status.HTTP_200_OK
+                application_type_str = request.data.get("application_type", {}).get("code")
 
-            application_name = ApplicationType.objects.get(id=application_type).name
-            # Get most recent versions of the Proposal Types
-            qs_proposal_type = ProposalType.objects.all().order_by('name', '-version').distinct('name')
-            proposal_type = qs_proposal_type.get(name=application_name)
+                application_type = ApplicationType.objects.get(name=application_type_str)
+                proposal_type = ProposalType.objects.get(code='new')
 
-            if application_name==ApplicationType.EVENT and selected_copy_from:
-                copy_from_proposal=Proposal.objects.get(id=selected_copy_from)
-                instance=copy_from_proposal.reapply_event(request)
-
-            else:
                 data = {
-                    #'schema': qs_proposal_type.order_by('-version').first().schema,
-                    'schema': proposal_type.schema,
                     'submitter': request.user.id,
                     'org_applicant': request.data.get('org_applicant'),
-                    'application_type': application_type,
-                    'region': region,
-                    'district': district,
-                    'activity': activity,
-                    'approval_level': approval_level,
-                    #'other_details': {},
-                    #'tenure': tenure,
-                    'data': [
-                        {
-                            u'regionActivitySection': [{
-                                'Region': Region.objects.get(id=region).name if region else None,
-                                'District': District.objects.get(id=district).name if district else None,
-                                #'Tenure': Tenure.objects.get(id=tenure).name if tenure else None,
-                                #'ApplicationType': ApplicationType.objects.get(id=application_type).name
-                                'ActivityType': activity,
-                                'Sub-activity level 1': sub_activity1,
-                                'Sub-activity level 2': sub_activity2,
-                                'Management area': category,
-                            }]
-                        }
-
-                    ],
+                    'application_type_id': application_type.id,
+                    'proposal_type_id': proposal_type.id,
                 }
-                serializer = SaveProposalSerializer(data=data)
+                print(data)
+                print("before serializer")
+                serializer = CreateProposalSerializer(data=data)
                 serializer.is_valid(raise_exception=True)
                 #serializer.save()
                 instance=serializer.save()
-                #Create ProposalOtherDetails instance for T Class/Filming/Event licence
-                if application_name==ApplicationType.TCLASS:
-                    other_details_data={
-                        'proposal': instance.id
-                    }
-                    serializer=SaveProposalOtherDetailsSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                elif application_name==ApplicationType.FILMING:
-                    other_details_data={
-                        'proposal': instance.id
-                    }
-                    #serializer=SaveProposalOtherDetailsFilmingSerializer(data=other_details_data)
-                    serializer=ProposalFilmingActivitySerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                    serializer=ProposalFilmingAccessSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                    serializer=ProposalFilmingEquipmentSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                    serializer=ProposalFilmingOtherDetailsSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-                elif application_name==ApplicationType.EVENT:
-                    other_details_data={
-                        'proposal': instance.id
-                    }
-                    serializer=ProposalEventOtherDetailsSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
 
-                    serializer=ProposalEventActivitiesSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-
-                    serializer=ProposalEventVehiclesVesselsSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-
-                    serializer=ProposalEventManagementSerializer(data=other_details_data)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
-
-
-            serializer = SaveProposalSerializer(instance)
-            return Response(serializer.data)
+                serializer = SaveProposalSerializer(instance)
+                return Response(serializer.data)
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
@@ -1630,18 +1517,12 @@ class ReferralViewSet(viewsets.ModelViewSet):
         """ Used by the external dashboard filters """
         #qs =  self.get_queryset().filter(referral=request.user)
         qs =  self.get_queryset()
-        region_qs =  qs.filter(proposal__region__isnull=False).values_list('proposal__region__name', flat=True).distinct()
-        #district_qs =  qs.filter(proposal__district__isnull=False).values_list('proposal__district__name', flat=True).distinct()
-        activity_qs =  qs.filter(proposal__activity__isnull=False).order_by('proposal__activity').distinct('proposal__activity').values_list('proposal__activity', flat=True).distinct()
         submitter_qs = qs.filter(proposal__submitter__isnull=False).order_by('proposal__submitter').distinct('proposal__submitter').values_list('proposal__submitter__first_name','proposal__submitter__last_name','proposal__submitter__email')
         submitters = [dict(email=i[2], search_term='{} {} ({})'.format(i[0], i[1], i[2])) for i in submitter_qs]
         processing_status_qs =  qs.filter(proposal__processing_status__isnull=False).order_by('proposal__processing_status').distinct('proposal__processing_status').values_list('proposal__processing_status', flat=True)
         processing_status = [dict(value=i, name='{}'.format(' '.join(i.split('_')).capitalize())) for i in processing_status_qs]
         application_types=ApplicationType.objects.filter(visible=True).values_list('name', flat=True)
         data = dict(
-            regions=region_qs,
-            #districts=district_qs,
-            activities=activity_qs,
             submitters=submitters,
             processing_status_choices=processing_status,
             application_types=application_types,
