@@ -1,80 +1,15 @@
 <template>
     <div>
-        <div v-if="is_external && wlaDash">
-            <div class="row">
-                <div class="col-lg-12">
-                    <input type="checkbox" id="checkbox_show_expired" v-model="show_expired_surrendered">
-                    <label for="checkbox_show_expired">Show expired and/or surrendered waiting list allocations</label>
-                </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="">Status:</label>
+                <select class="form-control" v-model="filterStatus">
+                    <option value="All">All</option>
+                    <option v-for="status in statusValues" :value="status.code">{{ status.description }}</option>
+                </select>
             </div>
         </div>
-        <div v-else class="row">
-            <div v-if="!wlaDash">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Type:</label>
-                            <select class="form-control" v-model="filterApprovalType">
-                                <option value="All">All</option>
-                                <option v-for="type in approvalTypes" :value="type.code">{{ type.description }}</option>
-                            </select>
-                        </div>
-                    </div>
-                <!--div v-if="is_internal">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Holder:</label>
-                            <select class="form-control" v-model="filterHolder">
-                                <option value="All">All</option>
-                                <option v-for="h in holderList" :value="h.id">{{ h.full_name }}</option>
-                            </select>
-                        </div>
-                    </div>
-                </div-->
-            </div>
-            <div v-else>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="">Bay:</label>
-                        <select class="form-control" v-model="filterMooringBay">
-                            <option value="All">All</option>
-                            <option v-for="bay in mooringBays" :value="bay.id">{{ bay.name }}</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Status:</label>
-                    <select class="form-control" v-model="filterStatus">
-                        <option value="All">All</option>
-                        <option v-for="status in statusValues" :value="status.code">{{ status.description }}</option>
-                    </select>
-                </div>
-            </div>
 
-            <div v-if="wlaDash">
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label for="">Max Vessel Length:</label>
-                        <input class="form-control" type="number" v-model="maxVesselLength" id="maxVesselLength"/>
-                        <!--select class="form-control" v-model="filterStatus">
-                            <option value="All">All</option>
-                            <option v-for="status in statusValues" :value="status.code">{{ status.description }}</option>
-                        </select-->
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label for="">Max Vessel Draft:</label>
-                        <input class="form-control" type="number" v-model="maxVesselDraft" id="maxVesselDraft"/>
-                        <!--select class="form-control" v-model="filterStatus">
-                            <option value="All">All</option>
-                            <option v-for="status in statusValues" :value="status.code">{{ status.description }}</option>
-                        </select-->
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="row">
             <div class="col-lg-12">
@@ -85,15 +20,6 @@
                     :dtHeaders="datatable_headers"
                 />
             </div>
-        </div>
-        <div v-if="is_internal && wlaDash && selectedWaitingListAllocationId">
-            <OfferMooringLicence
-                ref="offer_mooring_licence"
-                :key="offerMooringLicenceKey"
-                :wlaId="selectedWaitingListAllocationId"
-                :mooringBayId="mooringBayId"
-                @refreshFromResponse="refreshFromResponse"
-            />
         </div>
         <ApprovalCancellation ref="approval_cancellation"  @refreshFromResponse="refreshFromResponseApprovalModify"></ApprovalCancellation>
         <ApprovalSuspension ref="approval_suspension"  @refreshFromResponse="refreshFromResponseApprovalModify"></ApprovalSuspension>
@@ -127,16 +53,12 @@ import { api_endpoints, helpers }from '@/utils/hooks'
 export default {
     name: 'TableApprovals',
     props: {
+        /*
         approvalTypeFilter: {
             type: Array,
             required: true,
-            /*
-            validator: function(val) {
-                let options = ['wla', 'ml', 'aap', 'aup'];
-                return options.indexOf(val) != -1 ? true: false;
-            }
-            */
         },
+        */
         level:{
             type: String,
             required: true,
@@ -164,7 +86,7 @@ export default {
             filterStatus: null,
             statusValues: [],
             filterApprovalType: null,
-            approvalTypes: [],
+            //approvalTypes: [],
             filterMooringBay: null,
             mooringBays: [],
             filterHolder: null,
@@ -211,20 +133,6 @@ export default {
             }
             return false
         },
-        externalWaitingList: function() {
-            let extWLA = false;
-            if (this.is_external && this.wlaDash) {
-                extWLA = true;
-            }
-            return extWLA;
-        },
-        wlaDash: function() {
-            let returnVal = false;
-            if (this.approvalTypeFilter.includes('wla')) {
-                returnVal = true;
-            }
-            return returnVal;
-        },
         is_external: function() {
             return this.level == 'external'
         },
@@ -233,72 +141,28 @@ export default {
         },
         // Datatable settings
         datatable_headers: function() {
-            if (this.is_external && this.wlaDash) {
-                return [
-                    'Id',
-                    'Number',
-                    'Bay',
-                    //'Application number in Bay',
-                    'Allocation number in bay',
-                    'Status',
-                    'Vessel Registration',
-                    'Vessel Name',
-                    'Issue Date',
-                    'Expiry Date',
-                    'Action',
-                    'Approval letter',
-                ]
-            } else if (this.is_external) {
+            if (this.is_external) {
                 return [
                     'Id',
                     'Number',
                     'Type',
-                    'Sticker number/s',
-                    'Sticker mailed date',
                     'Status',
                     'Issue Date',
                     'Expiry Date',
-                    'Vessel',
                     'Action',
                     'Approval letter',
-                    //'Mooring Licence Vessels',
-                    //'Authorised User Permit Moorings',
-                ]
-            } else if (this.is_internal && this.wlaDash) {
-                return [
-                    'Id',
-                    'Number',
-                    'Holder',
-                    'Status',
-                    'Status 2',
-                    //'Mooring area',
-                    'Bay',
-                    'Allocation number in bay',
-                    'Action',
-                    'Issue Date',
-                    'Expiry Date',
-                    'Approval letter',
-                    'Vessel length',
-                    'Vessel draft',
-                    'Vessel Rego',
-                    'Mooring Licence Applications',
                 ]
             } else if (this.is_internal) {
                 return [
                     'Id',
                     'Number',
                     'Type',
-                    'Sticker Number/s',
-                    'Sticker mailed date',
                     'Holder',
                     'Status',
                     'Issue Date',
                     'Expiry Date',
                     'Approval letter',
-                    'Vessel Regos',
                     'Action',
-                    //'Mooring Licence Vessels',
-                    //'Authorised User Permit Moorings',
                 ]
             }
         },
@@ -332,18 +196,6 @@ export default {
                         }
                     }
         },
-        columnApplicationNumberInBay: function() {
-            return {
-                        // 4. Application number in Bay
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.current_proposal_number;
-                        }
-                    }
-        },
         columnStatus: function() {
             return {
                         // 5. Status
@@ -365,30 +217,6 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.internal_status
-                        }
-                    }
-        },
-        columnVesselRegistration: function() {
-            return {
-                        // 6. Vessel Registration
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.vessel_registration;
-                        }
-                    }
-        },
-        columnVesselName: function() {
-            return {
-                        // 7. Vessel Name
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.vessel_name;
                         }
                     }
         },
@@ -482,19 +310,6 @@ export default {
                         }
                     }
         },
-        columnRiaGeneratedProposals: function() {
-            let vm = this;
-            return {
-                        // 10. Action
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.ria_generated_proposals;
-                        }
-                    }
-        },
         columnHolder: function() {
             return {
                         data: "id",
@@ -517,92 +332,6 @@ export default {
                         }
                     }
         },
-        columnAllocationNumberInBay: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.wla_order;
-                        }
-                    }
-        },
-
-        columnVesselLength: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.vessel_length;
-                        }
-                    }
-        },
-        columnVesselDraft: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.vessel_draft;
-                        }
-                    }
-        },
-        columnApprovalType: function() {
-            //let vm = this;
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            //return full.vessel_draft;
-                            let approvalType = '';
-                            if (full.approval_type_dict) {
-                                approvalType = full.approval_type_dict.description;
-                            }
-                            return approvalType;
-                        }
-                    }
-        },
-        columnStickerNumber: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            let ret_str = ''
-                            for (let sticker of full.stickers){
-                                ret_str += sticker.number + '<br />'
-                            }
-                            return ret_str
-                        }
-                    }
-        },
-        columnStickerMailedDate: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            let ret_str = ''
-                            for (let sticker of full.stickers){
-                                console.log(sticker.mailing_date)
-                                if (sticker.mailing_date){
-                                    ret_str += moment(sticker.mailing_date).format('DD/MM/YYYY') + '<br />'
-                                } else {
-                                    ret_str += ''
-                                }
-                            }
-                            return ret_str
-                        }
-                    }
-        },
         columnApprovalLetter: function() {
             return {
                         data: "id",
@@ -616,115 +345,31 @@ export default {
                         }
                     }
         },
-        /*
-        columnMooringLicenceVessels: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.mooring_licence_vessels;
-                        }
-                    }
-        },
-        columnAuthorisedUserMoorings: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.authorised_user_moorings;
-                        }
-                    }
-        },
-        */
-        columnVesselRegos: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.vessel_regos;
-                            //return '';
-                        }
-                    }
-        },
         datatable_options: function() {
             let vm = this;
             let selectedColumns = [];
-            if (vm.is_external && this.wlaDash) {
-                selectedColumns = [
-                    vm.columnId,
-                    vm.columnLodgementNumber,
-                    //vm.columnBay,
-                    vm.columnPreferredMooringBay,
-                    //vm.columnApplicationNumberInBay,
-                    vm.columnAllocationNumberInBay,
-                    vm.columnStatus,
-                    vm.columnVesselRegistration,
-                    vm.columnVesselName,
-                    vm.columnIssueDate,
-                    vm.columnExpiryDate,
-                    vm.columnAction,
-                    vm.columnApprovalLetter,
-                ]
-            } else if (this.is_external) {
+            if (this.is_external) {
                 selectedColumns = [
                     vm.columnId,
                     vm.columnLodgementNumber,
                     vm.columnApprovalType,
-                    vm.columnStickerNumber,
-                    vm.columnStickerMailedDate,
                     vm.columnStatus,
                     vm.columnIssueDate,
                     vm.columnExpiryDate,
-                    vm.columnVesselRegistration,
                     vm.columnAction,
                     vm.columnApprovalLetter,
-                    /*
-                    vm.columnMooringLicenceVessels,
-                    vm.columnAuthorisedUserMoorings,
-                    */
-                ]
-            } else if (vm.is_internal && this.wlaDash) {
-                selectedColumns = [
-                    vm.columnId,
-                    vm.columnLodgementNumber,
-                    vm.columnHolder,
-                    vm.columnStatus,
-                    vm.columnStatusInternal,
-                    vm.columnPreferredMooringBay,
-                    vm.columnAllocationNumberInBay,
-                    vm.columnAction,
-                    vm.columnIssueDate,
-                    vm.columnExpiryDate,
-                    vm.columnApprovalLetter,
-                    vm.columnVesselLength,
-                    vm.columnVesselDraft,
-                    vm.columnVesselRegos,
-                    vm.columnRiaGeneratedProposals,
                 ]
             } else if (vm.is_internal) {
                 selectedColumns = [
                     vm.columnId,
                     vm.columnLodgementNumber,
                     vm.columnApprovalType,
-                    vm.columnStickerNumber,
-                    vm.columnStickerMailedDate,
                     vm.columnHolder,
                     vm.columnStatus,
                     vm.columnIssueDate,
                     vm.columnExpiryDate,
                     vm.columnApprovalLetter,
-                    vm.columnVesselRegos,
                     vm.columnAction,
-                    /*
-                    vm.columnMooringLicenceVessels,
-                    vm.columnAuthorisedUserMoorings,
-                    */
                 ]
             }
             let buttons = []
@@ -761,16 +406,8 @@ export default {
 
                     // adding extra GET params for Custom filtering
                     "data": function ( d ) {
-                        //d.filter_approval_type = vm.approvalTypesToDisplay.join(',');
-                        d.filter_approval_type = vm.approvalTypeFilter.join(',');
-                        d.show_expired_surrendered = vm.show_expired_surrendered;
-                        d.external_waiting_list = vm.externalWaitingList;
                         d.filter_status = vm.filterStatus;
-                        d.filter_approval_type2 = vm.filterApprovalType;
-                        d.filter_mooring_bay_id = vm.filterMooringBay;
                         d.filter_holder_id = vm.filterHolder;
-                        d.max_vessel_length = vm.maxVesselLength;
-                        d.max_vessel_draft = vm.maxVesselDraft;
                         d.is_internal = vm.is_internal;
                     }
                 },
@@ -784,10 +421,6 @@ export default {
                 },
             }
         },
-        offerMooringLicenceKey: function() {
-            return 'offer_mooring_licence_' + this.selectedWaitingListAllocationId + '_' + this.uuid;
-        },
-
     },
     methods: {
         sendData: function(params){
@@ -810,35 +443,6 @@ export default {
                 console.log(error);
 
             })
-        },
-        /*
-        check_assessor: function(proposal){
-            let vm = this;
-            //console.log(proposal.id, proposal.can_approver_reissue);
-            var assessor = proposal.allowed_assessors.filter(function(elem){
-                    return(elem.id==vm.profile.id)
-
-                });
-
-            if (assessor.length > 0){
-                //console.log(proposal.id, assessor)
-                return true;
-            }
-            else
-                return false;
-
-            return false;
-        },
-        */
-
-        offerMooringLicence: function(id){
-            console.log('offerMooringLicence')
-            console.log(id)
-            this.selectedWaitingListAllocationId = parseInt(id);
-            this.uuid++;
-            this.$nextTick(() => {
-                this.$refs.offer_mooring_licence.isModalOpen = true;
-            });
         },
         refreshFromResponseApprovalModify: function(){
             this.$refs.approvals_datatable.vmDataTable.ajax.reload();
@@ -979,25 +583,6 @@ export default {
                     this.statusValues.push(s);
                 }
             }
-            // Approval types
-            const approvalRes = await this.$http.get(api_endpoints.approval_types_dict + '?include_codes=' + this.approvalTypeFilter.join(','));
-            for (let t of approvalRes.body) {
-                if (t.code !== 'wla') {
-                    this.approvalTypes.push(t);
-                }
-            }
-            // Mooring bays
-            const mooringBayRes = await this.$http.get(api_endpoints.mooring_bays);
-            for (let b of mooringBayRes.body) {
-                this.mooringBays.push(b);
-            }
-            /*
-            // Holder list
-            const holderListRes = await this.$http.get(api_endpoints.holder_list);
-            for (let h of holderListRes.body) {
-                this.holderList.push(h);
-            }
-            */
         },
         reissueApproval:function (proposal_id) {
             let vm = this;
@@ -1098,17 +683,13 @@ export default {
         renewApproval:function (proposal_id) {
             let vm = this;
             let status= 'with_approver'
-            //let data = {'status': status}
             swal({
                 title: "Renew Approval",
                 text: "Are you sure you want to renew this approval?",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Renew approval',
-                //confirmButtonColor:'#d9534f'
             }).then(() => {
-                //vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_approval')),{
-                //vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')), {
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=renew', {
 
                 })
@@ -1141,9 +722,7 @@ export default {
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Amend approval',
-                //confirmButtonColor:'#d9534f'
             }).then(() => {
-                //vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')),{
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=amend', {
 
                 })
