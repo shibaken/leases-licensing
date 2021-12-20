@@ -247,39 +247,33 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         return obj.get_customer_status_display()
 
     def get_proposal_type(self,obj):
-        return obj.proposal_type.description
+        return obj.proposal_type.description if obj.proposal_type else ''
 
     def get_is_qa_officer(self,obj):
         #request = self.context['request']
         #return request.user.email in obj.qa_officers()
         return True
 
-    def get_fee_invoice_url(self,obj):
-        return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
+    #def get_fee_invoice_url(self,obj):
+     #   return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
 
     def get_allow_full_discount(self,obj):
         return True if obj.application_type.name==ApplicationType.TCLASS and obj.allow_full_discount else False
 
 
 class ListProposalSerializer(BaseProposalSerializer):
-    submitter = EmailUserSerializer()
+    #submitter = EmailUserSerializer()
+    submitter = serializers.SerializerMethodField(read_only=True)
     applicant = serializers.CharField(read_only=True)
     processing_status = serializers.SerializerMethodField(read_only=True)
     review_status = serializers.SerializerMethodField(read_only=True)
     customer_status = serializers.SerializerMethodField(read_only=True)
-    #assigned_officer = serializers.CharField(source='assigned_officer.get_full_name')
     assigned_officer = serializers.SerializerMethodField(read_only=True)
 
     application_type = serializers.CharField(source='application_type.name', read_only=True)
-    #region = serializers.CharField(source='region.name', read_only=True)
-    #district = serializers.CharField(source='district.name', read_only=True)
-    #region = serializers.SerializerMethodField(read_only=True)
-    #district = serializers.SerializerMethodField(read_only=True)
-
-    #tenure = serializers.CharField(source='tenure.name', read_only=True)
     assessor_process = serializers.SerializerMethodField(read_only=True)
     qaofficer_referrals = QAOfficerReferralSerializer(many=True)
-    fee_invoice_url = serializers.SerializerMethodField()
+    #fee_invoice_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -287,12 +281,8 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'id',
                 'application_type',
                 'proposal_type',
-                'activity',
                 'approval_level',
                 'title',
-                #'region',
-                #'district',
-                'tenure',
                 'customer_status',
                 'processing_status',
                 'review_status',
@@ -303,7 +293,6 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'previous_application',
                 'get_history',
                 'lodgement_date',
-                #'modified_date',
                 'readonly',
                 'can_user_edit',
                 'can_user_view',
@@ -316,18 +305,16 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'proposal_type',
                 'qaofficer_referrals',
                 'is_qa_officer',
-                'fee_invoice_url',
-                'fee_invoice_reference',
-                'fee_paid',
+                #'fee_invoice_url',
+                #'fee_invoice_reference',
+                #'fee_paid',
                 )
         # the serverSide functionality of datatables is such that only columns that have field 'data' defined are requested from the serializer. We
         # also require the following additional fields for some of the mRender functions
         datatables_always_serialize = (
                 'id',
                 'proposal_type',
-                'activity',
                 'title',
-                #'region',
                 'customer_status',
                 'processing_status',
                 'applicant',
@@ -341,10 +328,14 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'can_officer_process',
                 'assessor_process',
                 'allowed_assessors',
-                'fee_invoice_url',
-                'fee_invoice_reference',
-                'fee_paid',
+                #'fee_invoice_url',
+                #'fee_invoice_reference',
+                #'fee_paid',
                 )
+
+    def get_submitter(self,obj):
+        email_user = retrieve_email_user(obj.submitter)
+        return EmailUserSerializer(email_user).data
 
     def get_assigned_officer(self,obj):
         if obj.processing_status==Proposal.PROCESSING_STATUS_WITH_APPROVER and obj.assigned_approver:
@@ -352,16 +343,6 @@ class ListProposalSerializer(BaseProposalSerializer):
         if obj.assigned_officer:
             return obj.assigned_officer.get_full_name()
         return None
-
-    #def get_region(self,obj):
-    #    if obj.region:
-    #        return obj.region.name
-    #    return None
-
-    #def get_district(self,obj):
-    #    if obj.district:
-    #        return obj.district.name
-    #    return None
 
     def get_assessor_process(self,obj):
         # Check if currently logged in user has access to process the proposal
@@ -378,11 +359,12 @@ class ListProposalSerializer(BaseProposalSerializer):
         return False
 
     def get_is_qa_officer(self,obj):
-        request = self.context['request']
-        return request.user.email in obj.qa_officers()
+        #request = self.context['request']
+        #return request.user.email in obj.qa_officers()
+        return True
 
-    def get_fee_invoice_url(self,obj):
-        return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
+    #def get_fee_invoice_url(self,obj):
+     #   return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
 
 class ProposalSerializer(BaseProposalSerializer):
     #submitter = serializers.CharField(source='submitter.get_full_name')
@@ -595,7 +577,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'assessor_assessment',
                 'referral_assessments',
                 'fee_invoice_url',
-                'fee_paid',
+                #'fee_paid',
                 'requirements_completed'
                 )
         read_only_fields=('documents','requirements')

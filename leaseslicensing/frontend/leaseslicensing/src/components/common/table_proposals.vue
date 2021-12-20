@@ -95,11 +95,6 @@ export default {
         filterApplicationStatus: function() {
             let vm = this;
             vm.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            //if (vm.filterApplicationStatus != 'All') {
-            //    vm.$refs.application_datatable.vmDataTable.column('status:name').search('').draw();
-            //} else {
-            //    vm.$refs.application_datatable.vmDataTable.column('status:name').search(vm.filterApplicationStatus).draw();
-            //}
         },
         filterApplicationType: function() {
             let vm = this;
@@ -169,12 +164,15 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     if (full.application_type_dict){
                         return full.application_type_dict.description
                     } else {
                         // Should not reach here
                         return ''
                     }
+                    */
+                    return full.id
                 }
             }
         },
@@ -186,12 +184,15 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     if (full.proposal_type){
                         return full.proposal_type.description
                     } else {
                         // Should not reach here
                         return ''
                     }
+                    */
+                    return full.id
                 }
             }
         },
@@ -204,10 +205,13 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     if (vm.is_internal){
                         return full.processing_status
                     }
                     return full.customer_status
+                    */
+                    return full.id
                 }
             }
         },
@@ -219,10 +223,13 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     if (full.lodgement_date){
                         return moment(full.lodgement_date).format('DD/MM/YYYY')
                     }
                     return ''
+                    */
+                    return full.id
                 }
             }
         },
@@ -235,6 +242,7 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     let links = '';
                     if (full.invoices){
                         for (let invoice of full.invoices){
@@ -251,6 +259,8 @@ export default {
                         }
                     }
                     return links
+                    */
+                    return full.id
                 }
             }
         },
@@ -263,6 +273,7 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     let links = '';
                     if (vm.is_internal){
                         if (vm.debug){
@@ -295,6 +306,8 @@ export default {
                         }
                     }
                     return links;
+                    */
+                    return full.id
                 }
             }
         },
@@ -305,10 +318,13 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     if (full.submitter){
                         return `${full.submitter.first_name} ${full.submitter.last_name}`
                     }
                     return ''
+                    */
+                    return full.id
                 },
                 name: 'submitter__first_name, submitter__last_name',
             }
@@ -320,6 +336,7 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     let ret_str = ''
                     if (full.assigned_officer){
                         ret_str += full.assigned_officer
@@ -328,6 +345,8 @@ export default {
                         ret_str += full.assigned_approver
                     }
                     return ret_str
+                    */
+                    return full.id
                 },
                 name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
             }
@@ -339,6 +358,7 @@ export default {
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
+                    /*
                     if (full.invoices){
                         let ret_str = ''
                         for (let item of full.invoices){
@@ -349,6 +369,8 @@ export default {
                     } else {
                         return ''
                     }
+                    */
+                    return full.id
                 }
             }
         },
@@ -483,15 +505,6 @@ export default {
                 }
             },(error) => {
             })
-            /*
-            // Applicant
-            if (vm.is_internal){
-                vm.$http.get(api_endpoints.applicants_dict).then((response) => {
-                    vm.applicants = response.body
-                },(error) => {
-                })
-            }
-            */
         },
         addEventListeners: function(){
             let vm = this

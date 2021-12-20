@@ -64,7 +64,8 @@ from rest_framework_datatables.filters import DatatablesFilterBackend
 #            cache_title += '_' + code
 #        data = cache.get(cache_title)
 #        if not data:
-#            cache.set(cache_title, Approval.approval_types_dict(include_codes), settings.LOV_CACHE_TIMEOUT)
+#            #cache.set(cache_title, Approval.approval_types_dict(include_codes), settings.LOV_CACHE_TIMEOUT)
+#            cache.set(cache_title,[{'code': i[0], 'description': i[1]} for i in Approval.STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
 #            data = cache.get(cache_title)
 #        return Response(data)
 
@@ -94,15 +95,6 @@ class ApprovalFilterBackend(DatatablesFilterBackend):
                     return i[0]
             return None
 
-        # on the internal dashboard, the Region filter is multi-select - have to use the custom filter below
-        regions = request.GET.get('regions')
-        if regions:
-            if queryset.model is Proposal:
-                queryset = queryset.filter(region__name__iregex=regions.replace(',', '|'))
-            elif queryset.model is Referral or queryset.model is Compliance:
-                queryset = queryset.filter(proposal__region__name__iregex=regions.replace(',', '|'))
-
-        
         date_from = request.GET.get('date_from')
         date_to = request.GET.get('date_to')
         
@@ -247,12 +239,10 @@ class ApprovalViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET',], detail=False)
     def filter_list(self, request, *args, **kwargs):
         """ Used by the external dashboard filters """
-        region_qs =  self.get_queryset().filter(current_proposal__region__isnull=False).values_list('current_proposal__region__name', flat=True).distinct()
-        activity_qs =  self.get_queryset().filter(current_proposal__activity__isnull=False).values_list('current_proposal__activity', flat=True).distinct()
+        #region_qs =  self.get_queryset().filter(current_proposal__region__isnull=False).values_list('current_proposal__region__name', flat=True).distinct()
+        #activity_qs =  self.get_queryset().filter(current_proposal__activity__isnull=False).values_list('current_proposal__activity', flat=True).distinct()
         application_types=ApplicationType.objects.all().values_list('name', flat=True)
         data = dict(
-            regions=region_qs,
-            activities=activity_qs,
             approval_status_choices = [i[1] for i in Approval.STATUS_CHOICES],
             application_types=application_types,
         )

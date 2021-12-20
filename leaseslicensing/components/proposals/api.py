@@ -569,21 +569,12 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET',], detail=False)
     def filter_list(self, request, *args, **kwargs):
         """ Used by the internal/external dashboard filters """
-        region_qs =  self.get_queryset().filter(region__isnull=False).values_list('region__name', flat=True).distinct()
-        #district_qs =  self.get_queryset().filter(district__isnull=False).values_list('district__name', flat=True).distinct()
-        activity_qs =  self.get_queryset().filter(activity__isnull=False).values_list('activity', flat=True).distinct()
         submitter_qs = self.get_queryset().filter(submitter__isnull=False).distinct('submitter__email').values_list('submitter__first_name','submitter__last_name','submitter__email')
         submitters = [dict(email=i[2], search_term='{} {} ({})'.format(i[0], i[1], i[2])) for i in submitter_qs]
         application_types=ApplicationType.objects.filter(visible=True).values_list('name', flat=True)
         data = dict(
-            regions=region_qs,
-            #districts=district_qs,
-            activities=activity_qs,
             submitters=submitters,
             application_types=application_types,
-            #processing_status_choices = [i[1] for i in Proposal.PROCESSING_STATUS_CHOICES],
-            #processing_status_id_choices = [i[0] for i in Proposal.PROCESSING_STATUS_CHOICES],
-            #customer_status_choices = [i[1] for i in Proposal.CUSTOMER_STATUS_CHOICES],
             approval_status_choices = [i[1] for i in Approval.STATUS_CHOICES],
         )
         return Response(data)
@@ -1526,18 +1517,12 @@ class ReferralViewSet(viewsets.ModelViewSet):
         """ Used by the external dashboard filters """
         #qs =  self.get_queryset().filter(referral=request.user)
         qs =  self.get_queryset()
-        region_qs =  qs.filter(proposal__region__isnull=False).values_list('proposal__region__name', flat=True).distinct()
-        #district_qs =  qs.filter(proposal__district__isnull=False).values_list('proposal__district__name', flat=True).distinct()
-        activity_qs =  qs.filter(proposal__activity__isnull=False).order_by('proposal__activity').distinct('proposal__activity').values_list('proposal__activity', flat=True).distinct()
         submitter_qs = qs.filter(proposal__submitter__isnull=False).order_by('proposal__submitter').distinct('proposal__submitter').values_list('proposal__submitter__first_name','proposal__submitter__last_name','proposal__submitter__email')
         submitters = [dict(email=i[2], search_term='{} {} ({})'.format(i[0], i[1], i[2])) for i in submitter_qs]
         processing_status_qs =  qs.filter(proposal__processing_status__isnull=False).order_by('proposal__processing_status').distinct('proposal__processing_status').values_list('proposal__processing_status', flat=True)
         processing_status = [dict(value=i, name='{}'.format(' '.join(i.split('_')).capitalize())) for i in processing_status_qs]
         application_types=ApplicationType.objects.filter(visible=True).values_list('name', flat=True)
         data = dict(
-            regions=region_qs,
-            #districts=district_qs,
-            activities=activity_qs,
             submitters=submitters,
             processing_status_choices=processing_status,
             application_types=application_types,
