@@ -31,11 +31,6 @@
                 :approvalId="approvalHistoryId"
             />
         </div>
-        <!--ApprovalHistory ref="approval_history" /-->
-        <RequestNewStickerModal
-            ref="request_new_sticker_modal"
-            @sendData="sendData"
-        />
     </div>
 </template>
 
@@ -46,7 +41,6 @@ import ApprovalCancellation from '../internal/approvals/approval_cancellation.vu
 import ApprovalSuspension from '../internal/approvals/approval_suspension.vue'
 import ApprovalSurrender from '../internal/approvals/approval_surrender.vue'
 import ApprovalHistory from '../internal/approvals/approval_history.vue'
-import RequestNewStickerModal from "@/components/common/request_new_sticker_modal.vue"
 import Vue from 'vue'
 import { api_endpoints, helpers }from '@/utils/hooks'
 
@@ -103,7 +97,6 @@ export default {
         ApprovalSuspension,
         ApprovalSurrender,
         ApprovalHistory,
-        RequestNewStickerModal,
     },
     watch: {
         show_expired_surrendered: function(value){
