@@ -2,7 +2,7 @@
     <div class="">
 
         <div v-if="proposal && show_application_title" id="scrollspy-heading" class="" >
-            <h4>Waiting List {{applicationTypeText}} Application: {{proposal.lodgement_number}}</h4>
+            <h4>{{applicationTypeText}} Application: {{proposal.lodgement_number}}</h4>
         </div>
 
         <div class="">
@@ -13,23 +13,13 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="pills-vessels-tab" data-toggle="pill" href="#pills-vessels" role="tab" aria-controls="pills-vessels" aria-selected="false">
-                  Vessel
+                <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false">
+                  Map
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="pills-mooring-tab" data-toggle="pill" href="#pills-mooring" role="tab" aria-controls="pills-mooring" aria-selected="false">
-                  Mooring
-                </a>
-              </li>
-              <li v-if="showPaymentTab" class="nav-item" id="li-payment">
-                <a class="nav-link disabled" id="pills-payment-tab" data-toggle="pill" href="" role="tab" aria-controls="pills-payment" aria-selected="false">
-                  Payment
-                </a>
-              </li>
-              <li v-if="is_external" class="nav-item" id="li-confirm">
-                <a class="nav-link disabled" id="pills-confirm-tab" data-toggle="pill" href="" role="tab" aria-controls="pills-confirm" aria-selected="false">
-                    Confirmation
+                <a class="nav-link" id="pills-details-tab" data-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
+                  Details
                 </a>
               </li>
             </ul>
@@ -41,8 +31,6 @@
                     v-if="applicantType == 'SUB'" 
                     ref="profile"
                     @profile-fetched="populateProfile"
-                    :showElectoralRoll="showElectoralRoll"
-                    :storedSilentElector="silentElector"
                     :proposalId="proposal.id"
                     :readonly="readonly"
                     :submitterId="submitterId"
@@ -60,39 +48,22 @@
                     />
                   </div>
               </div>
-              <div class="tab-pane fade" id="pills-vessels" role="tabpanel" aria-labelledby="pills-vessels-tab">
-                  <div v-if="proposal">
-                      <CurrentVessels 
-                          :proposal=proposal
-                          :readonly=readonly
-                          :is_internal=is_internal
-                          @resetCurrentVessel=resetCurrentVessel
-                          />
-                  </div>
-                  <Vessels 
-                  :proposal="proposal" 
-                  :profile="profileVar" 
-                  :id="'proposalStartVessels' + uuid"
-                  :key="'proposalStartVessels' + uuid"
-                  :keep_current_vessel=keep_current_vessel
-                  ref="vessels"
-                  :readonly="readonly"
-                  :is_internal="is_internal"
-                  @updateVesselLength="updateVesselLength"
-                  @vesselChanged="vesselChanged"
-                  />
+              <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
+                  Map stuff
               </div>
-              <div class="tab-pane fade" id="pills-mooring" role="tabpanel" aria-labelledby="pills-mooring-tab">
-                  <Mooring
-                  :proposal="proposal" 
-                  id="mooring" 
-                  ref="mooring"
-                  :readonly="readonly"
-                  @mooringPreferenceChanged="mooringPreferenceChanged"
-                  />
-              </div>
-              <div class="tab-pane fade" id="pills-confirm" role="tabpanel" aria-labelledby="pills-confirm-tab">
-                <Confirmation :proposal="proposal" id="proposalStartConfirmation"></Confirmation>
+              <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
+                <FormSection label="Details" Index="application_details">
+                    <RichText
+                    :proposalData="proposal.details_text"
+                    ref="details_text"
+                    label="Rich text in here" 
+                    :readonly="readonly" 
+                    :can_view_richtext_src=true
+                    v-bind:key="proposal.id"
+                    />
+                </FormSection>
+                <FormSection label="Deed Poll" Index="deed_poll">
+                </FormSection>
               </div>
             </div>
         </div>
@@ -102,12 +73,16 @@
 <script>
     import Profile from '@/components/user/profile.vue'
     import Applicant from '@/components/common/applicant.vue'
+    import FormSection from '@/components/forms/section_toggle.vue'
+    import RichText from '@/components/forms/richtext.vue'
+    /*
     import Confirmation from '@/components/common/confirmation.vue'
     import Vessels from '@/components/common/vessels.vue'
     import CurrentVessels from '@/components/common/current_vessels.vue'
     import Mooring from '@/components/common/mooring.vue'
+    */
     export default {
-        name: 'WaitingListApplication',
+        name: 'ApplicationForm',
         props:{
             proposal:{
                 type: Object,
@@ -148,14 +123,6 @@
                 type: Object,
                 required:false
             },
-            proposal_parks:{
-                type:Object,
-                default:null
-            },
-            showElectoralRoll:{
-                type:Boolean,
-                default: false
-            },
             readonly:{
                 type: Boolean,
                 default: true,
@@ -169,15 +136,20 @@
                 keep_current_vessel: true,
                 //vesselLength: null,
                 showPaymentTab: false,
+                detailsText: null,
             }
         },
         components: {
             Applicant,
+            /*
             Confirmation,
             Vessels,
             Mooring,
             CurrentVessels,
+            */
             Profile,
+            FormSection,
+            RichText,
         },
         /*
         watch: {
@@ -208,11 +180,6 @@
                     return this.proposal.submitter;
                 }
             },
-            silentElector: function() {
-                if (this.proposal) {
-                    return this.proposal.silent_elector;
-                }
-            },
             applicantType: function(){
                 if (this.proposal) {
                     return this.proposal.applicant_type;
@@ -220,41 +187,18 @@
             },
             applicationTypeText: function(){
                 let text = '';
+                /*
                 if (this.proposal && this.proposal.proposal_type && this.proposal.proposal_type.code !== 'new') {
                     text = this.proposal.proposal_type.description;
+                }
+                */
+                if (this.proposal) {
+                    text = this.proposal.application_type_display;
                 }
                 return text;
             },
         },
         methods:{
-            vesselChanged: async function(vesselChanged) {
-                await this.$emit("vesselChanged", vesselChanged);
-            },
-            mooringPreferenceChanged: async function(preferenceChanged) {
-                await this.$emit("mooringPreferenceChanged", preferenceChanged);
-            },
-            updateVesselLength: function(length) {
-                let higherCategory = false;
-                if (this.is_external && this.proposal) {
-                    if (!this.proposal.previous_application_id) {
-                        // new application
-                        higherCategory = true;
-                    } else if (this.proposal.max_vessel_length_with_no_payment && 
-                        this.proposal.max_vessel_length_with_no_payment <= length) {
-                        // vessel length is in higher category
-                        higherCategory = true;
-                    }
-                }
-                console.log(higherCategory);
-                if (higherCategory) {
-                    this.showPaymentTab = true;
-                    this.$emit("updateSubmitText", "Pay / Submit");
-                }
-            },
-            resetCurrentVessel: function(keep) {
-                this.keep_current_vessel = keep;
-                this.uuid++
-            },
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
             },
@@ -263,23 +207,24 @@
 
                 /* set Applicant tab Active */
                 $('#pills-tab a[href="#pills-applicant"]').tab('show');
-
+                /*
                 if (vm.proposal.fee_paid) {
-                    /* Online Training tab */
+                    // Online Training tab 
                     $('#pills-online-training-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
                     $('#li-training').attr('class', 'nav-item disabled');
                     $('#pills-online-training-tab').attr("href", "")
                 }
 
                 if (!vm.proposal.training_completed) {
-                    /* Payment tab  (this is enabled after online_training is completed - in online_training.vue)*/
+                    // Payment tab  (this is enabled after online_training is completed - in online_training.vue)
                     $('#pills-payment-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
                     $('#li-payment').attr('class', 'nav-item disabled');
                 }
 
-                /* Confirmation tab - Always Disabled */
+                // Confirmation tab - Always Disabled
                 $('#pills-confirm-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
                 $('#li-confirm').attr('class', 'nav-item disabled');
+                */
             },
             /*
             eventListener: function(){

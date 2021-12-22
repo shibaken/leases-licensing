@@ -480,6 +480,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     approval_level = models.CharField('Activity matrix approval level', max_length=255,null=True,blank=True)
     approval_level_document = models.ForeignKey(ProposalDocument, blank=True, null=True, related_name='approval_level_document', on_delete=models.SET_NULL)
     approval_comment = models.TextField(blank=True)
+    details_text = models.TextField(blank=True)
     #If the proposal is created as part of migration of approvals
     migrated=models.BooleanField(default=False)
 
