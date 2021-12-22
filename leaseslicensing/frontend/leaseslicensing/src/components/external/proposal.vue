@@ -31,54 +31,14 @@
                     </li>
                 </ul>
             </div>
-            <!--ProposalTClass v-if="proposal && proposal_parks && proposal.application_type==application_type_tclass" :proposal="proposal" id="proposalStart"  :canEditActivities="canEditActivities" :is_external="true" :proposal_parks="proposal_parks" ref="proposal_tclass"></ProposalTClass>
-            <ProposalFilming v-else-if="proposal && proposal.application_type==application_type_filming" :proposal="proposal" id="proposalStart" :canEditActivities="canEditActivities" :canEditPeriod="canEditPeriod" :is_external="true" :proposal_parks="proposal_parks" ref="proposal_filming"></ProposalFilming>
-            <ProposalEvent v-else-if="proposal && proposal.application_type==application_type_event" :proposal="proposal" id="proposalStart" :canEditActivities="canEditActivities" :canEditPeriod="canEditPeriod" :is_external="true" :proposal_parks="proposal_parks" ref="proposal_event"></ProposalEvent-->
-            <WaitingListApplication
-            v-if="proposal && proposal.application_type_code==='wla'"
+            <ApplicationForm
+            v-if="proposal"
             :proposal="proposal"
             :is_external="true"
-            ref="waiting_list_application"
-            :showElectoralRoll="showElectoralRoll"
+            ref="application_form"
             :readonly="readonly"
             :submitterId="submitterId"
             @updateSubmitText="updateSubmitText"
-            @vesselChanged="updateVesselChanged"
-            @mooringPreferenceChanged="updateMooringPreference"
-            />
-
-            <AnnualAdmissionApplication
-            v-if="proposal && proposal.application_type_code==='aaa'"
-            :proposal="proposal"
-            :is_external="true"
-            ref="annual_admission_application"
-            :showElectoralRoll="showElectoralRoll"
-            :readonly="readonly"
-            :submitterId="submitterId"
-            @updateSubmitText="updateSubmitText"
-            @vesselChanged="updateVesselChanged"
-            />
-            <AuthorisedUserApplication
-            v-if="proposal && proposal.application_type_code==='aua'"
-            :proposal="proposal"
-            :is_external="true"
-            ref="authorised_user_application"
-            :readonly="readonly"
-            :submitterId="submitterId"
-            @updateSubmitText="updateSubmitText"
-            @vesselChanged="updateVesselChanged"
-            @changeMooring="updateMooringAuth"
-            />
-            <MooringLicenceApplication
-            v-if="proposal && proposal.application_type_code==='mla'"
-            :proposal="proposal"
-            :is_external="true"
-            ref="mooring_licence_application"
-            :showElectoralRoll="showElectoralRoll"
-            :readonly="readonly"
-            :submitterId="submitterId"
-            @updateSubmitText="updateSubmitText"
-            @vesselChanged="updateVesselChanged"
             />
 
             <div>
@@ -93,10 +53,6 @@
                                   <div class="navbar-inner">
                                     <div v-if="proposal && !proposal.readonly" class="container">
                                         <p class="pull-right" style="margin-top:5px">
-                                            <input type="checkbox" v-model="terms_and_conditions_checked" id="terms_and_conditions_checked" />
-                                            <label for="terms_and_conditions_checked">
-                                                I agree with all the <a href="https://rottnestisland.com/boating/boating-on-rottnest-island/tandc" target="_blank">RIA Terms and Conditions</a>
-                                            </label>
 
                                             <button v-if="saveExitProposal || !terms_and_conditions_checked" type="button" class="btn btn-primary" disabled>
                                                 Save and Exit&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
@@ -140,15 +96,7 @@
     </div>
 </template>
 <script>
-/*
-import ProposalTClass from '../form_tclass.vue'
-import ProposalFilming from '../form_filming.vue'
-import ProposalEvent from '../form_event.vue'
-*/
-import WaitingListApplication from '../form_wla.vue';
-import AnnualAdmissionApplication from '../form_aaa.vue';
-import AuthorisedUserApplication from '../form_aua.vue';
-import MooringLicenceApplication from '../form_mla.vue';
+import ApplicationForm from '../form.vue';
 import Vue from 'vue'
 import {
   api_endpoints,
@@ -184,15 +132,7 @@ export default {
     }
   },
   components: {
-      WaitingListApplication,
-      AnnualAdmissionApplication,
-      AuthorisedUserApplication,
-      MooringLicenceApplication,
-      /*
-      ProposalTClass,
-      ProposalFilming,
-      ProposalEvent
-      */
+      ApplicationForm,
   },
   computed: {
       disableSubmit: function() {

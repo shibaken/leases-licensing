@@ -128,20 +128,40 @@ class UserViewSet(viewsets.ModelViewSet):
     def update_address(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = UserAddressSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            address, created = Address.objects.get_or_create(
-                line1 = serializer.validated_data['line1'],
-                locality = serializer.validated_data['locality'],
-                state = serializer.validated_data['state'],
-                country = serializer.validated_data['country'],
-                postcode = serializer.validated_data['postcode'],
+            # residential address
+            residential_serializer = UserAddressSerializer(data=request.data.get('residential_address'))
+            residential_serializer.is_valid(raise_exception=True)
+            residential_address, created = Address.objects.get_or_create(
+                line1 = residential_serializer.validated_data['line1'],
+                locality = residential_serializer.validated_data['locality'],
+                state = residential_serializer.validated_data['state'],
+                country = residential_serializer.validated_data['country'],
+                postcode = residential_serializer.validated_data['postcode'],
                 user = instance
             )
-            instance.residential_address = address
+            instance.residential_address = residential_address
+            # postal address
+            postal_address_data = request.data.get('postal_address')
+            if request.data.get('postal_same_as_residential'):
+                instance.postal_same_as_residential = True
+                instance.postal_address = residential_address
+            elif postal_address_data:
+                postal_serializer = UserAddressSerializer(data=postal_address_data)
+                postal_serializer.is_valid(raise_exception=True)
+                postal_address, created = Address.objects.get_or_create(
+                    line1 = postal_serializer.validated_data['line1'],
+                    locality = postal_serializer.validated_data['locality'],
+                    state = postal_serializer.validated_data['state'],
+                    country = postal_serializer.validated_data['country'],
+                    postcode = postal_serializer.validated_data['postcode'],
+                    user = instance
+                )
+                instance.postal_address = postal_address
+                instance.postal_same_as_residential = False
+
             instance.save()
             serializer = UserSerializer(instance)
-            return Response(serializer.data);
+            return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -151,6 +171,36 @@ class UserViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
+
+
+    #@detail_route(methods=['POST',], detail=True)
+    #def update_address(self, request, *args, **kwargs):
+    #    try:
+    #        print(request.data)
+    #        instance = self.get_object()
+    #        serializer = UserAddressSerializer(data=request.data)
+    #        serializer.is_valid(raise_exception=True)
+    #        address, created = Address.objects.get_or_create(
+    #            line1 = serializer.validated_data['line1'],
+    #            locality = serializer.validated_data['locality'],
+    #            state = serializer.validated_data['state'],
+    #            country = serializer.validated_data['country'],
+    #            postcode = serializer.validated_data['postcode'],
+    #            user = instance
+    #        )
+    #        instance.residential_address = address
+    #        instance.save()
+    #        serializer = UserSerializer(instance)
+    #        return Response(serializer.data);
+    #    except serializers.ValidationError:
+    #        print(traceback.print_exc())
+    #        raise
+    #    except ValidationError as e:
+    #        print(traceback.print_exc())
+    #        raise serializers.ValidationError(repr(e.error_dict))
+    #    except Exception as e:
+    #        print(traceback.print_exc())
+    #        raise serializers.ValidationError(str(e))
 
     @detail_route(methods=['POST',], detail=True)
     def update_system_settings(self, request, *args, **kwargs):

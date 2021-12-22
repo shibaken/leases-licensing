@@ -53,50 +53,16 @@
                 </template>
 
                 <template v-if="canSeeSubmission || (!canSeeSubmission && showingProposal)">
-                    <WaitingListApplication
-                        v-if="proposal && proposal.application_type_dict.code==='wla'"
+                    <ApplicationForm
+                        v-if="proposal"
                         :proposal="proposal"
                         :show_application_title="false"
                         :is_external="false"
                         :is_internal="true"
-                        ref="waiting_list_application"
-                        :showElectoralRoll="showElectoralRoll"
+                        ref="application_form"
                         :readonly="readonly"
                         :submitterId="proposal.submitter.id"
                         :key="computedProposalId"
-                    />
-
-                    <AnnualAdmissionApplication
-                        v-if="proposal && proposal.application_type_dict.code==='aaa'"
-                        :proposal="proposal"
-                        :show_application_title="false"
-                        :is_external="false"
-                        :is_internal="true"
-                        ref="annual_admission_application"
-                        :showElectoralRoll="showElectoralRoll"
-                        :readonly="readonly"
-                        :submitterId="proposal.submitter.id"
-                    />
-                    <AuthorisedUserApplication
-                        v-if="proposal && proposal.application_type_dict.code==='aua'"
-                        :proposal="proposal"
-                        :show_application_title="false"
-                        :is_external="false"
-                        :is_internal="true"
-                        ref="authorised_user_application"
-                        :readonly="readonly"
-                        :submitterId="proposal.submitter.id"
-                    />
-                    <MooringLicenceApplication
-                        v-if="proposal && proposal.application_type_dict.code==='mla'"
-                        :proposal="proposal"
-                        :show_application_title="false"
-                        :is_external="false"
-                        :is_internal="true"
-                        ref="mooring_licence_application"
-                        :showElectoralRoll="showElectoralRoll"
-                        :readonly="readonly"
-                        :submitterId="proposal.submitter.id"
                     />
                 </template>
                 <template v-if="display_requirements">
@@ -151,10 +117,7 @@ import Submission from '@common-utils/submission.vue'
 import Workflow from '@common-utils/workflow.vue'
 import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import { api_endpoints, helpers, constants } from '@/utils/hooks'
-import WaitingListApplication from '@/components/form_wla.vue';
-import AnnualAdmissionApplication from '@/components/form_aaa.vue';
-import AuthorisedUserApplication from '@/components/form_aua.vue';
-import MooringLicenceApplication from '@/components/form_mla.vue';
+import ApplicationForm from '@/components/form.vue';
 
 export default {
     name: 'InternalProposal',
@@ -246,10 +209,7 @@ export default {
         //MoreReferrals,
         //NewApply,
         //MapLocations,
-        WaitingListApplication,
-        AnnualAdmissionApplication,
-        AuthorisedUserApplication,
-        MooringLicenceApplication,
+        ApplicationForm,
     },
     props: {
         proposalId: {
