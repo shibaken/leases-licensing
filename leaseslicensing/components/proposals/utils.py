@@ -18,6 +18,7 @@ from leaseslicensing.components.approvals.models import Approval
 from leaseslicensing.components.proposals.email import send_submit_email_notification, send_external_submit_email_notification
 from leaseslicensing.components.proposals.serializers import (
         SaveProposalSerializer, 
+        SaveRegistrationOfInterestSerializer,
         ProposalOtherDetailsSerializer, 
         )
 import traceback
@@ -307,12 +308,26 @@ class SpecialFieldsSearch(object):
         return item_data
 
 def save_proponent_data(instance,request,viewset,parks=None,trails=None):
-    if instance.application_type.name==ApplicationType.FILMING:
-        save_proponent_data_filming(instance,request,viewset,parks=None,trails=None)
-    elif instance.application_type.name==ApplicationType.EVENT:
-        save_proponent_data_event(instance,request,viewset,parks=None,trails=None)
-    else:
-        save_proponent_data_tclass(instance,request,viewset,parks=None,trails=None)
+    if instance.application_type.name==settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
+        save_proponent_data_registration_of_interest(instance,request,viewset)
+    elif instance.application_type.name==settings.APPLICATION_TYPE.LEASE:
+        save_proponent_data_registration_of_interest(instance,request,viewset)
+    elif instance.application_type.name==settings.APPLICATION_TYPE.LICENCE:
+        save_proponent_data_registration_of_interest(instance,request,viewset)
+
+def save_proponent_data_registration_of_interest(instance, request, viewset):
+    print(request.data)
+    # proposal
+    proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
+    serializer = SaveRegistrationOfInterestSerializer(
+            instance, 
+            data=proposal_data, 
+            context={
+                "action": viewset.action,
+                }
+    )
+    serializer.is_valid(raise_exception=True)
+    instance = serializer.save()
 
 
 from leaseslicensing.components.main.models import ApplicationType
