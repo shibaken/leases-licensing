@@ -63,6 +63,24 @@
                     />
                 </FormSection>
                 <FormSection label="Deed Poll" Index="deed_poll">
+                    <p>
+                        <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.  
+                        Please note: electronic or digital signatures cannot be accepted.</br>
+                        Please click <a href="www.google.com">here</a> to download the deed poll.</br>
+                        The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
+                        </strong>
+                    </p>
+
+                    <label for="deed_poll_document">Deed poll:</label>
+                    <FileField 
+                        :readonly="readonly"
+                        ref="deed_poll_document"
+                        name="deed_poll_document"
+                        id="deed_poll_document"
+                        :isRepeatable="true"
+                        :documentActionUrl="deedPollDocumentUrl"
+                        :replace_button_by_text="true"
+                    />
                 </FormSection>
               </div>
             </div>
@@ -71,16 +89,19 @@
 </template>
 
 <script>
-    import Profile from '@/components/user/profile.vue'
-    import Applicant from '@/components/common/applicant.vue'
-    import FormSection from '@/components/forms/section_toggle.vue'
-    import RichText from '@/components/forms/richtext.vue'
-    /*
-    import Confirmation from '@/components/common/confirmation.vue'
-    import Vessels from '@/components/common/vessels.vue'
-    import CurrentVessels from '@/components/common/current_vessels.vue'
-    import Mooring from '@/components/common/mooring.vue'
-    */
+import Profile from '@/components/user/profile.vue'
+import Applicant from '@/components/common/applicant.vue'
+import FormSection from '@/components/forms/section_toggle.vue'
+import RichText from '@/components/forms/richtext.vue'
+import FileField from '@/components/forms/filefield_immediate.vue'
+import {
+  api_endpoints,
+  helpers
+}
+from '@/utils/hooks'
+/*
+import Confirmation from '@/components/common/confirmation.vue'
+*/
     export default {
         name: 'ApplicationForm',
         props:{
@@ -150,6 +171,7 @@
             Profile,
             FormSection,
             RichText,
+            FileField,
         },
         /*
         watch: {
@@ -157,6 +179,13 @@
         },
         */
         computed:{
+            deedPollDocumentUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_deed_poll_document/'
+                    )
+            },
+
             /*
             showPaymentTab: function() {
                 let show = false;
