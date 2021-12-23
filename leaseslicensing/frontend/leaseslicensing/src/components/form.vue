@@ -49,7 +49,20 @@
                   </div>
               </div>
               <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
-                  Map stuff
+                <div class="row col-sm-12">
+                    <ComponentMap
+                        ref="component_map"
+                        :is_internal="is_internal"
+                        :is_external="is_external"
+                        :key="component_map_key"
+                        @featuresDisplayed="updateTableByFeatures"
+                        :can_modify="can_modify"
+                        :display_at_time_of_submitted="show_col_status_when_submitted"
+                        @featureGeometryUpdated="featureGeometryUpdated"
+                        @popupClosed="popupClosed"
+                    />
+                </div>
+
               </div>
               <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
                 <FormSection label="Details" Index="application_details">
@@ -94,6 +107,7 @@ import Applicant from '@/components/common/applicant.vue'
 import FormSection from '@/components/forms/section_toggle.vue'
 import RichText from '@/components/forms/richtext.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
+import ComponentMap from '@/components/common/apiary_component_map.vue'
 import {
   api_endpoints,
   helpers
@@ -151,6 +165,9 @@ import Confirmation from '@/components/common/confirmation.vue'
         },
         data:function () {
             return{
+                can_modify: true,
+                show_col_status_when_submitted: true,
+                component_map_key: '',
                 values:null,
                 profile: {},
                 uuid: 0,
@@ -172,6 +189,7 @@ import Confirmation from '@/components/common/confirmation.vue'
             FormSection,
             RichText,
             FileField,
+            ComponentMap,
         },
         /*
         watch: {
@@ -228,6 +246,12 @@ import Confirmation from '@/components/common/confirmation.vue'
             },
         },
         methods:{
+            updateTableByFeatures: function() {
+            },
+            featureGeometryUpdated: function() {
+            },
+            popupClosed: function() {
+            },
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
             },
