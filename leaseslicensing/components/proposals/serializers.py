@@ -184,6 +184,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
 
     #get_history = serializers.ReadOnlyField()
     is_qa_officer = serializers.SerializerMethodField()
+    application_type_display = serializers.SerializerMethodField()
     #fee_invoice_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -191,6 +192,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         fields = (
                 'id',
                 'application_type',
+                'application_type_display',
                 'proposal_type',
                 'approval_level',
                 'title',
@@ -228,6 +230,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'applicant_details',
                 #'fee_invoice_url',
                 #'fee_paid',
+                'details_text',
                 )
         read_only_fields=('documents',)
 
@@ -236,6 +239,9 @@ class BaseProposalSerializer(serializers.ModelSerializer):
 
     def get_readonly(self,obj):
         return False
+
+    def get_application_type_display(self,obj):
+        return obj.application_type.get_name_display()
 
     def get_processing_status(self,obj):
         return obj.get_processing_status_display()
@@ -405,6 +411,17 @@ class CreateProposalSerializer(BaseProposalSerializer):
         read_only_fields=('id',)
 
 
+class SaveRegistrationOfInterestSerializer(BaseProposalSerializer):
+
+    class Meta:
+        model = Proposal
+        fields = (
+                'id',
+                'details_text',
+                )
+        read_only_fields=('id',)
+
+
 class SaveProposalSerializer(BaseProposalSerializer):
     proxy_applicant = serializers.IntegerField(required=False)
     assigned_officer = serializers.IntegerField(required=False)
@@ -435,6 +452,7 @@ class SaveProposalSerializer(BaseProposalSerializer):
                 #'lodgement_sequence',
                 'can_officer_process',
                 'applicant_details',
+                'details_text',
                 )
         read_only_fields=('documents','requirements',)
 

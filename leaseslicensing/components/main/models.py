@@ -94,7 +94,7 @@ class RequiredDocument(models.Model):
 
 #@python_2_unicode_compatible
 class ApplicationType(models.Model):
-    name = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=64, unique=True, choices=settings.APPLICATION_TYPES)
     order = models.PositiveSmallIntegerField(default=0)
     visible = models.BooleanField(default=True)
 
