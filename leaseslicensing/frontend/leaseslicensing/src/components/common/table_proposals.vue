@@ -1,34 +1,41 @@
 <template>
     <div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Type</label>
-                    <select class="form-control" v-model="filterApplicationType">
-                        <option value="All">All</option>
-                        <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3" v-if="is_internal">
-                <div class="form-group">
-                    <label for="">Applicant</label>
-                    <select class="form-control" v-model="filterApplicant">
-                        <option value="All">All</option>
-                        <option v-for="applicant in applicants" :value="applicant.id">{{ applicant.first_name }} {{ applicant.last_name }}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Status</label>
-                    <select class="form-control" v-model="filterApplicationStatus">
-                        <option value="All">All</option>
-                        <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
-                    </select>
-                </div>
-            </div>
+        <div @click="expandCollapseFilters">
+            <div v-if="filters_expanded"><i class="fa fa-chevron-up"></i></div>
+            <div v-else><i class="fa fa-chevron-down"></i></div>
         </div>
+
+        <transition>
+            <div class="row" v-show="filters_expanded">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Type</label>
+                        <select class="form-control" v-model="filterApplicationType">
+                            <option value="All">All</option>
+                            <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3" v-if="is_internal">
+                    <div class="form-group">
+                        <label for="">Applicant</label>
+                        <select class="form-control" v-model="filterApplicant">
+                            <option value="All">All</option>
+                            <option v-for="applicant in applicants" :value="applicant.id">{{ applicant.first_name }} {{ applicant.last_name }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Status</label>
+                        <select class="form-control" v-model="filterApplicationStatus">
+                            <option value="All">All</option>
+                            <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </transition>
 
         <div v-if="is_external" class="row">
             <div class="col-md-12">
@@ -86,6 +93,9 @@ export default {
             application_types: [],
             application_statuses: [],
             applicants: [],
+
+            // Filters toggle
+            filters_expanded: false,
         }
     },
     components:{
@@ -457,6 +467,9 @@ export default {
         }
     },
     methods: {
+        expandCollapseFilters: function(){
+            this.filters_expanded = !this.filters_expanded
+        },
         new_application_button_clicked: function(){
             this.$router.push({
                 name: 'apply_proposal'
@@ -526,3 +539,13 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.v-enter, .v-leave-to {
+      opacity: 0;
+}
+
+.v-enter-active, .v-leave-active {
+    transition: 0.5s;
+}
+</style>
