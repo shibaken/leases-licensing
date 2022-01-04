@@ -1,6 +1,6 @@
 <template>
     <div class="container" id="externalDash">
-        <FormSection :formCollapse="false" label="Applications" Index="applications">
+        <FormSection :formCollapse="false" label="Applications" Index="applications" subtitle="View existing applications and lodge new ones">
             <ApplicationsTable
                 level="internal"
             />
