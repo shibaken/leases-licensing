@@ -5,6 +5,12 @@
                 level="internal"
             />
         </FormSection>
+        <FormSection :formCollapse="false" label="Leases and Licences" Index="leases_and_licences">
+
+        </FormSection>
+        <FormSection :formCollapse="false" label="Compliances" Index="compliances">
+
+        </FormSection>
         <!--
         <FormSection :formCollapse="false" label="Waiting List" Index="waiting_list">
             <WaitingListTable
