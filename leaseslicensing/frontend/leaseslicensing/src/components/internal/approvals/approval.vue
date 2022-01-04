@@ -116,72 +116,6 @@
                   </div>
                 </div>
             </div>
-            <div class="row" v-if="approval && approval.submitter && approval.current_proposal && annualAdmissionPermit">
-                  <Vessels
-                  :proposal="approval.current_proposal"
-                  :profile="approval.submitter"
-                  id="approvalVessel"
-                  ref="vessel"
-                  :readonly="true"
-                  :is_internal="true"
-                  :keep_current_vessel="true"
-                  />
-            </div>
-            <div class="row" v-if="approval && approval.id && authorisedUserPermit">
-                <FormSection 
-                    :formCollapse="false" 
-                    label="Moorings" 
-                    Index="moorings"
-                >
-                    <div class="col-sm-9">
-                        <datatable
-                            ref="moorings_datatable"
-                            :id="moorings_datatable_id"
-                            :dtOptions="moorings_datatable_options"
-                            :dtHeaders="moorings_datatable_headers"
-                        />
-                    </div>
-                </FormSection>
-            </div>
-            <div class="row" v-if="approval && approval.id && mooringLicence">
-                <FormSection 
-                    :formCollapse="false" 
-                    label="Authorised Users" 
-                    Index="mooringLicenceAuthorisedUsers"
-                >
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <input type="checkbox" id="checkbox_show_expired" v-model="showExpired">
-                            <label for="checkbox_show_expired">Show expired and/or surrendered authorised user permits</label>
-                        </div>
-                    </div>
-                    <div class="col-sm-11">
-                        <datatable
-                            ref="ml_authorised_users_datatable"
-                            :id="ml_authorised_users_datatable_id"
-                            :dtOptions="ml_authorised_users_datatable_options"
-                            :dtHeaders="ml_authorised_users_datatable_headers"
-                        />
-                    </div>
-                </FormSection>
-            </div>
-
-            <div class="row" v-if="approval && approval.id && mooringLicence">
-                <FormSection 
-                    :formCollapse="false" 
-                    label="Vessels" 
-                    Index="mooringLicenceVessels"
-                >
-                    <div class="col-sm-11">
-                        <datatable
-                            ref="ml_vessels_datatable"
-                            :id="ml_vessels_datatable_id"
-                            :dtOptions="ml_vessels_datatable_options"
-                            :dtHeaders="ml_vessels_datatable_headers"
-                        />
-                    </div>
-                </FormSection>
-            </div>
 
         </div>
     </div>
@@ -193,7 +127,6 @@ import Vue from 'vue'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import Applicant from '@/components/common/applicant.vue'
-import Vessels from '@/components/common/vessels.vue'
 //import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import FormSection from "@/components/forms/section_toggle.vue"
 import { api_endpoints, helpers } from '@/utils/hooks'
@@ -371,7 +304,6 @@ export default {
         CommsLogs,
         FormSection,
         Applicant,
-        Vessels,
   },
   computed: {
     isLoading: function () {

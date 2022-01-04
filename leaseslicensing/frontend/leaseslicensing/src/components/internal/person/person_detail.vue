@@ -26,11 +26,6 @@
                             Approvals
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="pills-vessels-tab" data-toggle="pill" href="#pills-vessels" role="tab" aria-controls="pills-vessels" aria-selected="false">
-                            Vessels
-                        </a>
-                    </li>
                 </ul>
                 <div class="tab-content" id="pills-tabContent">
                     <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
@@ -50,35 +45,8 @@
                             />
                         </FormSection>
 
-                        <FormSection :formCollapse="false" label="Waiting List" subtitle="" Index="waiting_list" >
-                            <WaitingListTable
-                                v-if="email_user"
-                                level="internal"
-                                :approvalTypeFilter="wlaApprovalTypeFilter"
-                                :target_email_user_id="email_user.id"
-                            />
-                        </FormSection>
-
-                        <FormSection :formCollapse="false" label="Licences and Permits" subtitle="" Index="licences_and_permits" >
-                            <LicencesAndPermitsTable
-                                v-if="email_user"
-                                level="internal"
-                                :approvalTypeFilter="allApprovalTypeFilter"
-                                :target_email_user_id="email_user.id"
-                            />
-                        </FormSection>
-
                         <FormSection :formCollapse="false" label="Compliances" subtitle="" Index="compliances" >
                             <CompliancesTable
-                                v-if="email_user"
-                                level="internal"
-                                :target_email_user_id="email_user.id"
-                            />
-                        </FormSection>
-                    </div>
-                    <div class="tab-pane fade" id="pills-vessels" role="tabpanel" aria-labelledby="pills-vessels-tab">
-                        <FormSection :formCollapse="false" label="Vessels" subtitle="" Index="vessels" >
-                            <VesselsTable
                                 v-if="email_user"
                                 level="internal"
                                 :target_email_user_id="email_user.id"
@@ -95,10 +63,7 @@
 import FormSection from "@/components/forms/section_toggle.vue"
 import Applicant from '@/components/common/applicant.vue'
 import ApplicationsTable from "@/components/common/table_proposals"
-import WaitingListTable from "@/components/common/table_approvals"
-import LicencesAndPermitsTable from "@/components/common/table_approvals"
 import CompliancesTable from "@/components/common/table_compliances"
-import VesselsTable from "@/components/common/table_vessels"
 import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import CommsLogs from '@common-utils/comms_logs.vue'
 
@@ -120,11 +85,7 @@ export default {
         FormSection,
         Applicant,
         ApplicationsTable,
-        WaitingListTable,
-        LicencesAndPermitsTable,
         CompliancesTable,
-        //VesselsDashboard,
-        VesselsTable,
         CommsLogs,
     },
     computed: {

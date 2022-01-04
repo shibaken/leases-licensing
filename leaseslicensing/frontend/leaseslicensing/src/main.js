@@ -16,6 +16,10 @@ Vue.config.devtools = true;
 Vue.config.productionTip = false
 Vue.use( resource );
 
+// ckeditor4 is installed in 'wildlifecompliance/templates/wildlifecompliance/base.html'
+import CKEditor from 'ckeditor4-vue';
+Vue.use( CKEditor );
+
 // Add CSRF Token to every request
 Vue.http.interceptors.push( function ( request, next ) {
   // modify headers
