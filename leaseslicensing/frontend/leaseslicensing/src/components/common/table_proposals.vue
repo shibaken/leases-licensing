@@ -2,8 +2,8 @@
     <div>
         <div class="toggle_filters_wrapper">
             <div @click="expandCollapseFilters" class="toggle_filters_button">
-                <div v-if="filters_expanded"><i class="fa fa-chevron-up"></i></div>
-                <div v-else><i class="fa fa-chevron-down"></i></div>
+                <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
+                <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
             </div>
 
             <transition>
@@ -12,17 +12,8 @@
                         <div class="form-group">
                             <label for="">Type</label>
                             <select class="form-control" v-model="filterApplicationType">
-                                <option value="All">All</option>
+                                <option value="all">All</option>
                                 <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3" v-if="is_internal">
-                        <div class="form-group">
-                            <label for="">Applicant</label>
-                            <select class="form-control" v-model="filterApplicant">
-                                <option value="All">All</option>
-                                <option v-for="applicant in applicants" :value="applicant.id">{{ applicant.first_name }} {{ applicant.last_name }}</option>
                             </select>
                         </div>
                     </div>
@@ -30,8 +21,24 @@
                         <div class="form-group">
                             <label for="">Status</label>
                             <select class="form-control" v-model="filterApplicationStatus">
-                                <option value="All">All</option>
+                                <option value="all">All</option>
                                 <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Lodged from</label>
+                            <select class="form-control" v-model="filterLodgedFrom">
+                                <option value="all">All</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Lodged to</label>
+                            <select class="form-control" v-model="filterLodgedTo">
+                                <option value="all">All</option>
                             </select>
                         </div>
                     </div>
@@ -87,9 +94,10 @@ export default {
             datatable_id: 'applications-datatable-' + vm._uid,
 
             // selected values for filtering
-            filterApplicationType: null,
-            filterApplicationStatus: null,
-            filterApplicant: null,
+            filterApplicationType: 'all',
+            filterApplicationStatus: 'all',
+            filterLodgedFrom: 'all',
+            filterLodgedTo: 'all',
 
             // filtering options
             application_types: [],
@@ -105,19 +113,27 @@ export default {
     },
     watch: {
         filterApplicationStatus: function() {
-            let vm = this;
-            vm.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
         },
         filterApplicationType: function() {
-            let vm = this;
-            vm.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
         },
-        filterApplicant: function(){
-            let vm = this;
-            vm.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-        }
+        filterLodgedFrom: function() {
+            this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+        },
+        filterLodgedTo: function() {
+            this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+        },
     },
     computed: {
+        filterApplied: function(){
+            if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
+                this.filterLodgedFrom.toLowerCase() === 'all' && this.filterLodgedTo.toLowerCase() === 'all' ){
+                return false
+            } else {
+                return true
+            }
+        },
         debug: function(){
             if (this.$route.query.debug){
                 return this.$route.query.debug === 'Tru3'
@@ -146,7 +162,6 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
-                    console.log(full)
                     return full.id
                 }
             }
@@ -453,7 +468,8 @@ export default {
                     "data": function ( d ) {
                         d.filter_application_type = vm.filterApplicationType
                         d.filter_application_status = vm.filterApplicationStatus
-                        d.filter_applicant = vm.filterApplicant
+                        d.filter_lodged_from = vm.filterLodgedFrom
+                        d.filter_lodged_to = vm.filterLodgedTo
                         d.level = vm.level
                     }
                 },
@@ -554,5 +570,7 @@ export default {
 }
 .toggle_filters_button {
     cursor: pointer;
+    display: flex;
+    flex-direction: row-reverse;
 }
 </style>
