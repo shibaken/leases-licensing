@@ -94,10 +94,10 @@ export default {
             datatable_id: 'applications-datatable-' + vm._uid,
 
             // selected values for filtering
-            filterApplicationType: 'all',
-            filterApplicationStatus: 'all',
-            filterLodgedFrom: 'all',
-            filterLodgedTo: 'all',
+            filterApplicationType: sessionStorage.getItem('filterApplicationType') ? sessionStorage.getItem('filterApplicationType') : 'all',
+            filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
+            filterLodgedFrom: sessionStorage.getItem('filterLodgedFrom') ? sessionStorage.getItem('filterLodgedFrom') : 'all',
+            filterLodgedTo: sessionStorage.getItem('filterLodgedTo') ? sessionStorage.getItem('filterLodgedTo') : 'all',
 
             // filtering options
             application_types: [],
@@ -114,15 +114,19 @@ export default {
     watch: {
         filterApplicationStatus: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterApplicationStatus', this.filterApplicationStatus);
         },
         filterApplicationType: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
         },
         filterLodgedFrom: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterLodgedFrom', this.filterLodgedFrom);
         },
         filterLodgedTo: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterLodgedTo', this.filterLodgedTo);
         },
     },
     computed: {
@@ -486,6 +490,7 @@ export default {
     },
     methods: {
         expandCollapseFilters: function(){
+            console.log('expandCollapseFilters')
             this.filters_expanded = !this.filters_expanded
         },
         new_application_button_clicked: function(){

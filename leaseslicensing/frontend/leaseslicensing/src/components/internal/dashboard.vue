@@ -1,14 +1,11 @@
 <template>
     <div class="container" id="externalDash">
-        <FormSection :formCollapse="false" label="Applications" Index="applications" subtitle="View existing applications and lodge new ones">
+        <FormSection :formCollapse="false" label="Applications" Index="applications">
             <ApplicationsTable
                 level="internal"
             />
         </FormSection>
-        <FormSection :formCollapse="false" label="Leases and Licences" Index="leases_and_licences">
-
-        </FormSection>
-        <FormSection :formCollapse="false" label="Compliances" Index="compliances">
+        <FormSection :formCollapse="false" label="Applications referred to me" Index="leases_and_licences">
 
         </FormSection>
         <!--
@@ -78,7 +75,9 @@ export default {
         is_external: function() {
             return this.level == 'external'
         },
-
+        is_internal: function() {
+            return this.level == 'internal'
+        }
     },
     methods: {
     },
