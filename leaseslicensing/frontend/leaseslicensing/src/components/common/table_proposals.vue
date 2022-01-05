@@ -4,6 +4,7 @@
             <div @click="expandCollapseFilters" class="toggle_filters_button">
                 <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
                 <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
+                <i v-if="filterApplied" class="fa fa-exclamation-circle" style="font-size: large; color: yellow;"></i>
             </div>
 
             <transition>
@@ -572,6 +573,7 @@ export default {
 }
 .toggle_filters_wrapper {
     background: lightgray;
+    padding: 0.5em;
 }
 .toggle_filters_button {
     cursor: pointer;
