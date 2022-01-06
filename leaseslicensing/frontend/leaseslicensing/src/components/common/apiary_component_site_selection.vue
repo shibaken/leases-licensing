@@ -35,8 +35,10 @@
     import Vue from 'vue'
     import datatable from '@vue-utils/datatable.vue'
     import uuid from 'uuid'
-    import ComponentMap from '@/components/common/apiary/component_map.vue'
-    import { getDisplayNameFromStatus, getStatusForColour, SiteColours } from '@/components/common/apiary/site_colours.js'
+    //import ComponentMap from '@/components/common/apiary/component_map.vue'
+    //import { getDisplayNameFromStatus, getStatusForColour, SiteColours } from '@/components/common/apiary/site_colours.js'
+    import ComponentMap from './apiary_component_map.vue'
+    //import { getDisplayNameFromStatus, getStatusForColour, SiteColours } from '@/components/common/apiary/site_colours.js'
 
     export default {
         props:{

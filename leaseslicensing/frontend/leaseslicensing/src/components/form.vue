@@ -13,7 +13,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false">
+                <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
                   Map
                 </a>
               </li>
@@ -50,7 +50,7 @@
               </div>
               <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                 <div class="row col-sm-12">
-                    <ComponentMap
+                    <!--ComponentMap
                         ref="component_map"
                         :is_internal="is_internal"
                         :is_external="is_external"
@@ -60,6 +60,12 @@
                         :display_at_time_of_submitted="show_col_status_when_submitted"
                         @featureGeometryUpdated="featureGeometryUpdated"
                         @popupClosed="popupClosed"
+                    /-->
+
+                    <ComponentMap
+                        ref="component_map"
+                        :key="componentMapKey"
+                        v-if="componentMapOn"
                     />
                 </div>
 
@@ -107,7 +113,10 @@ import Applicant from '@/components/common/applicant.vue'
 import FormSection from '@/components/forms/section_toggle.vue'
 import RichText from '@/components/forms/richtext.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
-import ComponentMap from '@/components/common/apiary_component_map.vue'
+//import ComponentMap from '@/components/common/apiary_component_map.vue'
+//import ComponentMap from '@/components/common/apiary_component_site_selection.vue'
+import ComponentMap from '@/components/common/component_map.vue'
+//import ComponentMap from '@/components/common/tutorial_map.vue'
 import {
   api_endpoints,
   helpers
@@ -167,7 +176,9 @@ import Confirmation from '@/components/common/confirmation.vue'
             return{
                 can_modify: true,
                 show_col_status_when_submitted: true,
-                component_map_key: '',
+                //component_map_key: '',
+                componentMapKey: 0,
+                componentMapOn: false,
                 values:null,
                 profile: {},
                 uuid: 0,
@@ -197,6 +208,9 @@ import Confirmation from '@/components/common/confirmation.vue'
         },
         */
         computed:{
+            proposalId: function() {
+                return this.proposal ? this.proposal.id : null;
+            },
             deedPollDocumentUrl: function() {
                 return helpers.add_endpoint_join(
                     api_endpoints.proposal,
@@ -246,6 +260,13 @@ import Confirmation from '@/components/common/confirmation.vue'
             },
         },
         methods:{
+            incrementComponentMapKey: function() {
+                this.componentMapKey++;
+            },
+            toggleComponentMapOn: function() {
+                this.incrementComponentMapKey()
+                this.componentMapOn = true;
+            },
             updateTableByFeatures: function() {
             },
             featureGeometryUpdated: function() {
@@ -293,9 +314,13 @@ import Confirmation from '@/components/common/confirmation.vue'
 
         },
         mounted: function() {
-            let vm = this;
-            vm.set_tabs();
-            vm.form = document.forms.new_proposal;
+            this.set_tabs();
+            this.form = document.forms.new_proposal;
+            /*
+            this.$nextTick(() => {
+                this.$refs.component_map.initMap();
+            });
+            */
             //vm.eventListener();
             //window.addEventListener('beforeunload', vm.leaving);
             //indow.addEventListener('onblur', vm.leaving);

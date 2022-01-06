@@ -6,7 +6,7 @@
                     <img id="basemap_sat" src="../../assets/satellite_icon.jpg" @click="setBaseLayer('sat')" />
                     <img id="basemap_osm" src="../../assets/map_icon.png" @click="setBaseLayer('osm')" />
                 </div>
-                <div class="optional-layers-wrapper">
+                <!--div class="optional-layers-wrapper">
                     <div class="optional-layers-button">
                         <template v-if="mode === 'layer'">
                             <img src="../../assets/info-bubble.svg" @click="set_mode('measure')" />
@@ -15,14 +15,6 @@
                             <img src="../../assets/ruler.svg" @click="set_mode('layer')" />
                         </template>
                     </div>
-                    <!--div class="optional-layers-button" @click="set_mode(mode)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" >
-                            <path 
-                                d="M18.342 0l-2.469 2.47 2.121 2.121-.707.707-2.121-2.121-1.414 1.414 1.414 1.414-.707.707-1.414-1.414-1.414 1.414 1.414 1.414-.707.707-1.414-1.414-1.414 1.414 2.121 2.122-.707.707-2.121-2.121-1.414 1.414 1.414 1.414-.708.707-1.414-1.414-1.414 1.414 1.414 1.414-.708.709-1.414-1.414-1.414 1.413 2.121 2.121-.706.706-2.122-2.121-2.438 2.439 5.656 5.657 18.344-18.343z" 
-                                :fill="ruler_colour"
-                            />
-                        </svg>
-                    </div-->
                     <div style="position:relative">
                         <transition v-if="optionalLayers.length">
                             <div class="optional-layers-button" @mouseover="hover=true">
@@ -44,7 +36,7 @@
                             </div>
                         </transition>
                     </div>
-                </div>
+                </div-->
             </div>
         </div>
 
@@ -153,17 +145,21 @@
         created: function(){
 
         },
-        mounted: function(){
+        mounted: async function(){
+            /*
             let vm = this;
             this.$nextTick(() => {
                 vm.addEventListeners()
             });
-            vm.initMap()
+            */
+            await this.$nextTick(() => {
+                this.initMap()
+            });
+            /*
             vm.setBaseLayer('osm')
             vm.set_mode('layer')
             vm.addOptionalLayers()
-            //vm.map.addLayer(vm.apiarySitesQueryLayer);
-            vm.displayAllFeatures()
+            */
         },
         components: {
 
@@ -293,6 +289,9 @@
             },
             setBaseLayer: function(selected_layer_name){
                 console.log('in setBaseLayer')
+                console.log(vm.map)
+                console.log(vm.tileLayerSat)
+                console.log(vm.tileLayerOsm)
                 let vm = this
                 if (selected_layer_name == 'sat') {
                     vm.tileLayerOsm.setVisible(false)
@@ -319,7 +318,6 @@
             },
             initMap: function() {
                 let vm = this;
-
                 let satelliteTileWms = new TileWMS({
                             url: env['kmi_server_url'] + '/geoserver/public/wms',
                             params: {
@@ -337,7 +335,6 @@
                     visible: true,
                     source: new OSM(),
                 });
-
                 vm.tileLayerSat = new TileLayer({
                     title: 'Satellite',
                     type: 'base',
@@ -348,7 +345,7 @@
                 vm.map = new Map({
                     layers: [
                         vm.tileLayerOsm, 
-                        vm.tileLayerSat,
+                        //vm.tileLayerSat,
                     ],
                     //target: 'map',
                     target: vm.elem_id,
@@ -358,20 +355,7 @@
                         projection: 'EPSG:4326'
                     })
                 });
-
-                vm.apiarySitesQuerySource = new VectorSource({ });
-                vm.apiarySitesQueryLayer = new VectorLayer({
-                    source: vm.apiarySitesQuerySource,
-                    style: function(feature, resolution){
-                        let status = getStatusForColour(feature, false, vm.display_at_time_of_submitted)
-                        return getApiaryFeatureStyle(status, feature.get('checked'))
-                    },
-                });
-                vm.map.addLayer(vm.apiarySitesQueryLayer);
-
-                // Set zIndex to some layers to be rendered over the other layers
-                vm.apiarySitesQueryLayer.setZIndex(10)  
-
+                console.log(this.map)
                 // Full screen toggle
                 vm.map.addControl(new FullScreenControl());
 
@@ -415,14 +399,6 @@
                     target: document.getElementById('mouse-position'),
                     className: 'custom-mouse-position',
                 }));
-                /*
-
-                // Add apiary_sites passed as a props
-                for (let i=0; i<vm.apiary_site_geojson_array.length; i++){
-                    this.addApiarySite(vm.apiary_site_geojson_array[i])
-                }
-                */
-
                 let container = document.getElementById(vm.popup_id)
                 vm.content_element = document.getElementById(vm.popup_content_id)
                 let closer = document.getElementById(vm.popup_closer_id)
@@ -440,102 +416,6 @@
                 }
 
                 vm.map.addOverlay(vm.overlay)
-
-                vm.map.on('singleclick', function(evt){
-                    if (vm.mode === 'layer'){
-                        let feature = vm.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                            return feature;
-                        });
-                        if (feature){
-                            if (!feature.id){
-                                // When the Modify object is used for the layer, 'feature' losts some of the attributes including 'id', 'status'...
-                                // Therefore try to get the correct feature by the coordinate
-                                let geometry = feature.getGeometry();
-                                let coord = geometry.getCoordinates();
-                                feature = vm.apiarySitesQuerySource.getFeaturesAtCoordinate(coord)
-                            }
-                            vm.showPopup(feature[0])
-                        } else {
-                            vm.closePopup()
-                            let view = vm.map.getView()
-                            let viewResolution = view.getResolution()
-
-                            // Retrieve active layers' sources
-                            for (let i=0; i < vm.optionalLayers.length; i++){
-                                let visibility = vm.optionalLayers[i].getVisible()
-                                if (visibility){
-                                    // Retrieve column names to be displayed
-                                    let column_names = vm.optionalLayers[i].get('columns')
-                                    column_names = column_names.map(function(col){
-                                        // Convert array of dictionaries to simple array
-                                        if (vm.is_internal && col.option_for_internal){
-                                            return col.name
-                                        }
-                                        if (vm.is_external && col.option_for_external){
-                                            return col.name
-                                        }
-                                    })
-                                    // Retrieve the value of display_all_columns boolean flag
-                                    let display_all_columns = vm.optionalLayers[i].get('display_all_columns')
-
-                                    // Retrieve the URL to query the attributes
-                                    let source = vm.optionalLayers[i].getSource()
-                                    let url = source.getFeatureInfoUrl(
-                                        evt.coordinate, viewResolution, view.getProjection(),
-                                        //{'INFO_FORMAT': 'text/html'}
-                                        {'INFO_FORMAT': 'application/json'}
-                                    )
-
-                                    // Query 
-                                    let p = fetch(url, {
-                                        credentials: 'include'
-                                    })
-
-                                    //p.then(res => res.text()).then(function(data){
-                                    p.then(res => res.json()).then(function(data){
-                                        //vm.showPopupForLayersHTML(data, evt.coordinate, column_names, display_all_columns)
-                                        vm.showPopupForLayersJson(data, evt.coordinate, column_names, display_all_columns, vm.optionalLayers[i])
-                                    })
-                                }
-                            }
-                        }
-                    } else if (vm.mode === 'measure'){
-                        // When in measure mode, the styleFunction() is responsible for the drawing
-                    }
-                })
-                vm.map.on('pointermove', function(e) {
-                    if (e.dragging) return;
-                    let pixel = vm.map.getEventPixel(e.originalEvent);
-                    let hit = vm.map.hasFeatureAtPixel(pixel);
-                    vm.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
-                });
-                vm.map.on('moveend', function(e){
-                    let extent = vm.map.getView().calculateExtent(vm.map.getSize());
-                    let features = vm.apiarySitesQuerySource.getFeaturesInExtent(extent)
-                    vm.$emit('featuresDisplayed', features)
-                });
-                if (vm.can_modify){
-                    let modifyTool = new Modify({
-                        source: vm.apiarySitesQuerySource,
-                    });
-                    modifyTool.on("modifystart", function(attributes){
-                            attributes.features.forEach(function(feature){
-                        })
-                    });
-                    modifyTool.on("modifyend", function(attributes){
-                        attributes.features.forEach(function(feature){
-                            let id = feature.getId();
-                            let index = vm.modifyInProgressList.indexOf(id);
-                            if (index != -1) {
-                                // feature has been modified
-                                vm.modifyInProgressList.splice(index, 1);
-                                let coords = feature.getGeometry().getCoordinates();
-                                vm.$emit('featureGeometryUpdated', {'id': id, 'coordinates': {'lng': coords[0], 'lat': coords[1]}})
-                            }
-                        });
-                    });
-                    vm.map.addInteraction(modifyTool);
-                }
                 document.addEventListener('keydown', vm.keydown, false)
             },
             keydown: function(evt){
@@ -628,6 +508,7 @@
             getDegrees: function(coords){
                 return coords[0].toFixed(6) + ', ' + coords[1].toFixed(6);
             },
+            /*
             addApiarySite: function(apiary_site_geojson) {
                 
                 let vm = this
@@ -674,6 +555,7 @@
                     view.animate({zoom: z, center: centre})
                 }
             },
+            */
         },
     }
 </script>
