@@ -574,11 +574,13 @@ export default {
             $(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
                 if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
+                    // DateFrom has been picked
                     vm.filterProposalLodgedFrom = e.date.format('DD/MM/YYYY');
-                    //$(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
+                    $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
                 }
                 else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
                     vm.filterProposalLodgedFrom = "";
+                    $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(false);
                 }
                 else {
                     console.log($(vm.$refs.proposalDateFromPicker).data('date'))
@@ -589,11 +591,13 @@ export default {
             $(vm.$refs.proposalDateToPicker).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.proposalDateToPicker).on('dp.change',function (e) {
                 if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
+                    // DateTo has been picked
                     vm.filterProposalLodgedTo = e.date.format('DD/MM/YYYY');
-                    //$(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
+                    $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(e.date);
                 }
                 else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
                     vm.filterProposalLodgedTo = "";
+                    $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(false);
                 }
                 else {
                     console.log($(vm.$refs.proposalDateToPicker).data('date'))
