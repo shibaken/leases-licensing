@@ -2,9 +2,11 @@
     <div>
         <div class="toggle_filters_wrapper">
             <div @click="expandCollapseFilters" class="toggle_filters_button">
-                <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
-                <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
-                <i v-if="filterApplied" class="fa fa-exclamation-circle" style="font-size: large; color: yellow;"></i>
+                <div class="toggle_filters_icon">
+                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
+                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
+                </div>
+                <i v-if="filterApplied" class="fa fa-exclamation-circle filter-warning-icon"></i>
             </div>
 
             <transition>
@@ -30,17 +32,23 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="">Lodged from</label>
-                            <select class="form-control" v-model="filterLodgedFrom">
-                                <option value="all">All</option>
-                            </select>
+                            <div class="input-group date" ref="proposalDateFromPicker">
+                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="">Lodged to</label>
-                            <select class="form-control" v-model="filterLodgedTo">
-                                <option value="all">All</option>
-                            </select>
+                            <div class="input-group date" ref="proposalDateToPicker">
+                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -97,8 +105,8 @@ export default {
             // selected values for filtering
             filterApplicationType: sessionStorage.getItem('filterApplicationType') ? sessionStorage.getItem('filterApplicationType') : 'all',
             filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
-            filterLodgedFrom: sessionStorage.getItem('filterLodgedFrom') ? sessionStorage.getItem('filterLodgedFrom') : 'all',
-            filterLodgedTo: sessionStorage.getItem('filterLodgedTo') ? sessionStorage.getItem('filterLodgedTo') : 'all',
+            filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFrom') ? sessionStorage.getItem('filterProposalLodgedFrom') : '',
+            filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedTo') ? sessionStorage.getItem('filterProposalLodgedTo') : '',
 
             // filtering options
             application_types: [],
@@ -107,6 +115,15 @@ export default {
 
             // Filters toggle
             filters_expanded: false,
+
+            dateFormat: 'DD/MM/YYYY',
+            datepickerOptions:{
+                format: 'DD/MM/YYYY',
+                showClear:true,
+                useCurrent:false,
+                keepInvalid:true,
+                allowInputToggle:true
+            },
         }
     },
     components:{
@@ -121,19 +138,21 @@ export default {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
         },
-        filterLodgedFrom: function() {
+        filterProposalLodgedFrom: function() {
+            console.log('filterProposalLodgedFrom changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterLodgedFrom', this.filterLodgedFrom);
+            sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
         },
-        filterLodgedTo: function() {
+        filterProposalLodgedTo: function() {
+            console.log('filterProposalLodgedTo changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterLodgedTo', this.filterLodgedTo);
+            sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
         },
     },
     computed: {
         filterApplied: function(){
             if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
-                this.filterLodgedFrom.toLowerCase() === 'all' && this.filterLodgedTo.toLowerCase() === 'all' ){
+                this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 return false
             } else {
                 return true
@@ -473,8 +492,8 @@ export default {
                     "data": function ( d ) {
                         d.filter_application_type = vm.filterApplicationType
                         d.filter_application_status = vm.filterApplicationStatus
-                        d.filter_lodged_from = vm.filterLodgedFrom
-                        d.filter_lodged_to = vm.filterLodgedTo
+                        d.filter_lodged_from = vm.filterProposalLodgedFrom
+                        d.filter_lodged_to = vm.filterProposalLodgedTo
                         d.level = vm.level
                     }
                 },
@@ -550,6 +569,65 @@ export default {
                 let id = $(this).attr('data-discard-proposal');
                 vm.discardProposal(id)
             });
+
+            // Lodged From
+            $(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
+            $(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
+                if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
+                    vm.filterProposalLodgedFrom = e.date.format('DD/MM/YYYY');
+                    //$(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
+                }
+                else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
+                    vm.filterProposalLodgedFrom = "";
+                }
+                else {
+                    console.log($(vm.$refs.proposalDateFromPicker).data('date'))
+                }
+            });
+
+            // Lodged To
+            $(vm.$refs.proposalDateToPicker).datetimepicker(vm.datepickerOptions);
+            $(vm.$refs.proposalDateToPicker).on('dp.change',function (e) {
+                if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
+                    vm.filterProposalLodgedTo = e.date.format('DD/MM/YYYY');
+                    //$(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
+                }
+                else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
+                    vm.filterProposalLodgedTo = "";
+                }
+                else {
+                    console.log($(vm.$refs.proposalDateToPicker).data('date'))
+                }
+            });
+
+            //$(vm.$refs.proposalDateToPicker).datetimepicker(vm.datepickerOptions);
+            //$(vm.$refs.proposalDateToPicker).on('dp.change', function(e){
+            //    if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
+            //        vm.filterProposalLodgedTo =  e.date.format('DD/MM/YYYY');
+            //    }
+            //    else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
+            //        vm.filterProposaLodgedTo = "";
+            //    }
+            //    else {
+            //        console.log('to picker')
+            //        console.log($(vm.$refs.proposalDateToPicker).data('date'))
+            //    }
+            // });
+
+            //$(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
+            //$(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
+            //    if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
+            //        vm.filterProposalLodgedFrom = e.date.format('DD/MM/YYYY');
+            //        $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
+            //    }
+            //    else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
+            //        vm.filterProposalLodgedFrom = "";
+            //    }
+            //    else {
+            //        console.log('from picker')
+            //        console.log($(vm.$refs.proposalDateFromPicker).data('date'))
+            //    }
+            //});
         },
     },
     created: function(){
@@ -572,12 +650,20 @@ export default {
     transition: 0.5s;
 }
 .toggle_filters_wrapper {
-    background: lightgray;
+    background: #f5f5f5;
     padding: 0.5em;
+    margin: 0 0 0.5em 0;
 }
 .toggle_filters_button {
     cursor: pointer;
     display: flex;
     flex-direction: row-reverse;
+}
+.filter-warning-icon {
+    font-size: x-large; 
+    color: #ffc107;
+}
+.toggle_filters_icon {
+    margin: 0 0 0 0.5em;
 }
 </style>
