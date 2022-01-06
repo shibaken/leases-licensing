@@ -5,6 +5,9 @@
                 level="internal"
             />
         </FormSection>
+        <FormSection :formCollapse="false" label="Applications referred to me" Index="leases_and_licences">
+
+        </FormSection>
         <!--
         <FormSection :formCollapse="false" label="Waiting List" Index="waiting_list">
             <WaitingListTable
@@ -72,7 +75,9 @@ export default {
         is_external: function() {
             return this.level == 'external'
         },
-
+        is_internal: function() {
+            return this.level == 'internal'
+        }
     },
     methods: {
     },
