@@ -31,7 +31,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="">Lodged from</label>
+                            <label for="">Lodged From</label>
                             <div class="input-group date" ref="proposalDateFromPicker">
                                 <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
                                 <span class="input-group-addon">
@@ -42,7 +42,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="">Lodged to</label>
+                            <label for="">Lodged To</label>
                             <div class="input-group date" ref="proposalDateToPicker">
                                 <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
                                 <span class="input-group-addon">
@@ -111,7 +111,6 @@ export default {
             // filtering options
             application_types: [],
             application_statuses: [],
-            applicants: [],
 
             // Filters toggle
             filters_expanded: false,
@@ -510,7 +509,6 @@ export default {
     },
     methods: {
         expandCollapseFilters: function(){
-            console.log('expandCollapseFilters')
             this.filters_expanded = !this.filters_expanded
         },
         new_application_button_clicked: function(){
@@ -582,9 +580,6 @@ export default {
                     vm.filterProposalLodgedFrom = "";
                     $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(false);
                 }
-                else {
-                    console.log($(vm.$refs.proposalDateFromPicker).data('date'))
-                }
             });
 
             // Lodged To
@@ -598,9 +593,6 @@ export default {
                 else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
                     vm.filterProposalLodgedTo = "";
                     $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(false);
-                }
-                else {
-                    console.log($(vm.$refs.proposalDateToPicker).data('date'))
                 }
             });
 

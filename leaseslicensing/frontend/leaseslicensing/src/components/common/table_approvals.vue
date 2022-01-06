@@ -1,15 +1,59 @@
 <template>
     <div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="">Status:</label>
-                <select class="form-control" v-model="filterStatus">
-                    <option value="All">All</option>
-                    <option v-for="status in statusValues" :value="status.code">{{ status.description }}</option>
-                </select>
+        <div class="toggle_filters_wrapper">
+            <div @click="expandCollapseFilters" class="toggle_filters_button">
+                <div class="toggle_filters_icon">
+                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
+                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
+                </div>
+                <i v-if="filterApplied" class="fa fa-exclamation-circle filter-warning-icon"></i>
             </div>
-        </div>
 
+            <transition>
+                <div class="row" v-show="filters_expanded">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Type</label>
+                            <select class="form-control" v-model="filterApprovalType">
+                                <option value="all">All</option>
+                                <option v-for="type in approval_types" :value="type.code">{{ type.description }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Status</label>
+                            <select class="form-control" v-model="filterApprovalStatus">
+                                <option value="all">All</option>
+                                <option v-for="status in approval_statuses" :value="status.code">{{ status.description }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Expiry Date From</label>
+                            <div class="input-group date" ref="approvalDateFromPicker">
+                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterApprovalExpiryDateFrom">
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Expiry Date To</label>
+                            <div class="input-group date" ref="approvalDateToPicker">
+                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterApprovalExpiryDateTo">
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+        </div>
 
         <div class="row">
             <div class="col-lg-12">
@@ -77,17 +121,33 @@ export default {
             approvalHistoryId: null,
             uuid: 0,
             mooringBayId: null,
-            filterStatus: null,
             statusValues: [],
             filterApprovalType: null,
             //approvalTypes: [],
-            filterMooringBay: null,
-            mooringBays: [],
-            filterHolder: null,
             holderList: [],
-            maxVesselLength: null,
-            maxVesselDraft: null,
             profile: {},
+
+            // selected values for filtering
+            filterApprovalType: sessionStorage.getItem('filterApprovalType') ? sessionStorage.getItem('filterApprovalType') : 'all',
+            filterApprovalStatus: sessionStorage.getItem('filterApprovalStatus') ? sessionStorage.getItem('filterApprovalStatus') : 'all',
+            filterApprovalExpiryDateFrom: sessionStorage.getItem('filterApprovalExpiryDateFrom') ? sessionStorage.getItem('filterApprovalExpiryDateFrom') : '',
+            filterApprovalExpiryDateTo: sessionStorage.getItem('filterApprovalExpiryDateTo') ? sessionStorage.getItem('filterApprovalExpiryDateTo') : '',
+
+            // filtering options
+            approval_types: [],
+            approval_statuses: [],
+
+            // Filters toggle
+            filters_expanded: false,
+
+            dateFormat: 'DD/MM/YYYY',
+            datepickerOptions:{
+                format: 'DD/MM/YYYY',
+                showClear:true,
+                useCurrent:false,
+                keepInvalid:true,
+                allowInputToggle:true
+            },
         }
     },
     components:{
@@ -103,20 +163,32 @@ export default {
             console.log(value)
             this.$refs.approvals_datatable.vmDataTable.ajax.reload()
         },
-        filterStatus: function(){
-            this.$refs.approvals_datatable.vmDataTable.ajax.reload()
+        filterApprovalStatus: function() {
+            this.$refs.approvals_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterApprovalStatus', this.filterApprovalStatus);
         },
-        filterApprovalType: function(){
-            this.$refs.approvals_datatable.vmDataTable.ajax.reload()
+        filterApprovalType: function() {
+            this.$refs.approvals_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterApprovalType', this.filterApprovalType);
         },
-        filterMooringBay: function(){
-            this.$refs.approvals_datatable.vmDataTable.ajax.reload()
+        filterApprovalExpiryDateFrom: function() {
+            this.$refs.approvals_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterApprovalExpiryDateFrom', this.filterApprovalExpiryDateFrom);
         },
-        filterHolder: function(){
-            this.$refs.approvals_datatable.vmDataTable.ajax.reload()
+        filterApprovalExpiryDateTo: function() {
+            this.$refs.approvals_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterApprovalExpiryDateTo', this.filterApprovalExpiryDateTo);
         },
     },
     computed: {
+        filterApplied: function(){
+            if(this.filterApprovalStatus.toLowerCase() === 'all' && this.filterApprovalType.toLowerCase() === 'all' && 
+                this.filterApprovalExpiryDateFrom.toLowerCase() === '' && this.filterApprovalExpiryDateTo.toLowerCase() === ''){
+                return false
+            } else {
+                return true
+            }
+        },
         csrf_token: function() {
           return helpers.getCookie('csrftoken')
         },
@@ -399,9 +471,11 @@ export default {
 
                     // adding extra GET params for Custom filtering
                     "data": function ( d ) {
-                        d.filter_status = vm.filterStatus;
-                        d.filter_holder_id = vm.filterHolder;
-                        d.is_internal = vm.is_internal;
+                        d.filter_approval_type = vm.filterApprovalType
+                        d.filter_approval_status = vm.filterApprovalStatus
+                        d.filter_approval_expiry_date_from = vm.filterApprovalExpiryDateFrom
+                        d.filter_approval_expiry_date_to = vm.filterApprovalExpiryDateTo
+                        d.level = vm.level
                     }
                 },
                 //dom: 'frt', //'lBfrtip',
@@ -416,6 +490,9 @@ export default {
         },
     },
     methods: {
+        expandCollapseFilters: function(){
+            this.filters_expanded = !this.filters_expanded
+        },
         sendData: function(params){
             let vm = this
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/request_new_stickers'), params).then(
@@ -451,6 +528,35 @@ export default {
         },
         addEventListeners: function(){
             let vm = this;
+
+            // Lodged From
+            $(vm.$refs.approvalDateFromPicker).datetimepicker(vm.datepickerOptions);
+            $(vm.$refs.approvalDateFromPicker).on('dp.change',function (e) {
+                if ($(vm.$refs.approvalDateFromPicker).data('DateTimePicker').date()) {
+                    // DateFrom has been picked
+                    vm.filterApprovalExpiryDateFrom = e.date.format('DD/MM/YYYY');
+                    $(vm.$refs.approvalDateToPicker).data("DateTimePicker").minDate(e.date);
+                }
+                else if ($(vm.$refs.approvalDateFromPicker).data('date') === "") {
+                    vm.filterApprovalExpiryDateFrom = "";
+                    $(vm.$refs.approvalDateToPicker).data("DateTimePicker").minDate(false);
+                }
+            });
+
+            // Lodged To
+            $(vm.$refs.approvalDateToPicker).datetimepicker(vm.datepickerOptions);
+            $(vm.$refs.approvalDateToPicker).on('dp.change',function (e) {
+                if ($(vm.$refs.approvalDateToPicker).data('DateTimePicker').date()) {
+                    // DateTo has been picked
+                    vm.filterApprovalExpiryDateTo = e.date.format('DD/MM/YYYY');
+                    $(vm.$refs.approvalDateFromPicker).data("DateTimePicker").maxDate(e.date);
+                }
+                else if ($(vm.$refs.approvalDateToPicker).data('date') === "") {
+                    vm.filterApprovalExpiryDateTo = "";
+                    $(vm.$refs.approvalDateFromPicker).data("DateTimePicker").maxDate(false);
+                }
+            });
+
             //Internal Action shortcut listeners
             let table = vm.$refs.approvals_datatable.vmDataTable
             table.on('processing.dt', function(e) {
@@ -480,26 +586,6 @@ export default {
                         return true;
                     });
                 }
-            });
-            $('#maxVesselLength').on("blur", async function(e) {
-                vm.$nextTick(() => {
-                    vm.$refs.approvals_datatable.vmDataTable.ajax.reload();
-                    /*
-                    if (vm.maxVesselLength) {
-                        vm.$refs.approvals_datatable.vmDataTable.ajax.reload();
-                    }
-                    */
-                });
-            });
-            $('#maxVesselDraft').on("blur", async function(e) {
-                vm.$nextTick(() => {
-                    vm.$refs.approvals_datatable.vmDataTable.ajax.reload();
-                    /*
-                    if (vm.maxVesselDraft) {
-                        vm.$refs.approvals_datatable.vmDataTable.ajax.reload();
-                    }
-                    */
-                });
             });
             // Internal Reissue listener
             vm.$refs.approvals_datatable.vmDataTable.on('click', 'a[data-reissue-approval]', function(e) {
@@ -754,3 +840,29 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.v-enter, .v-leave-to {
+      opacity: 0;
+}
+.v-enter-active, .v-leave-active {
+    transition: 0.5s;
+}
+.toggle_filters_wrapper {
+    background: #f5f5f5;
+    padding: 0.5em;
+    margin: 0 0 0.5em 0;
+}
+.toggle_filters_button {
+    cursor: pointer;
+    display: flex;
+    flex-direction: row-reverse;
+}
+.filter-warning-icon {
+    font-size: x-large; 
+    color: #ffc107;
+}
+.toggle_filters_icon {
+    margin: 0 0 0 0.5em;
+}
+</style>
