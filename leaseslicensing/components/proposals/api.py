@@ -31,6 +31,7 @@ from leaseslicensing.components.proposals.utils import save_proponent_data,save_
 from leaseslicensing.components.proposals.models import searchKeyWords, search_reference, ProposalUserAction
 from leaseslicensing.utils import missing_required_fields
 from leaseslicensing.components.main.utils import check_db_connection
+from leaseslicensing.components.main.decorators import basic_exception_handler
 
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -84,7 +85,9 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalAssessmentSerializer,
     ProposalAssessmentAnswerSerializer,
 )
-
+from leaseslicensing.components.main.process_document import (
+        process_generic_document, 
+        )
 from leaseslicensing.components.bookings.models import Booking, BookingInvoice
 from leaseslicensing.components.approvals.models import Approval
 from leaseslicensing.components.approvals.serializers import ApprovalSerializer
@@ -588,6 +591,16 @@ class ProposalViewSet(viewsets.ModelViewSet):
         urls = ['?version_id2={}&version_id1={}'.format(version_ids[0], version_ids[i+1]) for i in range(len(version_ids)-1)]
         return Response(urls)
 
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_deed_poll_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='deed_poll_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
 
     @detail_route(methods=['POST'], detail=True)
     @renderer_classes((JSONRenderer,))

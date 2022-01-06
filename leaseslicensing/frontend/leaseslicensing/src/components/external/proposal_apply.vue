@@ -9,7 +9,16 @@
         <div v-else class="row">
             <div class="col-sm-12">
                 <form class="form-horizontal" name="personal_form" method="post">
+                    <FormSection label="Apply on behalf of">
+                        <label style="margin-left:20px">Apply on behalf of</label>
+                        <div class="col-sm-12" style="margin-left:20px">
+                            <div class="form-group">
+                            </div>
+                        </div>
+                    </FormSection>
+
                     <FormSection label="Apply for">
+                        <label style="margin-left:20px">Apply for</label>
                         <div class="col-sm-12" style="margin-left:20px">
                             <div class="form-group">
                                 <div v-for="(application_type, index) in application_types">
@@ -20,7 +29,6 @@
                                     :value="application_type" 
                                     v-model="selectedApplication"
                                     />
-                                    <!--label :for="application_type.code + '_' + index" style="font-weight:normal">{{ application_type.new_application_text }}</label-->
                                     <label :for="application_type.code + '_' + index" style="font-weight:normal">{{ application_type.description }}</label>
                                 </div>
                             </div>

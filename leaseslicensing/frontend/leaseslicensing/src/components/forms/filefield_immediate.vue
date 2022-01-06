@@ -154,6 +154,7 @@ export default {
             }
         },
         handleChange: async function (e) {
+            console.log(e)
             let vm = this;
             /*
             if (vm.isRepeatable && e.target.files) {
