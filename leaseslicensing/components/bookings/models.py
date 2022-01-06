@@ -129,7 +129,7 @@ class Booking(Payment):
     @property
     def next_id(self):
         ids = map(int,[i.split('AD')[1] for i in Booking.objects.all().values_list('admission_number', flat=True) if i])
-        return max(ids) + 1 if ids else 1
+        return max(list(ids)) + 1 if list(ids) else 1
 
 #    def set_admission_number(self):
 #        """ Need to set admission_number after Credit Card Payment is successfully completed i.e. after BookingSuccessView.get() is executed.
