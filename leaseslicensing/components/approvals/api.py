@@ -116,6 +116,7 @@ class ApprovalFilterBackend(DatatablesFilterBackend):
         setattr(view, '_datatables_total_count', total_count)
         return queryset
 
+
 class ApprovalPaginatedViewSet(viewsets.ModelViewSet):
     #filter_backends = (ProposalFilterBackend,)
     filter_backends = (ApprovalFilterBackend,)
