@@ -24,6 +24,7 @@ import TileWMS from 'ol/source/TileWMS';
 import WMTS, {optionsFromCapabilities} from 'ol/source/WMTS';
 import GeoJSON from 'ol/format/GeoJSON';
 import Overlay from 'ol/Overlay';
+import { FullScreen as FullScreenControl, MousePosition as MousePositionControl } from 'ol/control';
 
 export default {
     name: 'ComponentMap',
@@ -45,69 +46,62 @@ export default {
     methods: {
         initMap: async function() {
             let vm = this;
+            let satelliteTileWms = new TileWMS({
+                        url: env['kmi_server_url'] + '/geoserver/public/wms',
+                        params: {
+                            'FORMAT': 'image/png',
+                            'VERSION': '1.1.1',
+                            tiled: true,
+                            STYLES: '',
+                            LAYERS: 'public:mapbox-satellite',
+                        }
+                    });
+
             vm.tileLayerOsm = new TileLayer({
                 title: 'OpenStreetMap',
                 type: 'base',
                 visible: true,
                 source: new OSM(),
             });
+            vm.tileLayerSat = new TileLayer({
+                title: 'Satellite',
+                type: 'base',
+                visible: true,
+                source: satelliteTileWms,
+            })
             console.log(vm.tileLayerOsm)
 
             vm.map = new Map({
                 layers: [
                     vm.tileLayerOsm, 
                     //vm.tileLayerSat,
-                    /*
-                    new TileLayer({
-                        source: new OSM()
-                    })
-                    */
                 ],
-                //target: 'map',
                 target: vm.elem_id,
-                //target: this.$refs['map-root'],
-                /*
                 view: new View({
                     center: [115.95, -31.95],
                     zoom: 7,
                     projection: 'EPSG:4326'
                 })
-                */
-               view: new View({
-                   center: [-12080385, 7567433],
-                   zoom: 3,
-                   maxZoom: 12,
-                   minZoom: 2,
-                   rotation: 0
-               }),
             });
-            
-            vm.map.on('rendercomplete', (event) => {
-                console.log(event);
-                console.log(vm.map.values_.view.viewportSize_);
-                //this.map.setTarget(document.getElementById(this.elem_id));
+            // Full screen toggle
+            vm.map.addControl(new FullScreenControl());
+            vm.tileLayerOsm.on('postcompose', (evt) => {
+                console.log(evt);
+            });
+
+            vm.map.on('rendercomplete', (evt) => {
+                console.log(evt);
+                console.log(this.map.getSize())
                 console.log(document.getElementById(this.elem_id))
             });
-            /*
-            const popupContainerElement = document.getElementById('popup-coordinates');
-            const popup = new Overlay({
-                element: popupContainerElement,
-                //positioning: 'bottom-left'
-                positioning: 'top-right'
-            })
-            vm.map.addOverlay(popup);
-            vm.map.on('click', function(e){
-                //console.log(e);
-                const clickedCoordinate = e.coordinate;
-                popup.setPosition(undefined);
-                popup.setPosition(clickedCoordinate);
-                popupContainerElement.innerHTML = clickedCoordinate;
-            })
-            */
+            window.addEventListener('resize', (evt) => {
+                console.log(evt);
+            });
+            console.log("initMap complete");
         },
-        forceMapRefresh: async function() {
+        forceMapRefresh: function() {
             let vm = this
-            await setTimeout(function(){
+            setTimeout(function(){
                 vm.map.updateSize();
             }, 50)
             console.log(document.getElementById(this.elem_id))
@@ -116,26 +110,10 @@ export default {
     async mounted() {
         let vm = this;
         console.log("mounted")
-        console.log(document.getElementById(this.elem_id))
-        //await this.initMap();
-        await this.$nextTick(async () => {
-            await this.initMap();
-        });
-        vm.tileLayerOsm.refresh();
-        //await this.forceMapRefresh();
-        /*
-        vm.tileLayerOsm.setZIndex(1000);
-        vm.tileLayerOsm.changed();
-        console.log(document.getElementById(this.elem_id))
-        await this.$nextTick(async () => {
-            await this.map.setTarget(document.getElementById(this.elem_id));
-        });
-        console.log(document.getElementById(this.elem_id))
-        console.log(this.map)
-        console.log(this.map.values_.view.viewportSize_)
-
-        console.log(this.map.values_.view.viewportSize_)
-        */
+        this.initMap();
+        this.map.setSize([690, 400]);
+        vm.map.renderSync();
+        console.log(this.map.getSize())
     },
 }
 </script>
