@@ -13,6 +13,7 @@ from django.db.models import JSONField
 from leaseslicensing import settings
 
 
+
 ## TODO: remove ledger models
 
 ##@python_2_unicode_compatible
@@ -93,7 +94,9 @@ class RevisionedMixin(models.Model):
     """
     A model tracked by reversion through the save method.
     """
+
     def save(self, **kwargs):
+        from reversion import revisions
         if kwargs.pop('no_revision', False):
             super(RevisionedMixin, self).save(**kwargs)
         else:
@@ -106,11 +109,13 @@ class RevisionedMixin(models.Model):
 
     @property
     def created_date(self):
+        from reversion.models import Version
         #return revisions.get_for_object(self).last().revision.date_created
         return Version.objects.get_for_object(self).last().revision.date_created
 
     @property
     def modified_date(self):
+        from reversion.models import Version
         #return revisions.get_for_object(self).first().revision.date_created
         return Version.objects.get_for_object(self).first().revision.date_created
 
