@@ -1,15 +1,58 @@
 <template>
     <div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Status</label>
-                    <select class="form-control" v-model="filterComplianceStatus">
-                        <option value="All">All</option>
-                        <option v-for="status in compliance_statuses" :value="status.code">{{ status.description }}</option>
-                    </select>
+        <div class="toggle_filters_wrapper">
+            <div @click="expandCollapseFilters" class="toggle_filters_button">
+                <div class="toggle_filters_icon">
+                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
+                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
                 </div>
+                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle filter-warning-icon"></i>
             </div>
+
+            <transition>
+                <div class="row" v-show="filters_expanded">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Type</label>
+                            <select class="form-control" v-model="filterComplianceType">
+                                <option value="all">All</option>
+                                <option v-for="type in compliance_types" :value="type.code">{{ type.description }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Status</label>
+                            <select class="form-control" v-model="filterComplianceStatus">
+                                <option value="all">All</option>
+                                <option v-for="status in compliance_statuses" :value="status.code">{{ status.description }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Due Date From</label>
+                            <div class="input-group date" ref="complianceDateFromPicker">
+                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterComplianceDueDateFrom">
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Due Date To</label>
+                            <div class="input-group date" ref="complianceDateToPicker">
+                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterComplianceDueDateTo">
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
         </div>
 
         <div class="row">
@@ -52,8 +95,26 @@ export default {
             datatable_id: 'compliances-datatable-' + vm._uid,
 
             // selected values for filtering
-            filterComplianceStatus: null,
+            filterComplianceType: sessionStorage.getItem('filterComplianceType') ? sessionStorage.getItem('filterComplianceType') : 'all',
+            filterComplianceStatus: sessionStorage.getItem('filterComplianceStatus') ? sessionStorage.getItem('filterComplianceStatus') : 'all',
+            filterComplianceDueDateFrom: sessionStorage.getItem('filterComplianceDueDateFrom') ? sessionStorage.getItem('filterComplianceDueDateFrom') : '',
+            filterComplianceDueDateTo: sessionStorage.getItem('filterComplianceDueDateTo') ? sessionStorage.getItem('filterComplianceDueDateTo') : '',
+
+            // filtering options
+            compliance_types: [],
             compliance_statuses: [],
+
+            // Filters toggle
+            filters_expanded: false,
+
+            dateFormat: 'DD/MM/YYYY',
+            datepickerOptions:{
+                format: 'DD/MM/YYYY',
+                showClear:true,
+                useCurrent:false,
+                keepInvalid:true,
+                allowInputToggle:true
+            },
 
         }
     },
@@ -61,13 +122,37 @@ export default {
         datatable
     },
     watch: {
-        filterComplianceStatus: function(){
-            this.$refs.compliances_datatable.vmDataTable.ajax.reload()
-        }
+        filterComplianceStatus: function() {
+            this.$refs.compliances_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterComplianceStatus', this.filterComplianceStatus);
+        },
+        filterComplianceType: function() {
+            this.$refs.compliances_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterComplianceType', this.filterComplianceType);
+        },
+        filterComplianceDueDateFrom: function() {
+            this.$refs.compliances_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterComplianceDueDateFrom', this.filterComplianceDueDateFrom);
+        },
+        filterComplianceDueDateTo: function() {
+            this.$refs.compliances_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            sessionStorage.setItem('filterComplianceDueDateTo', this.filterComplianceDueDateTo);
+        },
     },
     computed: {
+        filterApplied: function(){
+            if(this.filterComplianceStatus.toLowerCase() === 'all' && this.filterComplianceType.toLowerCase() === 'all' && 
+                this.filterComplianceDueDateFrom.toLowerCase() === '' && this.filterComplianceDueDateTo.toLowerCase() === ''){
+                return false
+            } else {
+                return true
+            }
+        },
         is_external: function() {
             return this.level == 'external'
+        },
+        is_internal: function() {
+            return this.level == 'internal'
         },
         compliancesHeaders: function() {
             let headers = ['Number', 'Licence/Permit', 'Condition', 'Due Date', 'Status', 'Action'];
@@ -312,6 +397,9 @@ export default {
 
     },
     methods: {
+        expandCollapseFilters: function(){
+            this.filters_expanded = !this.filters_expanded
+        },
         fetchFilterLists: function(){
             let vm = this;
 
@@ -322,12 +410,71 @@ export default {
                 console.log(error);
             })
         },
+        addEventListeners: function(){
+            let vm = this;
+
+            // Lodged From
+            $(vm.$refs.complianceDateFromPicker).datetimepicker(vm.datepickerOptions);
+            $(vm.$refs.complianceDateFromPicker).on('dp.change',function (e) {
+                if ($(vm.$refs.complianceDateFromPicker).data('DateTimePicker').date()) {
+                    // DateFrom has been picked
+                    vm.filterComplianceDueDateFrom = e.date.format('DD/MM/YYYY');
+                    $(vm.$refs.complianceDateToPicker).data("DateTimePicker").minDate(e.date);
+                }
+                else if ($(vm.$refs.complianceDateFromPicker).data('date') === "") {
+                    vm.filterComplianceDueDateFrom = "";
+                    $(vm.$refs.complianceDateToPicker).data("DateTimePicker").minDate(false);
+                }
+            });
+
+            // Lodged To
+            $(vm.$refs.complianceDateToPicker).datetimepicker(vm.datepickerOptions);
+            $(vm.$refs.complianceDateToPicker).on('dp.change',function (e) {
+                if ($(vm.$refs.complianceDateToPicker).data('DateTimePicker').date()) {
+                    // DateTo has been picked
+                    vm.filterComplianceDueDateTo = e.date.format('DD/MM/YYYY');
+                    $(vm.$refs.complianceDateFromPicker).data("DateTimePicker").maxDate(e.date);
+                }
+                else if ($(vm.$refs.complianceDateToPicker).data('date') === "") {
+                    vm.filterComplianceDueDateTo = "";
+                    $(vm.$refs.complianceDateFromPicker).data("DateTimePicker").maxDate(false);
+                }
+            });
+        }
     },
     created: function(){
         this.fetchFilterLists()
     },
     mounted: function(){
-
+        this.$nextTick(() => {
+            this.addEventListeners();
+        });
     }
 }
 </script>
+
+<style scoped>
+.v-enter, .v-leave-to {
+      opacity: 0;
+}
+.v-enter-active, .v-leave-active {
+    transition: 0.5s;
+}
+.toggle_filters_wrapper {
+    background: #f5f5f5;
+    padding: 0.5em;
+    margin: 0 0 0.5em 0;
+}
+.toggle_filters_button {
+    cursor: pointer;
+    display: flex;
+    flex-direction: row-reverse;
+}
+.filter-warning-icon {
+    font-size: x-large; 
+    color: #ffc107;
+}
+.toggle_filters_icon {
+    margin: 0 0 0 0.5em;
+}
+</style>

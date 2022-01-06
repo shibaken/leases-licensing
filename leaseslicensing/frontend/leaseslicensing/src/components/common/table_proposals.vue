@@ -6,7 +6,7 @@
                     <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
                     <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
                 </div>
-                <i v-if="filterApplied" class="fa fa-exclamation-circle filter-warning-icon"></i>
+                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle filter-warning-icon"></i>
             </div>
 
             <transition>
