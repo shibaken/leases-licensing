@@ -48,4 +48,5 @@ python manage.py migrate flatpages 0001_initial &&
 python manage.py migrate sites 0002_alter_domain_unique &&
 python manage.py migrate taggit &&
 python manage.py migrate sessions &&
-python manage.py migrate
+python manage.py migrate &&
+python manage.py dbshell -- -c 'ALTER TABLE django_admin_log RENAME COLUMN "user" TO "user_id";'

@@ -53,6 +53,7 @@ router.register(r'global_settings', main_api.GlobalSettingsViewSet)
 router.register(r'assessments', proposal_api.ProposalAssessmentViewSet)
 router.register(r'required_documents', main_api.RequiredDocumentViewSet)
 router.register(r'questions', main_api.QuestionViewSet)
+router.register(r'map_layers', main_api.MapLayerViewSet)
 #router.register(r'payment', main_api.PaymentViewSet)
 
 api_patterns = [

@@ -13,17 +13,19 @@ from rest_framework.pagination import PageNumberPagination
 from django.urls import reverse
 from leaseslicensing.components.main.models import (
         ApplicationType, 
-        RequiredDocument, Question, GlobalSettings
+        RequiredDocument, Question, GlobalSettings, MapLayer,
         )
 from leaseslicensing.components.main.serializers import (
         ApplicationTypeSerializer, 
         RequiredDocumentSerializer, QuestionSerializer, GlobalSettingsSerializer, OracleSerializer, BookingSettlementReportSerializer, 
+        MapLayerSerializer,
         )
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.proposals.serializers import ProposalSerializer
 from leaseslicensing.components.bookings.utils import oracle_integration
+from leaseslicensing.helpers import is_internal, is_customer
 #from leaseslicensing.components.bookings import reports
 from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission
 from collections import namedtuple
@@ -53,6 +55,22 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = QuestionSerializer
 
 
+class MapLayerViewSet(viewsets.ModelViewSet):
+    queryset = MapLayer.objects.none()
+    serializer_class = MapLayerSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if is_internal(self.request):
+            return MapLayer.objects.filter(option_for_internal=True)
+        elif is_customer(self.request):
+            return MapLayer.objects.filter(option_for_external=True)
+        return MapLayer.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 #class PaymentViewSet(viewsets.ModelViewSet):
 #    #queryset = Proposal.objects.all()

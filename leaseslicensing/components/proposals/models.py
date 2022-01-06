@@ -217,6 +217,18 @@ class DefaultDocument(Document):
         logger.info('Cannot delete existing document object after Application has been submitted (including document submitted before Application pushback to status Draft): {}'.format(self.name))
 
 
+class DeedPollDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='deed_poll_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Deed Poll Document"
+
 
 class ProposalDocument(Document):
     proposal = models.ForeignKey('Proposal',related_name='documents', on_delete=models.CASCADE)

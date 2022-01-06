@@ -29,7 +29,7 @@ import { mapActions } from 'vuex';
 
 export default {
     //props:["type","name","id", "field_data","isRequired","help_text","label","readonly", "help_text_url", "can_view_richtext_src"],
-    props:["id", "proposalData", "isRequired", "label", "readonly", "can_view_richtext_src"],
+    props:["id", "name", "proposalData", "isRequired", "label", "readonly", "can_view_richtext_src"],
     //components: {CommentBlock, HelpText, HelpTextUrl},
     data(){
         let vm = this;

@@ -13,7 +13,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false">
+                <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
                   Map
                 </a>
               </li>
@@ -49,7 +49,26 @@
                   </div>
               </div>
               <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
-                  Map stuff
+                <div class="row col-sm-12">
+                    <!--ComponentMap
+                        ref="component_map"
+                        :is_internal="is_internal"
+                        :is_external="is_external"
+                        :key="component_map_key"
+                        @featuresDisplayed="updateTableByFeatures"
+                        :can_modify="can_modify"
+                        :display_at_time_of_submitted="show_col_status_when_submitted"
+                        @featureGeometryUpdated="featureGeometryUpdated"
+                        @popupClosed="popupClosed"
+                    /-->
+
+                    <ComponentMap
+                        ref="component_map"
+                        :key="componentMapKey"
+                        v-if="componentMapOn"
+                    />
+                </div>
+
               </div>
               <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
                 <FormSection label="Details" Index="application_details">
@@ -63,6 +82,24 @@
                     />
                 </FormSection>
                 <FormSection label="Deed Poll" Index="deed_poll">
+                    <p>
+                        <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.  
+                        Please note: electronic or digital signatures cannot be accepted.</br>
+                        Please click <a href="www.google.com">here</a> to download the deed poll.</br>
+                        The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
+                        </strong>
+                    </p>
+
+                    <label for="deed_poll_document">Deed poll:</label>
+                    <FileField 
+                        :readonly="readonly"
+                        ref="deed_poll_document"
+                        name="deed_poll_document"
+                        id="deed_poll_document"
+                        :isRepeatable="true"
+                        :documentActionUrl="deedPollDocumentUrl"
+                        :replace_button_by_text="true"
+                    />
                 </FormSection>
               </div>
             </div>
@@ -71,16 +108,23 @@
 </template>
 
 <script>
-    import Profile from '@/components/user/profile.vue'
-    import Applicant from '@/components/common/applicant.vue'
-    import FormSection from '@/components/forms/section_toggle.vue'
-    import RichText from '@/components/forms/richtext.vue'
-    /*
-    import Confirmation from '@/components/common/confirmation.vue'
-    import Vessels from '@/components/common/vessels.vue'
-    import CurrentVessels from '@/components/common/current_vessels.vue'
-    import Mooring from '@/components/common/mooring.vue'
-    */
+import Profile from '@/components/user/profile.vue'
+import Applicant from '@/components/common/applicant.vue'
+import FormSection from '@/components/forms/section_toggle.vue'
+import RichText from '@/components/forms/richtext.vue'
+import FileField from '@/components/forms/filefield_immediate.vue'
+//import ComponentMap from '@/components/common/apiary_component_map.vue'
+//import ComponentMap from '@/components/common/apiary_component_site_selection.vue'
+import ComponentMap from '@/components/common/component_map.vue'
+//import ComponentMap from '@/components/common/tutorial_map.vue'
+import {
+  api_endpoints,
+  helpers
+}
+from '@/utils/hooks'
+/*
+import Confirmation from '@/components/common/confirmation.vue'
+*/
     export default {
         name: 'ApplicationForm',
         props:{
@@ -130,6 +174,11 @@
         },
         data:function () {
             return{
+                can_modify: true,
+                show_col_status_when_submitted: true,
+                //component_map_key: '',
+                componentMapKey: 0,
+                componentMapOn: false,
                 values:null,
                 profile: {},
                 uuid: 0,
@@ -150,6 +199,8 @@
             Profile,
             FormSection,
             RichText,
+            FileField,
+            ComponentMap,
         },
         /*
         watch: {
@@ -157,6 +208,16 @@
         },
         */
         computed:{
+            proposalId: function() {
+                return this.proposal ? this.proposal.id : null;
+            },
+            deedPollDocumentUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_deed_poll_document/'
+                    )
+            },
+
             /*
             showPaymentTab: function() {
                 let show = false;
@@ -199,6 +260,19 @@
             },
         },
         methods:{
+            incrementComponentMapKey: function() {
+                this.componentMapKey++;
+            },
+            toggleComponentMapOn: function() {
+                this.incrementComponentMapKey()
+                this.componentMapOn = true;
+            },
+            updateTableByFeatures: function() {
+            },
+            featureGeometryUpdated: function() {
+            },
+            popupClosed: function() {
+            },
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
             },
@@ -240,9 +314,13 @@
 
         },
         mounted: function() {
-            let vm = this;
-            vm.set_tabs();
-            vm.form = document.forms.new_proposal;
+            this.set_tabs();
+            this.form = document.forms.new_proposal;
+            /*
+            this.$nextTick(() => {
+                this.$refs.component_map.initMap();
+            });
+            */
             //vm.eventListener();
             //window.addEventListener('beforeunload', vm.leaving);
             //indow.addEventListener('onblur', vm.leaving);
