@@ -6,7 +6,7 @@
                     <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
                     <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
                 </div>
-                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle filter-warning-icon"></i>
+                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
             </div>
 
             <transition>
@@ -87,6 +87,7 @@ import ApprovalSurrender from '../internal/approvals/approval_surrender.vue'
 import ApprovalHistory from '../internal/approvals/approval_history.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers }from '@/utils/hooks'
+import '@/components/common/filters.css'
 
 export default {
     name: 'TableApprovals',
@@ -114,7 +115,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'waiting_lists-datatable-' + vm._uid,
+            datatable_id: 'approvals-datatable-' + vm._uid,
             //approvalTypesToDisplay: ['wla'],
             show_expired_surrendered: false,
             selectedWaitingListAllocationId: null,
@@ -842,27 +843,4 @@ export default {
 </script>
 
 <style scoped>
-.v-enter, .v-leave-to {
-      opacity: 0;
-}
-.v-enter-active, .v-leave-active {
-    transition: 0.5s;
-}
-.toggle_filters_wrapper {
-    background: #f5f5f5;
-    padding: 0.5em;
-    margin: 0 0 0.5em 0;
-}
-.toggle_filters_button {
-    cursor: pointer;
-    display: flex;
-    flex-direction: row-reverse;
-}
-.filter-warning-icon {
-    font-size: x-large; 
-    color: #ffc107;
-}
-.toggle_filters_icon {
-    margin: 0 0 0 0.5em;
-}
 </style>
