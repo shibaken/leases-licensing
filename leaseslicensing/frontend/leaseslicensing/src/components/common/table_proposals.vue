@@ -156,6 +156,10 @@ export default {
         },
     },
     computed: {
+        number_of_columns: function() {
+            let num =  this.$refs.application_datatable.vmDataTable.columns(':visible').nodes().length;
+            return num
+        },
         filterApplied: function(){
             if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
@@ -640,42 +644,24 @@ export default {
                 let td_link = $(this)
 
                 if (!(td_link.hasClass(vm.td_expand_class_name) || td_link.hasClass(vm.td_collapse_class_name))){
+                    // This row is not configured as expandable row (at the rowCallback)
                     return
                 }
 
                 // Get <tr> element as jQuery object
                 let tr = td_link.closest('tr')
 
-                // Retrieve sticker id from the id of the <tr>
+                // Retrieve id from the id of the <tr>
                 let tr_id = tr.attr('id')
                 let proposal_id = tr_id.replace('proposal_id_', '')
 
                 let first_td = tr.children().first()
                 if(first_td.hasClass(vm.td_expand_class_name)){
                     // Expand
-                    //vm.$http.get(helpers.add_endpoint_json(api_endpoints.stickers, proposal_id)).then(
-                    //    res => {
-                    //        let sticker = res.body
-                    //        let table_inside = vm.getActionDetailTable(sticker)
-                    //        let details_elem = $('<tr class="' + vm.sticker_details_tr_class_name + '"><td colspan="' + vm.number_of_columns + '">' + table_inside + '</td></tr>')
-                    //        details_elem.hide()
-                    //        details_elem.insertAfter(tr)
-                    //        // Make this sticker action details table Datatable
-                    //        let my_table = $('#table-sticker-details-' + sticker.id)
-                    //        my_table.DataTable({
-                    //            lengthChange: false,
-                    //            searching: false,
-                    //            info: false,
-                    //            paging: false,
-                    //            order: [[0, 'desc']],
-                    //        })
-                    //        details_elem.fadeIn(1000)
-                    //    },
-                    //    err => {
-                    //    }
-                    //)
 
-                    let details_elem = $('<span class="' + vm.expandable_row_class_name +'">' + proposal_id + '</span>')
+                    // If we don't need to retrieve the data from the server, follow the code below
+                    let contents = 'Display whatever you want'
+                    let details_elem = $('<tr class="' + vm.expandable_row_class_name +'"><td colspan="' + vm.number_of_columns + '">' + contents + '</td></tr>')
                     details_elem.hide()
                     details_elem.insertAfter(tr)
                     details_elem.fadeIn(1000)
@@ -685,14 +671,13 @@ export default {
                 } else {
                     let nextElem = tr.next()
                     // Collapse
-                    if(nextElem.is('span') & nextElem.hasClass(vm.expandable_row_class_name)){
+                    if(nextElem.is('tr') & nextElem.hasClass(vm.expandable_row_class_name)){
                         // Sticker details row is already shown.  Remove it.
                         nextElem.fadeOut(500, function(){
                             nextElem.remove()
                         })
                     }
                     // Change icon class name to vm.td_expand_class_name
-                    // Change icon class name to vm.td_collapse_class_name
                     first_td.removeClass(vm.td_collapse_class_name).addClass(vm.td_expand_class_name)
                 }
             })
