@@ -222,16 +222,10 @@ class ProposalFilterBackend(DatatablesFilterBackend):
     def filter_queryset(self, request, queryset, view):
         total_count = queryset.count()
 
-        # def get_choice(status, choices=Proposal.PROCESSING_STATUS_CHOICES):
-        #     for i in choices:
-        #         if i[1] == status:
-        #             return i[0]
-        #     return None
-
         filter_lodged_from = request.GET.get('filter_lodged_from')
         filter_lodged_to = request.GET.get('filter_lodged_to')
-        filter_application_type = request.GET.get('filter_application_type')
-        filter_application_status = request.GET.get('filter_application_status')
+        filter_application_type = request.GET.get('filter_application_type') if request.GET.get('filter_application_type') != 'all' else ''
+        filter_application_status = request.GET.get('filter_application_status') if request.GET.get('filter_application_status') != 'all' else ''
 
         if queryset.model is Proposal:
             if filter_lodged_from:
@@ -273,7 +267,6 @@ class ProposalRenderer(DatatablesRenderer):
             #data.pop('recordsTotal')
             #data.pop('recordsFiltered')
         return super(ProposalRenderer, self).render(data, accepted_media_type, renderer_context)
-
 
 
 #from django.utils.decorators import method_decorator

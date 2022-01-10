@@ -21,7 +21,7 @@ from leaseslicensing.components.proposals.models import (
                                     ProposalAssessment,
                                     RequirementDocument,
                                 )
-from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer
+from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer, ApplicationTypeSerializer
 from leaseslicensing.components.organisations.serializers import OrganisationSerializer
 from leaseslicensing.components.users.serializers import UserAddressSerializer, DocumentSerializer
 from rest_framework import serializers
@@ -179,12 +179,13 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     readonly = serializers.SerializerMethodField(read_only=True)
     documents_url = serializers.SerializerMethodField()
     proposal_type = serializers.SerializerMethodField()
+    application_type = ApplicationTypeSerializer()
     allowed_assessors = EmailUserSerializer(many=True)
     qaofficer_referrals = QAOfficerReferralSerializer(many=True)
 
     #get_history = serializers.ReadOnlyField()
     is_qa_officer = serializers.SerializerMethodField()
-    application_type_display = serializers.SerializerMethodField()
+    # application_type_display = serializers.SerializerMethodField()
     #fee_invoice_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -192,7 +193,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         fields = (
                 'id',
                 'application_type',
-                'application_type_display',
+                # 'application_type_display',
                 'proposal_type',
                 'approval_level',
                 'title',
@@ -240,8 +241,10 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     def get_readonly(self,obj):
         return False
 
-    def get_application_type_display(self,obj):
-        return obj.application_type.get_name_display()
+    # def get_application_type_display(self,obj):
+    #     return obj.application_type.get_name_display()
+    # def get_application_type(self, obj):
+    #     return obj.get_application_type_display()
 
     def get_processing_status(self,obj):
         return obj.get_processing_status_display()
@@ -276,7 +279,7 @@ class ListProposalSerializer(BaseProposalSerializer):
     customer_status = serializers.SerializerMethodField(read_only=True)
     assigned_officer = serializers.SerializerMethodField(read_only=True)
 
-    application_type = serializers.CharField(source='application_type.name', read_only=True)
+    # application_type = serializers.CharField(source='application_type.name', read_only=True)
     assessor_process = serializers.SerializerMethodField(read_only=True)
     qaofficer_referrals = QAOfficerReferralSerializer(many=True)
     #fee_invoice_url = serializers.SerializerMethodField()
@@ -319,6 +322,7 @@ class ListProposalSerializer(BaseProposalSerializer):
         # also require the following additional fields for some of the mRender functions
         datatables_always_serialize = (
                 'id',
+                'application_type',
                 'proposal_type',
                 'title',
                 'customer_status',

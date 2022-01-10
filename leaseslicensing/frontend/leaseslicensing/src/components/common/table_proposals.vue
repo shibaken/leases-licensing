@@ -226,15 +226,7 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
-                    if (full.application_type_dict){
-                        return full.application_type_dict.description
-                    } else {
-                        // Should not reach here
-                        return ''
-                    }
-                    */
-                    return full.id
+                    return full.application_type.name_display
                 }
             }
         },
@@ -267,13 +259,10 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
                     if (vm.is_internal){
                         return full.processing_status
                     }
                     return full.customer_status
-                    */
-                    return full.id
                 }
             }
         },
