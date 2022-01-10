@@ -50,23 +50,24 @@
               </div>
               <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                 <div class="row col-sm-12">
-                    <!--ComponentMap
+                    <ComponentMap
                         ref="component_map"
                         :is_internal="is_internal"
                         :is_external="is_external"
-                        :key="component_map_key"
+                        :key="componentMapKey"
+                        v-if="componentMapOn"
                         @featuresDisplayed="updateTableByFeatures"
                         :can_modify="can_modify"
                         :display_at_time_of_submitted="show_col_status_when_submitted"
                         @featureGeometryUpdated="featureGeometryUpdated"
                         @popupClosed="popupClosed"
-                    /-->
+                    />
 
-                    <ComponentMap
+                    <!--ComponentMap
                         ref="component_map"
                         :key="componentMapKey"
                         v-if="componentMapOn"
-                    />
+                    /-->
                 </div>
 
               </div>
