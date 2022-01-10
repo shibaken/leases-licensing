@@ -133,6 +133,7 @@ class RequiredDocument(models.Model):
     def __str__(self):
         return self.question
 
+
 #@python_2_unicode_compatible
 class ApplicationType(models.Model):
     name = models.CharField(max_length=64, unique=True, choices=settings.APPLICATION_TYPES)
@@ -147,6 +148,13 @@ class ApplicationType(models.Model):
     class Meta:
         ordering = ['order', 'name']
         app_label = 'leaseslicensing'
+
+    @staticmethod
+    def get_application_type_by_name(name):
+        try:
+            return ApplicationType.objects.get(name=name)
+        except:
+            return None
 
     def __str__(self):
         return self.name

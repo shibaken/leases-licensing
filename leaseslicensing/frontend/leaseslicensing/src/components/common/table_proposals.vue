@@ -196,6 +196,7 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
+                    console.log(full)
                     return full.id
                 }
             }
@@ -222,7 +223,7 @@ export default {
                 // 3. Type (This corresponds to the 'ApplicationType' at the backend)
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -242,7 +243,7 @@ export default {
                 // 4. Application Type (This corresponds to the 'ProposalType' at the backend)
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -263,7 +264,7 @@ export default {
                 // 5. Status
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -281,7 +282,7 @@ export default {
                 // 6. Lodged
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -300,7 +301,7 @@ export default {
                 // 7. Invoice
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -331,7 +332,7 @@ export default {
                 // 8. Action
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -376,7 +377,7 @@ export default {
             return {
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -387,14 +388,14 @@ export default {
                     */
                     return full.id
                 },
-                name: 'submitter__first_name, submitter__last_name',
+                //name: 'submitter__first_name, submitter__last_name',
             }
         },
         column_assigned_to: function(){
             return {
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -416,7 +417,7 @@ export default {
             return {
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*

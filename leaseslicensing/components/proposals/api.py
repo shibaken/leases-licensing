@@ -213,7 +213,6 @@ class GetEmptyList(views.APIView):
 14. questions.json
 15. amendment_request_reason_choices.json
 16. contacts.json
-
 '''
 class ProposalFilterBackend(DatatablesFilterBackend):
     """
@@ -223,38 +222,37 @@ class ProposalFilterBackend(DatatablesFilterBackend):
     def filter_queryset(self, request, queryset, view):
         total_count = queryset.count()
 
-        def get_choice(status, choices=Proposal.PROCESSING_STATUS_CHOICES):
-            for i in choices:
-                if i[1]==status:
-                    return i[0]
-            return None
+        # def get_choice(status, choices=Proposal.PROCESSING_STATUS_CHOICES):
+        #     for i in choices:
+        #         if i[1] == status:
+        #             return i[0]
+        #     return None
 
-        date_from = request.GET.get('date_from')
-        date_to = request.GET.get('date_to')
+        filter_lodged_from = request.GET.get('filter_lodged_from')
+        filter_lodged_to = request.GET.get('filter_lodged_to')
+        filter_application_type = request.GET.get('filter_application_type')
+        filter_application_status = request.GET.get('filter_application_status')
+
         if queryset.model is Proposal:
-            if date_from:
-                queryset = queryset.filter(lodgement_date__gte=date_from)
-
-            if date_to:
-                queryset = queryset.filter(lodgement_date__lte=date_to)
-        elif queryset.model is Approval:
-            if date_from:
-                queryset = queryset.filter(start_date__gte=date_from)
-
-            if date_to:
-                queryset = queryset.filter(expiry_date__lte=date_to)
+            if filter_lodged_from:
+                queryset = queryset.filter(lodgement_date__gte=filter_lodged_from)
+            if filter_lodged_to:
+                queryset = queryset.filter(lodgement_date__lte=filter_lodged_to)
+            if filter_application_type:
+                application_type = ApplicationType.get_application_type_by_name(filter_application_type)
+                queryset = queryset.filter(application_type=application_type)
+            if filter_application_status:
+                queryset = queryset.filter(processing_status=filter_application_status)
         elif queryset.model is Compliance:
-            if date_from:
-                queryset = queryset.filter(due_date__gte=date_from)
-
-            if date_to:
-                queryset = queryset.filter(due_date__lte=date_to)
+            if filter_lodged_from:
+                queryset = queryset.filter(due_date__gte=filter_lodged_from)
+            if filter_lodged_to:
+                queryset = queryset.filter(due_date__lte=filter_lodged_to)
         elif queryset.model is Referral:
-            if date_from:
-                queryset = queryset.filter(proposal__lodgement_date__gte=date_from)
-
-            if date_to:
-                queryset = queryset.filter(proposal__lodgement_date__lte=date_to)
+            if filter_lodged_from:
+                queryset = queryset.filter(proposal__lodgement_date__gte=filter_lodged_from)
+            if filter_lodged_to:
+                queryset = queryset.filter(proposal__lodgement_date__lte=filter_lodged_to)
 
         getter = request.query_params.get
         fields = self.get_fields(getter)
@@ -266,6 +264,7 @@ class ProposalFilterBackend(DatatablesFilterBackend):
         queryset = super(ProposalFilterBackend, self).filter_queryset(request, queryset, view)
         setattr(view, '_datatables_total_count', total_count)
         return queryset
+
 
 class ProposalRenderer(DatatablesRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
