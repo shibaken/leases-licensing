@@ -43,7 +43,7 @@ ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Patch also required on local environments after a venv rebuild
-# (in local) patch /home/<username>/leases-licensing/venv/lib/python3.8/site-packages/django/contrib/admin/migrations/0001_initial.py admin.patch.addition
+# (in local) patch /home/<username>/leases-licensing/venv/lib/python3.8/site-packages/django/contrib/admin/migrations/0001_initial.py admin.patch.additional
 COPY admin.patch.additional /app/
 RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
 RUN rm /app/admin.patch.additional
