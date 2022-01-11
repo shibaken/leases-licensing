@@ -486,7 +486,9 @@ export default {
         //vm.setBaseLayer('osm')
         this.setMode('layer')
         this.addOptionalLayers()
-        this.map.setSize([690, 400]);
+        //this.map.setSize([690, 400]);
+        console.log([window.innerWidth, window.innerHeight]);
+        this.map.setSize([window.innerWidth, window.innerHeight]);
         this.map.renderSync();
         console.log(this.map.getSize())
     },
