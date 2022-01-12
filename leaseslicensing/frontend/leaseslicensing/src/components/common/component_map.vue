@@ -12,7 +12,10 @@
                 <div class="optional-layers-wrapper">
                     <div class="optional-layers-button">
                         <template v-if="mode === 'layer'">
-                            <img src="../../assets/info-bubble.svg" @click="setMode('measure')" />
+                            <img src="../../assets/info-bubble.svg" @click="setMode('draw')" />
+                        </template>
+                        <template v-else-if="mode === 'draw'">
+                            <img class="pencil" src="../../assets/pencil.png" @click="setMode('measure')" />
                         </template>
                         <template v-else>
                             <img src="../../assets/ruler.svg" @click="setMode('layer')" />
@@ -78,6 +81,7 @@ import VectorSource from 'ol/source/Vector';
 import MeasureStyles, { formatLength } from '@/components/common/measure.js'
 import { LineString, Point } from 'ol/geom';
 import { Circle as CircleStyle, Fill, Stroke, Style, Text, RegularShape } from 'ol/style';
+//import { getDisplayNameFromStatus, getDisplayNameOfCategory, getStatusForColour, getApiaryFeatureStyle } from '@/components/common/site_colours.js'
 
 export default {
     name: 'ComponentMap',
@@ -118,10 +122,13 @@ export default {
             hover: false,
             mode: 'normal',
             drawForMeasure: null,
+            drawForLeaseLicence: null,
             style: MeasureStyles.defaultStyle,
             segmentStyle: MeasureStyles.segmentStyle,
             labelStyle: MeasureStyles.labelStyle,
             segmentStyles: null,
+            leaselicenceQuerySource: null,
+            leaselicenseQueryLayer: null,
         }
     },
     props: {
@@ -205,6 +212,30 @@ export default {
                     minZoom: 3,
                 })
             });
+
+            vm.leaselicenceQuerySource = new VectorSource({ });
+            vm.drawForLeaselicence = new Draw({
+                source: vm.leaselicenceQuerySource,
+                type: 'MultiPolygon',
+                //style: vm.styleFunctionForMeasurement,
+            })
+            vm.leaselicenceQueryLayer = new VectorLayer({
+                source: vm.leaselicenceQuerySource,
+                /*
+                style: function(feature, resolution){
+                    //let status = getStatusForColour(feature, false, vm.display_at_time_of_submitted)
+                    return getLeaselicenceFeatureStyle(status, feature.get('checked'))
+                },
+                */
+            });
+            console.log(vm.drawForLeaselicence);
+            vm.map.addInteraction(vm.drawForLeaselicence);
+            vm.map.addLayer(vm.leaselicenceQueryLayer);
+
+            // Set zIndex to some layers to be rendered over the other layers
+            vm.leaselicenceQueryLayer.setZIndex(10);
+
+
             // Measure tool
             let draw_source = new VectorSource({ wrapX: false })
             vm.drawForMeasure = new Draw({
@@ -346,8 +377,14 @@ export default {
             if (this.mode === 'layer'){
                 this.clearMeasurementLayer()
                 this.drawForMeasure.setActive(false)
+                this.drawForLeaselicence.setActive(false)
+            } else if (this.mode === 'draw') {
+                this.clearMeasurementLayer()
+                this.drawForMeasure.setActive(false)
+                this.drawForLeaselicence.setActive(true)
             } else if (this.mode === 'measure') {
                 this.drawForMeasure.setActive(true)
+                this.drawForLeaselicence.setActive(false)
             }
         },
         addJoint: function(point, styles){
@@ -480,22 +517,23 @@ export default {
 
     },
     mounted() {
-        //let vm = this;
         console.log("mounted")
         this.initMap();
         //vm.setBaseLayer('osm')
         this.setMode('layer')
         this.addOptionalLayers()
         //this.map.setSize([690, 400]);
-        console.log([window.innerWidth, window.innerHeight]);
         this.map.setSize([window.innerWidth, window.innerHeight]);
-        this.map.renderSync();
-        console.log(this.map.getSize())
+        //this.map.renderSync();
     },
 }
 </script>
 
 <style lang="css" scoped>
+    .pencil {
+        width: 10%;
+        height: 10%;
+    }
     .ol-zoom-in {
         top: 100px;
         color: transparent;
