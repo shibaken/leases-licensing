@@ -48,6 +48,7 @@ from decimal import Decimal as D
 import csv
 import time
 from multiselectfield import MultiSelectField
+from django.contrib.gis.db.models.fields import PointField, MultiPolygonField
 
 
 
