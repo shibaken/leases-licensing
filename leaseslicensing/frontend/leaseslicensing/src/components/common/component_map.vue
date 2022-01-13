@@ -15,7 +15,7 @@
                             <img src="../../assets/info-bubble.svg" @click="setMode('draw')" />
                         </template>
                         <template v-else-if="mode === 'draw'">
-                            <img class="pencil" src="../../assets/pencil.png" @click="setMode('measure')" />
+                            <img src="../../assets/pen-icon.svg" @click="setMode('measure')" />
                         </template>
                         <template v-else>
                             <img src="../../assets/ruler.svg" @click="setMode('layer')" />
@@ -122,7 +122,7 @@ export default {
             hover: false,
             mode: 'normal',
             drawForMeasure: null,
-            drawForLeaseLicence: null,
+            drawForLeaselicence: null,
             style: MeasureStyles.defaultStyle,
             segmentStyle: MeasureStyles.segmentStyle,
             labelStyle: MeasureStyles.labelStyle,
@@ -219,6 +219,10 @@ export default {
                 type: 'MultiPolygon',
                 //style: vm.styleFunctionForMeasurement,
             })
+            vm.drawForLeaselicence.on('drawend', function(evt){
+                console.log(evt);
+                console.log(evt.feature.values_.geometry.flatCoordinates);
+            });
             vm.leaselicenceQueryLayer = new VectorLayer({
                 source: vm.leaselicenceQuerySource,
                 /*
@@ -228,7 +232,7 @@ export default {
                 },
                 */
             });
-            console.log(vm.drawForLeaselicence);
+            //console.log(vm.drawForLeaselicence);
             vm.map.addInteraction(vm.drawForLeaselicence);
             vm.map.addLayer(vm.leaselicenceQueryLayer);
 
