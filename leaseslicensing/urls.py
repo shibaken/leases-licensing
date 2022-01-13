@@ -86,7 +86,7 @@ urlpatterns = [
     path(r'admin/', admin.site.urls),
     #url(r'^login/', LoginView.as_view(),name='login'),
     #path('login/', login, name='login'),
-    url(r'^logout/$', LogoutView.as_view(), {'next_page': '/'}, name='logout'),
+    #url(r'^logout/$', LogoutView.as_view(), {'next_page': '/'}, name='logout'),
     url(r'', include(api_patterns)),
     url(r'^$', views.LeasesLicensingRoutingView.as_view(), name='ds_home'),
     url(r'^contact/', views.LeasesLicensingContactView.as_view(), name='ds_contact'),
@@ -150,8 +150,8 @@ urlpatterns = [
 
 ] + ledger_patterns
 
-if settings.EMAIL_INSTANCE != 'PROD':
-    urlpatterns.append(path('accounts/', include('django.contrib.auth.urls')))
+#if settings.EMAIL_INSTANCE != 'PROD':
+ #   urlpatterns.append(path('accounts/', include('django.contrib.auth.urls')))
 
 if settings.DEBUG:  # Serve media locally in development.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
