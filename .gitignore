@@ -104,4 +104,4 @@ npm locks
 # npm build files
 leaseslicensing/static/leaseslicensing_vue/
 
-ll_git_history
+git_history_recent
