@@ -1,5 +1,11 @@
 <template>
     <div>
+        <CollapsibleFilters 
+            ref="collapsible_filters">
+            Filters here
+        </CollapsibleFilters>
+        <div @click="test_calling_function">Button in table_proposals to call function</div>
+
         <div class="toggle_filters_wrapper">
             <div @click="expandCollapseFilters" class="toggle_filters_button">
                 <div class="toggle_filters_icon">
@@ -79,6 +85,7 @@ import datatable from '@/utils/vue/datatable.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import '@/components/common/filters.css'
+import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 
 export default {
     name: 'TableApplications',
@@ -133,7 +140,8 @@ export default {
         }
     },
     components:{
-        datatable
+        datatable,
+        CollapsibleFilters,
     },
     watch: {
         filterApplicationStatus: function() {
@@ -161,12 +169,13 @@ export default {
             return num
         },
         filterApplied: function(){
+            let filter_applied = true
             if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
-                return false
-            } else {
-                return true
+                filter_applied = false
             }
+            //this.$refs.collapsible_filters.toggle_panel(filter_applied)
+            return filter_applied
         },
         debug: function(){
             if (this.$route.query.debug){
@@ -514,6 +523,10 @@ export default {
         }
     },
     methods: {
+        test_calling_function: function(){
+            // Call a function in collapsible component
+            this.$refs.collapsible_filters.toggle_panel('calling from parent')
+        },
         //getActionDetailTable: function(sticker){
         //    let thead = `<thead>
         //                    <tr>
