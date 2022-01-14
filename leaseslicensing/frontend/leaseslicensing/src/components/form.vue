@@ -61,6 +61,7 @@
                         :display_at_time_of_submitted="show_col_status_when_submitted"
                         @featureGeometryUpdated="featureGeometryUpdated"
                         @popupClosed="popupClosed"
+                        :proposal="proposal"
                     />
 
                     <!--ComponentMap

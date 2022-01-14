@@ -31,7 +31,7 @@ from leaseslicensing.ledger_api_utils import retrieve_email_user
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 #from reversion.models import Version
 
-
+# still required
 class ProposalGeometrySaveSerializer(GeoFeatureModelSerializer):
     proposal_id = serializers.IntegerField(write_only=True, required=False)
     class Meta:
@@ -43,6 +43,20 @@ class ProposalGeometrySaveSerializer(GeoFeatureModelSerializer):
             'polygons',
         )
         read_only_fields=('id',)
+
+
+class ProposalGeometrySerializer(GeoFeatureModelSerializer):
+    proposal_id = serializers.IntegerField(write_only=True, required=False)
+    class Meta:
+        model = ProposalGeometry
+        geo_field = 'polygons'
+        fields = (
+            'id',
+            'proposal_id',
+            'polygons',
+        )
+        read_only_fields=('id',)
+
 
 class ProposalTypeSerializer(serializers.ModelSerializer):
     activities = serializers.SerializerMethodField()
@@ -201,6 +215,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     is_qa_officer = serializers.SerializerMethodField()
     application_type_display = serializers.SerializerMethodField()
     #fee_invoice_url = serializers.SerializerMethodField()
+    proposalgeometry = ProposalGeometrySerializer()
 
     class Meta:
         model = Proposal
@@ -246,6 +261,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 #'fee_invoice_url',
                 #'fee_paid',
                 'details_text',
+                'proposalgeometry',
                 )
         read_only_fields=('documents',)
 

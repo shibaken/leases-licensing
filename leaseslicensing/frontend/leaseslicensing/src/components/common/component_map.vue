@@ -127,15 +127,35 @@ export default {
             segmentStyle: MeasureStyles.segmentStyle,
             labelStyle: MeasureStyles.labelStyle,
             segmentStyles: null,
-            leaselicenceQuerySource: null,
+            //leaselicenceQuerySource: null,
+            leaselicenceQuerySource: new VectorSource({ }),
             leaselicenseQueryLayer: null,
         }
     },
     props: {
+        proposal:{
+            type: Object,
+            required:true
+        },
+        /*
+        lease_licensing_geojson_array: {
+            type: Array,
+            default: function(){
+                return []
+            }
+        },
+        */
     },
     computed: {
     },
     methods: {
+        loadLeaseLicenceGeometry: function(){
+            if (this.proposal.proposalgeometry) {
+                const feature = (new GeoJSON).readFeature(this.proposal.proposalgeometry)
+                this.leaselicenceQuerySource.addFeature(feature)
+            }
+        },
+
         getJSONFeatures: function() {
             //const format = new GeoJSON({featureProjection: 4326});
             const format = new GeoJSON();
@@ -221,7 +241,6 @@ export default {
                 })
             });
 
-            vm.leaselicenceQuerySource = new VectorSource({ });
             vm.drawForLeaselicence = new Draw({
                 source: vm.leaselicenceQuerySource,
                 //type: 'MultiPolygon',
@@ -537,6 +556,9 @@ export default {
         this.addOptionalLayers()
         //this.map.setSize([690, 400]);
         this.map.setSize([window.innerWidth, window.innerHeight]);
+        this.$nextTick(() => {
+            this.loadLeaseLicenceGeometry();
+        });
         //this.map.renderSync();
     },
 }
