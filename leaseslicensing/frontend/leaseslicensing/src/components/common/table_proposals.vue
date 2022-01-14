@@ -1,8 +1,9 @@
 <template>
     <div>
-        <CollapsibleFilters 
-            ref="collapsible_filters">
-            Filters here
+        <CollapsibleFilters ref="collapsible_filters">
+            <div>Filter1 here</div>
+            <div>Filter2 here</div>
+            <div>Filter3 here</div>
         </CollapsibleFilters>
         <div @click="test_calling_function">Button in table_proposals to call function</div>
 
