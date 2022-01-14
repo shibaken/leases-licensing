@@ -341,7 +341,8 @@ export default {
             proposal: {},
         }
         payload.proposal.details_text = this.$refs.application_form.$refs.details_text.detailsText;
-        payload.proposal.lease_licence_geometry = this.$refs.application_form.$refs.component_map.leaselicenceQuerySource.getFeatures();
+        //payload.lease_licensing_geometry = this.$refs.application_form.$refs.component_map.leaselicenceQuerySource.getFeatures();
+        payload.lease_licensing_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
         this.$refs.details_text
         const res = await vm.$http.post(url, payload);
         if (res.ok) {
