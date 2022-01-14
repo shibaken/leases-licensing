@@ -30,6 +30,8 @@ RUN pip install --upgrade pip
 FROM builder_base_leaseslicensing as python_libs_leaseslicensing
 WORKDIR /app
 COPY requirements.txt ./
+COPY git_history_recent ./
+RUN touch /app/rand_hash
 RUN pip3 install --no-cache-dir -r requirements.txt \
   # Update the Django <1.11 bug in django/contrib/gis/geos/libgeos.py
   # Reference: https://stackoverflow.com/questions/18643998/geodjango-geosexception-error
