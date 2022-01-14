@@ -1997,9 +1997,6 @@ class ApplicationFeeDiscount(RevisionedMixin):
             pass
         return False
 
-    class Meta:
-        app_label = 'leaseslicensing'
-
     @property
     def payment_amount(self):
         return self.invoice.amount
@@ -2007,6 +2004,13 @@ class ApplicationFeeDiscount(RevisionedMixin):
     class Meta:
         app_label = 'leaseslicensing'
 
+
+class ProposalGeometry(models.Model):
+    proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE)
+    polygons = MultiPolygonField(srid=4326, blank=True, null=True)
+
+    class Meta:
+        app_label = 'leaseslicensing'
 
 class ProposalLogDocument(Document):
     log_entry = models.ForeignKey('ProposalLogEntry',related_name='documents', on_delete=models.CASCADE)

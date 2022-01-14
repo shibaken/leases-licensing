@@ -20,6 +20,7 @@ from leaseslicensing.components.proposals.models import (
                                     ProposalAssessmentAnswer,
                                     ProposalAssessment,
                                     RequirementDocument,
+                                    ProposalGeometry,
                                 )
 from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer
 from leaseslicensing.components.organisations.serializers import OrganisationSerializer
@@ -27,7 +28,21 @@ from leaseslicensing.components.users.serializers import UserAddressSerializer, 
 from rest_framework import serializers
 from django.db.models import Q
 from leaseslicensing.ledger_api_utils import retrieve_email_user
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 #from reversion.models import Version
+
+
+class ProposalGeometrySaveSerializer(GeoFeatureModelSerializer):
+    proposal_id = serializers.IntegerField(write_only=True, required=False)
+    class Meta:
+        model = ProposalGeometry
+        geo_field = 'polygons'
+        fields = (
+            'id',
+            'proposal_id',
+            'polygons',
+        )
+        read_only_fields=('id',)
 
 class ProposalTypeSerializer(serializers.ModelSerializer):
     activities = serializers.SerializerMethodField()

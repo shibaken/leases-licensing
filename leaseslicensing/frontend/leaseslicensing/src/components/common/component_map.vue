@@ -136,6 +136,14 @@ export default {
     computed: {
     },
     methods: {
+        getJSONFeatures: function() {
+            //const format = new GeoJSON({featureProjection: 4326});
+            const format = new GeoJSON();
+            const features = this.leaselicenceQuerySource.getFeatures();
+            console.log(format.writeFeatures(features));
+            console.log(this.leaselicenceQuerySource.getFeatures())
+            return format.writeFeatures(features);
+        },
         toggleSatIcon: function(layer) {
             if (layer === 'osm') {
                 this.showSatIcon = true;
@@ -216,7 +224,8 @@ export default {
             vm.leaselicenceQuerySource = new VectorSource({ });
             vm.drawForLeaselicence = new Draw({
                 source: vm.leaselicenceQuerySource,
-                type: 'MultiPolygon',
+                //type: 'MultiPolygon',
+                type: 'Polygon',
                 //style: vm.styleFunctionForMeasurement,
             })
             vm.drawForLeaselicence.on('drawend', function(evt){
