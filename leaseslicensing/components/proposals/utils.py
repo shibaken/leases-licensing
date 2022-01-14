@@ -20,12 +20,15 @@ from leaseslicensing.components.proposals.serializers import (
         SaveProposalSerializer, 
         SaveRegistrationOfInterestSerializer,
         ProposalOtherDetailsSerializer, 
+        ProposalGeometrySaveSerializer,
         )
 import traceback
 import os
 from copy import deepcopy
 from datetime import datetime
 import time
+import json
+from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Polygon, MultiPolygon, LinearRing
 
 
 import logging
@@ -316,7 +319,6 @@ def save_proponent_data(instance,request,viewset,parks=None,trails=None):
         save_proponent_data_registration_of_interest(instance,request,viewset)
 
 def save_proponent_data_registration_of_interest(instance, request, viewset):
-    print(request.data)
     # proposal
     proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
     serializer = SaveRegistrationOfInterestSerializer(
@@ -328,6 +330,37 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     )
     serializer.is_valid(raise_exception=True)
     instance = serializer.save()
+    # geometry
+    lease_licensing_geometry_str = request.data.get('lease_licensing_geometry')
+    geometry_list = []
+    lease_licensing_geometry = json.loads(lease_licensing_geometry_str)
+    for feature in lease_licensing_geometry.get("features"):
+        linear_ring = LinearRing(feature.get("geometry").get("coordinates")[0])
+        polygon = Polygon(linear_ring)
+        geometry_list.append(polygon)
+    multi_polygon = MultiPolygon(geometry_list)
+
+    if lease_licensing_geometry and hasattr(instance, 'proposalgeometry'):
+        serializer = ProposalGeometrySaveSerializer(
+                instance.proposalgeometry,
+                data={"proposal_id": instance.id, "polygons":multi_polygon},
+                context={
+                    "action": viewset.action,
+                    }
+        )
+        serializer.is_valid(raise_exception=True)
+        #instance.proposalgeometry = serializer.save()
+        serializer.save()
+    elif lease_licensing_geometry:
+        serializer = ProposalGeometrySaveSerializer(
+                data={"proposal_id": instance.id, "polygons":multi_polygon},
+                context={
+                    "action": viewset.action,
+                    }
+        )
+        serializer.is_valid(raise_exception=True)
+        #instance.proposalgeometry = serializer.save()
+        serializer.save()
 
 
 from leaseslicensing.components.main.models import ApplicationType
