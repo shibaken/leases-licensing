@@ -1,23 +1,6 @@
 <template>
     <div>
         <CollapsibleFilters ref="collapsible_filters">
-            <div>Filter1 here</div>
-            <div>Filter2 here</div>
-            <div>Filter3 here</div>
-        </CollapsibleFilters>
-        <div @click="test_calling_function">Button in table_proposals to call function</div>
-
-        <div class="toggle_filters_wrapper">
-            <div @click="expandCollapseFilters" class="toggle_filters_button">
-                <div class="toggle_filters_icon">
-                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
-                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
-                </div>
-                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
-            </div>
-
-            <transition>
-                <div class="row" v-show="filters_expanded">
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="">Type</label>
@@ -58,6 +41,19 @@
                             </div>
                         </div>
                     </div>
+        </CollapsibleFilters>
+
+        <div class="toggle_filters_wrapper">
+            <div @click="expandCollapseFilters" class="toggle_filters_button">
+                <div class="toggle_filters_icon">
+                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
+                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
+                </div>
+                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
+            </div>
+
+            <transition>
+                <div class="row" v-show="filters_expanded">
                 </div>
             </transition>
         </div>
@@ -175,7 +171,9 @@ export default {
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }
-            //this.$refs.collapsible_filters.toggle_panel(filter_applied)
+            if (this.$refs.collapsible_filters){
+                this.$refs.collapsible_filters.show_icon(filter_applied)
+            }
             return filter_applied
         },
         debug: function(){
@@ -524,10 +522,6 @@ export default {
         }
     },
     methods: {
-        test_calling_function: function(){
-            // Call a function in collapsible component
-            this.$refs.collapsible_filters.toggle_panel('calling from parent')
-        },
         //getActionDetailTable: function(sticker){
         //    let thead = `<thead>
         //                    <tr>
