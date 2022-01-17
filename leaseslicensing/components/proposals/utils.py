@@ -335,9 +335,20 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     geometry_list = []
     lease_licensing_geometry = json.loads(lease_licensing_geometry_str)
     for feature in lease_licensing_geometry.get("features"):
-        linear_ring = LinearRing(feature.get("geometry").get("coordinates")[0])
-        polygon = Polygon(linear_ring)
-        geometry_list.append(polygon)
+        #if feature.get("geometry").get("type") == "MultiPolygon":
+        #    print("multi feature")
+        #    print(feature.get("geometry").get("coordinates"))
+        #    for poly in feature.get("geometry").get("coordinates"):
+        #        linear_ring = LinearRing(poly[0])
+        #        polygon = Polygon(linear_ring)
+        #        geometry_list.append(polygon)
+        if feature.get("geometry").get("type") == "Polygon":
+            print("poly feature")
+            print(feature.get("geometry").get("coordinates")[0])
+            linear_ring = LinearRing(feature.get("geometry").get("coordinates")[0])
+            polygon = Polygon(linear_ring)
+            geometry_list.append(polygon)
+
     multi_polygon = MultiPolygon(geometry_list)
 
     if lease_licensing_geometry and hasattr(instance, 'proposalgeometry'):
