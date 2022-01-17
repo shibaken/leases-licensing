@@ -1,59 +1,64 @@
 <template>
     <div>
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Type</label>
+                    <select class="form-control" v-model="filterApplicationType">
+                        <option value="all">All</option>
+                        <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Status</label>
+                    <select class="form-control" v-model="filterApplicationStatus">
+                        <option value="all">All</option>
+                        <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Lodged From</label>
+                    <div class="input-group date" ref="proposalDateFromPicker">
+                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Lodged To</label>
+                    <div class="input-group date" ref="proposalDateToPicker">
+                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </CollapsibleFilters>
+
+        <!--
         <div class="toggle_filters_wrapper">
             <div @click="expandCollapseFilters" class="toggle_filters_button">
                 <div class="toggle_filters_icon">
                     <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
                     <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
                 </div>
-                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle filter-warning-icon"></i>
+                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
             </div>
 
             <transition>
                 <div class="row" v-show="filters_expanded">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Type</label>
-                            <select class="form-control" v-model="filterApplicationType">
-                                <option value="all">All</option>
-                                <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Status</label>
-                            <select class="form-control" v-model="filterApplicationStatus">
-                                <option value="all">All</option>
-                                <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Lodged From</label>
-                            <div class="input-group date" ref="proposalDateFromPicker">
-                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Lodged To</label>
-                            <div class="input-group date" ref="proposalDateToPicker">
-                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </transition>
         </div>
+        -->
 
         <div v-if="is_external" class="row">
             <div class="col-md-12">
@@ -78,6 +83,8 @@
 import datatable from '@/utils/vue/datatable.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
+import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
+
 export default {
     name: 'TableApplications',
     props: {
@@ -123,10 +130,16 @@ export default {
                 keepInvalid:true,
                 allowInputToggle:true
             },
+
+            // For Expandable row
+            td_expand_class_name: 'expand-icon',
+            td_collapse_class_name: 'collapse-icon',
+            expandable_row_class_name: 'expandable_row_class_name',
         }
     },
     components:{
-        datatable
+        datatable,
+        CollapsibleFilters,
     },
     watch: {
         filterApplicationStatus: function() {
@@ -147,15 +160,26 @@ export default {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
         },
+        filterApplied: function(){
+            if (this.$refs.collapsible_filters){
+                // Collapsible component exists
+                this.$refs.collapsible_filters.show_icon(this.filterApplied)
+            }
+        }
     },
     computed: {
+        number_of_columns: function() {
+            let num =  this.$refs.application_datatable.vmDataTable.columns(':visible').nodes().length;
+            return num
+        },
         filterApplied: function(){
+            let filter_applied = true
             if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
-                return false
-            } else {
-                return true
+                filter_applied = false
             }
+            console.log('in filterApplied: ' + filter_applied)
+            return filter_applied
         },
         debug: function(){
             if (this.$route.query.debug){
@@ -211,18 +235,10 @@ export default {
                 // 3. Type (This corresponds to the 'ApplicationType' at the backend)
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
-                    if (full.application_type_dict){
-                        return full.application_type_dict.description
-                    } else {
-                        // Should not reach here
-                        return ''
-                    }
-                    */
-                    return full.id
+                    return full.application_type.name_display
                 }
             }
         },
@@ -231,7 +247,7 @@ export default {
                 // 4. Application Type (This corresponds to the 'ProposalType' at the backend)
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -252,16 +268,13 @@ export default {
                 // 5. Status
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
                     if (vm.is_internal){
                         return full.processing_status
                     }
                     return full.customer_status
-                    */
-                    return full.id
                 }
             }
         },
@@ -270,7 +283,7 @@ export default {
                 // 6. Lodged
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -289,7 +302,7 @@ export default {
                 // 7. Invoice
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -320,7 +333,7 @@ export default {
                 // 8. Action
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -365,7 +378,7 @@ export default {
             return {
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -376,14 +389,14 @@ export default {
                     */
                     return full.id
                 },
-                name: 'submitter__first_name, submitter__last_name',
+                //name: 'submitter__first_name, submitter__last_name',
             }
         },
         column_assigned_to: function(){
             return {
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -405,7 +418,7 @@ export default {
             return {
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
@@ -479,6 +492,11 @@ export default {
                 language: {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
+                rowCallback: function (row, proposal){
+                    let row_jq = $(row)
+                    row_jq.attr('id', 'proposal_id_' + proposal.id)
+                    row_jq.children().first().addClass(vm.td_expand_class_name)
+                },
                 responsive: true,
                 serverSide: true,
                 searching: search,
@@ -508,7 +526,38 @@ export default {
         }
     },
     methods: {
+        collapsible_component_mounted: function(){
+            this.$refs.collapsible_filters.show_icon(this.filterApplied)
+        },
+        //getActionDetailTable: function(sticker){
+        //    let thead = `<thead>
+        //                    <tr>
+        //                        <th scope="col">Date</th>
+        //                        <th scope="col">User</th>
+        //                        <th scope="col">Action</th>
+        //                        <th scope="col">Date of Lost</th>
+        //                        <th scope="col">Date of Returned</th>
+        //                        <th scope="col">Reason</th>
+        //                    </tr>
+        //                <thead>`
+        //    let tbody = ''
+        //    for (let detail of sticker.sticker_action_details){
+        //        tbody += `<tr>
+        //            <td>${moment(detail.date_updated).format('DD/MM/YYYY')}</td>
+        //            <td>${detail.user_detail ? detail.user_detail.first_name : ''} ${detail.user_detail ? detail.user_detail.last_name : ''} </td>
+        //            <td>${detail.action ? detail.action : ''}</td>
+        //            <td>${detail.date_of_lost_sticker ? moment(detail.date_of_lost_sticker, 'YYYY-MM-DD').format('DD/MM/YYYY') : ''}</td>
+        //            <td>${detail.date_of_returned_sticker ? moment(detail.date_of_returned_sticker, 'YYYY-MM-DD').format('DD/MM/YYYY') : ''}</td>
+        //            <td>${detail.reason}</td>
+        //        </tr>`
+        //    }
+        //    tbody = '<tbody>' + tbody + '</tbody>'
+
+        //    let details = '<table class="table table-striped table-bordered table-sm table-sticker-details" id="table-sticker-details-' + sticker.id + '">' + thead + tbody + '</table>'
+        //    return details
+        //},
         expandCollapseFilters: function(){
+            console.log('expandCollapseFilters')
             this.filters_expanded = !this.filters_expanded
         },
         new_application_button_clicked: function(){
@@ -596,34 +645,48 @@ export default {
                 }
             });
 
-            //$(vm.$refs.proposalDateToPicker).datetimepicker(vm.datepickerOptions);
-            //$(vm.$refs.proposalDateToPicker).on('dp.change', function(e){
-            //    if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
-            //        vm.filterProposalLodgedTo =  e.date.format('DD/MM/YYYY');
-            //    }
-            //    else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
-            //        vm.filterProposaLodgedTo = "";
-            //    }
-            //    else {
-            //        console.log('to picker')
-            //        console.log($(vm.$refs.proposalDateToPicker).data('date'))
-            //    }
-            // });
+            // Listener for thr row
+            vm.$refs.application_datatable.vmDataTable.on('click', 'td', function(e) {
+                let td_link = $(this)
 
-            //$(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
-            //$(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
-            //    if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
-            //        vm.filterProposalLodgedFrom = e.date.format('DD/MM/YYYY');
-            //        $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
-            //    }
-            //    else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
-            //        vm.filterProposalLodgedFrom = "";
-            //    }
-            //    else {
-            //        console.log('from picker')
-            //        console.log($(vm.$refs.proposalDateFromPicker).data('date'))
-            //    }
-            //});
+                if (!(td_link.hasClass(vm.td_expand_class_name) || td_link.hasClass(vm.td_collapse_class_name))){
+                    // This row is not configured as expandable row (at the rowCallback)
+                    return
+                }
+
+                // Get <tr> element as jQuery object
+                let tr = td_link.closest('tr')
+
+                // Retrieve id from the id of the <tr>
+                let tr_id = tr.attr('id')
+                let proposal_id = tr_id.replace('proposal_id_', '')
+
+                let first_td = tr.children().first()
+                if(first_td.hasClass(vm.td_expand_class_name)){
+                    // Expand
+
+                    // If we don't need to retrieve the data from the server, follow the code below
+                    let contents = 'Display whatever you want'
+                    let details_elem = $('<tr class="' + vm.expandable_row_class_name +'"><td colspan="' + vm.number_of_columns + '">' + contents + '</td></tr>')
+                    details_elem.hide()
+                    details_elem.insertAfter(tr)
+                    details_elem.fadeIn(1000)
+
+                    // Change icon class name to vm.td_collapse_class_name
+                    first_td.removeClass(vm.td_expand_class_name).addClass(vm.td_collapse_class_name)
+                } else {
+                    let nextElem = tr.next()
+                    // Collapse
+                    if(nextElem.is('tr') & nextElem.hasClass(vm.expandable_row_class_name)){
+                        // Sticker details row is already shown.  Remove it.
+                        nextElem.fadeOut(500, function(){
+                            nextElem.remove()
+                        })
+                    }
+                    // Change icon class name to vm.td_expand_class_name
+                    first_td.removeClass(vm.td_collapse_class_name).addClass(vm.td_expand_class_name)
+                }
+            })
         },
     },
     created: function(){
@@ -638,28 +701,51 @@ export default {
 }
 </script>
 
-<style scoped>
-.v-enter, .v-leave-to {
-      opacity: 0;
-}
-.v-enter-active, .v-leave-active {
-    transition: 0.5s;
-}
-.toggle_filters_wrapper {
-    background: #f5f5f5;
-    padding: 0.5em;
-    margin: 0 0 0.5em 0;
-}
-.toggle_filters_button {
+<style>
+.collapse-icon {
     cursor: pointer;
-    display: flex;
-    flex-direction: row-reverse;
 }
-.filter-warning-icon {
-    font-size: x-large; 
-    color: #ffc107;
+.collapse-icon::before {
+    top: 5px;
+    left: 4px;
+    height: 14px;
+    width: 14px;
+    border-radius: 14px;
+    line-height: 14px;
+    border: 2px solid white;
+    line-height: 14px;
+    content: '-';
+    color: white;
+    background-color: #d33333;
+    display: inline-block;
+    box-shadow: 0px 0px 3px #444;
+    box-sizing: content-box;
+    text-align: center;
+    text-indent: 0 !important;
+    font-family: 'Courier New', Courier monospace;
+    margin: 5px;
 }
-.toggle_filters_icon {
-    margin: 0 0 0 0.5em;
+.expand-icon {
+    cursor: pointer;
+}
+.expand-icon::before {
+    top: 5px;
+    left: 4px;
+    height: 14px;
+    width: 14px;
+    border-radius: 14px;
+    line-height: 14px;
+    border: 2px solid white;
+    line-height: 14px;
+    content: '+';
+    color: white;
+    background-color: #337ab7;
+    display: inline-block;
+    box-shadow: 0px 0px 3px #444;
+    box-sizing: content-box;
+    text-align: center;
+    text-indent: 0 !important;
+    font-family: 'Courier New', Courier monospace;
+    margin: 5px;
 }
 </style>
