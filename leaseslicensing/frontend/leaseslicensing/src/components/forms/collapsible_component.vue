@@ -3,11 +3,6 @@
         <div class="toggle_filters_wrapper">
             <div data-toggle="collapse" :data-target="'#' + target_elem_id" :id="button_elem_id" class="toggle_filters_button collapsed" @click="toggle_filters_button_clicked">
                 <div class="toggle_filters_icon">
-                    <!--
-                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
-                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
-                    -->
-
                     <i :id="chevron_elem_id" class="rotate_icon fa fa-chevron-down"></i>
                 </div>
                 <i v-if="display_icon" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter_warning_icon"></i>
