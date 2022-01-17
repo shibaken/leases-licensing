@@ -1,48 +1,49 @@
 <template>
     <div>
-        <CollapsibleFilters ref="collapsible_filters">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Type</label>
-                            <select class="form-control" v-model="filterApplicationType">
-                                <option value="all">All</option>
-                                <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
-                            </select>
-                        </div>
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Type</label>
+                    <select class="form-control" v-model="filterApplicationType">
+                        <option value="all">All</option>
+                        <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Status</label>
+                    <select class="form-control" v-model="filterApplicationStatus">
+                        <option value="all">All</option>
+                        <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Lodged From</label>
+                    <div class="input-group date" ref="proposalDateFromPicker">
+                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
                     </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Status</label>
-                            <select class="form-control" v-model="filterApplicationStatus">
-                                <option value="all">All</option>
-                                <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
-                            </select>
-                        </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Lodged To</label>
+                    <div class="input-group date" ref="proposalDateToPicker">
+                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
                     </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Lodged From</label>
-                            <div class="input-group date" ref="proposalDateFromPicker">
-                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Lodged To</label>
-                            <div class="input-group date" ref="proposalDateToPicker">
-                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+            </div>
         </CollapsibleFilters>
 
+        <!--
         <div class="toggle_filters_wrapper">
             <div @click="expandCollapseFilters" class="toggle_filters_button">
                 <div class="toggle_filters_icon">
@@ -57,6 +58,7 @@
                 </div>
             </transition>
         </div>
+        -->
 
         <div v-if="is_external" class="row">
             <div class="col-md-12">
@@ -159,6 +161,16 @@ export default {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
         },
+        filterApplied: function(){
+            console.log('in filterApplied')
+            if (this.$refs.collapsible_filters){
+                console.log('component exists')
+                // Collapsible component exists
+                this.$refs.collapsible_filters.show_icon(this.filterApplied)
+            } else {
+                console.log('component not exists')
+            }
+        }
     },
     computed: {
         number_of_columns: function() {
@@ -171,9 +183,7 @@ export default {
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }
-            if (this.$refs.collapsible_filters){
-                this.$refs.collapsible_filters.show_icon(filter_applied)
-            }
+            console.log('in filterApplied: ' + filter_applied)
             return filter_applied
         },
         debug: function(){
@@ -204,7 +214,6 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
-                    console.log(full)
                     return full.id
                 }
             }
@@ -522,6 +531,9 @@ export default {
         }
     },
     methods: {
+        collapsible_component_mounted: function(){
+            this.$refs.collapsible_filters.show_icon(this.filterApplied)
+        },
         //getActionDetailTable: function(sticker){
         //    let thead = `<thead>
         //                    <tr>
@@ -550,6 +562,7 @@ export default {
         //    return details
         //},
         expandCollapseFilters: function(){
+            console.log('expandCollapseFilters')
             this.filters_expanded = !this.filters_expanded
         },
         new_application_button_clicked: function(){
