@@ -29,17 +29,19 @@
             subtitle="- View existing licences / permits and renew them" 
             Index="licences_and_permits"
         >
+        <!--
             <LicencesAndPermitsTable
                 level="external"
                 :approvalTypeFilter="allApprovalTypeFilter"
             />
+        -->
         </FormSection>
 
         <FormSection 
             :formCollapse="false" 
-            label="Compliances" 
-            subtitle="- View submitted Compliances and submit new ones" 
-            Index="compliances"
+            label="Conditions" 
+            subtitle="- View submitted Conditions and submit new ones" 
+            Index="Conditions"
         >
             <CompliancesTable
                 level="external"
