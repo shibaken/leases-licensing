@@ -163,7 +163,7 @@ export default {
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
                 // Collapsible component exists
-                this.$refs.collapsible_filters.show_icon(this.filterApplied)
+                this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
             }
         }
     },
@@ -527,7 +527,7 @@ export default {
     },
     methods: {
         collapsible_component_mounted: function(){
-            this.$refs.collapsible_filters.show_icon(this.filterApplied)
+            this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
         },
         //getActionDetailTable: function(sticker){
         //    let thead = `<thead>
