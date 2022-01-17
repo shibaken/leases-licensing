@@ -161,13 +161,9 @@ export default {
             sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
         },
         filterApplied: function(){
-            console.log('in filterApplied')
             if (this.$refs.collapsible_filters){
-                console.log('component exists')
                 // Collapsible component exists
                 this.$refs.collapsible_filters.show_icon(this.filterApplied)
-            } else {
-                console.log('component not exists')
             }
         }
     },

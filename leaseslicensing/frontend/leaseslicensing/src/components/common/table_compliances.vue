@@ -1,16 +1,7 @@
 <template>
     <div>
-        <div class="toggle_filters_wrapper">
-            <div @click="expandCollapseFilters" class="toggle_filters_button">
-                <div class="toggle_filters_icon">
-                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
-                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
-                </div>
-                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
-            </div>
-
-            <transition>
-                <div class="row" v-show="filters_expanded">
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+                <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="">Type</label>
@@ -52,8 +43,21 @@
                         </div>
                     </div>
                 </div>
-            </transition>
+
+        </CollapsibleFilters>
+
+        <!--
+        <div class="toggle_filters_wrapper">
+            <div @click="expandCollapseFilters" class="toggle_filters_button">
+                <div class="toggle_filters_icon">
+                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
+                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
+                </div>
+                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
+            </div>
+
         </div>
+        -->
 
         <div class="row">
             <div class="col-lg-12">
@@ -72,6 +76,7 @@
 import datatable from '@/utils/vue/datatable.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers }from '@/utils/hooks'
+import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 //import '@/components/common/filters.css'
 
 export default {
@@ -121,7 +126,8 @@ export default {
         }
     },
     components:{
-        datatable
+        datatable,
+        CollapsibleFilters,
     },
     watch: {
         filterComplianceStatus: function() {
@@ -140,6 +146,12 @@ export default {
             this.$refs.compliances_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterComplianceDueDateTo', this.filterComplianceDueDateTo);
         },
+        filterApplied: function(){
+            if (this.$refs.collapsible_filters){
+                // Collapsible component exists
+                this.$refs.collapsible_filters.show_icon(this.filterApplied)
+            }
+        }
     },
     computed: {
         filterApplied: function(){
@@ -399,6 +411,9 @@ export default {
 
     },
     methods: {
+        collapsible_component_mounted: function(){
+            this.$refs.collapsible_filters.show_icon(this.filterApplied)
+        },
         expandCollapseFilters: function(){
             this.filters_expanded = !this.filters_expanded
         },
