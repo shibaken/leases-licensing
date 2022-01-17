@@ -51,7 +51,7 @@ export default {
             // Bootstrap add a 'collapsed' class name to the element
             this.filters_expanded = $('#' + this.button_elem_id).hasClass('collapsed')
         },
-        show_icon: function(show){
+        show_warning_icon: function(show){
             this.display_icon = show
         },
     },
