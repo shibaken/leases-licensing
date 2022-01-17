@@ -72,7 +72,7 @@
 import datatable from '@/utils/vue/datatable.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers }from '@/utils/hooks'
-import '@/components/common/filters.css'
+//import '@/components/common/filters.css'
 
 export default {
     name: 'TableCompliances',

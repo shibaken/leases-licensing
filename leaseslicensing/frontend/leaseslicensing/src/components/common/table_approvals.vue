@@ -87,7 +87,7 @@ import ApprovalSurrender from '../internal/approvals/approval_surrender.vue'
 import ApprovalHistory from '../internal/approvals/approval_history.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers }from '@/utils/hooks'
-import '@/components/common/filters.css'
+//import '@/components/common/filters.css'
 
 export default {
     name: 'TableApprovals',

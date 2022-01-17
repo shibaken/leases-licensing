@@ -22,7 +22,6 @@
 
 <script>
 import uuid from 'uuid';
-import '@/components/common/filters.css'
 
 export default {
     name:"CollapsibleComponent",
