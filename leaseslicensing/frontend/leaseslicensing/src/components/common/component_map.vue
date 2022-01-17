@@ -67,6 +67,7 @@ import uuid from 'uuid';
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
+import Feature from 'ol/Feature';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
@@ -151,8 +152,18 @@ export default {
     methods: {
         loadLeaseLicenceGeometry: function(){
             if (this.proposal.proposalgeometry) {
-                const feature = (new GeoJSON).readFeature(this.proposal.proposalgeometry)
-                this.leaselicenceQuerySource.addFeature(feature)
+                /*
+                const feature = (new GeoJSON).readFeatures(this.proposal.proposalgeometry)
+                this.leaselicenceQuerySource.addFeatures(feature)
+                */
+                const featureJson = (new GeoJSON).readFeature(this.proposal.proposalgeometry)
+                featureJson.getGeometry().getPolygons().forEach((polygon) => {
+                    console.log(polygon)
+                    this.leaselicenceQuerySource.addFeature(new Feature({
+                        geometry: polygon,
+                        parent: featureJson,
+                    }));
+                })
             }
         },
 
@@ -160,8 +171,10 @@ export default {
             //const format = new GeoJSON({featureProjection: 4326});
             const format = new GeoJSON();
             const features = this.leaselicenceQuerySource.getFeatures();
+            /*
             console.log(format.writeFeatures(features));
             console.log(this.leaselicenceQuerySource.getFeatures())
+            */
             return format.writeFeatures(features);
         },
         toggleSatIcon: function(layer) {
