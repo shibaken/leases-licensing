@@ -1,15 +1,15 @@
 <template lang="html">
     <div>
         <div class="toggle_filters_wrapper">
-            <div data-toggle="collapse" data-target="#target_id" class="toggle_filters_button collapsed" @click="toggle_filters_button_clicked($event)">
+            <div data-toggle="collapse" :data-target="'#' + target_elem_id" :id="button_elem_id" class="toggle_filters_button collapsed" @click="toggle_filters_button_clicked">
                 <div class="toggle_filters_icon">
                     <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
                     <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
                 </div>
-                <i v-if="display_icon" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
+                <i v-if="display_icon" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter_warning_icon"></i>
             </div>
 
-            <div class="collapse" id="target_id">
+            <div class="collapse" :id="target_elem_id">
                 <slot></slot>
             </div>
         </div>
@@ -27,6 +27,8 @@ export default {
     },
     data:function () {
         return {
+            target_elem_id: 'target_elem_' + uuid(),
+            button_elem_id: 'button_elem_' + uuid(),
             display_icon: false,
             filters_expanded: false,
         }
@@ -36,14 +38,20 @@ export default {
     },
     methods: {
         toggle_filters_button_clicked: function(e){
-            this.filters_expanded = $('.toggle_filters_button').hasClass('collapsed')
+            // Bootstrap add a 'collapsed' class name to the element
+            this.filters_expanded = $('#' + this.button_elem_id).hasClass('collapsed')
         },
         show_icon: function(show){
             this.display_icon = show
         },
     },
-    mounted: function() {
+    created: function() {
 
+    },
+    mounted: function() {
+        this.$nextTick(function(){
+            this.$emit('created')
+        })
     },
     updated:function () {
 
@@ -52,5 +60,20 @@ export default {
 </script>
 
 <style lang="css">
-
+.toggle_filters_wrapper {
+    background: #efefee;
+    padding: 0.5em;
+    margin: 0 0 0.5em 0;
+}
+.toggle_filters_button {
+    cursor: pointer;
+    display: flex;
+    flex-direction: row-reverse;
+}
+.filter_warning_icon {
+    color: #ffc107;
+}
+.toggle_filters_icon {
+    margin: 0 0 0 0.5em;
+}
 </style>
