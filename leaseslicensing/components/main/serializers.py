@@ -34,22 +34,26 @@ class CommunicationLogEntrySerializer(serializers.ModelSerializer):
 
 
 class ApplicationTypeSerializer(serializers.ModelSerializer):
+    name_display = serializers.SerializerMethodField()
     #regions = RegionSerializer(many=True)
     #activity_app_types = ActivitySerializer(many=True)
     #tenure_app_types = TenureSerializer(many=True)
+
     class Meta:
         model = ApplicationType
         #fields = ('id', 'name', 'activity_app_types', 'tenure_app_types')
         #fields = ('id', 'name', 'tenure_app_types')
         fields = '__all__'
-        #extra_fields = ['pizzas']
+        extra_fields = ['name_display']
+
+    def get_name_display(self, obj):
+        return obj.get_name_display()
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GlobalSettings
         fields = ('key', 'value')
-
 
 
 class RequiredDocumentSerializer(serializers.ModelSerializer):
