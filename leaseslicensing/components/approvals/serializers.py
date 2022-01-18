@@ -123,11 +123,11 @@ class ApprovalSerializer(serializers.ModelSerializer):
     applicant = serializers.SerializerMethodField(read_only=True)
     applicant_type = serializers.SerializerMethodField(read_only=True)
     applicant_id = serializers.SerializerMethodField(read_only=True)
-    licence_document = serializers.CharField(source='licence_document._file.url')
-    renewal_document = serializers.SerializerMethodField(read_only=True)
+    # licence_document = serializers.CharField(source='licence_document._file.url')
+    # renewal_document = serializers.SerializerMethodField(read_only=True)
     status = serializers.CharField(source='get_status_display')
-    allowed_assessors = EmailUserSerializer(many=True)
-    title = serializers.CharField(source='current_proposal.title')
+    # allowed_assessors = EmailUserSerializer(many=True)
+    # title = serializers.CharField(source='current_proposal.title')
     application_type = serializers.SerializerMethodField(read_only=True)
     linked_applications = serializers.SerializerMethodField(read_only=True)
     can_renew = serializers.SerializerMethodField()
@@ -142,12 +142,12 @@ class ApprovalSerializer(serializers.ModelSerializer):
             'id',
             'lodgement_number',
             'linked_applications',
-            'licence_document',
+            # 'licence_document',
             'replaced_by',
             'current_proposal',
             'tenure',
-            'title',
-            'renewal_document',
+            # 'title',
+            # 'renewal_document',
             'renewal_sent',
             'issue_date',
             'original_issue_date',
@@ -162,7 +162,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
             'status',
             'reference',
             'can_reissue',
-            'allowed_assessors',
+            # 'allowed_assessors',
             'cancellation_date',
             'cancellation_details',
             'can_action',
@@ -186,12 +186,12 @@ class ApprovalSerializer(serializers.ModelSerializer):
         # also require the following additional fields for some of the mRender functions
         datatables_always_serialize = (
             'id',
-            'title',
+            # 'title',
             'status',
             'reference',
             'lodgement_number',
             'linked_applications',
-            'licence_document',
+            # 'licence_document',
             'start_date',
             'expiry_date',
             'applicant',
@@ -205,9 +205,9 @@ class ApprovalSerializer(serializers.ModelSerializer):
             'set_to_suspend',
             'set_to_surrender',
             'current_proposal',
-            'renewal_document',
+            # 'renewal_document',
             'renewal_sent',
-            'allowed_assessors',
+            # 'allowed_assessors',
             'application_type',
             'migrated',
             'is_assessor',
