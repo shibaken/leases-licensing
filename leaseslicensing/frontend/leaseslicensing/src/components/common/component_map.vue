@@ -42,8 +42,10 @@
                             </div>
                         </transition>
                     </div>
+                    <div class="optional-layers-button">
+                        <img v-if="selectedFeatureId" id="delete_feature" src="../../assets/trash.svg" @click="removeLeaselicenceFeature()" />
+                    </div>
                 </div>
-
             </div>
         </div>
 
@@ -76,7 +78,7 @@ import WMTS, {optionsFromCapabilities} from 'ol/source/WMTS';
 import GeoJSON from 'ol/format/GeoJSON';
 import Overlay from 'ol/Overlay';
 import { FullScreen, MousePosition, defaults as olDefaults, OverviewMap, ScaleLine, ZoomSlider, ZoomToExtent } from 'ol/control';
-import { Draw, Modify, Snap } from 'ol/interaction';
+import { Draw, Modify, Snap, Select } from 'ol/interaction';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import MeasureStyles, { formatLength } from '@/components/common/measure.js'
@@ -131,6 +133,7 @@ export default {
             //leaselicenceQuerySource: null,
             leaselicenceQuerySource: new VectorSource({ }),
             leaselicenseQueryLayer: null,
+            selectedFeatureId: null,
         }
     },
     props: {
@@ -157,13 +160,17 @@ export default {
                 this.leaselicenceQuerySource.addFeatures(feature)
                 */
                 const featureJson = (new GeoJSON).readFeature(this.proposal.proposalgeometry)
+                let id = 1;
                 featureJson.getGeometry().getPolygons().forEach((polygon) => {
                     console.log(polygon)
-                    this.leaselicenceQuerySource.addFeature(new Feature({
+                    const feature = new Feature({
                         geometry: polygon,
                         parent: featureJson,
-                    }));
-                })
+                    });
+                    feature.setId(id);
+                    this.leaselicenceQuerySource.addFeature(feature);
+                    id++;
+                });
             }
         },
 
@@ -329,7 +336,39 @@ export default {
             }
 
             vm.map.addOverlay(vm.overlay)
+            const selected = new Style({
+                fill: new Fill({
+                    color: '#eeeeee',
+                }),
+                stroke: new Stroke({
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    width: 2,
+                }),
+            });
 
+            function selectStyle(feature) {
+                const color = feature.get('COLOR') || '#eeeeee';
+                selected.getFill().setColor(color);
+                return selected;
+            }
+
+            // select interaction working on "singleclick"
+            const selectSingleClick = new Select({
+                style: selectStyle,
+                layers: [vm.leaselicenceQueryLayer, ],
+            });
+            vm.map.addInteraction(selectSingleClick);
+            selectSingleClick.on('select', (e) => {
+                if (e.selected && e.selected.length > 0) {
+                    vm.selectedFeatureId = e.selected[0].getId();
+                } else {
+                    vm.selectedFeatureId = null;
+                }
+            });
+        },
+        removeLeaselicenceFeature: function() {
+            const feature = this.leaselicenceQuerySource.getFeatureById(this.selectedFeatureId);
+            this.leaselicenceQuerySource.removeFeature(feature);
         },
         showPopupById: function(apiary_site_id){
             let feature = this.apiarySitesQuerySource.getFeatureById(apiary_site_id)
