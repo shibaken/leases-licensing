@@ -5,6 +5,7 @@ import pytz
 from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
+import xml.etree.ElementTree as ET
 
 
 def retrieve_department_users():
@@ -57,4 +58,28 @@ def check_db_connection():
 #
 #    return from_date
 
+def _get_params(layer_name):
+    return {
+        'SERVICE': 'WFS',
+        'VERSION': '1.0.0',
+        'REQUEST': 'GetFeature',
+        'typeName': layer_name,
+        'maxFeatures': 50000,
+        'outputFormat': 'application/json',
+    }
+
+def get_dbca_lands_waters():
+    try:
+        URL = 'https://kmi.dpaw.wa.gov.au/geoserver/public/ows'
+        PARAMS = _get_params('public:dbca_legislated_lands_and_waters')
+        print(PARAMS)
+        res = requests.get(url=URL, params=PARAMS)
+        geo_json = res.json()
+        return geo_json
+    except:
+        return ''
+
+# testing - add result to cache
+#geojson=get_dbca_lands_waters()
+#geojson.get('features')[0].keys()
 
