@@ -5,28 +5,8 @@ import pytz
 from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
-import xml.etree.ElementTree as ET
+from django.contrib.gis.geos import GEOSGeometry, GeometryCollection#, Polygon, MultiPolygon, LinearRing
 
-
-def retrieve_department_users():
-    try:
-        res = requests.get('{}/api/users?minimal'.format(settings.CMS_URL), auth=(settings.LEDGER_USER,settings.LEDGER_PASS), verify=False)
-        res.raise_for_status()
-        cache.set('department_users',json.loads(res.content).get('objects'),10800)
-    except:
-        raise
-
-def get_department_user(email):
-    try:
-        res = requests.get('{}/api/users?email={}'.format(settings.CMS_URL,email), auth=(settings.LEDGER_USER,settings.LEDGER_PASS), verify=False)
-        res.raise_for_status()
-        data = json.loads(res.content).get('objects')
-        if len(data) > 0:
-            return data[0]
-        else:
-            return None
-    except:
-        raise
 
 def to_local_tz(_date):
     local_tz = pytz.timezone(settings.TIME_ZONE)
@@ -40,24 +20,6 @@ def check_db_connection():
     except Exception as e:
         connection.connect()
 
-#def add_business_days(from_date, number_of_days):
-#    """ given from_date and number_of_days, returns the next weekday date i.e. excludes Sat/Sun """
-#    to_date = from_date
-#    while number_of_days:
-#        to_date += timedelta(1)
-#        if to_date.weekday() < 5: # i.e. is not saturday or sunday
-#            number_of_days -= 1
-#    return to_date
-#
-#def get_next_weekday(from_date):
-#    """ given from_date and number_of_days, returns the next weekday date i.e. excludes Sat/Sun """
-#    if from_date.weekday() == 5: # i.e. Sat
-#        from_date += timedelta(2)
-#    elif from_date.weekday() == 6: # i.e. Sun
-#        from_date += timedelta(1)
-#
-#    return from_date
-
 def _get_params(layer_name):
     return {
         'SERVICE': 'WFS',
@@ -68,18 +30,23 @@ def _get_params(layer_name):
         'outputFormat': 'application/json',
     }
 
-def get_dbca_lands_waters():
-    try:
+def get_dbca_lands_and_waters_geojson():
+    data = cache.get('dbca_legislated_lands_and_waters')
+    if not data:
         URL = 'https://kmi.dpaw.wa.gov.au/geoserver/public/ows'
         PARAMS = _get_params('public:dbca_legislated_lands_and_waters')
-        print(PARAMS)
         res = requests.get(url=URL, params=PARAMS)
-        geo_json = res.json()
-        return geo_json
-    except:
-        return ''
+        #geo_json = res.json()
+        cache.set('dbca_legislated_lands_and_waters',res.json(), settings.LOV_CACHE_TIMEOUT)
+        data = cache.get('dbca_legislated_lands_and_waters')
+    return data
 
-# testing - add result to cache
-#geojson=get_dbca_lands_waters()
-#geojson.get('features')[0].keys()
+def get_dbca_lands_and_waters_geos():
+    geojson = get_dbca_lands_and_waters_geojson()
+    geoms = []
+    for feature in geojson.get('features'):
+        feature_geom = feature.get('geometry')
+        geoms.append(GEOSGeometry('{}'.format(feature_geom)))
+    return GeometryCollection(tuple(geoms))
+    #return GeometryCollection(geoms)
 
