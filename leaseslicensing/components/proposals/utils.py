@@ -29,6 +29,7 @@ from datetime import datetime
 import time
 import json
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Polygon, MultiPolygon, LinearRing
+from django.contrib.gis.gdal import SpatialReference
 from leaseslicensing.components.main.utils import get_dbca_lands_and_waters_geos
 
 
@@ -336,6 +337,11 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     geometry_list = []
     lease_licensing_geometry = json.loads(lease_licensing_geometry_str)
     lands_geos_data = get_dbca_lands_and_waters_geos()
+    #print("lease_licensing_geometry")
+    #print(lease_licensing_geometry)
+    wgs84 = SpatialReference('EPSG:4326') # EPSG string
+    e4283 = SpatialReference('EPSG:4283') # EPSG string
+    #lands_geos_data.transform(wgs84)
     for feature in lease_licensing_geometry.get("features"):
         #if feature.get("geometry").get("type") == "MultiPolygon":
         #    print("multi feature")
@@ -347,18 +353,22 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
         if feature.get("geometry").get("type") == "Polygon":
             #import ipdb; ipdb.set_trace()
             feature_dict = feature.get("geometry")
+            print(feature_dict)
             geos_repr = GEOSGeometry('{}'.format(feature_dict))
+            geos_repr.transform(e4283)
+            print(geos_repr)
+            print(geos_repr.ptr)
             #print(geos_repr)
             #print(geos_repr.valid)
             #print(geos_repr.valid_reason)
-            print(lands_geos_data.valid)
-            print(lands_geos_data.valid_reason)
-            if lands_geos_data.intersects(geos_repr):
-                print(geos_repr)
-                print("Intersects")
-            else:
-                print(geos_repr)
-                print("Does not Intersect")
+            #print(lands_geos_data.valid)
+            #print(lands_geos_data.valid_reason)
+            intersects = False
+            for geom in lands_geos_data:
+                if geom.intersects(geos_repr):
+                    intersects = True
+            print("intersects")
+            print(intersects)
             #print("poly feature")
             #print(feature.get("geometry").get("coordinates")[0])
             linear_ring = LinearRing(feature_dict.get("coordinates")[0])
