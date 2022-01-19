@@ -29,6 +29,7 @@ from datetime import datetime
 import time
 import json
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Polygon, MultiPolygon, LinearRing
+from leaseslicensing.components.main.utils import get_dbca_lands_and_waters_geos
 
 
 import logging
@@ -334,6 +335,7 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     lease_licensing_geometry_str = request.data.get('lease_licensing_geometry')
     geometry_list = []
     lease_licensing_geometry = json.loads(lease_licensing_geometry_str)
+    lands_geos_data = get_dbca_lands_and_waters_geos()
     for feature in lease_licensing_geometry.get("features"):
         #if feature.get("geometry").get("type") == "MultiPolygon":
         #    print("multi feature")
@@ -343,9 +345,23 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
         #        polygon = Polygon(linear_ring)
         #        geometry_list.append(polygon)
         if feature.get("geometry").get("type") == "Polygon":
-            print("poly feature")
-            print(feature.get("geometry").get("coordinates")[0])
-            linear_ring = LinearRing(feature.get("geometry").get("coordinates")[0])
+            #import ipdb; ipdb.set_trace()
+            feature_dict = feature.get("geometry")
+            geos_repr = GEOSGeometry('{}'.format(feature_dict))
+            #print(geos_repr)
+            #print(geos_repr.valid)
+            #print(geos_repr.valid_reason)
+            print(lands_geos_data.valid)
+            print(lands_geos_data.valid_reason)
+            if lands_geos_data.intersects(geos_repr):
+                print(geos_repr)
+                print("Intersects")
+            else:
+                print(geos_repr)
+                print("Does not Intersect")
+            #print("poly feature")
+            #print(feature.get("geometry").get("coordinates")[0])
+            linear_ring = LinearRing(feature_dict.get("coordinates")[0])
             polygon = Polygon(linear_ring)
             geometry_list.append(polygon)
 
