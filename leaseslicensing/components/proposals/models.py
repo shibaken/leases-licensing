@@ -29,7 +29,6 @@ from leaseslicensing.components.main.models import (
         ApplicationType, 
         RequiredDocument, RevisionedMixin
         )
-from leaseslicensing.components.main.utils import get_department_user
 from leaseslicensing.components.proposals.email import (
     send_referral_email_notification,
     send_proposal_decline_email_notification,

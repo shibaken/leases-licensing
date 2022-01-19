@@ -134,6 +134,7 @@ export default {
             leaselicenceQuerySource: new VectorSource({ }),
             leaselicenseQueryLayer: null,
             selectedFeatureId: null,
+            newFeatureId: 1,
         }
     },
     props: {
@@ -160,16 +161,15 @@ export default {
                 this.leaselicenceQuerySource.addFeatures(feature)
                 */
                 const featureJson = (new GeoJSON).readFeature(this.proposal.proposalgeometry)
-                let id = 1;
                 featureJson.getGeometry().getPolygons().forEach((polygon) => {
                     console.log(polygon)
                     const feature = new Feature({
                         geometry: polygon,
                         parent: featureJson,
                     });
-                    feature.setId(id);
+                    feature.setId(this.newFeatureId);
                     this.leaselicenceQuerySource.addFeature(feature);
-                    id++;
+                    this.newFeatureId++;
                 });
             }
         },
@@ -270,6 +270,8 @@ export default {
             vm.drawForLeaselicence.on('drawend', function(evt){
                 console.log(evt);
                 console.log(evt.feature.values_.geometry.flatCoordinates);
+                evt.feature.setId(vm.newFeatureId)
+                vm.newFeatureId++;
             });
             vm.leaselicenceQueryLayer = new VectorLayer({
                 source: vm.leaselicenceQuerySource,
@@ -369,6 +371,7 @@ export default {
         removeLeaselicenceFeature: function() {
             const feature = this.leaselicenceQuerySource.getFeatureById(this.selectedFeatureId);
             this.leaselicenceQuerySource.removeFeature(feature);
+            this.selectedFeatureId = null;
         },
         showPopupById: function(apiary_site_id){
             let feature = this.apiarySitesQuerySource.getFeatureById(apiary_site_id)
