@@ -342,7 +342,9 @@ export default {
         }
         payload.proposal.details_text = this.$refs.application_form.$refs.details_text.detailsText;
         //payload.lease_licensing_geometry = this.$refs.application_form.$refs.component_map.leaselicenceQuerySource.getFeatures();
-        payload.lease_licensing_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+        if (this.$refs.application_form.componentMapOn) {
+            payload.lease_licensing_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+        }
         this.$refs.details_text
         const res = await vm.$http.post(url, payload);
         if (res.ok) {
@@ -354,6 +356,11 @@ export default {
                 );
             };
             vm.savingProposal=false;
+            //this.$refs.application_form.incrementComponentMapKey();
+            this.proposal = res.body;
+            this.$nextTick(async () => {
+                this.$refs.application_form.incrementComponentMapKey();
+            });
             return res;
         } else {
             swal({
