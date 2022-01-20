@@ -36,11 +36,12 @@ class ProposalGeometrySaveSerializer(GeoFeatureModelSerializer):
     proposal_id = serializers.IntegerField(write_only=True, required=False)
     class Meta:
         model = ProposalGeometry
-        geo_field = 'polygons'
+        geo_field = 'polygon'
         fields = (
             'id',
             'proposal_id',
-            'polygons',
+            'polygon',
+            'intersects',
         )
         read_only_fields=('id',)
 
@@ -49,11 +50,12 @@ class ProposalGeometrySerializer(GeoFeatureModelSerializer):
     proposal_id = serializers.IntegerField(write_only=True, required=False)
     class Meta:
         model = ProposalGeometry
-        geo_field = 'polygons'
+        geo_field = 'polygon'
         fields = (
             'id',
             'proposal_id',
-            'polygons',
+            'polygon',
+            'intersects',
         )
         read_only_fields=('id',)
 
@@ -216,7 +218,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     is_qa_officer = serializers.SerializerMethodField()
     # application_type_display = serializers.SerializerMethodField()
     #fee_invoice_url = serializers.SerializerMethodField()
-    proposalgeometry = ProposalGeometrySerializer()
+    #proposalgeometry = ProposalGeometrySerializer()
+    proposalgeometry = ProposalGeometrySerializer(many=True, read_only=True)
 
     class Meta:
         model = Proposal
