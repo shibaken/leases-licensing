@@ -48,7 +48,7 @@ def get_dbca_lands_and_waters_geos():
     geoms = []
     for feature in geojson.get('features'):
         feature_geom = feature.get('geometry')
-        geos_geom = GEOSGeometry('{}'.format(feature_geom))
+        geos_geom = GEOSGeometry('{}'.format(feature_geom)).prepared
         geoms.append(geos_geom)
     return geoms
     #geos_obj = GeometryCollection(tuple(geoms))
