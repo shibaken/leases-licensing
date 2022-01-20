@@ -35,15 +35,12 @@
 
         </meta>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script language="javascript">
-            env = {
-                "kmi_server_url": "{{ KMI_SERVER_URL }}"
-            }
-        </script>
         <link rel="icon" href="/static/favicon-ll.svg"/>
 
     </head>
     <body>
+        {% block header_top_menu %}
+        {% endblock %}
         {% comment %}
         <header class="topmast">
             {% block header %}
@@ -179,6 +176,7 @@
         {% endblock %}
         {% block modals %}
         {% endblock %}
+        {% block custom_js %}
         {% if not dev %}
 	<script type="text/javascript" src="{% static 'leaseslicensing_vue/js/manifest.js' %}?v={{build_tag}}"></script>
 	<script type="text/javascript" src="{% static 'leaseslicensing_vue/js/vendor.js' %}?v={{build_tag}}"></script>
@@ -190,7 +188,12 @@
         {% else %}
             <script type="text/javascript" src="{{ dev_url }}"></script>
         {% endif %}
-        {% block custom_js %}
+        <script language="javascript">
+            env = {
+                "kmi_server_url": "{{ KMI_SERVER_URL }}"
+            }
+        </script>
+
         {% endblock %}
     </body>
 </html>
