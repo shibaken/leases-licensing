@@ -1,5 +1,4 @@
-{% load bootstrap3 %}
-
+{% extends "webtemplate_dbca/base_b5.html" %}
 {% load static %}
 
 {% load users %}
@@ -21,8 +20,6 @@
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            {% bootstrap_css %}
-                <link type="text/css" href="{% static 'leaseslicensing/css/base.css' %}" rel="stylesheet">
             {% if not dev %}
 	    <link rel="stylesheet" href="{% static 'leaseslicensing_vue/css/app.css' %}?v={{build_tag}}">
             {% endif %}
@@ -47,11 +44,13 @@
 
     </head>
     <body>
+        {% comment %}
         <header class="topmast">
             {% block header %}
                 {% include 'leaseslicensing/header.html' %}
             {% endblock %}
         </header>
+        {% endcomment %}
         {% block menu %}
             <div class="container-fluid">
                 <div class="row">
@@ -64,7 +63,7 @@
                                     <span class="icon-bar"></span>
                                     <span class="icon-bar"></span>
                                 </a>
-                                <a class="navbar-brand" href="{% url 'ds_home' %}"><div style="inline"><img src="{% static 'leaseslicensing/img/dpaw_small.png' %}">{% if is_internal_login %}Applications {% else %}Home {% endif %}</div></a>
+                                <a class="navbar-brand" href="{% url 'home' %}"><div style="inline"><img src="{% static 'leaseslicensing/img/dpaw_small.png' %}">{% if is_internal_login %}Applications {% else %}Home {% endif %}</div></a>
                             </div>
                             <div id="navbar" class="navbar-collapse collapse">
                                 <ul class="nav navbar-nav">
@@ -158,7 +157,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         {% for message in messages %}
-                            <div class="{{ message|bootstrap_message_classes }} alert-dismissable">
+                            <div class="{{ message }} alert-dismissable">
                                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
                                 {{ message|safe }}
                             </div>
@@ -176,6 +175,7 @@
         {% endif %}
 
         {% block content %}
+        stuff
         {% endblock %}
         {% block modals %}
         {% endblock %}

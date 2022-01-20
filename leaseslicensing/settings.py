@@ -51,7 +51,8 @@ STATIC_URL = '/static/'
 
 INSTALLED_APPS += [
     #'reversion_compare',
-    'bootstrap3',
+    #'bootstrap3',
+    'webtemplate_dbca',
     'leaseslicensing',
     'leaseslicensing.components.main',
     'leaseslicensing.components.organisations',
@@ -235,3 +236,5 @@ APPLICATION_TYPES = [
     (APPLICATION_TYPE_LICENCE, 'Licence'),
 ]
 KMI_SERVER_URL = env('KMI_SERVER_URL', 'https://kmi.dbca.wa.gov.au')
+template_title = "This is a test Title"
+template_group = "parkswildlife"
