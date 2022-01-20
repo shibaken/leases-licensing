@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection#, Polygon, MultiPolygon, LinearRing
+#from django.contrib.gis.gdal import SpatialReference
 
 
 def to_local_tz(_date):
@@ -39,6 +40,7 @@ def get_dbca_lands_and_waters_geojson():
         #geo_json = res.json()
         cache.set('dbca_legislated_lands_and_waters',res.json(), settings.LOV_CACHE_TIMEOUT)
         data = cache.get('dbca_legislated_lands_and_waters')
+    #print(data.get('properties'))
     return data
 
 def get_dbca_lands_and_waters_geos():
@@ -46,7 +48,11 @@ def get_dbca_lands_and_waters_geos():
     geoms = []
     for feature in geojson.get('features'):
         feature_geom = feature.get('geometry')
-        geoms.append(GEOSGeometry('{}'.format(feature_geom)))
-    return GeometryCollection(tuple(geoms))
-    #return GeometryCollection(geoms)
+        geos_geom = GEOSGeometry('{}'.format(feature_geom))
+        geoms.append(geos_geom)
+    return geoms
+    #geos_obj = GeometryCollection(tuple(geoms))
+    #print(geos_obj.valid)
+    #print(geos_obj.valid_reason)
+    #return geos_obj
 

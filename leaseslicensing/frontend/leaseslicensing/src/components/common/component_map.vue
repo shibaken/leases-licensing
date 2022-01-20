@@ -154,12 +154,9 @@ export default {
     computed: {
     },
     methods: {
+        /*
         loadLeaseLicenceGeometry: function(){
             if (this.proposal.proposalgeometry) {
-                /*
-                const feature = (new GeoJSON).readFeatures(this.proposal.proposalgeometry)
-                this.leaselicenceQuerySource.addFeatures(feature)
-                */
                 const featureJson = (new GeoJSON).readFeature(this.proposal.proposalgeometry)
                 featureJson.getGeometry().getPolygons().forEach((polygon) => {
                     console.log(polygon)
@@ -171,6 +168,32 @@ export default {
                     this.leaselicenceQuerySource.addFeature(feature);
                     this.newFeatureId++;
                 });
+            }
+        },
+        */
+        loadLeaseLicenceGeometry: function(){
+            const nonIntersectingStyle = new Style({
+                fill: new Fill({
+                    color: '#ff0000',
+                }),
+                stroke: new Stroke({
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    width: 2,
+                }),
+            });
+
+            if (this.proposal.proposalgeometry) {
+                //const featuresJson = (new GeoJSON).readFeatures(this.proposal.proposalgeometry)
+                for (let poly of this.proposal.proposalgeometry.features) {
+                    const feature = (new GeoJSON).readFeature(poly);
+                    console.log(feature)
+                    if (!feature.getProperties().intersects) {
+                        feature.setStyle(nonIntersectingStyle);
+                    }
+                    feature.setProperties({"id": this.newFeatureId});
+                    this.leaselicenceQuerySource.addFeature(feature);
+                    this.newFeatureId++;
+                };
             }
         },
 
@@ -270,7 +293,8 @@ export default {
             vm.drawForLeaselicence.on('drawend', function(evt){
                 console.log(evt);
                 console.log(evt.feature.values_.geometry.flatCoordinates);
-                evt.feature.setId(vm.newFeatureId)
+                //evt.feature.setId(vm.newFeatureId)
+                evt.feature.setProperties({"id": vm.newFeatureId})
                 vm.newFeatureId++;
             });
             vm.leaselicenceQueryLayer = new VectorLayer({
@@ -338,6 +362,8 @@ export default {
             }
 
             vm.map.addOverlay(vm.overlay)
+
+            // select and delete polygons
             const selected = new Style({
                 fill: new Fill({
                     color: '#eeeeee',
@@ -362,14 +388,22 @@ export default {
             vm.map.addInteraction(selectSingleClick);
             selectSingleClick.on('select', (e) => {
                 if (e.selected && e.selected.length > 0) {
-                    vm.selectedFeatureId = e.selected[0].getId();
+                    //vm.selectedFeatureId = e.selected[0].getId();
+                    vm.selectedFeatureId = e.selected[0].getProperties().id;
                 } else {
                     vm.selectedFeatureId = null;
                 }
             });
         },
         removeLeaselicenceFeature: function() {
-            const feature = this.leaselicenceQuerySource.getFeatureById(this.selectedFeatureId);
+            //const feature = this.leaselicenceQuerySource.getFeatureById(this.selectedFeatureId);
+            const feature = this.leaselicenceQuerySource.forEachFeature((feat) => {
+                if (feat.getProperties().id === this.selectedFeatureId) {
+                    return feat;
+                }
+                console.log(feat.getProperties())
+            });
+            console.log(feature)
             this.leaselicenceQuerySource.removeFeature(feature);
             this.selectedFeatureId = null;
         },
