@@ -12,7 +12,8 @@ from leaseslicensing.components.proposals.models import (
         ProposalAssessment, 
         ProposalAssessmentAnswer, 
         ChecklistQuestion,
-        ProposalStandardRequirement
+        ProposalStandardRequirement,
+        ProposalGeometry
         )
 from leaseslicensing.components.approvals.models import Approval
 from leaseslicensing.components.proposals.email import send_submit_email_notification, send_external_submit_email_notification
@@ -29,6 +30,7 @@ from datetime import datetime
 import time
 import json
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Polygon, MultiPolygon, LinearRing
+from django.contrib.gis.gdal import SpatialReference
 from leaseslicensing.components.main.utils import get_dbca_lands_and_waters_geos
 
 
@@ -333,61 +335,49 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     instance = serializer.save()
     # geometry
     lease_licensing_geometry_str = request.data.get('lease_licensing_geometry')
-    geometry_list = []
+    #geometry_list = []
     lease_licensing_geometry = json.loads(lease_licensing_geometry_str)
     lands_geos_data = get_dbca_lands_and_waters_geos()
+    e4283 = SpatialReference('EPSG:4283') # EPSG string
+    polygons_to_delete = list(instance.proposalgeometry.all())
+    print("polygons_to_delete")
+    print(polygons_to_delete)
     for feature in lease_licensing_geometry.get("features"):
-        #if feature.get("geometry").get("type") == "MultiPolygon":
-        #    print("multi feature")
-        #    print(feature.get("geometry").get("coordinates"))
-        #    for poly in feature.get("geometry").get("coordinates"):
-        #        linear_ring = LinearRing(poly[0])
-        #        polygon = Polygon(linear_ring)
-        #        geometry_list.append(polygon)
+        polygon = None
+        intersects = False
         if feature.get("geometry").get("type") == "Polygon":
-            #import ipdb; ipdb.set_trace()
             feature_dict = feature.get("geometry")
             geos_repr = GEOSGeometry('{}'.format(feature_dict))
-            #print(geos_repr)
-            #print(geos_repr.valid)
-            #print(geos_repr.valid_reason)
-            print(lands_geos_data.valid)
-            print(lands_geos_data.valid_reason)
-            if lands_geos_data.intersects(geos_repr):
-                print(geos_repr)
-                print("Intersects")
-            else:
-                print(geos_repr)
-                print("Does not Intersect")
-            #print("poly feature")
-            #print(feature.get("geometry").get("coordinates")[0])
+            geos_repr_transform = geos_repr.transform(e4283, clone=True)
+            for geom in lands_geos_data:
+                if geom.intersects(geos_repr_transform):
+                    intersects = True
             linear_ring = LinearRing(feature_dict.get("coordinates")[0])
             polygon = Polygon(linear_ring)
-            geometry_list.append(polygon)
-
-    multi_polygon = MultiPolygon(geometry_list)
-
-    if lease_licensing_geometry and hasattr(instance, 'proposalgeometry'):
-        serializer = ProposalGeometrySaveSerializer(
-                instance.proposalgeometry,
-                data={"proposal_id": instance.id, "polygons":multi_polygon},
-                context={
-                    "action": viewset.action,
-                    }
-        )
-        serializer.is_valid(raise_exception=True)
-        #instance.proposalgeometry = serializer.save()
-        serializer.save()
-    elif lease_licensing_geometry:
-        serializer = ProposalGeometrySaveSerializer(
-                data={"proposal_id": instance.id, "polygons":multi_polygon},
-                context={
-                    "action": viewset.action,
-                    }
-        )
-        serializer.is_valid(raise_exception=True)
-        #instance.proposalgeometry = serializer.save()
-        serializer.save()
+        if lease_licensing_geometry and feature.get("id"):
+            proposalgeometry = ProposalGeometry.objects.get(id=feature.get("id"))
+            polygons_to_delete.remove(proposalgeometry)
+            serializer = ProposalGeometrySaveSerializer(
+                    proposalgeometry,
+                    data={"proposal_id": instance.id, "polygon":polygon, "intersects": intersects},
+                    context={
+                        "action": viewset.action,
+                        }
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        elif lease_licensing_geometry:
+            serializer = ProposalGeometrySaveSerializer(
+                    data={"proposal_id": instance.id, "polygon":polygon, "intersects": intersects},
+                    context={
+                        "action": viewset.action,
+                        }
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+    print(polygons_to_delete)
+    # delete polygons not returned from the front end
+    [poly.delete() for poly in polygons_to_delete]
 
 
 from leaseslicensing.components.main.models import ApplicationType
