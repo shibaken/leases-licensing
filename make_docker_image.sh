@@ -16,7 +16,7 @@ fi
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 REPO=$(basename -s .git `git config --get remote.origin.url` | sed 's/-//g')
 DBCA_BRANCH="dbca_"$1
-BUILD_TAG_NO_INCREMENT=dbcawa/$REPO:v$(date +%Y.%m.%d)
+BUILD_TAG_NO_INCREMENT=dbcawa/$REPO:$1_v$(date +%Y.%m.%d)
 if [[ $# -gt 1 ]]; then
     INCREMENT=$2
 else
@@ -41,7 +41,8 @@ else
         INCREMENT=$((max_value+1))
     fi
 fi
-BUILD_TAG=dbcawa/$REPO:v$(date +%Y.%m.%d).$INCREMENT
+#BUILD_TAG=dbcawa/$REPO:v$(date +%Y.%m.%d).$INCREMENT
+BUILD_TAG=$BUILD_TAG_NO_INCREMENT.$INCREMENT
 {
     git checkout $DBCA_BRANCH
 } ||

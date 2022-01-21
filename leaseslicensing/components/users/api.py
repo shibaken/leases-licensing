@@ -45,27 +45,21 @@ from leaseslicensing.components.users.serializers import   (
 from leaseslicensing.components.organisations.serializers import (
     OrganisationRequestDTSerializer,
 )
-from leaseslicensing.components.main.utils import retrieve_department_users
 from leaseslicensing.components.main.models import UserSystemSettings
 
-class DepartmentUserList(views.APIView):
-    renderer_classes = [JSONRenderer,]
-    def get(self, request, format=None):
-        data = cache.get('department_users')
-        if not data:
-            retrieve_department_users()
-            data = cache.get('department_users')
-        return Response(data)
-
-        serializer  = UserSerializer(request.user)
 
 class GetCountries(views.APIView):
     renderer_classes = [JSONRenderer,]
     def get(self, request, format=None):
-        country_list = []
-        for country in list(countries):
-            country_list.append({"name": country.name, "code": country.code})
-        return Response(country_list)
+        data = cache.get('country_list')
+        if not data:
+            country_list = []
+            for country in list(countries):
+                country_list.append({"name": country.name, "code": country.code})
+            cache.set('country_list',country_list, settings.LOV_CACHE_TIMEOUT)
+            data = cache.get('country_list')
+        return Response(data)
+
 
 class GetProfile(views.APIView):
     renderer_classes = [JSONRenderer,]
