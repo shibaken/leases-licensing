@@ -43,15 +43,44 @@
             </div>
         </CollapsibleFilters>
 
-        <!-- Map Here -->
+        <div :id="elem_id" class="map" style="position: relative; width: 500px; height: 200px;">
+        </div>
 
     </div>
 </template>
 
 <script>
 import Vue from 'vue'
+import uuid from 'uuid'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
+
+import 'ol/ol.css';
+//import 'ol-layerswitcher/dist/ol-layerswitcher.css'
+import Map from 'ol/Map';
+import View from 'ol/View';
+import WMTSCapabilities from 'ol/format/WMTSCapabilities';
+import TileLayer from 'ol/layer/Tile';
+import OSM from 'ol/source/OSM';
+import TileWMS from 'ol/source/TileWMS';
+import WMTS, {optionsFromCapabilities} from 'ol/source/WMTS';
+import Collection from 'ol/Collection';
+import { Draw, Modify, Snap } from 'ol/interaction';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import { Circle as CircleStyle, Fill, Stroke, Style, Text, RegularShape } from 'ol/style';
+import { FullScreen as FullScreenControl, MousePosition as MousePositionControl } from 'ol/control';
+import { Feature } from 'ol';
+import { LineString, Point } from 'ol/geom';
+import { getDistance } from 'ol/sphere';
+import { circular} from 'ol/geom/Polygon';
+import GeoJSON from 'ol/format/GeoJSON';
+import Overlay from 'ol/Overlay';
+import { getArea, getLength } from 'ol/sphere'
+import Datatable from '@vue-utils/datatable.vue'
+import Cluster from 'ol/source/Cluster';
+import 'select2/dist/css/select2.min.css'
+import 'select2-bootstrap-theme/dist/select2-bootstrap.min.css'
 
 export default {
     name: 'MapComponent',
@@ -94,6 +123,10 @@ export default {
                 allowInputToggle:true
             },
 
+            elem_id: uuid(),
+            map: null,
+            tileLayerOsm: null,
+            tileLayerSat: null,
         }
     },
     computed: {
@@ -130,6 +163,62 @@ export default {
         }
     },
     methods: {
+        initMap: function(){
+            let vm = this;
+            //const map = new Map({
+            //    layers: [
+            //            new TileLayer({
+            //                      source: new OSM(),
+            //                    }),
+            //          ],
+            //    //target: 'map',
+            //    target: vm.elem_id,
+            //    view: new View({
+            //            center: [0, 0],
+            //            zoom: 2,
+            //          }),
+            //})
+
+            let satelliteTileWms = new TileWMS({
+                url: env['kmi_server_url'] + '/geoserver/public/wms',
+                params: {
+                    'FORMAT': 'image/png',
+                    'VERSION': '1.1.1',
+                    tiled: true,
+                    STYLES: '',
+                    LAYERS: 'public:mapbox-satellite',
+                }
+            });
+
+            vm.tileLayerOsm = new TileLayer({
+                title: 'OpenStreetMap',
+                type: 'base',
+                visible: true,
+                source: new OSM(),
+            });
+
+            vm.tileLayerSat = new TileLayer({
+                title: 'Satellite',
+                type: 'base',
+                visible: true,
+                source: satelliteTileWms,
+            })
+
+            vm.map = new Map({
+                layers: [
+                    vm.tileLayerOsm, 
+                    vm.tileLayerSat,
+                ],
+                //target: 'map',
+                target: vm.elem_id,
+                view: new View({
+                    center: [115.95, -31.95],
+                    zoom: 7,
+                    projection: 'EPSG:4326'
+                })
+            });
+
+        },
         collapsible_component_mounted: function(){
             this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
         },
@@ -189,9 +278,11 @@ export default {
     },
     mounted: function(){
         let vm = this;
+
         this.$nextTick(() => {
             vm.addEventListeners();
         });
+        vm.initMap()
     }
 }
 </script>
