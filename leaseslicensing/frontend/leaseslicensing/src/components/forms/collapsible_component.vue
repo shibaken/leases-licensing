@@ -5,7 +5,7 @@
                 <div class="toggle_filters_icon">
                     <i :id="chevron_elem_id" class="rotate_icon fa fa-chevron-down"></i>
                 </div>
-                <i v-if="display_icon" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter_warning_icon"></i>
+                <i :id="warning_icon_id" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter_warning_icon"></i>
             </div>
 
             <div class="collapse" :id="target_elem_id">
@@ -20,9 +20,6 @@ import uuid from 'uuid';
 
 export default {
     name:"CollapsibleComponent",
-    props: {
-
-    },
     watch: {
         filters_expanded: function(){
             let chevron_icon = $('#' + this.chevron_elem_id)
@@ -30,7 +27,6 @@ export default {
                 chevron_icon.addClass('chev_rotated')
             } else {
                 chevron_icon.removeClass('chev_rotated')
-
             }
         }
     },
@@ -39,12 +35,10 @@ export default {
             target_elem_id: 'target_elem_' + uuid(),
             button_elem_id: 'button_elem_' + uuid(),
             chevron_elem_id: 'chevron_elem_' + uuid(),
+            warning_icon_id: 'warning_elem_' + uuid(),
             display_icon: false,
             filters_expanded: false,
         }
-    },
-    computed:{
-
     },
     methods: {
         toggle_filters_button_clicked: function(e){
@@ -52,19 +46,18 @@ export default {
             this.filters_expanded = $('#' + this.button_elem_id).hasClass('collapsed')
         },
         show_warning_icon: function(show){
-            this.display_icon = show
+            let warning_icon = $('#' + this.warning_icon_id)
+            if (show){
+                warning_icon.css('opacity', 1)
+            } else {
+                warning_icon.css('opacity', 0)
+            }
         },
-    },
-    created: function() {
-
     },
     mounted: function() {
         this.$nextTick(function(){
             this.$emit('created')
         })
-    },
-    updated:function () {
-
     },
 }
 </script>
@@ -83,6 +76,7 @@ export default {
 }
 .filter_warning_icon {
     color: #ffc107;
+    transition: 0.5s;
 }
 .toggle_filters_icon {
     margin: 0 0 0 0.5em;
