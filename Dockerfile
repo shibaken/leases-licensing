@@ -50,6 +50,11 @@ COPY admin.patch.additional /app/
 RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
 RUN rm /app/admin.patch.additional
 
+# required for first time db setup
+COPY 0001_initial.py.patch1 /app/
+COPY 0001_initial.py.patch2 /app/
+COPY apply_initial_migrations.sh /app/
+
 COPY cron /etc/cron.d/dockercron
 COPY startup.sh /
 RUN service rsyslog start
