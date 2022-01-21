@@ -29,7 +29,6 @@ from leaseslicensing.components.main.models import (
         ApplicationType, 
         RequiredDocument, RevisionedMixin
         )
-from leaseslicensing.components.main.utils import get_department_user
 from leaseslicensing.components.proposals.email import (
     send_referral_email_notification,
     send_proposal_decline_email_notification,
@@ -48,7 +47,7 @@ from decimal import Decimal as D
 import csv
 import time
 from multiselectfield import MultiSelectField
-from django.contrib.gis.db.models.fields import PointField, MultiPolygonField
+from django.contrib.gis.db.models.fields import PointField, PolygonField
 
 
 
@@ -2006,8 +2005,11 @@ class ApplicationFeeDiscount(RevisionedMixin):
 
 
 class ProposalGeometry(models.Model):
-    proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE)
-    polygons = MultiPolygonField(srid=4326, blank=True, null=True)
+    #proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE)
+    #polygons = MultiPolygonField(srid=4326, blank=True, null=True)
+    proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE, related_name="proposalgeometry")
+    polygon = PolygonField(srid=4326, blank=True, null=True)
+    intersects = models.BooleanField(default=False)
 
     class Meta:
         app_label = 'leaseslicensing'
