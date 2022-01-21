@@ -46,14 +46,17 @@ export default {
         panel_collapse_class: function() {
             if (this.formCollapse) {
                 this.panel_chevron_class = "glyphicon glyphicon-chevron-down pull-right";
-                return "panel-body collapse";
+                //return "panel-body collapse";
+                return "panel-body";
             } else {
                 if (this.treeHeight) {
                     this.panel_chevron_class = "glyphicon glyphicon-chevron-up pull-right";
-                    return "panel-body collapse in flex-container";
+                    //return "panel-body collapse in flex-container";
+                    return "panel-body in flex-container";
                 } else {
                     this.panel_chevron_class = "glyphicon glyphicon-chevron-up pull-right";
-                    return "panel-body collapse in";
+                    //return "panel-body collapse in";
+                    return "panel-body in";
                 }
             }
         },
