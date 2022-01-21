@@ -48,7 +48,6 @@
                 </div>
             </div>
         </div>
-
         <div :id="popup_id" class="ol-popup">
             <a href="#" :id="popup_closer_id" class="ol-popup-closer">
                 <svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='20' width='20' class="close-icon">
@@ -58,8 +57,20 @@
                     </g>
                 </svg>
             </a>
-            <div :id="popup_content_id"></div>
+            <div :id="popup_content_id" class="text-center"></div>
         </div>
+
+        <!--div :id="popup_id" class="ol-popup">
+            <a href="#" :id="popup_closer_id" class="ol-popup-closer">
+                <svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='20' width='20' class="close-icon">
+                    <g transform='scale(3)'>
+                        <path d     ="M 5.2916667,2.6458333 A 2.6458333,2.6458333 0 0 1 2.6458335,5.2916667 2.6458333,2.6458333 0 0 1 0,2.6458333 2.6458333,2.6458333 0 0 1 2.6458335,0 2.6458333,2.6458333 0 0 1 5.2916667,2.6458333 Z" style="fill:#ffffff;fill-opacity:1;stroke-width:0.182031" id="path846" />
+                        <path d     ="M 1.5581546,0.94474048 2.6457566,2.0324189 3.7334348,0.94474048 4.3469265,1.5581547 3.2592475,2.6458334 4.3469265,3.7334353 3.7334348,4.3469261 2.6457566,3.2593243 1.5581546,4.3469261 0.9447402,3.7334353 2.0323422,2.6458334 0.9447402,1.5581547 Z" style="fill:#f46464;fill-opacity:1;stroke:none;stroke-width:0.0512157" id="path2740-3" />
+                    </g>
+                </svg>
+            </a>
+            <div :id="popup_content_id"></div>
+        </div-->
     </div>
 
 </template>
@@ -396,6 +407,53 @@ export default {
                     vm.selectedFeatureId = null;
                 }
             });
+            vm.map.on('singleclick', function(evt){
+                if(vm.mode === 'layer'){
+                    vm.closePopup()
+                    let view = vm.map.getView()
+                    let viewResolution = view.getResolution()
+
+                    // Retrieve active layers' sources
+                    for (let i=0; i < vm.optionalLayers.length; i++){
+                        let visibility = vm.optionalLayers[i].getVisible()
+                        if (visibility){
+                            // Retrieve column names to be displayed
+                            let column_names = vm.optionalLayers[i].get('columns')
+                            column_names = column_names.map(function(col){
+                                // Convert array of dictionaries to simple array
+                                if (vm.is_internal && col.option_for_internal){
+                                    return col.name
+                                }
+                                if (vm.is_external && col.option_for_external){
+                                    return col.name
+                                }
+                            })
+                            // Retrieve the value of display_all_columns boolean flag
+                            let display_all_columns = vm.optionalLayers[i].get('display_all_columns')
+
+                            // Retrieve the URL to query the attributes
+                            let source = vm.optionalLayers[i].getSource()
+                            let url = source.getFeatureInfoUrl(
+                                evt.coordinate, viewResolution, view.getProjection(),
+                                //{'INFO_FORMAT': 'text/html'}
+                                {'INFO_FORMAT': 'application/json'}
+                            )
+
+                            // Query 
+                            let p = fetch(url, {
+                                credentials: 'include'
+                            })
+
+                            //p.then(res => res.text()).then(function(data){
+                            p.then(res => res.json()).then(function(data){
+                                //vm.showPopupForLayersHTML(data, evt.coordinate, column_names, display_all_columns)
+                                vm.showPopupForLayersJson(data, evt.coordinate, column_names, display_all_columns, vm.optionalLayers[i])
+                            })
+                        }
+                    }
+                }
+            });
+
         },
         removeLeaselicenceFeature: function() {
             //const feature = this.leaselicenceQuerySource.getFeatureById(this.selectedFeatureId);
@@ -409,11 +467,14 @@ export default {
             this.leaselicenceQuerySource.removeFeature(feature);
             this.selectedFeatureId = null;
         },
+        /*
         showPopupById: function(apiary_site_id){
             let feature = this.apiarySitesQuerySource.getFeatureById(apiary_site_id)
             this.showPopup(feature)
         },
+        */
         showPopup: function(feature){
+            console.log("showPopup");
             if (feature){
                 let geometry = feature.getGeometry();
                 let coord = geometry.getCoordinates();
@@ -434,6 +495,7 @@ export default {
             }
         },
         showPopupForLayersJson: function(geojson, coord, column_names, display_all_columns, target_layer){
+            console.log("popup opt layers")
             let wrapper = $('<div>')  // Add wrapper element because html() used at the end exports only the contents of the jquery object
             let caption = $('<div style="text-align:center; font-weight: bold;">').text(target_layer.get('title'))
             let table = $('<table style="margin-bottom: 1em;">') //.addClass('table')
