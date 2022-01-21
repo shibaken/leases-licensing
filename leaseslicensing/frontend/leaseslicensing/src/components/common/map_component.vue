@@ -43,7 +43,8 @@
             </div>
         </CollapsibleFilters>
 
-        <div :id="elem_id" class="map" style="position: relative; width: 500px; height: 200px;">
+        <div :id="map_container_id">
+            <div :id="elem_id" class="map" style="position: relative; width: 800px; height: 500px;"></div>
         </div>
 
     </div>
@@ -103,6 +104,7 @@ export default {
     },
     data() {
         let vm = this;
+
         return {
             // selected values for filtering
             filterApplicationType: sessionStorage.getItem('filterApplicationType') ? sessionStorage.getItem('filterApplicationType') : 'all',
@@ -124,6 +126,7 @@ export default {
             },
 
             elem_id: uuid(),
+            map_container_id: uuid(),
             map: null,
             tileLayerOsm: null,
             tileLayerSat: null,
