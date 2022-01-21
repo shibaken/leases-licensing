@@ -35,7 +35,9 @@
             </div>
             <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                 <FormSection :formCollapse="false" label="Map" Index="map">
-
+                    <MapComponent
+                        level="internal"
+                    />
                 </FormSection>
             </div>
         </div>
@@ -48,6 +50,7 @@ import FormSection from "@/components/forms/section_toggle.vue"
 import ApplicationsTable from "@/components/common/table_proposals"
 import ApplicationsReferredToMeTable from "@/components/common/table_proposals_referred_to_me"
 import CompetitiveProcessesTable from "@/components/common/table_competitive_processes"
+import MapComponent from "@/components/common/map_component"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
@@ -72,6 +75,7 @@ export default {
         ApplicationsTable,
         ApplicationsReferredToMeTable,
         CompetitiveProcessesTable,
+        MapComponent,
         //WaitingListTable,
         //LicencesAndPermitsTable,
         //CompliancesTable,

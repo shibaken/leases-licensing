@@ -14,7 +14,7 @@
                 <div class="form-group">
                     <label for="">Created From</label>
                     <div class="input-group date" ref="proposalDateFromPicker">
-                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
+                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedFrom">
                         <span class="input-group-addon">
                             <span class="glyphicon glyphicon-calendar"></span>
                         </span>
@@ -25,7 +25,7 @@
                 <div class="form-group">
                     <label for="">Created To</label>
                     <div class="input-group date" ref="proposalDateToPicker">
-                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
+                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedTo">
                         <span class="input-group-addon">
                             <span class="glyphicon glyphicon-calendar"></span>
                         </span>
@@ -51,9 +51,9 @@
         </div>
         -->
 
-        <div v-if="is_external" class="row">
+        <div v-if="is_internal" class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-primary pull-right" @click="new_application_button_clicked">New Application</button>
+                <button type="button" class="btn btn-primary pull-right" @click="new_competitive_process_clicked">New Competitive Process</button>
             </div>
         </div>
 
@@ -101,10 +101,9 @@ export default {
             datatable_id: 'applications-datatable-' + vm._uid,
 
             // selected values for filtering
-            filterApplicationType: sessionStorage.getItem('filterApplicationType') ? sessionStorage.getItem('filterApplicationType') : 'all',
             filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
-            filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFrom') ? sessionStorage.getItem('filterProposalLodgedFrom') : '',
-            filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedTo') ? sessionStorage.getItem('filterProposalLodgedTo') : '',
+            filterCompetitiveProcessCreatedFrom: sessionStorage.getItem('filterCompetitiveProcessCreatedFrom') ? sessionStorage.getItem('filterCompetitiveProcessCreatedFrom') : '',
+            filterCompetitiveProcessCreatedTo: sessionStorage.getItem('filterCompetitiveProcessCreatedTo') ? sessionStorage.getItem('filterCompetitiveProcessCreatedTo') : '',
 
             // filtering options
             application_types: [],
@@ -137,19 +136,15 @@ export default {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterApplicationStatus', this.filterApplicationStatus);
         },
-        filterApplicationType: function() {
+        filterCompetitiveProcessCreatedFrom: function() {
+            console.log('filterCompetitiveProcessCreatedFrom changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
+            sessionStorage.setItem('filterCompetitiveProcessCreatedFrom', this.filterCompetitiveProcessCreatedFrom);
         },
-        filterProposalLodgedFrom: function() {
-            console.log('filterProposalLodgedFrom changed')
+        filterCompetitiveProcessCreatedTo: function() {
+            console.log('filterCompetitiveProcessCreatedTo changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
-        },
-        filterProposalLodgedTo: function() {
-            console.log('filterProposalLodgedTo changed')
-            this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
+            sessionStorage.setItem('filterCompetitiveProcessCreatedTo', this.filterCompetitiveProcessCreatedTo);
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
@@ -165,8 +160,7 @@ export default {
         },
         filterApplied: function(){
             let filter_applied = true
-            if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
-                this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
+            if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterCompetitiveProcessCreatedFrom.toLowerCase() === '' && this.filterCompetitiveProcessCreatedTo.toLowerCase() === ''){
                 filter_applied = false
             }
             console.log('in filterApplied: ' + filter_applied)
@@ -186,10 +180,10 @@ export default {
         },
         datatable_headers: function(){
             if (this.is_external){
-                return ['id', 'Lodgement Number', 'Type', 'Application Type', 'Status', 'Lodged on', 'Invoice', 'Action']
+                return []
             }
             if (this.is_internal){
-                return ['id', 'Lodgement Number', 'Type', 'Applicant', 'Status', 'Lodged on', 'Invoice', 'Assigned To', 'Payment Status', 'Action']
+                return ['id', 'Lodgement Number', 'Registration of Interest', 'Status', 'Created On', 'Assigned Officer', 'Action']
             }
         },
         column_id: function(){
@@ -221,36 +215,16 @@ export default {
                 name: 'lodgement_number',
             }
         },
-        column_type: function(){
+        column_registration_of_interest: function(){
             return {
-                // 3. Type (This corresponds to the 'ApplicationType' at the backend)
                 data: "id",
                 orderable: true,
-                searchable: false,
+                searchable: true,
                 visible: true,
                 'render': function(row, type, full){
-                    return full.application_type.name_display
-                }
-            }
-        },
-        column_application_type: function(){
-            return {
-                // 4. Application Type (This corresponds to the 'ProposalType' at the backend)
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    if (full.proposal_type){
-                        return full.proposal_type.description
-                    } else {
-                        // Should not reach here
-                        return ''
-                    }
-                    */
-                    return full.id
-                }
+                    return 'roi(todo)'
+                },
+                name: 'registration_of_interest',
             }
         },
         column_status: function(){
@@ -269,7 +243,7 @@ export default {
                 }
             }
         },
-        column_lodged_on: function(){
+        column_created_on: function(){
             return {
                 // 6. Lodged
                 data: "id",
@@ -282,37 +256,6 @@ export default {
                         return moment(full.lodgement_date).format('DD/MM/YYYY')
                     }
                     return ''
-                    */
-                    return full.id
-                }
-            }
-        },
-        column_invoice: function(){
-            let vm = this
-            return {
-                // 7. Invoice
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    let links = '';
-                    if (full.invoices){
-                        for (let invoice of full.invoices){
-                            links += '<div>'
-                            links +=  `<div><a href='/payments/invoice-pdf/${invoice.reference}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
-                            if (vm.is_internal && full.can_view_payment_details){
-                                if (invoice.payment_status.toLowerCase() === 'paid'){
-                                    links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>View Payment</a></div>`;
-                                } else {
-                                    //links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>Record Payment</a></div>`;
-                                }
-                            }
-                            links += '</div>'
-                        }
-                    }
-                    return links
                     */
                     return full.id
                 }
@@ -365,24 +308,6 @@ export default {
                 }
             }
         },
-        column_applicant: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    if (full.submitter){
-                        return `${full.submitter.first_name} ${full.submitter.last_name}`
-                    }
-                    return ''
-                    */
-                    return full.id
-                },
-                //name: 'submitter__first_name, submitter__last_name',
-            }
-        },
         column_assigned_to: function(){
             return {
                 data: "id",
@@ -405,29 +330,6 @@ export default {
                 name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
             }
         },
-        column_payment_status: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    if (full.invoices){
-                        let ret_str = ''
-                        for (let item of full.invoices){
-                            //ret_str += '<div>' + item.payment_status + '</div>'
-                            ret_str += '<span>' + item.payment_status + '</span>'
-                        }
-                        return ret_str
-                    } else {
-                        return ''
-                    }
-                    */
-                    return full.id
-                }
-            }
-        },
         datatable_options: function(){
             let vm = this
 
@@ -436,14 +338,6 @@ export default {
             let buttons = []
             if(vm.is_external){
                 columns = [
-                    vm.column_id,
-                    vm.column_lodgement_number,
-                    vm.column_type,
-                    vm.column_application_type,
-                    vm.column_status,
-                    vm.column_lodged_on,
-                    vm.column_invoice,
-                    vm.column_action,
                 ]
                 search = false
                 buttons = []
@@ -452,13 +346,10 @@ export default {
                 columns = [
                     vm.column_id,
                     vm.column_lodgement_number,
-                    vm.column_type,
-                    vm.column_applicant,
+                    vm.column_registration_of_interest,
                     vm.column_status,
-                    vm.column_lodged_on,
-                    vm.column_invoice,
+                    vm.column_created_on,
                     vm.column_assigned_to,
-                    vm.column_payment_status,
                     vm.column_action,
                 ]
                 search = true
@@ -500,8 +391,8 @@ export default {
                     "data": function ( d ) {
                         d.filter_application_type = vm.filterApplicationType
                         d.filter_application_status = vm.filterApplicationStatus
-                        d.filter_lodged_from = vm.filterProposalLodgedFrom
-                        d.filter_lodged_to = vm.filterProposalLodgedTo
+                        d.filter_competitive_process_created_from = vm.filterCompetitiveProcessCreatedFrom
+                        d.filter_competitive_process_created_to = vm.filterCompetitiveProcessCreatedTo
                         d.level = vm.level
                     }
                 },
@@ -551,10 +442,11 @@ export default {
             console.log('expandCollapseFilters')
             this.filters_expanded = !this.filters_expanded
         },
-        new_application_button_clicked: function(){
-            this.$router.push({
-                name: 'apply_proposal'
-            })
+        new_competitive_process_clicked: function(){
+            //this.$router.push({
+            //    name: 'apply_proposal'
+            //})
+            console.log('New Competitive Process Clicked')
         },
         discardProposal: function(proposal_id) {
             let vm = this;
@@ -613,11 +505,11 @@ export default {
             $(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
                 if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
                     // DateFrom has been picked
-                    vm.filterProposalLodgedFrom = e.date.format('DD/MM/YYYY');
+                    vm.filterCompetitiveProcessCreatedFrom = e.date.format('DD/MM/YYYY');
                     $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
                 }
                 else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
-                    vm.filterProposalLodgedFrom = "";
+                    vm.filterCompetitiveProcessCreatedFrom = "";
                     $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(false);
                 }
             });
@@ -627,11 +519,11 @@ export default {
             $(vm.$refs.proposalDateToPicker).on('dp.change',function (e) {
                 if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
                     // DateTo has been picked
-                    vm.filterProposalLodgedTo = e.date.format('DD/MM/YYYY');
+                    vm.filterCompetitiveProcessCreatedTo = e.date.format('DD/MM/YYYY');
                     $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(e.date);
                 }
                 else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
-                    vm.filterProposalLodgedTo = "";
+                    vm.filterCompetitiveProcessCreatedTo = "";
                     $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(false);
                 }
             });
