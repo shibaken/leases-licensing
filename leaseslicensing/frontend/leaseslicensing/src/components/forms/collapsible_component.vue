@@ -5,7 +5,7 @@
                 <div class="toggle_filters_icon">
                     <i :id="chevron_elem_id" class="rotate_icon fa fa-chevron-down"></i>
                 </div>
-                <i :id="warning_icon_id" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter_warning_icon"></i>
+                <i :id="warning_icon_id" :title="warning_icon_title" class="fa fa-exclamation-circle fa-2x filter_warning_icon"></i>
             </div>
 
             <div class="collapse" :id="target_elem_id">
@@ -36,6 +36,7 @@ export default {
             button_elem_id: 'button_elem_' + uuid(),
             chevron_elem_id: 'chevron_elem_' + uuid(),
             warning_icon_id: 'warning_elem_' + uuid(),
+            warning_icon_title: '',
             display_icon: false,
             filters_expanded: false,
         }
@@ -49,8 +50,10 @@ export default {
             let warning_icon = $('#' + this.warning_icon_id)
             if (show){
                 warning_icon.css('opacity', 1)
+                this.warning_icon_title = 'filter(s) applied'
             } else {
                 warning_icon.css('opacity', 0)
+                this.warning_icon_title = ''
             }
         },
     },

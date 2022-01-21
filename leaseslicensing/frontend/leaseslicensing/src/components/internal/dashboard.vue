@@ -28,7 +28,9 @@
             </div>
             <div class="tab-pane fade" id="pills-competitive-processes" role="tabpanel" aria-labelledby="pills-competitive-processes-tab">
                 <FormSection :formCollapse="false" label="Competitive Processes" Index="competitive_processes">
-
+                    <CompetitiveProcessesTable
+                        level="internal"
+                    />
                 </FormSection>
             </div>
             <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
@@ -45,6 +47,7 @@ import datatable from '@/utils/vue/datatable.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
 import ApplicationsTable from "@/components/common/table_proposals"
 import ApplicationsReferredToMeTable from "@/components/common/table_proposals_referred_to_me"
+import CompetitiveProcessesTable from "@/components/common/table_competitive_processes"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
@@ -68,6 +71,7 @@ export default {
         FormSection,
         ApplicationsTable,
         ApplicationsReferredToMeTable,
+        CompetitiveProcessesTable,
         //WaitingListTable,
         //LicencesAndPermitsTable,
         //CompliancesTable,
