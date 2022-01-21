@@ -1,5 +1,6 @@
 <template>
     <div class="container" id="externalDash">
+        <div v-if="is_debug">src/components/internal/dashboard.vue</div>
         <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
             <li class="nav-item">
                 <a class="nav-link" id="pills-applications-tab" data-toggle="pill" href="#pills-applications" role="tab" aria-controls="pills-applications" aria-selected="true">Applications</a>
@@ -20,7 +21,9 @@
                     />
                 </FormSection>
                 <FormSection :formCollapse="false" label="Applications referred to me" Index="leases_and_licences">
-
+                    <ApplicationsReferredToMeTable
+                        level="internal"
+                    />
                 </FormSection>
             </div>
             <div class="tab-pane fade" id="pills-competitive-processes" role="tabpanel" aria-labelledby="pills-competitive-processes-tab">
@@ -41,10 +44,7 @@
 import datatable from '@/utils/vue/datatable.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
 import ApplicationsTable from "@/components/common/table_proposals"
-//import WaitingListTable from "@/components/common/table_approval_waiting_list"
-//import LicencesAndPermitsTable from "@/components/common/table_approval_licences_and_permits"
-//import CompliancesTable from "@/components/common/table_compliances"
-//import AuthorisedUserApplicationsTable from "@/components/common/table_approval_to_be_endorsed"
+import ApplicationsReferredToMeTable from "@/components/common/table_proposals_referred_to_me"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
@@ -67,6 +67,7 @@ export default {
     components:{
         FormSection,
         ApplicationsTable,
+        ApplicationsReferredToMeTable,
         //WaitingListTable,
         //LicencesAndPermitsTable,
         //CompliancesTable,
@@ -76,12 +77,15 @@ export default {
 
     },
     computed: {
+        is_debug: function(){
+            return this.$route.query.hasOwnProperty('debug') && this.$route.query.debug == 'true' ? true : false
+        },
         is_external: function() {
             return this.level == 'external'
         },
         is_internal: function() {
             return this.level == 'internal'
-        }
+        },
     },
     methods: {
         toggleComponentMapOn: function(){

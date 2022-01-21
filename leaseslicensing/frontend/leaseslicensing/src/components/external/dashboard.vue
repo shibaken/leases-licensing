@@ -1,5 +1,6 @@
 <template>
     <div class="container" id="externalDash">
+        <div v-if="is_debug">src/components/external/dashboard.vue</div>
         <FormSection 
             :formCollapse="false" 
             label="Applications" 
@@ -29,12 +30,10 @@
             subtitle="- View existing licences / permits and renew them" 
             Index="licences_and_permits"
         >
-        <!--
             <LicencesAndPermitsTable
                 level="external"
                 :approvalTypeFilter="allApprovalTypeFilter"
             />
-        -->
         </FormSection>
 
         <FormSection 
@@ -102,10 +101,15 @@ export default {
 
     },
     computed: {
+        is_debug: function(){
+            return this.$route.query.hasOwnProperty('debug') && this.$route.query.debug == 'true' ? true : false
+        },
         is_external: function() {
             return this.level == 'external'
         },
-
+        is_internal: function() {
+            return this.level == 'internal'
+        },
     },
     methods: {
     },
