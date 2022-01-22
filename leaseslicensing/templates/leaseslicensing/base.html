@@ -18,6 +18,8 @@
 <!DOCTYPE html>
 <html lang="en">
     <body>
+        {% block header_top_menu %}
+        {% endblock %}
         {% block custom_js %}
             {% if not dev %}
                 <script type="text/javascript" src="{% static 'leaseslicensing_vue/js/manifest.js' %}?v={{build_tag}}"></script>

@@ -98,7 +98,7 @@ importo.py
 uwsgi*.ini
 *.djcache
 
-npm locks
+#npm locks
 *-lock.json
 
 # npm build files
