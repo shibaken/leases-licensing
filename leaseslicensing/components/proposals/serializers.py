@@ -74,10 +74,25 @@ class ProposalTypeSerializer(serializers.ModelSerializer):
     def get_activities(self,obj):
         return obj.activities.names()
 
+
 class EmailUserSerializer(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+
     class Meta:
         model = EmailUser
-        fields = ('id','email','first_name','last_name','title','organisation')
+        fields = (
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+            'title',
+            'organisation',
+            'fullname',
+        )
+
+    def get_fullname(self, obj):
+        return '{} {}'.format(obj.first_name, obj.last_name)
+
 
 class EmailUserAppViewSerializer(serializers.ModelSerializer):
     residential_address = UserAddressSerializer()

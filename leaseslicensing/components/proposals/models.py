@@ -438,20 +438,21 @@ class Proposal(DirtyFieldsMixin, models.Model):
     # customer_status = models.CharField('Customer Status', max_length=40, choices=CUSTOMER_STATUS_CHOICES,
     #                                    default=CUSTOMER_STATUS_CHOICES[1][0])
     #applicant = models.ForeignKey(Organisation, blank=True, null=True, related_name='proposals')
+    ind_applicant = models.IntegerField(null=True, blank=True)  #EmailUserRO
     org_applicant = models.ForeignKey(
         Organisation,
         blank=True,
         null=True,
         related_name='org_applications', on_delete=models.SET_NULL)
+    proxy_applicant = models.IntegerField(null=True)  #EmailUserRO
     lodgement_number = models.CharField(max_length=9, blank=True, default='')
     lodgement_sequence = models.IntegerField(blank=True, default=0)
     #lodgement_date = models.DateField(blank=True, null=True)
     lodgement_date = models.DateTimeField(blank=True, null=True)
 
     #proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
-    proxy_applicant = models.IntegerField(null=True) #EmailUserRO
     #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
-    submitter = models.IntegerField() #EmailUserRO
+    submitter = models.IntegerField()  #EmailUserRO
 
     #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
     #assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
