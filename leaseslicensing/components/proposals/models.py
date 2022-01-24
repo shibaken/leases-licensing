@@ -495,6 +495,23 @@ class Proposal(DirtyFieldsMixin, models.Model):
     details_text = models.TextField(blank=True)
     #If the proposal is created as part of migration of approvals
     migrated=models.BooleanField(default=False)
+    ## additional form fields
+    # proposal details
+    exclusive_use = models.BooleanField()
+    long_term_use = models.BooleanField()
+    consistent_purpose = models.BooleanField(null=True)
+    consistent_plan = models.BooleanField(null=True)
+    # proposal impact
+    clearing_vegetation = models.BooleanField(null=True)
+    ground_disturbing_works = models.BooleanField(null=True)
+    heritage_site = models.BooleanField(null=True)
+    environmentally_sensitive = models.BooleanField(null=True)
+    wetlands_impact = models.BooleanField(null=True)
+    building_required = models.BooleanField(null=True)
+    significant_change = models.BooleanField(null=True)
+    aboriginal_site = models.BooleanField(null=True)
+    native_title_consultation = models.BooleanField(null=True)
+    mining_tenement = models.BooleanField(null=True)
 
     class Meta:
         app_label = 'leaseslicensing'
