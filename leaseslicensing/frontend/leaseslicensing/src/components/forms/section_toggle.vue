@@ -81,24 +81,11 @@ export default {
             }, 100);
             */
         });
+        //console.log($(vm.fn.tooltip.Constructor.VERSION));
+        //console.log($.fn)
     },
     updated:function () {
     },
 }
 </script>
 
-<style lang="css">
-    h3.panel-title{
-        font-weight: bold;
-        font-size: 25px;
-        padding:20px;
-    }
-    .flex-container {
-        display: flex;
-        flex-direction: column;
-        min-height: 325px;
-    }
-    .subtitle {
-        font-size: 0.6em;
-    }
-</style>
