@@ -3,36 +3,36 @@
         <div v-if="is_debug">src/components/internal/dashboard.vue</div>
         <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
             <li class="nav-item">
-                <a 
-                    class="nav-link" 
-                    id="pills-applications-tab" 
-                    data-toggle="pill" 
-                    href="#pills-applications" 
-                    role="tab" 
-                    aria-controls="pills-applications" 
+                <a
+                    class="nav-link"
+                    id="pills-applications-tab"
+                    data-toggle="pill"
+                    href="#pills-applications"
+                    role="tab"
+                    aria-controls="pills-applications"
                     aria-selected="true"
                 >Applications</a>
             </li>
             <li class="nav-item">
-                <a 
-                    class="nav-link" 
-                    id="pills-competitive-processes-tab" 
-                    data-toggle="pill" 
-                    href="#pills-competitive-processes" 
-                    role="tab" 
-                    aria-controls="pills-competitive-processes" 
+                <a
+                    class="nav-link"
+                    id="pills-competitive-processes-tab"
+                    data-toggle="pill"
+                    href="#pills-competitive-processes"
+                    role="tab"
+                    aria-controls="pills-competitive-processes"
                     aria-selected="false"
                 >Competitive Processes</a>
             </li>
             <li class="nav-item">
-                <a 
-                    class="nav-link" 
-                    id="pills-map-tab" 
-                    data-toggle="pill" 
-                    href="#pills-map" 
-                    role="tab" 
-                    aria-controls="pills-map" 
-                    aria-selected="false" 
+                <a
+                    class="nav-link"
+                    id="pills-map-tab"
+                    data-toggle="pill"
+                    href="#pills-map"
+                    role="tab"
+                    aria-controls="pills-map"
+                    aria-selected="false"
                     @click="toggleComponentMapOn"
                 >Map</a>
             </li>
@@ -61,7 +61,7 @@
             <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                 <FormSection :formCollapse="false" label="Map" Index="map">
                     <MapComponent
-                        ref="map_component"
+                        ref="component_map_with_filters"
                         level="internal"
                     />
                 </FormSection>
@@ -76,7 +76,7 @@ import FormSection from "@/components/forms/section_toggle.vue"
 import ApplicationsTable from "@/components/common/table_proposals"
 import ApplicationsReferredToMeTable from "@/components/common/table_proposals_referred_to_me"
 import CompetitiveProcessesTable from "@/components/common/table_competitive_processes"
-import MapComponent from "@/components/common/map_component"
+import MapComponent from "@/components/common/component_map_with_filters"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
@@ -123,7 +123,7 @@ export default {
     },
     methods: {
         toggleComponentMapOn: function(){
-            this.$refs.map_component.forceToRefreshMap()
+            this.$refs.component_map_with_filters.forceToRefreshMap()
         },
         set_tabs: function(){
             let aho = $('#pills-tab a[href="#pills-applications"]').tab('show');
