@@ -739,6 +739,10 @@ export default {
         this.addOptionalLayers()
         //this.map.setSize([690, 400]);
         this.map.setSize([window.innerWidth, window.innerHeight]);
+        /*
+        console.log(this.map.getView().getCenter());
+        this.map.getView().setCenter([115.95, -31.95]);
+        */
         //this.forceMapRefresh();
         //this.map.renderSync();
         //sessionStorage.clear();

@@ -140,7 +140,8 @@ class GetApplicationTypeDict(views.APIView):
         if not data:
             cache.set(
                     'application_type_dict', 
-                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES], 
+                    #[{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES], 
+                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'], 
                         settings.LOV_CACHE_TIMEOUT
                         )
             data = cache.get('application_type_dict')
