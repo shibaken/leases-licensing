@@ -1,13 +1,13 @@
 from confy import env
 from django.conf import settings
 #from ledger.payments.helpers import is_payment_admin
+
 from leaseslicensing.settings import (
         KMI_SERVER_URL, 
         template_group, 
         template_title,
         BUILD_TAG,
         )
-
 
 def leaseslicensing_url(request):
     #if settings.DOMAIN_DETECTED == 'apiary':

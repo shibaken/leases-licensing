@@ -56,6 +56,7 @@
                             :is_internal="is_internal"
                             :is_external="is_external"
                             :key="componentMapKey"
+
                             @featuresDisplayed="updateTableByFeatures"
                             :can_modify="can_modify"
                             :display_at_time_of_submitted="show_col_status_when_submitted"

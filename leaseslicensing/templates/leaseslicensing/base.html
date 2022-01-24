@@ -17,6 +17,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
     <body>
         {% block header_top_menu %}
         {% endblock %}
@@ -32,12 +33,13 @@
             {% else %}
                 <script type="text/javascript" src="{{ dev_url }}"></script>
             {% endif %}
-
+      
             <script language="javascript">
                 env = {
                     "kmi_server_url": "{{ KMI_SERVER_URL }}"
                 }
             </script>
+
         {% endblock %}
     </body>
 </html>
