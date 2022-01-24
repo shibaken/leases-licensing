@@ -25,9 +25,7 @@ export default {
             default: '',
         },
         Index: {}, 
-        formCollapse: {}, 
         hideHeader: {},
-        treeHeight: {},
         noChevron: {
             default: false,
         },
@@ -37,6 +35,8 @@ export default {
             title:"Section title",
             panel_chevron_class: null,
             custom_id: uuid(),
+            chev_down_class_names: 'glyphicon glyphicon-chevron-down pull-right rotate_icon',
+            chev_up_class_names:   'glyphicon glyphicon-chevron-down pull-right rotate_icon chev_rotated',
         }
     },
     computed:{
@@ -44,29 +44,16 @@ export default {
             return "section_"+this.Index
         },
         panel_collapse_class: function() {
-            if (this.formCollapse) {
-                this.panel_chevron_class = "glyphicon glyphicon-chevron-down pull-right";
-                //return "panel-body collapse";
-                return "panel-body";
-            } else {
-                if (this.treeHeight) {
-                    this.panel_chevron_class = "glyphicon glyphicon-chevron-up pull-right";
-                    //return "panel-body collapse in flex-container";
-                    return "panel-body in flex-container";
-                } else {
-                    this.panel_chevron_class = "glyphicon glyphicon-chevron-up pull-right";
-                    //return "panel-body collapse in";
-                    return "panel-body in";
-                }
-            }
+            this.panel_chevron_class = this.chev_up_class_names
+            return "panel-body collapse in";
         },
     },
     methods: {
         switchPanelChevronClass: function() {
-            if (this.panel_chevron_class = "glyphicon glyphicon-chevron-down pull-right") {
-                this.panel_chevron_class = "glyphicon glyphicon-chevron-up pull-right";
+            if (this.panel_chevron_class == this.chev_down_class_names) {
+                this.panel_chevron_class = this.chev_up_class_names
             } else {
-                this.panel_chevron_class = "glyphicon glyphicon-chevron-down pull-right";
+                this.panel_chevron_class = this.chev_down_class_names
             }
         },
     },
@@ -74,18 +61,29 @@ export default {
         let vm = this;
         $('#' + vm.custom_id).on('click',function () {
             vm.switchPanelChevronClass();
-            /*
-            var chev = $(this).children()[0];
-            window.setTimeout(function () {
-                $(chev).toggleClass("glyphicon-chevron-up glyphicon-chevron-down");
-            }, 100);
-            */
         });
-        //console.log($(vm.fn.tooltip.Constructor.VERSION));
-        //console.log($.fn)
-    },
-    updated:function () {
     },
 }
 </script>
 
+<style lang="css">
+    h3.panel-title{
+        font-weight: bold;
+        font-size: 25px;
+        padding:20px;
+    }
+    .flex-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 325px;
+    }
+    .subtitle {
+        font-size: 0.6em;
+    }
+    .rotate_icon {
+        transition: 0.5s;
+    }
+    .chev_rotated {
+        transform: rotate(180deg);
+    }
+</style>

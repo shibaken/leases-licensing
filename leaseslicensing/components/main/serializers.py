@@ -97,6 +97,7 @@ class MapLayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = MapLayer
         fields = (
+            'id',
             'display_name',
             'layer_full_name',
             'layer_group_name',
@@ -104,6 +105,7 @@ class MapLayerSerializer(serializers.ModelSerializer):
             'display_all_columns',
             'columns',
         )
+        read_only_fields=('id',)
 
     def get_layer_full_name(self, obj):
         return obj.layer_name.strip()
