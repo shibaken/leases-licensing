@@ -654,7 +654,7 @@ export default {
             let vm = this
             setTimeout(function(){
                 vm.map.updateSize();
-            }, 50)
+            }, 700)
             console.log(document.getElementById(this.elem_id))
         },
         setBaseLayer: function(selected_layer_name){
