@@ -1,59 +1,47 @@
 <template>
     <div>
-        <div class="toggle_filters_wrapper">
-            <div @click="expandCollapseFilters" class="toggle_filters_button">
-                <div class="toggle_filters_icon">
-                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
-                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Type</label>
+                    <select class="form-control" v-model="filterApprovalType">
+                        <option value="all">All</option>
+                        <option v-for="type in approval_types" :value="type.code">{{ type.description }}</option>
+                    </select>
                 </div>
-                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
             </div>
-
-            <transition>
-                <div class="row" v-show="filters_expanded">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Type</label>
-                            <select class="form-control" v-model="filterApprovalType">
-                                <option value="all">All</option>
-                                <option v-for="type in approval_types" :value="type.code">{{ type.description }}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Status</label>
-                            <select class="form-control" v-model="filterApprovalStatus">
-                                <option value="all">All</option>
-                                <option v-for="status in approval_statuses" :value="status.code">{{ status.description }}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Expiry Date From</label>
-                            <div class="input-group date" ref="approvalDateFromPicker">
-                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterApprovalExpiryDateFrom">
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="">Expiry Date To</label>
-                            <div class="input-group date" ref="approvalDateToPicker">
-                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterApprovalExpiryDateTo">
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                        </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Status</label>
+                    <select class="form-control" v-model="filterApprovalStatus">
+                        <option value="all">All</option>
+                        <option v-for="status in approval_statuses" :value="status.code">{{ status.description }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Expiry Date From</label>
+                    <div class="input-group date" ref="approvalDateFromPicker">
+                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterApprovalExpiryDateFrom">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
                     </div>
                 </div>
-            </transition>
-        </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">Expiry Date To</label>
+                    <div class="input-group date" ref="approvalDateToPicker">
+                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterApprovalExpiryDateTo">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </CollapsibleFilters>
 
         <div class="row">
             <div class="col-lg-12">
@@ -87,7 +75,7 @@ import ApprovalSurrender from '../internal/approvals/approval_surrender.vue'
 import ApprovalHistory from '../internal/approvals/approval_history.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers }from '@/utils/hooks'
-//import '@/components/common/filters.css'
+import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 
 export default {
     name: 'TableApprovals',
@@ -158,6 +146,7 @@ export default {
         ApprovalSuspension,
         ApprovalSurrender,
         ApprovalHistory,
+        CollapsibleFilters,
     },
     watch: {
         show_expired_surrendered: function(value){
@@ -180,15 +169,21 @@ export default {
             this.$refs.approvals_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterApprovalExpiryDateTo', this.filterApprovalExpiryDateTo);
         },
+        filterApplied: function(){
+            if (this.$refs.collapsible_filters){
+                // Collapsible component exists
+                this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
+            }
+        }
     },
     computed: {
         filterApplied: function(){
+            let filter_applied = true
             if(this.filterApprovalStatus.toLowerCase() === 'all' && this.filterApprovalType.toLowerCase() === 'all' && 
                 this.filterApprovalExpiryDateFrom.toLowerCase() === '' && this.filterApprovalExpiryDateTo.toLowerCase() === ''){
-                return false
-            } else {
-                return true
+                filter_applied = false
             }
+            return filter_applied
         },
         csrf_token: function() {
           return helpers.getCookie('csrftoken')
@@ -491,8 +486,8 @@ export default {
         },
     },
     methods: {
-        expandCollapseFilters: function(){
-            this.filters_expanded = !this.filters_expanded
+        collapsible_component_mounted: function(){
+            this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
         },
         sendData: function(params){
             let vm = this
@@ -529,7 +524,8 @@ export default {
         },
         addEventListeners: function(){
             let vm = this;
-
+            /*
+            // update to bs5
             // Lodged From
             $(vm.$refs.approvalDateFromPicker).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.approvalDateFromPicker).on('dp.change',function (e) {
@@ -557,6 +553,7 @@ export default {
                     $(vm.$refs.approvalDateFromPicker).data("DateTimePicker").maxDate(false);
                 }
             });
+            */
 
             //Internal Action shortcut listeners
             let table = vm.$refs.approvals_datatable.vmDataTable

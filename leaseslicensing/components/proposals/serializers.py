@@ -266,6 +266,22 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 #'fee_paid',
                 'details_text',
                 'proposalgeometry',
+                ## additional form fields
+                'exclusive_use',
+                'long_term_use',
+                'consistent_purpose',
+                'consistent_plan',
+                'clearing_vegetation',
+                'ground_disturbing_works',
+                'heritage_site',
+                'environmentally_sensitive',
+                'wetlands_impact',
+                'building_required',
+                'significant_change',
+                'aboriginal_site',
+                'native_title_consultation',
+                'mining_tenement',
+
                 )
         read_only_fields=('documents',)
 
@@ -456,6 +472,21 @@ class SaveRegistrationOfInterestSerializer(BaseProposalSerializer):
         fields = (
                 'id',
                 'details_text',
+                ## additional form fields
+                'exclusive_use',
+                'long_term_use',
+                'consistent_purpose',
+                'consistent_plan',
+                'clearing_vegetation',
+                'ground_disturbing_works',
+                'heritage_site',
+                'environmentally_sensitive',
+                'wetlands_impact',
+                'building_required',
+                'significant_change',
+                'aboriginal_site',
+                'native_title_consultation',
+                'mining_tenement',
                 )
         read_only_fields=('id',)
 

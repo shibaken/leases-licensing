@@ -236,5 +236,5 @@ APPLICATION_TYPES = [
     (APPLICATION_TYPE_LICENCE, 'Licence'),
 ]
 KMI_SERVER_URL = env('KMI_SERVER_URL', 'https://kmi.dbca.wa.gov.au')
-template_title = "This is a test Title"
+template_title = "Leases and Licensing"
 template_group = "parkswildlife"

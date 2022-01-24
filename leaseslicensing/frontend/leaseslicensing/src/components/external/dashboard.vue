@@ -1,5 +1,6 @@
 <template>
     <div class="container" id="externalDash">
+        <!--div v-if="is_debug">src/components/external/dashboard.vue</div-->
         <FormSection 
             :formCollapse="false" 
             label="Applications" 
@@ -11,30 +12,16 @@
             />
         </FormSection>
 
-        <!--FormSection 
-            :formCollapse="false" 
-            label="Waiting List" 
-            subtitle="- View and amend your waiting list allocation" 
-            Index="waiting_list"
-        >
-            <WaitingListTable
-                level="external"
-                :approvalTypeFilter="wlaApprovalTypeFilter"
-            />
-        </FormSection-->
-
         <FormSection 
             :formCollapse="false" 
             label="Licences and Permits" 
             subtitle="- View existing licences / permits and renew them" 
             Index="licences_and_permits"
         >
-        <!--
             <LicencesAndPermitsTable
                 level="external"
                 :approvalTypeFilter="allApprovalTypeFilter"
             />
-        -->
         </FormSection>
 
         <FormSection 
@@ -48,16 +35,6 @@
             />
         </FormSection>
 
-        <!--FormSection 
-            :formCollapse="false" 
-            label="Authorised User Applications for my Endorsement" 
-            subtitle="" 
-            Index="authorised_user_applications_for_my_endorsement"
-        >
-            <AuthorisedUserApplicationsTable
-                level="external"
-            />
-        </FormSection-->
     </div>
 </template>
 
@@ -102,10 +79,15 @@ export default {
 
     },
     computed: {
+        is_debug: function(){
+            return this.$route.query.hasOwnProperty('debug') && this.$route.query.debug == 'true' ? true : false
+        },
         is_external: function() {
             return this.level == 'external'
         },
-
+        is_internal: function() {
+            return this.level == 'internal'
+        },
     },
     methods: {
     },
