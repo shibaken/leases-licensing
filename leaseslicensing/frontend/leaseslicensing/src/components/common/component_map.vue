@@ -290,6 +290,7 @@ export default {
                     center: [115.95, -31.95],
                     zoom: 7,
                     projection: 'EPSG:4326',
+                    //extent: [112.95, 120, -30.95, -33],
                     /*
                     maxZoom: 12,
                     minZoom: 3,
@@ -555,6 +556,19 @@ export default {
             this.overlay.setPosition(undefined)
             this.$emit('popupClosed')
         },
+        displayAllFeatures: function() {
+            if (this.map){
+                if (this.leaselicenceQuerySource.getFeatures().length>0){
+                    let view = this.map.getView()
+
+                    let ext = this.leaselicenceQuerySource.getExtent()
+                    let centre = [(ext[0] + ext[2])/2.0, (ext[1] + ext[3])/2.0]
+                    let resolution = view.getResolutionForExtent(ext);
+                    let z = view.getZoomForResolution(resolution) - 1
+                    view.animate({zoom: z, center: centre})
+                }
+            }
+        },
 
         setMode: function(mode){
             console.log(mode)
@@ -666,7 +680,15 @@ export default {
             })
         },
         changeLayerVisibility: function(targetLayer){
-            targetLayer.setVisible(!targetLayer.getVisible())
+            if (!targetLayer.getVisible()) {
+                // add
+                targetLayer.setVisible(true);
+                sessionStorage.setItem('optionalLayer_'+targetLayer.getProperties().id, true);
+            } else {
+                // remove
+                targetLayer.setVisible(false);
+                sessionStorage.removeItem('optionalLayer_'+targetLayer.getProperties().id);
+            }
         },
         addOptionalLayers: function(){
             let vm = this
@@ -686,13 +708,15 @@ export default {
 
                     let tileLayer= new TileLayer({
                         title: layers[i].display_name.trim(),
-                        visible: false,
+                        //visible: false,
+                        visible: sessionStorage.getItem('optionalLayer_'+layers[i].id) ? true : false,
                         source: l,
                     })
 
                     // Set additional attributes to the layer
                     tileLayer.set('columns', layers[i].columns)
                     tileLayer.set('display_all_columns', layers[i].display_all_columns)
+                    tileLayer.setProperties({"id": layers[i].id});
 
                     vm.optionalLayers.push(tileLayer)
                     vm.map.addLayer(tileLayer)
@@ -700,6 +724,12 @@ export default {
             })
         },
 
+    },
+    created() {
+        this.$nextTick(() => {
+            this.loadLeaseLicenceGeometry();
+            //this.displayAllFeatures();
+        });
     },
     mounted() {
         console.log("mounted")
@@ -709,10 +739,9 @@ export default {
         this.addOptionalLayers()
         //this.map.setSize([690, 400]);
         this.map.setSize([window.innerWidth, window.innerHeight]);
-        this.$nextTick(() => {
-            this.loadLeaseLicenceGeometry();
-        });
+        //this.forceMapRefresh();
         //this.map.renderSync();
+        //sessionStorage.clear();
     },
 }
 </script>
