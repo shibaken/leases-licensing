@@ -33,7 +33,7 @@
                     role="tab"
                     aria-controls="pills-map"
                     aria-selected="false"
-                    @click="toggleComponentMapOn"
+                    @click="mapTabClicked"
                 >Map</a>
             </li>
         </ul>
@@ -122,7 +122,7 @@ export default {
         },
     },
     methods: {
-        toggleComponentMapOn: function(){
+        mapTabClicked: function(){
             this.$refs.component_map_with_filters.forceToRefreshMap()
         },
         set_tabs: function(){
