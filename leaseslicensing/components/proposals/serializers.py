@@ -287,7 +287,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         return obj.get_review_status_display()
 
     def get_customer_status(self,obj):
-        return obj.get_customer_status_display()
+        # return obj.get_customer_status_display()
+        return obj.get_processing_status_display()
 
     def get_proposal_type(self,obj):
         return obj.proposal_type.description if obj.proposal_type else ''

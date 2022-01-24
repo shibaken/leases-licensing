@@ -190,6 +190,7 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
+                    console.log(full)
                     return full.id
                 }
             }
@@ -267,13 +268,10 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
                     if (full.lodgement_date){
                         return moment(full.lodgement_date).format('DD/MM/YYYY')
                     }
                     return ''
-                    */
-                    return full.id
                 }
             }
         },

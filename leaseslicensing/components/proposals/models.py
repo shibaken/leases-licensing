@@ -378,51 +378,32 @@ class Proposal(DirtyFieldsMixin, models.Model):
         'partially_declined'
     ]
 
-    PROCESSING_STATUS_TEMP = 'temp'
     PROCESSING_STATUS_DRAFT = 'draft'
     PROCESSING_STATUS_WITH_ASSESSOR = 'with_assessor'
-    PROCESSING_STATUS_WITH_DISTRICT_ASSESSOR = 'with_district_assessor'
-    PROCESSING_STATUS_ONHOLD = 'on_hold'
-    PROCESSING_STATUS_WITH_QA_OFFICER = 'with_qa_officer'
-    PROCESSING_STATUS_WITH_REFERRAL = 'with_referral'
-    PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS = 'with_assessor_requirements'
+    PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS = 'with_assessor_conditions'
     PROCESSING_STATUS_WITH_APPROVER = 'with_approver'
-    PROCESSING_STATUS_RENEWAL = 'renewal'
-    PROCESSING_STATUS_LICENCE_AMENDMENT = 'licence_amendment'
-    PROCESSING_STATUS_AWAITING_APPLICANT_RESPONSE = 'awaiting_applicant_respone'
-    PROCESSING_STATUS_AWAITING_ASSESSOR_RESPONSE = 'awaiting_assessor_response'
-    PROCESSING_STATUS_AWAITING_RESPONSES = 'awaiting_responses'
-    PROCESSING_STATUS_READY_FOR_CONDITIONS = 'ready_for_conditions'
-    PROCESSING_STATUS_READY_TO_ISSUE = 'ready_to_issue'
+    PROCESSING_STATUS_WITH_REFERRAL = 'with_referral'
+    PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS = 'with_referral_conditions'
+    PROCESSING_STATUS_APPROVED_APPLICATION = 'approved_application'
+    PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS = 'approved_competitive_process'
+    PROCESSING_STATUS_APPROVED_EDITING_INVOICING = 'approved_editing_invoicing'
     PROCESSING_STATUS_APPROVED = 'approved'
     PROCESSING_STATUS_DECLINED = 'declined'
     PROCESSING_STATUS_DISCARDED = 'discarded'
-    PROCESSING_STATUS_PARTIALLY_APPROVED = 'partially_approved'
-    PROCESSING_STATUS_PARTIALLY_DECLINED = 'partially_declined'
-    PROCESSING_STATUS_AWAITING_PAYMENT = 'awaiting_payment'
-    PROCESSING_STATUS_CHOICES = ((PROCESSING_STATUS_TEMP, 'Temporary'),
-                                 (PROCESSING_STATUS_DRAFT, 'Draft'),
-                                 (PROCESSING_STATUS_WITH_ASSESSOR, 'With Assessor'),
-                                 (PROCESSING_STATUS_WITH_DISTRICT_ASSESSOR, 'With District Assessor'),
-                                 (PROCESSING_STATUS_ONHOLD, 'On Hold'),
-                                 (PROCESSING_STATUS_WITH_QA_OFFICER, 'With QA Officer'),
-                                 (PROCESSING_STATUS_WITH_REFERRAL, 'With Referral'),
-                                 (PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS, 'With Assessor (Requirements)'),
-                                 (PROCESSING_STATUS_WITH_APPROVER, 'With Approver'),
-                                 (PROCESSING_STATUS_RENEWAL, 'Renewal'),
-                                 (PROCESSING_STATUS_LICENCE_AMENDMENT, 'Licence Amendment'),
-                                 (PROCESSING_STATUS_AWAITING_APPLICANT_RESPONSE, 'Awaiting Applicant Response'),
-                                 (PROCESSING_STATUS_AWAITING_ASSESSOR_RESPONSE, 'Awaiting Assessor Response'),
-                                 (PROCESSING_STATUS_AWAITING_RESPONSES, 'Awaiting Responses'),
-                                 (PROCESSING_STATUS_READY_FOR_CONDITIONS, 'Ready for Conditions'),
-                                 (PROCESSING_STATUS_READY_TO_ISSUE, 'Ready to Issue'),
-                                 (PROCESSING_STATUS_APPROVED, 'Approved'),
-                                 (PROCESSING_STATUS_DECLINED, 'Declined'),
-                                 (PROCESSING_STATUS_DISCARDED, 'Discarded'),
-                                 (PROCESSING_STATUS_PARTIALLY_APPROVED, 'Partially Approved'),
-                                 (PROCESSING_STATUS_PARTIALLY_DECLINED, 'Partially Declined'),
-                                 (PROCESSING_STATUS_AWAITING_PAYMENT, 'Awaiting Payment'),
-                                )
+    PROCESSING_STATUS_CHOICES = (
+        (PROCESSING_STATUS_DRAFT, 'Draft'),
+        (PROCESSING_STATUS_WITH_ASSESSOR, 'With Assessor'),
+        (PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS, 'With Assessor (Conditions)'),
+        (PROCESSING_STATUS_WITH_APPROVER, 'With Approver'),
+        (PROCESSING_STATUS_WITH_REFERRAL, 'With Referral'),
+        (PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS, 'With Referral (Conditions)'),
+        (PROCESSING_STATUS_APPROVED_APPLICATION, 'Approved (Application)'),
+        (PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS, 'Approved (Competitive Process)'),
+        (PROCESSING_STATUS_APPROVED_EDITING_INVOICING, 'Approved (Editing Invoicing)'),
+        (PROCESSING_STATUS_APPROVED, 'Approved'),
+        (PROCESSING_STATUS_DECLINED, 'Declined'),
+        (PROCESSING_STATUS_DISCARDED, 'Discarded'),
+    )
 
     ID_CHECK_STATUS_CHOICES = (('not_checked', 'Not Checked'), ('awaiting_update', 'Awaiting Update'),
                                ('updated', 'Updated'), ('accepted', 'Accepted'))
