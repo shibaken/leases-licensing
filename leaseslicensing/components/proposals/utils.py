@@ -322,7 +322,6 @@ def save_proponent_data(instance,request,viewset,parks=None,trails=None):
         save_proponent_data_registration_of_interest(instance,request,viewset)
 
 def save_proponent_data_registration_of_interest(instance, request, viewset):
-    print(request.data)
     # proposal
     proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
     serializer = SaveRegistrationOfInterestSerializer(
