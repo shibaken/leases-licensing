@@ -56,7 +56,6 @@
                             :is_internal="is_internal"
                             :is_external="is_external"
                             :key="componentMapKey"
-                            v-if="componentMapOn"
                             @featuresDisplayed="updateTableByFeatures"
                             :can_modify="can_modify"
                             :display_at_time_of_submitted="show_col_status_when_submitted"
@@ -75,7 +74,7 @@
 
               </div>
               <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
-                <FormSection label="Details" Index="application_details">
+                <FormSection label="Proposal Details" Index="application_details" v-if="proposal">
                     <RichText
                     :proposalData="proposal.details_text"
                     ref="details_text"
@@ -84,6 +83,139 @@
                     :can_view_richtext_src=true
                     v-bind:key="proposal.id"
                     />
+                    <label for="supporting_documents">Attach any supporting documents</label>
+                    <FileField 
+                        :readonly="readonly"
+                        ref="supporting_documents"
+                        name="supporting_documents"
+                        id="supporting_documents"
+                        :isRepeatable="true"
+                        :documentActionUrl="supportingDocumentsUrl"
+                        :replace_button_by_text="true"
+                    />
+                    <div class="additional-questions-wrapper">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label class="control-label pull-left">Exclusive Use</label>
+                                <ul  class="list-inline col-sm-6">
+                                    <li class="list-inline-item">
+                                        <input class="form-check-input" v-model="proposal.exclusive_use" type="radio" name="exclusive_use_yes" id="exclusive_use_yes" :value="true" data-parsley-required :disabled="readonly"/>
+                                        <label for="exclusive_use_yes">Yes</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.exclusive_use" type="radio" name="exclusive_use_no" id="exclusive_use_no" :value="false" data-parsley-required :disabled="readonly"/> 
+                                        <label for="exclusive_use_no">No</label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="control-label pull-left">Long Term Use</label>
+                                <ul  class="list-inline col-sm-6">
+                                    <li class="list-inline-item">
+                                        <input class="form-check-input" v-model="proposal.long_term_use" type="radio" name="long_term_use_yes" id="long_term_use_yes" :value="true" data-parsley-required :disabled="readonly"/>
+                                        <label for="long_term_use_yes">Yes</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.long_term_use" type="radio" name="long_term_use_no" id="long_term_use_no" :value="false" data-parsley-required :disabled="readonly"/> 
+                                        <label for="long_term_use_no">No</label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="control-label pull-left">Consistent Purpose</label>
+                                <ul  class="list-inline col-sm-6">
+                                    <li class="list-inline-item">
+                                        <input class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_yes" id="consistent_purpose_yes" :value="true" data-parsley-required :disabled="readonly"/>
+                                        <label for="consistent_purpose_yes">Yes</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_no" id="consistent_purpose_no" :value="false" data-parsley-required :disabled="readonly"/> 
+                                        <label for="consistent_purpose_no">No</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_null" id="consistent_purpose_null" :value="null" data-parsley-required :disabled="readonly"/> 
+                                        <label for="consistent_purpose_null">Unsure</label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="control-label pull-left">Consistent Plan</label>
+                                <ul  class="list-inline col-sm-6">
+                                    <li class="list-inline-item">
+                                        <input class="form-check-input" v-model="proposal.consistent_plan" type="radio" name="consistent_plan_yes" id="consistent_plan_yes" :value="true" data-parsley-required :disabled="readonly"/>
+                                        <label for="consistent_plan_yes">Yes</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.consistent_plan" type="radio" name="consistent_plan_no" id="consistent_plan_no" :value="false" data-parsley-required :disabled="readonly"/> 
+                                        <label for="consistent_plan_no">No</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.consistent_plan" type="radio" name="consistent_plan_null" id="consistent_plan_null" :value="null" data-parsley-required :disabled="readonly"/> 
+                                        <label for="consistent_plan_null">Unsure</label>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                </FormSection>
+                <FormSection label="Proposal Impact" Index="proposal_impact" v-if="proposal">
+                    <div class="additional-questions-wrapper">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label class="control-label pull-left">Clearing Vegetation</label>
+                                <ul  class="list-inline col-sm-6">
+                                    <li class="list-inline-item">
+                                        <input class="form-check-input" v-model="proposal.clearing_vegetation" type="radio" name="clearing_vegetation_yes" id="clearing_vegetation_yes" :value="true" data-parsley-required :disabled="readonly"/>
+                                        <label for="clearing_vegetation_yes">Yes</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.clearing_vegetation" type="radio" name="clearing_vegetation_no" id="clearing_vegetation_no" :value="false" data-parsley-required :disabled="readonly"/> 
+                                        <label for="clearing_vegetation_no">No</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.clearing_vegetation" type="radio" name="clearing_vegetation_null" id="clearing_vegetation_null" :value="null" data-parsley-required :disabled="readonly"/> 
+                                        <label for="clearing_vegetation_null">Unsure</label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="control-label pull-left">Ground disturbing works</label>
+                                <ul  class="list-inline col-sm-6">
+                                    <li class="list-inline-item">
+                                        <input class="form-check-input" v-model="proposal.ground_disturbing_works" type="radio" name="ground_disturbing_works_yes" id="ground_disturbing_works_yes" :value="true" data-parsley-required :disabled="readonly"/>
+                                        <label for="ground_disturbing_works_yes">Yes</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.ground_disturbing_works" type="radio" name="ground_disturbing_works_no" id="ground_disturbing_works_no" :value="false" data-parsley-required :disabled="readonly"/> 
+                                        <label for="ground_disturbing_works_no">No</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.ground_disturbing_works" type="radio" name="ground_disturbing_works_null" id="ground_disturbing_works_null" :value="null" data-parsley-required :disabled="readonly"/> 
+                                        <label for="ground_disturbing_works_null">Unsure</label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="control-label pull-left">Heritage Site</label>
+                                <ul  class="list-inline col-sm-6">
+                                    <li class="list-inline-item">
+                                        <input class="form-check-input" v-model="proposal.heritage_site" type="radio" name="heritage_site_yes" id="heritage_site_yes" :value="true" data-parsley-required :disabled="readonly"/>
+                                        <label for="heritage_site_yes">Yes</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.heritage_site" type="radio" name="heritage_site_no" id="heritage_site_no" :value="false" data-parsley-required :disabled="readonly"/> 
+                                        <label for="heritage_site_no">No</label>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <input  class="form-check-input" v-model="proposal.heritage_site" type="radio" name="heritage_site_null" id="heritage_site_null" :value="null" data-parsley-required :disabled="readonly"/> 
+                                        <label for="heritage_site_null">Unsure</label>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
                 </FormSection>
                 <FormSection label="Deed Poll" Index="deed_poll">
                     <p>
@@ -221,6 +353,12 @@ import Confirmation from '@/components/common/confirmation.vue'
                     this.proposal.id + '/process_deed_poll_document/'
                     )
             },
+            supportingDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_deed_poll_document/'
+                    )
+            },
 
             /*
             showPaymentTab: function() {
@@ -268,8 +406,11 @@ import Confirmation from '@/components/common/confirmation.vue'
                 this.componentMapKey++;
             },
             toggleComponentMapOn: function() {
+                /*
                 this.incrementComponentMapKey()
                 this.componentMapOn = true;
+                */
+                this.$refs.component_map.forceMapRefresh();
             },
             updateTableByFeatures: function() {
             },
@@ -335,6 +476,9 @@ import Confirmation from '@/components/common/confirmation.vue'
 </script>
 
 <style lang="css" scoped>
+    .additional-questions-wrapper{
+        margin-top: 20px;
+    }
     .section{
         text-transform: capitalize;
     }
