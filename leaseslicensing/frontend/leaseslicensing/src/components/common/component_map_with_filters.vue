@@ -296,9 +296,7 @@ export default {
         this.$nextTick(() => {
             vm.addEventListeners()
             vm.initMap()
-            //vm.map.setSize([window.innerWidth, window.innerHeight])
-            console.log(window.innerWidth)
-            console.log(window.innerHeight)
+            //vm.map.setSize([window.innerWidth, window.innerHeight])  // Now sure if we need this or forceToRefreshMap() is sufficient
         });
     }
 }
