@@ -722,7 +722,7 @@ class OrganisationReader():
             proposal.lodgement_number = proposal.lodgement_number.replace('A', 'AM') # Application Migrated
             proposal.approval= approval
             proposal.processing_status='approved'
-            proposal.customer_status='approved'
+            # proposal.customer_status='approved'
             proposal.migrated=True
             approval.migrated=True
             other_details = ProposalOtherDetails.objects.create(proposal=proposal)

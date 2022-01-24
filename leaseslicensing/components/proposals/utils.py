@@ -445,7 +445,7 @@ def proposal_submit(proposal,request):
                 #proposal.save_form_tabs(request)
                 if ret1 and ret2:
                     proposal.processing_status = 'with_assessor'
-                    proposal.customer_status = 'with_assessor'
+                    # proposal.customer_status = 'with_assessor'
                     proposal.documents.all().update(can_delete=False)
                     proposal.required_documents.all().update(can_delete=False)
                     proposal.save()
