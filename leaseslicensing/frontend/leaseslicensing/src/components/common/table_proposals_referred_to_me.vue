@@ -43,6 +43,23 @@
             </div>
         </CollapsibleFilters>
 
+        <!--
+        <div class="toggle_filters_wrapper">
+            <div @click="expandCollapseFilters" class="toggle_filters_button">
+                <div class="toggle_filters_icon">
+                    <span v-if="filters_expanded" class="text-right"><i class="fa fa-chevron-up"></i></span>
+                    <span v-else class="text-right"><i class="fa fa-chevron-down"></i></span>
+                </div>
+                <i v-if="filterApplied" title="filter(s) applied" class="fa fa-exclamation-circle fa-2x filter-warning-icon"></i>
+            </div>
+
+            <transition>
+                <div class="row" v-show="filters_expanded">
+                </div>
+            </transition>
+        </div>
+        -->
+
         <div v-if="is_external" class="row">
             <div class="col-md-12">
                 <button type="button" class="btn btn-primary pull-right" @click="new_application_button_clicked">New Application</button>
@@ -101,6 +118,9 @@ export default {
             // filtering options
             application_types: [],
             application_statuses: [],
+
+            // Filters toggle
+            filters_expanded: false,
 
             dateFormat: 'DD/MM/YYYY',
             datepickerOptions:{
@@ -536,6 +556,10 @@ export default {
         //    let details = '<table class="table table-striped table-bordered table-sm table-sticker-details" id="table-sticker-details-' + sticker.id + '">' + thead + tbody + '</table>'
         //    return details
         //},
+        expandCollapseFilters: function(){
+            console.log('expandCollapseFilters')
+            this.filters_expanded = !this.filters_expanded
+        },
         new_application_button_clicked: function(){
             this.$router.push({
                 name: 'apply_proposal'
