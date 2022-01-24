@@ -333,40 +333,50 @@ class ProposalType(models.Model):
         app_label = 'leaseslicensing'
 
 
-#class Proposal(DirtyFieldsMixin, RevisionedMixin):
 class Proposal(DirtyFieldsMixin, models.Model):
     APPLICANT_TYPE_ORGANISATION = 'ORG'
     APPLICANT_TYPE_PROXY = 'PRX'
     APPLICANT_TYPE_SUBMITTER = 'SUB'
 
-    CUSTOMER_STATUS_TEMP = 'temp'
-    CUSTOMER_STATUS_WITH_ASSESSOR = 'with_assessor'
-    CUSTOMER_STATUS_AMENDMENT_REQUIRED = 'amendment_required'
-    CUSTOMER_STATUS_APPROVED = 'approved'
-    CUSTOMER_STATUS_DECLINED = 'declined'
-    CUSTOMER_STATUS_DISCARDED = 'discarded'
-    CUSTOMER_STATUS_PARTIALLY_APPROVED = 'partially_approved'
-    CUSTOMER_STATUS_PARTIALLY_DECLINED = 'partially_declined'
-    CUSTOMER_STATUS_AWAITING_PAYMENT = 'awaiting_payment'
-    CUSTOMER_STATUS_CHOICES = ((CUSTOMER_STATUS_TEMP, 'Temporary'), ('draft', 'Draft'),
-                               (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
-                               (CUSTOMER_STATUS_AMENDMENT_REQUIRED, 'Amendment Required'),
-                               (CUSTOMER_STATUS_APPROVED, 'Approved'),
-                               (CUSTOMER_STATUS_DECLINED, 'Declined'),
-                               (CUSTOMER_STATUS_DISCARDED, 'Discarded'),
-                               (CUSTOMER_STATUS_PARTIALLY_APPROVED, 'Partially Approved'),
-                               (CUSTOMER_STATUS_PARTIALLY_DECLINED, 'Partially Declined'),
-                               (CUSTOMER_STATUS_AWAITING_PAYMENT, 'Awaiting Payment'),
-                               )
+    #CUSTOMER_STATUS_TEMP = 'temp'
+    #CUSTOMER_STATUS_WITH_ASSESSOR = 'with_assessor'
+    #CUSTOMER_STATUS_AMENDMENT_REQUIRED = 'amendment_required'
+    #CUSTOMER_STATUS_APPROVED = 'approved'
+    #CUSTOMER_STATUS_DECLINED = 'declined'
+    #CUSTOMER_STATUS_DISCARDED = 'discarded'
+    #CUSTOMER_STATUS_PARTIALLY_APPROVED = 'partially_approved'
+    #CUSTOMER_STATUS_PARTIALLY_DECLINED = 'partially_declined'
+    #CUSTOMER_STATUS_AWAITING_PAYMENT = 'awaiting_payment'
+    #CUSTOMER_STATUS_CHOICES = ((CUSTOMER_STATUS_TEMP, 'Temporary'), ('draft', 'Draft'),
+    #                           (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
+    #                           (CUSTOMER_STATUS_AMENDMENT_REQUIRED, 'Amendment Required'),
+    #                           (CUSTOMER_STATUS_APPROVED, 'Approved'),
+    #                           (CUSTOMER_STATUS_DECLINED, 'Declined'),
+    #                           (CUSTOMER_STATUS_DISCARDED, 'Discarded'),
+    #                           (CUSTOMER_STATUS_PARTIALLY_APPROVED, 'Partially Approved'),
+    #                           (CUSTOMER_STATUS_PARTIALLY_DECLINED, 'Partially Declined'),
+    #                           (CUSTOMER_STATUS_AWAITING_PAYMENT, 'Awaiting Payment'),
+    #                           )
 
     # List of statuses from above that allow a customer to edit an application.
-    CUSTOMER_EDITABLE_STATE = ['temp',
-                                'draft',
-                                'amendment_required',
-                            ]
+    CUSTOMER_EDITABLE_STATE = [
+        'temp',
+        'draft',
+        'amendment_required',
+    ]
 
     # List of statuses from above that allow a customer to view an application (read-only)
-    CUSTOMER_VIEWABLE_STATE = ['with_assessor', 'under_review', 'id_required', 'returns_required', 'awaiting_payment', 'approved', 'declined','partially_approved', 'partially_declined']
+    CUSTOMER_VIEWABLE_STATE = [
+        'with_assessor',
+        'under_review',
+        'id_required',
+        'returns_required',
+        'awaiting_payment',
+        'approved',
+        'declined',
+        'partially_approved',
+        'partially_declined'
+    ]
 
     PROCESSING_STATUS_TEMP = 'temp'
     PROCESSING_STATUS_DRAFT = 'draft'
@@ -444,8 +454,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     proposed_issuance_approval = JSONField(blank=True, null=True)
     #hard_copy = models.ForeignKey(Document, blank=True, null=True, related_name='hard_copy')
 
-    customer_status = models.CharField('Customer Status', max_length=40, choices=CUSTOMER_STATUS_CHOICES,
-                                       default=CUSTOMER_STATUS_CHOICES[1][0])
+    # customer_status = models.CharField('Customer Status', max_length=40, choices=CUSTOMER_STATUS_CHOICES,
+    #                                    default=CUSTOMER_STATUS_CHOICES[1][0])
     #applicant = models.ForeignKey(Organisation, blank=True, null=True, related_name='proposals')
     org_applicant = models.ForeignKey(
         Organisation,
@@ -775,23 +785,24 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def is_temporary(self):
-        return self.customer_status == 'temp' and self.processing_status == 'temp'
+        # return self.customer_status == 'temp' and self.processing_status == 'temp'
+        return self.processing_status == 'temp'
 
     @property
     def can_user_edit(self):
         """
         :return: True if the application is in one of the editable status.
         """
-        return self.customer_status in self.CUSTOMER_EDITABLE_STATE
+        # return self.customer_status in self.CUSTOMER_EDITABLE_STATE
+        return self.processing_status in self.CUSTOMER_EDITABLE_STATE
 
     @property
     def can_user_view(self):
         """
         :return: True if the application is in one of the approved status.
         """
-        return self.customer_status in self.CUSTOMER_VIEWABLE_STATE
-
-
+        # return self.customer_status in self.CUSTOMER_VIEWABLE_STATE
+        return self.processing_status in self.CUSTOMER_VIEWABLE_STATE
 
     @property
     def is_discardable(self):
@@ -800,7 +811,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         1 - It is a draft
         2- or if the application has been pushed back to the user
         """
-        return self.customer_status == 'draft' or self.processing_status == 'awaiting_applicant_response'
+        # return self.customer_status == 'draft' or self.processing_status == 'awaiting_applicant_response'
+        return self.processing_status == 'draft' or self.processing_status == 'awaiting_applicant_response'
 
     @property
     def is_deletable(self):
@@ -808,7 +820,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         An application can be deleted only if it is a draft and it hasn't been lodged yet
         :return:
         """
-        return self.customer_status == 'draft' and not self.lodgement_number
+        # return self.customer_status == 'draft' and not self.lodgement_number
+        return self.processing_status == 'draft' and not self.lodgement_number
 
     @property
     def latest_referrals(self):
@@ -1075,7 +1088,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 #self.save_form_tabs(request)
                 if ret1 and ret2:
                     self.processing_status = 'with_assessor'
-                    self.customer_status = 'with_assessor'
+                    # self.customer_status = 'with_assessor'
                     self.documents.all().update(can_delete=False)
                     self.save()
                 else:
@@ -1379,7 +1392,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 )
                 self.proposed_decline_status = True
                 self.processing_status = 'declined'
-                self.customer_status = 'declined'
+                # self.customer_status = 'declined'
                 self.save()
                 # Log proposal action
                 self.log_user_action(ProposalUserAction.ACTION_DECLINE.format(self.id),request)
@@ -1602,7 +1615,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         not self.fee_paid:
 
                     self.processing_status = self.PROCESSING_STATUS_AWAITING_PAYMENT
-                    self.customer_status = self.CUSTOMER_STATUS_AWAITING_PAYMENT
+                    # self.customer_status = self.CUSTOMER_STATUS_AWAITING_PAYMENT
                     self.approved_by = request.user
                     invoice = self.__create_filming_fee_invoice(request)
                     #confirmation = self.__create_filming_fee_confirmation(request)
@@ -1624,7 +1637,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                 else:
                     self.processing_status = 'approved'
-                    self.customer_status = 'approved'
+                    # self.customer_status = 'approved'
                     # Log proposal action
                     self.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
                     # Log entry for organisation
@@ -1744,7 +1757,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         if r.is_deleted == True:
                             for c in cs:
                                 c.processing_status='discarded'
-                                c.customer_status = 'discarded'
+                                # c.customer_status = 'discarded'
                                 c.reminder_sent=True
                                 c.post_reminder_sent=True
                                 c.save()
@@ -1919,7 +1932,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                 }
                 proposal=Proposal.objects.get(**amend_conditions)
-                if proposal.customer_status=='with_assessor':
+                # if proposal.customer_status=='with_assessor':
+                if proposal.processing_status in ('with_assessor', ):
                     raise ValidationError('An amendment for this licence has already been lodged and is awaiting review.')
             except Proposal.DoesNotExist:
                 previous_proposal = Proposal.objects.get(id=self.id)
