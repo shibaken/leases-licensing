@@ -597,6 +597,17 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['POST'], detail=True)
     @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_supporting_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance)
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
     def process_document(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
