@@ -524,7 +524,8 @@ export default {
         },
         addEventListeners: function(){
             let vm = this;
-
+            /*
+            // update to bs5
             // Lodged From
             $(vm.$refs.approvalDateFromPicker).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.approvalDateFromPicker).on('dp.change',function (e) {
@@ -552,6 +553,7 @@ export default {
                     $(vm.$refs.approvalDateFromPicker).data("DateTimePicker").maxDate(false);
                 }
             });
+            */
 
             //Internal Action shortcut listeners
             let table = vm.$refs.approvals_datatable.vmDataTable

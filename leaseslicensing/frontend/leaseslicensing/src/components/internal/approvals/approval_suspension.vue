@@ -207,7 +207,8 @@ export default {
        eventListeners:function () {
             let vm = this;
             // Initialise Date Picker
-
+            /*
+            // update to bs5
             $(vm.$refs.from_date).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.from_date).on('dp.change', function(e){
                 if ($(vm.$refs.from_date).data('DateTimePicker').date()) {
@@ -227,6 +228,7 @@ export default {
                     vm.approval.to_date = "";
                 }
              });
+             */
        }
    },
    mounted:function () {
