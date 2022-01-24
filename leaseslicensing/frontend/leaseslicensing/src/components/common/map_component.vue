@@ -44,7 +44,7 @@
         </CollapsibleFilters>
 
         <div :id="map_container_id">
-            <div :id="elem_id" class="map" style="position: relative; width: 800px; height: 500px;"></div>
+            <div :id="elem_id" class="map"></div>
         </div>
 
     </div>
@@ -166,7 +166,16 @@ export default {
         }
     },
     methods: {
+        forceToRefreshMap() {
+            console.log('forceToRefreshMap()')
+            let vm = this
+            setTimeout(function(){
+                console.log('updateSize()')
+                vm.map.updateSize();
+            }, 700)
+        },
         initMap: function(){
+            console.log('initMap()')
             let vm = this;
             //const map = new Map({
             //    layers: [
@@ -277,15 +286,26 @@ export default {
         }
     },
     created: function(){
+        console.log('created()')
         this.fetchFilterLists()
     },
     mounted: function(){
+        console.log('mounted()')
         let vm = this;
 
         this.$nextTick(() => {
-            vm.addEventListeners();
+            vm.addEventListeners()
+            vm.initMap()
+            //vm.map.setSize([window.innerWidth, window.innerHeight])
+            console.log(window.innerWidth)
+            console.log(window.innerHeight)
         });
-        vm.initMap()
     }
 }
 </script>
+<style scoped>
+.map {
+    width: 100%;
+    height: 600px;
+}
+</style>

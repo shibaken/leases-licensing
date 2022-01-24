@@ -3,13 +3,38 @@
         <div v-if="is_debug">src/components/internal/dashboard.vue</div>
         <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link" id="pills-applications-tab" data-toggle="pill" href="#pills-applications" role="tab" aria-controls="pills-applications" aria-selected="true">Applications</a>
+                <a 
+                    class="nav-link" 
+                    id="pills-applications-tab" 
+                    data-toggle="pill" 
+                    href="#pills-applications" 
+                    role="tab" 
+                    aria-controls="pills-applications" 
+                    aria-selected="true"
+                >Applications</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="pills-competitive-processes-tab" data-toggle="pill" href="#pills-competitive-processes" role="tab" aria-controls="pills-competitive-processes" aria-selected="false">Competitive Processes</a>
+                <a 
+                    class="nav-link" 
+                    id="pills-competitive-processes-tab" 
+                    data-toggle="pill" 
+                    href="#pills-competitive-processes" 
+                    role="tab" 
+                    aria-controls="pills-competitive-processes" 
+                    aria-selected="false"
+                >Competitive Processes</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">Map</a>
+                <a 
+                    class="nav-link" 
+                    id="pills-map-tab" 
+                    data-toggle="pill" 
+                    href="#pills-map" 
+                    role="tab" 
+                    aria-controls="pills-map" 
+                    aria-selected="false" 
+                    @click="toggleComponentMapOn"
+                >Map</a>
             </li>
         </ul>
 
@@ -36,6 +61,7 @@
             <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                 <FormSection :formCollapse="false" label="Map" Index="map">
                     <MapComponent
+                        ref="map_component"
                         level="internal"
                     />
                 </FormSection>
@@ -97,7 +123,7 @@ export default {
     },
     methods: {
         toggleComponentMapOn: function(){
-
+            this.$refs.map_component.forceToRefreshMap()
         },
         set_tabs: function(){
             let aho = $('#pills-tab a[href="#pills-applications"]').tab('show');
