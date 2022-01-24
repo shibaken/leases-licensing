@@ -497,8 +497,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     migrated=models.BooleanField(default=False)
     ## additional form fields
     # proposal details
-    exclusive_use = models.BooleanField()
-    long_term_use = models.BooleanField()
+    exclusive_use = models.BooleanField(null=True)
+    long_term_use = models.BooleanField(null=True)
     consistent_purpose = models.BooleanField(null=True)
     consistent_plan = models.BooleanField(null=True)
     # proposal impact
