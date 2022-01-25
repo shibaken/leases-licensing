@@ -167,9 +167,9 @@ class GetApplicationStatusesDict(views.APIView):
 
     def get(self, request, format=None):
         data = {}
-        if not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
-            cache.set('application_internal_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.CUSTOMER_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
-            cache.set('application_external_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+        if True or not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
+            cache.set('application_internal_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+            cache.set('application_external_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
         data['external_statuses'] = cache.get('application_external_statuses_dict')
         data['internal_statuses'] = cache.get('application_internal_statuses_dict')
         return Response(data)
@@ -502,12 +502,13 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if is_internal(self.request): #user.is_authenticated():
-            qs= Proposal.objects.all().exclude(application_type=self.excluded_type)
+            qs = Proposal.objects.all().exclude(application_type=self.excluded_type)
             return qs.exclude(migrated=True)
             #return Proposal.objects.filter(region__isnull=False)
         elif is_customer(self.request):
-            user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
-            queryset =  Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(migrated=True)
+            # user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
+            user_orgs = []  # TODO array of organisations' id for this user
+            queryset = Proposal.objects.filter(Q(org_applicant_id__in=user_orgs) | Q(submitter=user.id)).exclude(migrated=True)
             #queryset =  Proposal.objects.filter(region__isnull=False).filter( Q(applicant_id__in = user_orgs) | Q(submitter = user) )
             return queryset.exclude(application_type=self.excluded_type)
         logger.warn("User is neither customer nor internal user: {} <{}>".format(user.get_full_name(), user.email))
@@ -1472,6 +1473,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
                 data = {
                     'submitter': request.user.id,
                     'org_applicant': request.data.get('org_applicant'),
+                    'ind_applicant': request.user.id if not request.data.get('org_applicant') else None,  # if no org_applicant, assume this application is for individual.
                     'application_type_id': application_type.id,
                     'proposal_type_id': proposal_type.id,
                 }

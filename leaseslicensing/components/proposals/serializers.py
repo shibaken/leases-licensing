@@ -74,10 +74,25 @@ class ProposalTypeSerializer(serializers.ModelSerializer):
     def get_activities(self,obj):
         return obj.activities.names()
 
+
 class EmailUserSerializer(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+
     class Meta:
         model = EmailUser
-        fields = ('id','email','first_name','last_name','title','organisation')
+        fields = (
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+            'title',
+            'organisation',
+            'fullname',
+        )
+
+    def get_fullname(self, obj):
+        return '{} {}'.format(obj.first_name, obj.last_name)
+
 
 class EmailUserAppViewSerializer(serializers.ModelSerializer):
     residential_address = UserAddressSerializer()
@@ -303,7 +318,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         return obj.get_review_status_display()
 
     def get_customer_status(self,obj):
-        return obj.get_customer_status_display()
+        # return obj.get_customer_status_display()
+        return obj.get_processing_status_display()
 
     def get_proposal_type(self,obj):
         return obj.proposal_type.description if obj.proposal_type else ''
@@ -324,6 +340,7 @@ class ListProposalSerializer(BaseProposalSerializer):
     #submitter = EmailUserSerializer()
     submitter = serializers.SerializerMethodField(read_only=True)
     applicant = serializers.CharField(read_only=True)
+    applicant_name = serializers.CharField(read_only=True)
     processing_status = serializers.SerializerMethodField(read_only=True)
     review_status = serializers.SerializerMethodField(read_only=True)
     customer_status = serializers.SerializerMethodField(read_only=True)
@@ -346,6 +363,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'processing_status',
                 'review_status',
                 'applicant',
+                'applicant_name',
                 'proxy_applicant',
                 'submitter',
                 'assigned_officer',
@@ -378,6 +396,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'customer_status',
                 'processing_status',
                 'applicant',
+                'applicant_name',
                 'submitter',
                 'assigned_officer',
                 'lodgement_date',
@@ -453,12 +472,14 @@ class ProposalSerializer(BaseProposalSerializer):
 class CreateProposalSerializer(BaseProposalSerializer):
     application_type_id = serializers.IntegerField(write_only=True, required=False)
     proposal_type_id = serializers.IntegerField(write_only=True, required=False)
+
     class Meta:
         model = Proposal
         fields = (
                 'id',
                 'application_type_id',
                 'submitter',
+                'ind_applicant',
                 'org_applicant',
                 'proposal_type_id',
                 )
@@ -501,7 +522,7 @@ class SaveProposalSerializer(BaseProposalSerializer):
                 'id',
                 'application_type',
                 'title',
-                'customer_status',
+                # 'customer_status',
                 'processing_status',
                 'applicant_type',
                 'applicant',

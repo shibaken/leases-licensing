@@ -54,8 +54,8 @@
                 <datatable
                     ref="application_datatable"
                     :id="datatable_id"
-                    :dtOptions="datatable_options"
-                    :dtHeaders="datatable_headers"
+                    :dtOptions="dtOptions"
+                    :dtHeaders="dtHeaders"
                 />
             </div>
         </div>
@@ -132,12 +132,10 @@ export default {
             sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
         },
         filterProposalLodgedFrom: function() {
-            console.log('filterProposalLodgedFrom changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
         },
         filterProposalLodgedTo: function() {
-            console.log('filterProposalLodgedTo changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
         },
@@ -159,7 +157,6 @@ export default {
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }
-            console.log('in filterApplied: ' + filter_applied)
             return filter_applied
         },
         debug: function(){
@@ -174,12 +171,12 @@ export default {
         is_internal: function() {
             return this.level == 'internal'
         },
-        datatable_headers: function(){
+        dtHeaders: function(){
             if (this.is_external){
-                return ['id', 'Lodgement Number', 'Type', 'Application Type', 'Status', 'Lodged on', 'Invoice', 'Action']
+                return ['id', 'Number', 'Type', 'Submitter', 'Applicant', 'Status', 'Lodged On', 'Action',]
             }
             if (this.is_internal){
-                return ['id', 'Lodgement Number', 'Type', 'Applicant', 'Status', 'Lodged on', 'Invoice', 'Assigned To', 'Payment Status', 'Action']
+                return ['id', 'Number', 'Type', 'Submitter', 'Applicant', 'Status', 'Lodged On', 'Assigned Officer', 'Action']
             }
         },
         column_id: function(){
@@ -190,6 +187,7 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
+                    console.log(full)
                     return full.id
                 }
             }
@@ -223,26 +221,55 @@ export default {
                 }
             }
         },
-        column_application_type: function(){
+        column_submitter: function(){
             return {
-                // 4. Application Type (This corresponds to the 'ProposalType' at the backend)
+                data: "id",
+                orderable: true,
+                searchable: false,
+                visible: true,
+                'render': function(row, type, full){
+                    return full.submitter.fullname
+                }
+            }
+        },
+        column_applicant: function(){
+            return {
                 data: "id",
                 orderable: true,
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
-                    if (full.proposal_type){
-                        return full.proposal_type.description
-                    } else {
-                        // Should not reach here
-                        return ''
+                    if (full.submitter){
+                        return `${full.submitter.first_name} ${full.submitter.last_name}`
                     }
+                    return ''
                     */
-                    return full.id
-                }
+                    return full.applicant_name
+                },
+                //name: 'submitter__first_name, submitter__last_name',
             }
         },
+        //column_application_type: function(){
+        //    return {
+        //        // 4. Application Type (This corresponds to the 'ProposalType' at the backend)
+        //        data: "id",
+        //        orderable: true,
+        //        searchable: false,
+        //        visible: true,
+        //        'render': function(row, type, full){
+        //            /*
+        //            if (full.proposal_type){
+        //                return full.proposal_type.description
+        //            } else {
+        //                // Should not reach here
+        //                return ''
+        //            }
+        //            */
+        //            return full.id
+        //        }
+        //    }
+        //},
         column_status: function(){
             let vm = this
             return {
@@ -267,45 +294,64 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
                     if (full.lodgement_date){
                         return moment(full.lodgement_date).format('DD/MM/YYYY')
                     }
                     return ''
-                    */
-                    return full.id
                 }
             }
         },
-        column_invoice: function(){
-            let vm = this
+        //column_invoice: function(){
+        //    let vm = this
+        //    return {
+        //        // 7. Invoice
+        //        data: "id",
+        //        orderable: true,
+        //        searchable: false,
+        //        visible: true,
+        //        'render': function(row, type, full){
+        //            /*
+        //            let links = '';
+        //            if (full.invoices){
+        //                for (let invoice of full.invoices){
+        //                    links += '<div>'
+        //                    links +=  `<div><a href='/payments/invoice-pdf/${invoice.reference}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
+        //                    if (vm.is_internal && full.can_view_payment_details){
+        //                        if (invoice.payment_status.toLowerCase() === 'paid'){
+        //                            links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>View Payment</a></div>`;
+        //                        } else {
+        //                            //links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>Record Payment</a></div>`;
+        //                        }
+        //                    }
+        //                    links += '</div>'
+        //                }
+        //            }
+        //            return links
+        //            */
+        //            return full.id
+        //        }
+        //    }
+        //},
+        column_assigned_officer: function(){
             return {
-                // 7. Invoice
                 data: "id",
                 orderable: true,
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
-                    let links = '';
-                    if (full.invoices){
-                        for (let invoice of full.invoices){
-                            links += '<div>'
-                            links +=  `<div><a href='/payments/invoice-pdf/${invoice.reference}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
-                            if (vm.is_internal && full.can_view_payment_details){
-                                if (invoice.payment_status.toLowerCase() === 'paid'){
-                                    links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>View Payment</a></div>`;
-                                } else {
-                                    //links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>Record Payment</a></div>`;
-                                }
-                            }
-                            links += '</div>'
-                        }
+                    let ret_str = ''
+                    if (full.assigned_officer){
+                        ret_str += full.assigned_officer
                     }
-                    return links
+                    if (full.assigned_approver){
+                        ret_str += full.assigned_approver
+                    }
+                    return ret_str
                     */
                     return full.id
-                }
+                },
+                name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
             }
         },
         column_action: function(){
@@ -355,70 +401,7 @@ export default {
                 }
             }
         },
-        column_applicant: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    if (full.submitter){
-                        return `${full.submitter.first_name} ${full.submitter.last_name}`
-                    }
-                    return ''
-                    */
-                    return full.id
-                },
-                //name: 'submitter__first_name, submitter__last_name',
-            }
-        },
-        column_assigned_to: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    let ret_str = ''
-                    if (full.assigned_officer){
-                        ret_str += full.assigned_officer
-                    }
-                    if (full.assigned_approver){
-                        ret_str += full.assigned_approver
-                    }
-                    return ret_str
-                    */
-                    return full.id
-                },
-                name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
-            }
-        },
-        column_payment_status: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    if (full.invoices){
-                        let ret_str = ''
-                        for (let item of full.invoices){
-                            //ret_str += '<div>' + item.payment_status + '</div>'
-                            ret_str += '<span>' + item.payment_status + '</span>'
-                        }
-                        return ret_str
-                    } else {
-                        return ''
-                    }
-                    */
-                    return full.id
-                }
-            }
-        },
-        datatable_options: function(){
+        dtOptions: function(){
             let vm = this
 
             let columns = []
@@ -429,10 +412,11 @@ export default {
                     vm.column_id,
                     vm.column_lodgement_number,
                     vm.column_type,
-                    vm.column_application_type,
+                    vm.column_submitter,
+                    vm.column_applicant,
                     vm.column_status,
                     vm.column_lodged_on,
-                    vm.column_invoice,
+                    //vm.column_assigned_officer,
                     vm.column_action,
                 ]
                 search = false
@@ -443,12 +427,11 @@ export default {
                     vm.column_id,
                     vm.column_lodgement_number,
                     vm.column_type,
+                    vm.column_submitter,
                     vm.column_applicant,
                     vm.column_status,
                     vm.column_lodged_on,
-                    vm.column_invoice,
-                    vm.column_assigned_to,
-                    vm.column_payment_status,
+                    vm.column_assigned_officer,
                     vm.column_action,
                 ]
                 search = true
