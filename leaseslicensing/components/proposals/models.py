@@ -36,6 +36,7 @@ from leaseslicensing.components.proposals.email import (
     send_proposal_awaiting_payment_approval_email_notification,
     send_amendment_email_notification,
 )
+from leaseslicensing.ledger_api_utils import retrieve_email_user
 from leaseslicensing.ordered_model import OrderedModel
 from leaseslicensing.components.proposals.email import send_submit_email_notification, send_external_submit_email_notification, send_approver_decline_email_notification, send_approver_approve_email_notification, send_referral_complete_email_notification, send_proposal_approver_sendback_email_notification, send_qaofficer_email_notification, send_qaofficer_complete_email_notification, send_district_proposal_submit_email_notification,send_district_proposal_approver_sendback_email_notification, send_district_approver_decline_email_notification, send_district_approver_approve_email_notification, send_district_proposal_decline_email_notification, send_district_proposal_approval_email_notification
 import copy
@@ -335,6 +336,7 @@ class ProposalType(models.Model):
 
 class Proposal(DirtyFieldsMixin, models.Model):
     APPLICANT_TYPE_ORGANISATION = 'ORG'
+    APPLICANT_TYPE_INDIVIDUAL = 'IND'
     APPLICANT_TYPE_PROXY = 'PRX'
     APPLICANT_TYPE_SUBMITTER = 'SUB'
 
@@ -444,7 +446,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         blank=True,
         null=True,
         related_name='org_applications', on_delete=models.SET_NULL)
-    proxy_applicant = models.IntegerField(null=True)  #EmailUserRO
+    proxy_applicant = models.IntegerField(null=True, blank=True)  #EmailUserRO
     lodgement_number = models.CharField(max_length=9, blank=True, default='')
     lodgement_sequence = models.IntegerField(blank=True, default=0)
     #lodgement_date = models.DateField(blank=True, null=True)
@@ -635,66 +637,57 @@ class Proposal(DirtyFieldsMixin, models.Model):
     @property
     def applicant(self):
         if self.org_applicant:
-            return self.org_applicant.organisation.name
+            return self.org_applicant.organisation
+        elif self.ind_applicant:
+            email_user = retrieve_email_user(self.ind_applicant)
         elif self.proxy_applicant:
-            return "{} {}".format(
-                self.proxy_applicant.first_name,
-                self.proxy_applicant.last_name)
+            email_user = retrieve_email_user(self.proxy_applicant)
         else:
-            return "{} {}".format(
-                self.submitter.first_name,
-                self.submitter.last_name)
+            logger.warning('Applicant for the proposal {} not found'.format(self.lodgement_number))
+            email_user = retrieve_email_user(self.submitter)
+
+        return email_user
 
     @property
     def applicant_email(self):
         if self.org_applicant and hasattr(self.org_applicant.organisation, 'email') and self.org_applicant.organisation.email:
             return self.org_applicant.organisation.email
+        elif self.ind_applicant:
+            email_user = retrieve_email_user(self.ind_applicant)
         elif self.proxy_applicant:
-            return self.proxy_applicant.email
+            email_user = retrieve_email_user(self.proxy_applicant)
         else:
-            return self.submitter.email
+            email_user = retrieve_email_user(self.submitter)
+
+        return email_user.email
 
     @property
     def applicant_details(self):
-        if self.org_applicant:
-            return '{} \n{}'.format(
-                self.org_applicant.organisation.name,
-                self.org_applicant.address)
-        elif self.proxy_applicant:
-            return "{} {}\n{}".format(
-                self.proxy_applicant.first_name,
-                self.proxy_applicant.last_name,
-                self.proxy_applicant.addresses.all().first())
+        if isinstance(self.applicant, Organisation):
+            return '{} \n{}'.format(self.org_applicant.organisation.name, self.org_applicant.address)
         else:
             return "{} {}\n{}".format(
-                self.submitter.first_name,
-                self.submitter.last_name,
-                self.submitter.addresses.all().first())
+                self.applicant.first_name,
+                self.applicant.last_name,
+                self.applicant.addresses.all().first())
 
     @property
     def applicant_address(self):
-        if self.org_applicant:
+        if isinstance(self.applicant, Organisation):
             return self.org_applicant.address
-        elif self.proxy_applicant:
-            #return self.proxy_applicant.addresses.all().first()
-            return self.proxy_applicant.residential_address
         else:
-            #return self.submitter.addresses.all().first()
-            return self.submitter.residential_address
+            return self.applicant.residential_address
 
     @property
     def applicant_id(self):
-        if self.org_applicant:
-            return self.org_applicant.id
-        elif self.proxy_applicant:
-            return self.proxy_applicant.id
-        else:
-            return self.submitter.id
+        return self.applicant.id
 
     @property
     def applicant_type(self):
         if self.org_applicant:
             return self.APPLICANT_TYPE_ORGANISATION
+        elif self.ind_applicant:
+            return self.APPLICANT_TYPE_INDIVIDUAL
         elif self.proxy_applicant:
             return self.APPLICANT_TYPE_PROXY
         else:
@@ -704,6 +697,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def applicant_field(self):
         if self.org_applicant:
             return 'org_applicant'
+        elif self.ind_applicant:
+            return 'ind_applicant'
         elif self.proxy_applicant:
             return 'proxy_applicant'
         else:

@@ -453,12 +453,14 @@ class ProposalSerializer(BaseProposalSerializer):
 class CreateProposalSerializer(BaseProposalSerializer):
     application_type_id = serializers.IntegerField(write_only=True, required=False)
     proposal_type_id = serializers.IntegerField(write_only=True, required=False)
+
     class Meta:
         model = Proposal
         fields = (
                 'id',
                 'application_type_id',
                 'submitter',
+                'ind_applicant',
                 'org_applicant',
                 'proposal_type_id',
                 )
@@ -486,7 +488,7 @@ class SaveProposalSerializer(BaseProposalSerializer):
                 'id',
                 'application_type',
                 'title',
-                'customer_status',
+                # 'customer_status',
                 'processing_status',
                 'applicant_type',
                 'applicant',
