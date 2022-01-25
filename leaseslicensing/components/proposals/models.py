@@ -662,6 +662,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return email_user.email
 
     @property
+    def applicant_name(self):
+        if isinstance(self.applicant, Organisation):
+            return '{}'.format(self.org_applicant.organisation.name)
+        else:
+            names = ' '.join([self.applicant.first_name, self.applicant.last_name, ])
+            return names if names else ''
+
+    @property
     def applicant_details(self):
         if isinstance(self.applicant, Organisation):
             return '{} \n{}'.format(self.org_applicant.organisation.name, self.org_applicant.address)
@@ -851,12 +859,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
             group = QAOfficerGroup.objects.get(default=True)
         else:
             group = self.__assessor_group()
-        return group.members.all() if group else []
+        # return group.members.all() if group else []
+        return group.members if group else []
 
     @property
     def compliance_assessors(self):
         group = self.__assessor_group()
-        return group.members.all() if group else []
+        return group.members if group else []
 
     @property
     def can_officer_process(self):

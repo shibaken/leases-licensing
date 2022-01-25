@@ -132,12 +132,10 @@ export default {
             sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
         },
         filterProposalLodgedFrom: function() {
-            console.log('filterProposalLodgedFrom changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
         },
         filterProposalLodgedTo: function() {
-            console.log('filterProposalLodgedTo changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
         },
@@ -159,7 +157,6 @@ export default {
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }
-            console.log('in filterApplied: ' + filter_applied)
             return filter_applied
         },
         debug: function(){
@@ -231,7 +228,6 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    console.log(full.submitter)
                     return full.submitter.fullname
                 }
             }
@@ -249,7 +245,7 @@ export default {
                     }
                     return ''
                     */
-                    return full.id
+                    return full.applicant_name
                 },
                 //name: 'submitter__first_name, submitter__last_name',
             }

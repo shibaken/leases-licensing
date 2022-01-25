@@ -324,6 +324,7 @@ class ListProposalSerializer(BaseProposalSerializer):
     #submitter = EmailUserSerializer()
     submitter = serializers.SerializerMethodField(read_only=True)
     applicant = serializers.CharField(read_only=True)
+    applicant_name = serializers.CharField(read_only=True)
     processing_status = serializers.SerializerMethodField(read_only=True)
     review_status = serializers.SerializerMethodField(read_only=True)
     customer_status = serializers.SerializerMethodField(read_only=True)
@@ -346,6 +347,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'processing_status',
                 'review_status',
                 'applicant',
+                'applicant_name',
                 'proxy_applicant',
                 'submitter',
                 'assigned_officer',
@@ -378,6 +380,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'customer_status',
                 'processing_status',
                 'applicant',
+                'applicant_name',
                 'submitter',
                 'assigned_officer',
                 'lodgement_date',
