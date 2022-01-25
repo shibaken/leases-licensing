@@ -140,7 +140,8 @@ class GetApplicationTypeDict(views.APIView):
         if not data:
             cache.set(
                     'application_type_dict', 
-                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES], 
+                    #[{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES], 
+                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'], 
                         settings.LOV_CACHE_TIMEOUT
                         )
             data = cache.get('application_type_dict')
@@ -590,6 +591,17 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def process_deed_poll_document(self, request, *args, **kwargs):
         instance = self.get_object()
         returned_data = process_generic_document(request, instance, document_type='deed_poll_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_supporting_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance)
         if returned_data:
             return Response(returned_data)
         else:

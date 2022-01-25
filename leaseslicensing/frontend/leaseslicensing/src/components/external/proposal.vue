@@ -338,7 +338,23 @@ export default {
         //vm.save_applicant_data();
 
         let payload = {
-            proposal: {},
+            proposal: {
+                'exclusive_use': this.proposal.exclusive_use,
+                'long_term_use': this.proposal.long_term_use,
+                'consistent_purpose': this.proposal.consistent_purpose,
+                'consistent_plan': this.proposal.consistent_plan,
+                'clearing_vegetation': this.proposal.clearing_vegetation,
+                'ground_disturbing_works': this.proposal.ground_disturbing_works,
+                'heritage_site': this.proposal.heritage_site,
+                'environmentally_sensitive': this.proposal.environmentally_sensitive,
+                'wetlands_impact': this.proposal.wetlands_impact,
+                'building_required': this.proposal.building_required,
+                'significant_change': this.proposal.significant_change,
+                'aboriginal_site': this.proposal.aboriginal_site,
+                'native_title_consultation': this.proposal.native_title_consultation,
+                'mining_tenement': this.proposal.mining_tenement,
+
+            },
         }
         payload.proposal.details_text = this.$refs.application_form.$refs.details_text.detailsText;
         //payload.lease_licensing_geometry = this.$refs.application_form.$refs.component_map.leaselicenceQuerySource.getFeatures();
