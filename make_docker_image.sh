@@ -13,6 +13,11 @@ if [[ $# -gt 1 ]] && ! [[ $2 =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
+int ()
+{
+    printf '%d' ${1:-} 2> /dev/null || :
+}
+
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 REPO=$(basename -s .git `git config --get remote.origin.url` | sed 's/-//g')
 DBCA_BRANCH="dbca_"$1
@@ -27,7 +32,8 @@ else
         declare -A inc_array
         for DAILY in $DAILY_IMAGE_INCREMENTS;
         do
-            INC=$(echo $DAILY | cut -c $((${#REPO}+21))-)
+            #INC=$(echo $DAILY | cut -c $((${#REPO}+21))-)
+            INC=$(echo $DAILY | cut -c $((${#REPO}+${#1}+22))-)
             inc_array[$I]=$INC
             I=$(($I+1))
         done
