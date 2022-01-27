@@ -1,6 +1,6 @@
 <template lang="html">
-   <div id="DataTable" >
-      <table class="hover table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" :id="id">
+   <div id="DataTable">
+      <table class="hover table border table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" :id="id">
             <thead>
                 <tr>
                     <th :data-class="(i == 0 )? 'expand':null" v-for="(header,i) in dtHeaders"> {{ header}}</th>
@@ -13,7 +13,9 @@
 
 </template>
 <script>
-import ResponsiveDatatablesHelper from "../responsive_datatable_helper.js"
+    
+    //import {$, DataTableBs} from '../../hooks'
+    import ResponsiveDatatablesHelper from "../responsive_datatable_helper.js"
 module.exports = {
    name : 'DataTable',
    props:{
@@ -62,31 +64,24 @@ module.exports = {
                  responsiveHelper.respond();
              },
            }
-           //var options = Object.assign(vm.dtOptions,responsiveOptions)
-           var options = Object.assign(vm.dtOptions)
+           var options = Object.assign(vm.dtOptions,responsiveOptions)
            vm.vmDataTable = $(vm.table).DataTable(options);
-            $(vm.table).on( 'page.dt', function () {
-                vm.vmDataTable.columns.adjust().responsive.recalc();
-            } );
-           /*$(vm.table).resize(function (e) {
+           $(vm.table).resize(function (e) {
                vm.vmDataTable.draw(true);
-           });*/
+           });
        }
    },
    mounted:function () {
       let vm = this;
       vm.table =$('#'+vm.id);
       $.fn.dataTable.ext.errMode = 'throw';
+      // $.fn.dataTable.ext.classes.sPageButton = 'page-link page-item';
       vm.initEvents();
    }
 };
 </script>
 
 <style lang="css">
-    table { table-layout: auto; }
-    td { 
-        word-wrap: break-word;
-    }
     td > a{
         border: none;
         border-radius: 2px;
@@ -105,6 +100,9 @@ module.exports = {
         text-decoration: none;
         background: transparent;
         color: #03a9f4;
+    }
+    td{
+        word-wrap: break-word;
     }
     table.table-bordered.dataTable tbody th, table.table-bordered.dataTable tbody td {
         border-bottom-width: 0;
@@ -150,7 +148,6 @@ module.exports = {
     }
     div.dataTables_filter input {
         margin-left: 10px;
-        margin-right: 10px;
         display: inline-block;
     }
     div.dataTables_length select {
@@ -171,7 +168,4 @@ module.exports = {
              float:right;
         }
     }
-    .dataTables_wrapper .dt-buttons{
-    float: right;
-  }
 </style>

@@ -87,7 +87,7 @@ urlpatterns = [
     #path('login/', login, name='login'),
     #url(r'^logout/$', LogoutView.as_view(), {'next_page': '/'}, name='logout'),
     url(r'', include(api_patterns)),
-    url(r'^$', views.LeasesLicensingRoutingView.as_view(), name='ds_home'),
+    url(r'^$', views.LeasesLicensingRoutingView.as_view(), name='home'),
     url(r'^contact/', views.LeasesLicensingContactView.as_view(), name='ds_contact'),
     url(r'^further_info/', views.LeasesLicensingFurtherInformationView.as_view(), name='ds_further_info'),
     url(r'^internal/', views.InternalView.as_view(), name='internal'),

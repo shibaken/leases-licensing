@@ -183,7 +183,8 @@ export default {
        eventListeners:function () {
             let vm = this;
             // Initialise Date Picker
-
+            /*
+            // update to bs5
             $(vm.$refs.cancellation_date).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.cancellation_date).on('dp.change', function(e){
                 if ($(vm.$refs.cancellation_date).data('DateTimePicker').date()) {
@@ -193,6 +194,7 @@ export default {
                     vm.approval.cancellation_date = "";
                 }
              });
+             */
        }
    },
    mounted:function () {

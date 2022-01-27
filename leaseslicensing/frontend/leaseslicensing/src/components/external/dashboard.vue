@@ -1,6 +1,6 @@
 <template>
     <div class="container" id="externalDash">
-        <div v-if="is_debug">src/components/external/dashboard.vue</div>
+        <!--div v-if="is_debug">src/components/external/dashboard.vue</div-->
         <FormSection 
             :formCollapse="false" 
             label="Applications" 
@@ -11,18 +11,6 @@
                 level="external"
             />
         </FormSection>
-
-        <!--FormSection 
-            :formCollapse="false" 
-            label="Waiting List" 
-            subtitle="- View and amend your waiting list allocation" 
-            Index="waiting_list"
-        >
-            <WaitingListTable
-                level="external"
-                :approvalTypeFilter="wlaApprovalTypeFilter"
-            />
-        </FormSection-->
 
         <FormSection 
             :formCollapse="false" 
@@ -47,16 +35,6 @@
             />
         </FormSection>
 
-        <!--FormSection 
-            :formCollapse="false" 
-            label="Authorised User Applications for my Endorsement" 
-            subtitle="" 
-            Index="authorised_user_applications_for_my_endorsement"
-        >
-            <AuthorisedUserApplicationsTable
-                level="external"
-            />
-        </FormSection-->
     </div>
 </template>
 

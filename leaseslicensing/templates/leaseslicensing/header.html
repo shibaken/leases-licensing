@@ -1,4 +1,4 @@
-{% load bootstrap3 %}
+{% extends "webtemplate_dbca/base_b5.html" %}
 {% load utils %}
 
 {% system_name as system_name %}
@@ -19,7 +19,8 @@
                         <div class="col-sm-7">
                             <!--div class="pull-right"-->
                             <div>
-                                {{ system_name }}<a href="/">
+                                stuff
+                                {% block template_title %}{{ template_title }}{% endblock %}<a href="/">
                             </div>
                         </div>
                       </h1>
