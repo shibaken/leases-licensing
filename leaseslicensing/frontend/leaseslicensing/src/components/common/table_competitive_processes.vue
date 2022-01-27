@@ -77,7 +77,7 @@ import { api_endpoints, helpers } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 
 export default {
-    name: 'TableApplications',
+    name: 'TableCompetitiveProcesses',
     props: {
         level:{
             type: String,

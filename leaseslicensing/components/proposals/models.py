@@ -36,6 +36,7 @@ from leaseslicensing.components.proposals.email import (
     send_proposal_awaiting_payment_approval_email_notification,
     send_amendment_email_notification,
 )
+from leaseslicensing.ledger_api_utils import retrieve_email_user
 from leaseslicensing.ordered_model import OrderedModel
 from leaseslicensing.components.proposals.email import send_submit_email_notification, send_external_submit_email_notification, send_approver_decline_email_notification, send_approver_approve_email_notification, send_referral_complete_email_notification, send_proposal_approver_sendback_email_notification, send_qaofficer_email_notification, send_qaofficer_complete_email_notification, send_district_proposal_submit_email_notification,send_district_proposal_approver_sendback_email_notification, send_district_approver_decline_email_notification, send_district_approver_approve_email_notification, send_district_proposal_decline_email_notification, send_district_proposal_approval_email_notification
 import copy
@@ -333,86 +334,78 @@ class ProposalType(models.Model):
         app_label = 'leaseslicensing'
 
 
-#class Proposal(DirtyFieldsMixin, RevisionedMixin):
 class Proposal(DirtyFieldsMixin, models.Model):
     APPLICANT_TYPE_ORGANISATION = 'ORG'
+    APPLICANT_TYPE_INDIVIDUAL = 'IND'
     APPLICANT_TYPE_PROXY = 'PRX'
     APPLICANT_TYPE_SUBMITTER = 'SUB'
 
-    CUSTOMER_STATUS_TEMP = 'temp'
-    CUSTOMER_STATUS_WITH_ASSESSOR = 'with_assessor'
-    CUSTOMER_STATUS_AMENDMENT_REQUIRED = 'amendment_required'
-    CUSTOMER_STATUS_APPROVED = 'approved'
-    CUSTOMER_STATUS_DECLINED = 'declined'
-    CUSTOMER_STATUS_DISCARDED = 'discarded'
-    CUSTOMER_STATUS_PARTIALLY_APPROVED = 'partially_approved'
-    CUSTOMER_STATUS_PARTIALLY_DECLINED = 'partially_declined'
-    CUSTOMER_STATUS_AWAITING_PAYMENT = 'awaiting_payment'
-    CUSTOMER_STATUS_CHOICES = ((CUSTOMER_STATUS_TEMP, 'Temporary'), ('draft', 'Draft'),
-                               (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
-                               (CUSTOMER_STATUS_AMENDMENT_REQUIRED, 'Amendment Required'),
-                               (CUSTOMER_STATUS_APPROVED, 'Approved'),
-                               (CUSTOMER_STATUS_DECLINED, 'Declined'),
-                               (CUSTOMER_STATUS_DISCARDED, 'Discarded'),
-                               (CUSTOMER_STATUS_PARTIALLY_APPROVED, 'Partially Approved'),
-                               (CUSTOMER_STATUS_PARTIALLY_DECLINED, 'Partially Declined'),
-                               (CUSTOMER_STATUS_AWAITING_PAYMENT, 'Awaiting Payment'),
-                               )
+    #CUSTOMER_STATUS_TEMP = 'temp'
+    #CUSTOMER_STATUS_WITH_ASSESSOR = 'with_assessor'
+    #CUSTOMER_STATUS_AMENDMENT_REQUIRED = 'amendment_required'
+    #CUSTOMER_STATUS_APPROVED = 'approved'
+    #CUSTOMER_STATUS_DECLINED = 'declined'
+    #CUSTOMER_STATUS_DISCARDED = 'discarded'
+    #CUSTOMER_STATUS_PARTIALLY_APPROVED = 'partially_approved'
+    #CUSTOMER_STATUS_PARTIALLY_DECLINED = 'partially_declined'
+    #CUSTOMER_STATUS_AWAITING_PAYMENT = 'awaiting_payment'
+    #CUSTOMER_STATUS_CHOICES = ((CUSTOMER_STATUS_TEMP, 'Temporary'), ('draft', 'Draft'),
+    #                           (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
+    #                           (CUSTOMER_STATUS_AMENDMENT_REQUIRED, 'Amendment Required'),
+    #                           (CUSTOMER_STATUS_APPROVED, 'Approved'),
+    #                           (CUSTOMER_STATUS_DECLINED, 'Declined'),
+    #                           (CUSTOMER_STATUS_DISCARDED, 'Discarded'),
+    #                           (CUSTOMER_STATUS_PARTIALLY_APPROVED, 'Partially Approved'),
+    #                           (CUSTOMER_STATUS_PARTIALLY_DECLINED, 'Partially Declined'),
+    #                           (CUSTOMER_STATUS_AWAITING_PAYMENT, 'Awaiting Payment'),
+    #                           )
 
     # List of statuses from above that allow a customer to edit an application.
-    CUSTOMER_EDITABLE_STATE = ['temp',
-                                'draft',
-                                'amendment_required',
-                            ]
+    CUSTOMER_EDITABLE_STATE = [
+        'temp',
+        'draft',
+        'amendment_required',
+    ]
 
     # List of statuses from above that allow a customer to view an application (read-only)
-    CUSTOMER_VIEWABLE_STATE = ['with_assessor', 'under_review', 'id_required', 'returns_required', 'awaiting_payment', 'approved', 'declined','partially_approved', 'partially_declined']
+    CUSTOMER_VIEWABLE_STATE = [
+        'with_assessor',
+        'under_review',
+        'id_required',
+        'returns_required',
+        'awaiting_payment',
+        'approved',
+        'declined',
+        'partially_approved',
+        'partially_declined'
+    ]
 
-    PROCESSING_STATUS_TEMP = 'temp'
     PROCESSING_STATUS_DRAFT = 'draft'
     PROCESSING_STATUS_WITH_ASSESSOR = 'with_assessor'
-    PROCESSING_STATUS_WITH_DISTRICT_ASSESSOR = 'with_district_assessor'
-    PROCESSING_STATUS_ONHOLD = 'on_hold'
-    PROCESSING_STATUS_WITH_QA_OFFICER = 'with_qa_officer'
-    PROCESSING_STATUS_WITH_REFERRAL = 'with_referral'
-    PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS = 'with_assessor_requirements'
+    PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS = 'with_assessor_conditions'
     PROCESSING_STATUS_WITH_APPROVER = 'with_approver'
-    PROCESSING_STATUS_RENEWAL = 'renewal'
-    PROCESSING_STATUS_LICENCE_AMENDMENT = 'licence_amendment'
-    PROCESSING_STATUS_AWAITING_APPLICANT_RESPONSE = 'awaiting_applicant_respone'
-    PROCESSING_STATUS_AWAITING_ASSESSOR_RESPONSE = 'awaiting_assessor_response'
-    PROCESSING_STATUS_AWAITING_RESPONSES = 'awaiting_responses'
-    PROCESSING_STATUS_READY_FOR_CONDITIONS = 'ready_for_conditions'
-    PROCESSING_STATUS_READY_TO_ISSUE = 'ready_to_issue'
+    PROCESSING_STATUS_WITH_REFERRAL = 'with_referral'
+    PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS = 'with_referral_conditions'
+    PROCESSING_STATUS_APPROVED_APPLICATION = 'approved_application'
+    PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS = 'approved_competitive_process'
+    PROCESSING_STATUS_APPROVED_EDITING_INVOICING = 'approved_editing_invoicing'
     PROCESSING_STATUS_APPROVED = 'approved'
     PROCESSING_STATUS_DECLINED = 'declined'
     PROCESSING_STATUS_DISCARDED = 'discarded'
-    PROCESSING_STATUS_PARTIALLY_APPROVED = 'partially_approved'
-    PROCESSING_STATUS_PARTIALLY_DECLINED = 'partially_declined'
-    PROCESSING_STATUS_AWAITING_PAYMENT = 'awaiting_payment'
-    PROCESSING_STATUS_CHOICES = ((PROCESSING_STATUS_TEMP, 'Temporary'),
-                                 (PROCESSING_STATUS_DRAFT, 'Draft'),
-                                 (PROCESSING_STATUS_WITH_ASSESSOR, 'With Assessor'),
-                                 (PROCESSING_STATUS_WITH_DISTRICT_ASSESSOR, 'With District Assessor'),
-                                 (PROCESSING_STATUS_ONHOLD, 'On Hold'),
-                                 (PROCESSING_STATUS_WITH_QA_OFFICER, 'With QA Officer'),
-                                 (PROCESSING_STATUS_WITH_REFERRAL, 'With Referral'),
-                                 (PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS, 'With Assessor (Requirements)'),
-                                 (PROCESSING_STATUS_WITH_APPROVER, 'With Approver'),
-                                 (PROCESSING_STATUS_RENEWAL, 'Renewal'),
-                                 (PROCESSING_STATUS_LICENCE_AMENDMENT, 'Licence Amendment'),
-                                 (PROCESSING_STATUS_AWAITING_APPLICANT_RESPONSE, 'Awaiting Applicant Response'),
-                                 (PROCESSING_STATUS_AWAITING_ASSESSOR_RESPONSE, 'Awaiting Assessor Response'),
-                                 (PROCESSING_STATUS_AWAITING_RESPONSES, 'Awaiting Responses'),
-                                 (PROCESSING_STATUS_READY_FOR_CONDITIONS, 'Ready for Conditions'),
-                                 (PROCESSING_STATUS_READY_TO_ISSUE, 'Ready to Issue'),
-                                 (PROCESSING_STATUS_APPROVED, 'Approved'),
-                                 (PROCESSING_STATUS_DECLINED, 'Declined'),
-                                 (PROCESSING_STATUS_DISCARDED, 'Discarded'),
-                                 (PROCESSING_STATUS_PARTIALLY_APPROVED, 'Partially Approved'),
-                                 (PROCESSING_STATUS_PARTIALLY_DECLINED, 'Partially Declined'),
-                                 (PROCESSING_STATUS_AWAITING_PAYMENT, 'Awaiting Payment'),
-                                )
+    PROCESSING_STATUS_CHOICES = (
+        (PROCESSING_STATUS_DRAFT, 'Draft'),
+        (PROCESSING_STATUS_WITH_ASSESSOR, 'With Assessor'),
+        (PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS, 'With Assessor (Conditions)'),
+        (PROCESSING_STATUS_WITH_APPROVER, 'With Approver'),
+        (PROCESSING_STATUS_WITH_REFERRAL, 'With Referral'),
+        (PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS, 'With Referral (Conditions)'),
+        (PROCESSING_STATUS_APPROVED_APPLICATION, 'Approved (Application)'),
+        (PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS, 'Approved (Competitive Process)'),
+        (PROCESSING_STATUS_APPROVED_EDITING_INVOICING, 'Approved (Editing Invoicing)'),
+        (PROCESSING_STATUS_APPROVED, 'Approved'),
+        (PROCESSING_STATUS_DECLINED, 'Declined'),
+        (PROCESSING_STATUS_DISCARDED, 'Discarded'),
+    )
 
     ID_CHECK_STATUS_CHOICES = (('not_checked', 'Not Checked'), ('awaiting_update', 'Awaiting Update'),
                                ('updated', 'Updated'), ('accepted', 'Accepted'))
@@ -444,23 +437,24 @@ class Proposal(DirtyFieldsMixin, models.Model):
     proposed_issuance_approval = JSONField(blank=True, null=True)
     #hard_copy = models.ForeignKey(Document, blank=True, null=True, related_name='hard_copy')
 
-    customer_status = models.CharField('Customer Status', max_length=40, choices=CUSTOMER_STATUS_CHOICES,
-                                       default=CUSTOMER_STATUS_CHOICES[1][0])
+    # customer_status = models.CharField('Customer Status', max_length=40, choices=CUSTOMER_STATUS_CHOICES,
+    #                                    default=CUSTOMER_STATUS_CHOICES[1][0])
     #applicant = models.ForeignKey(Organisation, blank=True, null=True, related_name='proposals')
+    ind_applicant = models.IntegerField(null=True, blank=True)  #EmailUserRO
     org_applicant = models.ForeignKey(
         Organisation,
         blank=True,
         null=True,
         related_name='org_applications', on_delete=models.SET_NULL)
+    proxy_applicant = models.IntegerField(null=True, blank=True)  #EmailUserRO
     lodgement_number = models.CharField(max_length=9, blank=True, default='')
     lodgement_sequence = models.IntegerField(blank=True, default=0)
     #lodgement_date = models.DateField(blank=True, null=True)
     lodgement_date = models.DateTimeField(blank=True, null=True)
 
     #proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
-    proxy_applicant = models.IntegerField(null=True) #EmailUserRO
     #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
-    submitter = models.IntegerField() #EmailUserRO
+    submitter = models.IntegerField()  #EmailUserRO
 
     #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
     #assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
@@ -469,7 +463,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     assigned_approver = models.IntegerField(null=True) #EmailUserRO
     approved_by = models.IntegerField(null=True) #EmailUserRO
     processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES,
-                                         default=PROCESSING_STATUS_CHOICES[1][0])
+                                         default=PROCESSING_STATUS_CHOICES[0][0])
     prev_processing_status = models.CharField(max_length=30, blank=True, null=True)
     id_check_status = models.CharField('Identification Check Status', max_length=30, choices=ID_CHECK_STATUS_CHOICES,
                                        default=ID_CHECK_STATUS_CHOICES[0][0])
@@ -660,66 +654,65 @@ class Proposal(DirtyFieldsMixin, models.Model):
     @property
     def applicant(self):
         if self.org_applicant:
-            return self.org_applicant.organisation.name
+            return self.org_applicant.organisation
+        elif self.ind_applicant:
+            email_user = retrieve_email_user(self.ind_applicant)
         elif self.proxy_applicant:
-            return "{} {}".format(
-                self.proxy_applicant.first_name,
-                self.proxy_applicant.last_name)
+            email_user = retrieve_email_user(self.proxy_applicant)
         else:
-            return "{} {}".format(
-                self.submitter.first_name,
-                self.submitter.last_name)
+            logger.warning('Applicant for the proposal {} not found'.format(self.lodgement_number))
+            email_user = retrieve_email_user(self.submitter)
+
+        return email_user
 
     @property
     def applicant_email(self):
         if self.org_applicant and hasattr(self.org_applicant.organisation, 'email') and self.org_applicant.organisation.email:
             return self.org_applicant.organisation.email
+        elif self.ind_applicant:
+            email_user = retrieve_email_user(self.ind_applicant)
         elif self.proxy_applicant:
-            return self.proxy_applicant.email
+            email_user = retrieve_email_user(self.proxy_applicant)
         else:
-            return self.submitter.email
+            email_user = retrieve_email_user(self.submitter)
+
+        return email_user.email
+
+    @property
+    def applicant_name(self):
+        if isinstance(self.applicant, Organisation):
+            return '{}'.format(self.org_applicant.organisation.name)
+        else:
+            names = ' '.join([self.applicant.first_name, self.applicant.last_name, ])
+            return names if names else ''
 
     @property
     def applicant_details(self):
-        if self.org_applicant:
-            return '{} \n{}'.format(
-                self.org_applicant.organisation.name,
-                self.org_applicant.address)
-        elif self.proxy_applicant:
-            return "{} {}\n{}".format(
-                self.proxy_applicant.first_name,
-                self.proxy_applicant.last_name,
-                self.proxy_applicant.addresses.all().first())
+        if isinstance(self.applicant, Organisation):
+            return '{} \n{}'.format(self.org_applicant.organisation.name, self.org_applicant.address)
         else:
             return "{} {}\n{}".format(
-                self.submitter.first_name,
-                self.submitter.last_name,
-                self.submitter.addresses.all().first())
+                self.applicant.first_name,
+                self.applicant.last_name,
+                self.applicant.addresses.all().first())
 
     @property
     def applicant_address(self):
-        if self.org_applicant:
+        if isinstance(self.applicant, Organisation):
             return self.org_applicant.address
-        elif self.proxy_applicant:
-            #return self.proxy_applicant.addresses.all().first()
-            return self.proxy_applicant.residential_address
         else:
-            #return self.submitter.addresses.all().first()
-            return self.submitter.residential_address
+            return self.applicant.residential_address
 
     @property
     def applicant_id(self):
-        if self.org_applicant:
-            return self.org_applicant.id
-        elif self.proxy_applicant:
-            return self.proxy_applicant.id
-        else:
-            return self.submitter.id
+        return self.applicant.id
 
     @property
     def applicant_type(self):
         if self.org_applicant:
             return self.APPLICANT_TYPE_ORGANISATION
+        elif self.ind_applicant:
+            return self.APPLICANT_TYPE_INDIVIDUAL
         elif self.proxy_applicant:
             return self.APPLICANT_TYPE_PROXY
         else:
@@ -729,6 +722,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def applicant_field(self):
         if self.org_applicant:
             return 'org_applicant'
+        elif self.ind_applicant:
+            return 'ind_applicant'
         elif self.proxy_applicant:
             return 'proxy_applicant'
         else:
@@ -792,23 +787,24 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def is_temporary(self):
-        return self.customer_status == 'temp' and self.processing_status == 'temp'
+        # return self.customer_status == 'temp' and self.processing_status == 'temp'
+        return self.processing_status == 'temp'
 
     @property
     def can_user_edit(self):
         """
         :return: True if the application is in one of the editable status.
         """
-        return self.customer_status in self.CUSTOMER_EDITABLE_STATE
+        # return self.customer_status in self.CUSTOMER_EDITABLE_STATE
+        return self.processing_status in self.CUSTOMER_EDITABLE_STATE
 
     @property
     def can_user_view(self):
         """
         :return: True if the application is in one of the approved status.
         """
-        return self.customer_status in self.CUSTOMER_VIEWABLE_STATE
-
-
+        # return self.customer_status in self.CUSTOMER_VIEWABLE_STATE
+        return self.processing_status in self.CUSTOMER_VIEWABLE_STATE
 
     @property
     def is_discardable(self):
@@ -817,7 +813,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         1 - It is a draft
         2- or if the application has been pushed back to the user
         """
-        return self.customer_status == 'draft' or self.processing_status == 'awaiting_applicant_response'
+        # return self.customer_status == 'draft' or self.processing_status == 'awaiting_applicant_response'
+        return self.processing_status == 'draft' or self.processing_status == 'awaiting_applicant_response'
 
     @property
     def is_deletable(self):
@@ -825,7 +822,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         An application can be deleted only if it is a draft and it hasn't been lodged yet
         :return:
         """
-        return self.customer_status == 'draft' and not self.lodgement_number
+        # return self.customer_status == 'draft' and not self.lodgement_number
+        return self.processing_status == 'draft' and not self.lodgement_number
 
     @property
     def latest_referrals(self):
@@ -878,12 +876,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
             group = QAOfficerGroup.objects.get(default=True)
         else:
             group = self.__assessor_group()
-        return group.members.all() if group else []
+        # return group.members.all() if group else []
+        return group.members if group else []
 
     @property
     def compliance_assessors(self):
         group = self.__assessor_group()
-        return group.members.all() if group else []
+        return group.members if group else []
 
     @property
     def can_officer_process(self):
@@ -1092,7 +1091,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 #self.save_form_tabs(request)
                 if ret1 and ret2:
                     self.processing_status = 'with_assessor'
-                    self.customer_status = 'with_assessor'
+                    # self.customer_status = 'with_assessor'
                     self.documents.all().update(can_delete=False)
                     self.save()
                 else:
@@ -1396,7 +1395,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 )
                 self.proposed_decline_status = True
                 self.processing_status = 'declined'
-                self.customer_status = 'declined'
+                # self.customer_status = 'declined'
                 self.save()
                 # Log proposal action
                 self.log_user_action(ProposalUserAction.ACTION_DECLINE.format(self.id),request)
@@ -1619,7 +1618,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         not self.fee_paid:
 
                     self.processing_status = self.PROCESSING_STATUS_AWAITING_PAYMENT
-                    self.customer_status = self.CUSTOMER_STATUS_AWAITING_PAYMENT
+                    # self.customer_status = self.CUSTOMER_STATUS_AWAITING_PAYMENT
                     self.approved_by = request.user
                     invoice = self.__create_filming_fee_invoice(request)
                     #confirmation = self.__create_filming_fee_confirmation(request)
@@ -1641,7 +1640,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                 else:
                     self.processing_status = 'approved'
-                    self.customer_status = 'approved'
+                    # self.customer_status = 'approved'
                     # Log proposal action
                     self.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
                     # Log entry for organisation
@@ -1761,7 +1760,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         if r.is_deleted == True:
                             for c in cs:
                                 c.processing_status='discarded'
-                                c.customer_status = 'discarded'
+                                # c.customer_status = 'discarded'
                                 c.reminder_sent=True
                                 c.post_reminder_sent=True
                                 c.save()
@@ -1936,7 +1935,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                 }
                 proposal=Proposal.objects.get(**amend_conditions)
-                if proposal.customer_status=='with_assessor':
+                # if proposal.customer_status=='with_assessor':
+                if proposal.processing_status in ('with_assessor', ):
                     raise ValidationError('An amendment for this licence has already been lodged and is awaiting review.')
             except Proposal.DoesNotExist:
                 previous_proposal = Proposal.objects.get(id=self.id)
