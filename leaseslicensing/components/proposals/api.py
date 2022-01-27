@@ -83,7 +83,7 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalParkSerializer,
     ChecklistQuestionSerializer,
     ProposalAssessmentSerializer,
-    ProposalAssessmentAnswerSerializer,
+    ProposalAssessmentAnswerSerializer, ListProposalMinimalSerializer,
 )
 from leaseslicensing.components.main.process_document import (
         process_generic_document, 
@@ -506,9 +506,10 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if is_internal(self.request): #user.is_authenticated():
-            qs = Proposal.objects.all().exclude(application_type=self.excluded_type)
-            return qs.exclude(migrated=True)
+        if is_internal(self.request):  #user.is_authenticated():
+            return Proposal.objects.all()
+            # qs = Proposal.objects.all().exclude(application_type=self.excluded_type)
+            # return qs.exclude(migrated=True)
             #return Proposal.objects.filter(region__isnull=False)
         elif is_customer(self.request):
             # user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
@@ -778,6 +779,11 @@ class ProposalViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
+
+    def list(self, request, *args, **kwargs):
+        proposals = self.get_queryset()
+        serializer = ListProposalMinimalSerializer(proposals, context={'request': request}, many=True)
+        return Response(serializer.data)
 
     @list_route(methods=['GET',], detail=False)
     def list_paginated(self, request, *args, **kwargs):

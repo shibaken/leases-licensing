@@ -344,6 +344,17 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         return True if obj.application_type.name==ApplicationType.TCLASS and obj.allow_full_discount else False
 
 
+class ListProposalMinimalSerializer(BaseProposalSerializer):
+
+    class Meta:
+        model = Proposal
+        fields = (
+            'id',
+            'processing_status',
+            'proposalgeometry',
+        )
+
+
 class ListProposalSerializer(BaseProposalSerializer):
     #submitter = EmailUserSerializer()
     submitter = serializers.SerializerMethodField(read_only=True)
