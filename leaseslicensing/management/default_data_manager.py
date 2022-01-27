@@ -16,10 +16,10 @@ from leaseslicensing.components.main.models import (
         )
 #from leaseslicensing.components.payments_ml.models import OracleCodeItem, FeeItemStickerReplacement
 from leaseslicensing.components.proposals.models import (
-        ProposalType, 
-        Proposal, 
-        #StickerPrintingContact
-        )
+    ProposalType,
+    Proposal, ProposalAssessorGroup, ProposalApproverGroup,
+    #StickerPrintingContact
+)
 
 logger = logging.getLogger(__name__)
 
@@ -66,14 +66,38 @@ class DefaultDataManager(object):
             except Exception as e:
                 logger.error('{}, Key: {}'.format(e, item[0]))
 
-        ## Groups
-        #for group_name in settings.CUSTOM_GROUPS:
-        #    try:
-        #        group, created = Group.objects.get_or_create(name=group_name)
-        #        if created:
-        #            logger.info("Created group: {}".format(group_name))
-        #    except Exception as e:
-        #        logger.error('{}, Group name: {}'.format(e, group_name))
+        # ProposalAssessorGroup
+        default_groups = ProposalAssessorGroup.objects.filter(default=True)
+        if default_groups.count() == 1:
+            pass
+        elif default_groups.count() == 0:
+            try:
+                group = ProposalAssessorGroup.objects.create()
+                group.name = 'Default Assessor Group'
+                group.default = True
+                group.save()
+                logger.info('Created ProposalAssessorGroup(default): {}'.format(group))
+            except Exception as e:
+                logger.error('{}'.format(e))
+        else:
+            logger.error('There are {} default PropsalAssessorGroups.  There must be only 1 default group.'.format(default_groups.count()))
+
+
+        # ProposalApproverGroup
+        default_groups = ProposalApproverGroup.objects.filter(default=True)
+        if default_groups.count() == 1:
+            pass
+        elif default_groups.count() == 0:
+            try:
+                group = ProposalApproverGroup.objects.create()
+                group.name = 'Default Approver Group'
+                group.default = True
+                group.save()
+                logger.info('Created ProposalApproverGroup(default): {}'.format(group))
+            except Exception as e:
+                logger.error('{}'.format(e))
+        else:
+            logger.error('There are {} default PropsalApproverGroups.  There must be only 1 default group.'.format(default_groups.count()))
 
 
         ## Oracle account codes

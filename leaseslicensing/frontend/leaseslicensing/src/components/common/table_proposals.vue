@@ -54,8 +54,8 @@
                 <datatable
                     ref="application_datatable"
                     :id="datatable_id"
-                    :dtOptions="datatable_options"
-                    :dtHeaders="datatable_headers"
+                    :dtOptions="dtOptions"
+                    :dtHeaders="dtHeaders"
                 />
             </div>
         </div>
@@ -80,13 +80,31 @@ export default {
                 return options.indexOf(val) != -1 ? true: false;
             }
         },
-        /*
-        target_email_user_id: {
+        email_user_id_assigned: {
             type: Number,
             required: false,
             default: 0,
-        }
-        */
+        },
+        filterApplicationType_cache_name: {
+            type: String,
+            required: false,
+            default: 'filterApplicationType',
+        },
+        filterApplicationStatus_cache_name: {
+            type: String,
+            required: false,
+            default: 'filterApplicationStatus',
+        },
+        filterApplicationLodgedFrom_cache_name: {
+            type: String,
+            required: false,
+            default: 'filterApplicationLodgedFrom',
+        },
+        filterApplicationLodgedTo_cache_name: {
+            type: String,
+            required: false,
+            default: 'filterApplicationLodgedTo',
+        },
     },
     data() {
         let vm = this;
@@ -94,10 +112,10 @@ export default {
             datatable_id: 'applications-datatable-' + vm._uid,
 
             // selected values for filtering
-            filterApplicationType: sessionStorage.getItem('filterApplicationType') ? sessionStorage.getItem('filterApplicationType') : 'all',
-            filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
-            filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFrom') ? sessionStorage.getItem('filterProposalLodgedFrom') : '',
-            filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedTo') ? sessionStorage.getItem('filterProposalLodgedTo') : '',
+            filterApplicationType: sessionStorage.getItem(vm.filterApplicationType_cache_name) ? sessionStorage.getItem(vm.filterApplicationType_cache_name) : 'all',
+            filterApplicationStatus: sessionStorage.getItem(vm.filterApplicationStatus_cache_name) ? sessionStorage.getItem(vm.filterApplicationStatus_cache_name) : 'all',
+            filterProposalLodgedFrom: sessionStorage.getItem(vm.filterProposalLodgedFrom_cache_name) ? sessionStorage.getItem(vm.filterProposalLodgedFrom_cache_name) : '',
+            filterProposalLodgedTo: sessionStorage.getItem(vm.filterProposalLodgedTo_cache_name) ? sessionStorage.getItem(vm.filterProposalLodgedTo_cache_name) : '',
 
             // filtering options
             application_types: [],
@@ -125,21 +143,19 @@ export default {
     watch: {
         filterApplicationStatus: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterApplicationStatus', this.filterApplicationStatus);
+            sessionStorage.setItem(this.filterApplicationStatus_cache_name, this.filterApplicationStatus);
         },
         filterApplicationType: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
+            sessionStorage.setItem(this.filterApplicationType_cache_name, this.filterApplicationType);
         },
         filterProposalLodgedFrom: function() {
-            console.log('filterProposalLodgedFrom changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
+            sessionStorage.setItem(this.filterProposalLodgedFrom_cache_name, this.filterProposalLodgedFrom);
         },
         filterProposalLodgedTo: function() {
-            console.log('filterProposalLodgedTo changed')
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
+            sessionStorage.setItem(this.filterProposalLodgedTo_cache_name, this.filterProposalLodgedTo);
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
@@ -159,12 +175,11 @@ export default {
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }
-            console.log('in filterApplied: ' + filter_applied)
             return filter_applied
         },
         debug: function(){
             if (this.$route.query.debug){
-                return this.$route.query.debug === 'Tru3'
+                return this.$route.query.debug === 'true'
             }
             return false
         },
@@ -174,12 +189,12 @@ export default {
         is_internal: function() {
             return this.level == 'internal'
         },
-        datatable_headers: function(){
+        dtHeaders: function(){
             if (this.is_external){
-                return ['id', 'Lodgement Number', 'Type', 'Application Type', 'Status', 'Lodged on', 'Invoice', 'Action']
+                return ['id', 'Number', 'Type', 'Submitter', 'Applicant', 'Status', 'Lodged On', 'Action',]
             }
             if (this.is_internal){
-                return ['id', 'Lodgement Number', 'Type', 'Applicant', 'Status', 'Lodged on', 'Invoice', 'Assigned To', 'Payment Status', 'Action']
+                return ['id', 'Number', 'Type', 'Submitter', 'Applicant', 'Status', 'Lodged On', 'Assigned Officer', 'Action']
             }
         },
         column_id: function(){
@@ -190,6 +205,7 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
+                    console.log(full)
                     return full.id
                 }
             }
@@ -223,24 +239,37 @@ export default {
                 }
             }
         },
-        column_application_type: function(){
+        column_submitter: function(){
             return {
-                // 4. Application Type (This corresponds to the 'ProposalType' at the backend)
+                data: "id",
+                orderable: true,
+                searchable: false,
+                visible: true,
+                'render': function(row, type, full){
+                    if (full.submitter){
+                        return full.submitter.fullname
+                    } else {
+                        return ''
+                    }
+                }
+            }
+        },
+        column_applicant: function(){
+            return {
                 data: "id",
                 orderable: true,
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*
-                    if (full.proposal_type){
-                        return full.proposal_type.description
-                    } else {
-                        // Should not reach here
-                        return ''
+                    if (full.submitter){
+                        return `${full.submitter.first_name} ${full.submitter.last_name}`
                     }
+                    return ''
                     */
-                    return full.id
-                }
+                    return full.applicant_name
+                },
+                //name: 'submitter__first_name, submitter__last_name',
             }
         },
         column_status: function(){
@@ -267,45 +296,27 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
                     if (full.lodgement_date){
                         return moment(full.lodgement_date).format('DD/MM/YYYY')
                     }
                     return ''
-                    */
-                    return full.id
                 }
             }
         },
-        column_invoice: function(){
-            let vm = this
+        column_assigned_officer: function(){
             return {
-                // 7. Invoice
                 data: "id",
                 orderable: true,
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
-                    let links = '';
-                    if (full.invoices){
-                        for (let invoice of full.invoices){
-                            links += '<div>'
-                            links +=  `<div><a href='/payments/invoice-pdf/${invoice.reference}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
-                            if (vm.is_internal && full.can_view_payment_details){
-                                if (invoice.payment_status.toLowerCase() === 'paid'){
-                                    links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>View Payment</a></div>`;
-                                } else {
-                                    //links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>Record Payment</a></div>`;
-                                }
-                            }
-                            links += '</div>'
-                        }
+                    if (full.assigned_officer){
+                        return full.assigned_officer.fullname
+                    } else {
+                        return ''
                     }
-                    return links
-                    */
-                    return full.id
-                }
+                },
+                name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
             }
         },
         column_action: function(){
@@ -317,18 +328,12 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
                     let links = '';
                     if (vm.is_internal){
-                        if (vm.debug){
+                        if(full.assessor_process){
                             links +=  `<a href='/internal/proposal/${full.id}'>Process</a><br/>`;
-                            links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
                         } else {
-                            if(full.assessor_process){
-                                links +=  `<a href='/internal/proposal/${full.id}'>Process</a><br/>`;
-                            } else {
-                                links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
-                            }
+                            links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
                         }
                     }
                     if (vm.is_external){
@@ -339,86 +344,21 @@ export default {
                         else if (full.can_user_view) {
                             links +=  `<a href='/external/proposal/${full.id}'>View</a><br/>`;
                         }
-                        for (let invoice of full.invoices){
-                            console.log(invoice.payment_status.toLowerCase())
-                            if (invoice.payment_status.toLowerCase() === 'unpaid' || invoice.payment_status.toLowerCase() === 'partially paid'){
-                                links +=  `<a href='/application_fee_existing/${full.id}'>Pay</a>`
-                            }
-                        }
-                        if (full.document_upload_url){
-                            links +=  `<a href='${full.document_upload_url}'>Upload Documents</a>`
-                        }
+                        //for (let invoice of full.invoices){
+                        //    console.log(invoice.payment_status.toLowerCase())
+                        //    if (invoice.payment_status.toLowerCase() === 'unpaid' || invoice.payment_status.toLowerCase() === 'partially paid'){
+                        //        links +=  `<a href='/application_fee_existing/${full.id}'>Pay</a>`
+                        //    }
+                        //}
+                        //if (full.document_upload_url){
+                        //    links +=  `<a href='${full.document_upload_url}'>Upload Documents</a>`
+                        //}
                     }
                     return links;
-                    */
-                    return full.id
                 }
             }
         },
-        column_applicant: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    if (full.submitter){
-                        return `${full.submitter.first_name} ${full.submitter.last_name}`
-                    }
-                    return ''
-                    */
-                    return full.id
-                },
-                //name: 'submitter__first_name, submitter__last_name',
-            }
-        },
-        column_assigned_to: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    let ret_str = ''
-                    if (full.assigned_officer){
-                        ret_str += full.assigned_officer
-                    }
-                    if (full.assigned_approver){
-                        ret_str += full.assigned_approver
-                    }
-                    return ret_str
-                    */
-                    return full.id
-                },
-                name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
-            }
-        },
-        column_payment_status: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    if (full.invoices){
-                        let ret_str = ''
-                        for (let item of full.invoices){
-                            //ret_str += '<div>' + item.payment_status + '</div>'
-                            ret_str += '<span>' + item.payment_status + '</span>'
-                        }
-                        return ret_str
-                    } else {
-                        return ''
-                    }
-                    */
-                    return full.id
-                }
-            }
-        },
-        datatable_options: function(){
+        dtOptions: function(){
             let vm = this
 
             let columns = []
@@ -429,10 +369,11 @@ export default {
                     vm.column_id,
                     vm.column_lodgement_number,
                     vm.column_type,
-                    vm.column_application_type,
+                    vm.column_submitter,
+                    vm.column_applicant,
                     vm.column_status,
                     vm.column_lodged_on,
-                    vm.column_invoice,
+                    //vm.column_assigned_officer,
                     vm.column_action,
                 ]
                 search = false
@@ -443,12 +384,11 @@ export default {
                     vm.column_id,
                     vm.column_lodgement_number,
                     vm.column_type,
+                    vm.column_submitter,
                     vm.column_applicant,
                     vm.column_status,
                     vm.column_lodged_on,
-                    vm.column_invoice,
-                    vm.column_assigned_to,
-                    vm.column_payment_status,
+                    vm.column_assigned_officer,
                     vm.column_action,
                 ]
                 search = true
@@ -482,8 +422,7 @@ export default {
                 serverSide: true,
                 searching: search,
                 ajax: {
-                    //"url": api_endpoints.proposals_paginated_list + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,
-                    "url": api_endpoints.proposals_paginated_list + '?format=datatables',
+                    "url": api_endpoints.proposals_paginated_list + '?format=datatables&email_user_id_assigned=' + vm.email_user_id_assigned,
                     "dataSrc": 'data',
 
                     // adding extra GET params for Custom filtering
@@ -643,7 +582,7 @@ export default {
                     // Expand
 
                     // If we don't need to retrieve the data from the server, follow the code below
-                    let contents = 'Display whatever you want'
+                    let contents = '<div><strong>Site:</strong> (site name here)</div><div><strong>Group:</strong> (group name here)</div>'
                     let details_elem = $('<tr class="' + vm.expandable_row_class_name +'"><td colspan="' + vm.number_of_columns + '">' + contents + '</td></tr>')
                     details_elem.hide()
                     details_elem.insertAfter(tr)

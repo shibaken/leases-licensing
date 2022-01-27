@@ -207,11 +207,12 @@ export default {
                     'Id',
                     'Number',
                     'Type',
+                    'Site',
+                    'Holder',
                     'Status',
-                    'Issue Date',
                     'Expiry Date',
+                    'Document',
                     'Action',
-                    'Approval letter',
                 ]
             } else if (this.is_internal) {
                 return [
@@ -219,10 +220,10 @@ export default {
                     'Number',
                     'Type',
                     'Holder',
+                    'Application',
                     'Status',
-                    'Issue Date',
                     'Expiry Date',
-                    'Approval letter',
+                    'Document',
                     'Action',
                 ]
             }
@@ -257,6 +258,39 @@ export default {
                         }
                     }
         },
+        columnType: function() {
+            return {
+                data: "id",
+                orderable: true,
+                searchable: true,
+                visible: true,
+                'render': function(row, type, full){
+                    return '(todo)'
+                }
+            }
+        },
+        columnSite: function() {
+            return {
+                data: "id",
+                orderable: true,
+                searchable: true,
+                visible: true,
+                'render': function(row, type, full){
+                    return '(todo)'
+                }
+            }
+        },
+        columnHolder: function() {
+            return {
+                        data: "id",
+                        orderable: true,
+                        searchable: true,
+                        visible: true,
+                        'render': function(row, type, full){
+                            return full.holder;
+                        }
+                    }
+        },
         columnStatus: function() {
             return {
                         // 5. Status
@@ -266,30 +300,6 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.status
-                        }
-                    }
-        },
-        columnStatusInternal: function() {
-            return {
-                        // 5. Status
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.internal_status
-                        }
-                    }
-        },
-        columnIssueDate: function() {
-            return {
-                        // 8. Issue Date
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.issue_date_str;
                         }
                     }
         },
@@ -304,6 +314,17 @@ export default {
                             return full.expiry_date_str;
                         }
                     }
+        },
+        columnDocument: function() {
+            return {
+                data: "id",
+                orderable: true,
+                searchable: true,
+                visible: true,
+                'render': function(row, type, full){
+                    return '(todo)'
+                }
+            }
         },
         columnAction: function() {
             let vm = this;
@@ -371,41 +392,6 @@ export default {
                         }
                     }
         },
-        columnHolder: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.holder;
-                        }
-                    }
-        },
-        columnPreferredMooringBay: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            return full.preferred_mooring_bay;
-                        }
-                    }
-        },
-        columnApprovalLetter: function() {
-            return {
-                        data: "id",
-                        orderable: true,
-                        searchable: true,
-                        visible: true,
-                        'render': function(row, type, full){
-                            //return full.vessel_draft;
-                            //return '';
-                            return `<div><a href='${full.licence_document}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i></a></div>`;
-                        }
-                    }
-        },
         datatable_options: function() {
             let vm = this;
             let selectedColumns = [];
@@ -413,23 +399,24 @@ export default {
                 selectedColumns = [
                     vm.columnId,
                     vm.columnLodgementNumber,
-                    vm.columnApprovalType,
+                    vm.columnType,
+                    vm.columnSite,
+                    vm.columnHolder,
                     vm.columnStatus,
-                    vm.columnIssueDate,
                     vm.columnExpiryDate,
+                    vm.columnDocument,
                     vm.columnAction,
-                    vm.columnApprovalLetter,
                 ]
             } else if (vm.is_internal) {
                 selectedColumns = [
                     vm.columnId,
                     vm.columnLodgementNumber,
-                    vm.columnApprovalType,
+                    vm.columnType,
                     vm.columnHolder,
+                    vm.columnApplication,
                     vm.columnStatus,
-                    vm.columnIssueDate,
                     vm.columnExpiryDate,
-                    vm.columnApprovalLetter,
+                    vm.columnDocument,
                     vm.columnAction,
                 ]
             }
