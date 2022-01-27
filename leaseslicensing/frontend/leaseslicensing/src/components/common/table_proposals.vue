@@ -80,13 +80,31 @@ export default {
                 return options.indexOf(val) != -1 ? true: false;
             }
         },
-        /*
-        target_email_user_id: {
+        email_user_id_assigned: {
             type: Number,
             required: false,
             default: 0,
-        }
-        */
+        },
+        filterApplicationType_cache_name: {
+            type: String,
+            required: false,
+            default: 'filterApplicationType',
+        },
+        filterApplicationStatus_cache_name: {
+            type: String,
+            required: false,
+            default: 'filterApplicationStatus',
+        },
+        filterApplicationLodgedFrom_cache_name: {
+            type: String,
+            required: false,
+            default: 'filterApplicationLodgedFrom',
+        },
+        filterApplicationLodgedTo_cache_name: {
+            type: String,
+            required: false,
+            default: 'filterApplicationLodgedTo',
+        },
     },
     data() {
         let vm = this;
@@ -94,10 +112,10 @@ export default {
             datatable_id: 'applications-datatable-' + vm._uid,
 
             // selected values for filtering
-            filterApplicationType: sessionStorage.getItem('filterApplicationType') ? sessionStorage.getItem('filterApplicationType') : 'all',
-            filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
-            filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFrom') ? sessionStorage.getItem('filterProposalLodgedFrom') : '',
-            filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedTo') ? sessionStorage.getItem('filterProposalLodgedTo') : '',
+            filterApplicationType: sessionStorage.getItem(vm.filterApplicationType_cache_name) ? sessionStorage.getItem(vm.filterApplicationType_cache_name) : 'all',
+            filterApplicationStatus: sessionStorage.getItem(vm.filterApplicationStatus_cache_name) ? sessionStorage.getItem(vm.filterApplicationStatus_cache_name) : 'all',
+            filterProposalLodgedFrom: sessionStorage.getItem(vm.filterProposalLodgedFrom_cache_name) ? sessionStorage.getItem(vm.filterProposalLodgedFrom_cache_name) : '',
+            filterProposalLodgedTo: sessionStorage.getItem(vm.filterProposalLodgedTo_cache_name) ? sessionStorage.getItem(vm.filterProposalLodgedTo_cache_name) : '',
 
             // filtering options
             application_types: [],
@@ -125,19 +143,19 @@ export default {
     watch: {
         filterApplicationStatus: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterApplicationStatus', this.filterApplicationStatus);
+            sessionStorage.setItem(this.filterApplicationStatus_cache_name, this.filterApplicationStatus);
         },
         filterApplicationType: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
+            sessionStorage.setItem(this.filterApplicationType_cache_name, this.filterApplicationType);
         },
         filterProposalLodgedFrom: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
+            sessionStorage.setItem(this.filterProposalLodgedFrom_cache_name, this.filterProposalLodgedFrom);
         },
         filterProposalLodgedTo: function() {
             this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
+            sessionStorage.setItem(this.filterProposalLodgedTo_cache_name, this.filterProposalLodgedTo);
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
@@ -228,7 +246,11 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    return full.submitter.fullname
+                    if (full.submitter){
+                        return full.submitter.fullname
+                    } else {
+                        return ''
+                    }
                 }
             }
         },
@@ -250,26 +272,6 @@ export default {
                 //name: 'submitter__first_name, submitter__last_name',
             }
         },
-        //column_application_type: function(){
-        //    return {
-        //        // 4. Application Type (This corresponds to the 'ProposalType' at the backend)
-        //        data: "id",
-        //        orderable: true,
-        //        searchable: false,
-        //        visible: true,
-        //        'render': function(row, type, full){
-        //            /*
-        //            if (full.proposal_type){
-        //                return full.proposal_type.description
-        //            } else {
-        //                // Should not reach here
-        //                return ''
-        //            }
-        //            */
-        //            return full.id
-        //        }
-        //    }
-        //},
         column_status: function(){
             let vm = this
             return {
@@ -301,37 +303,6 @@ export default {
                 }
             }
         },
-        //column_invoice: function(){
-        //    let vm = this
-        //    return {
-        //        // 7. Invoice
-        //        data: "id",
-        //        orderable: true,
-        //        searchable: false,
-        //        visible: true,
-        //        'render': function(row, type, full){
-        //            /*
-        //            let links = '';
-        //            if (full.invoices){
-        //                for (let invoice of full.invoices){
-        //                    links += '<div>'
-        //                    links +=  `<div><a href='/payments/invoice-pdf/${invoice.reference}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
-        //                    if (vm.is_internal && full.can_view_payment_details){
-        //                        if (invoice.payment_status.toLowerCase() === 'paid'){
-        //                            links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>View Payment</a></div>`;
-        //                        } else {
-        //                            //links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>Record Payment</a></div>`;
-        //                        }
-        //                    }
-        //                    links += '</div>'
-        //                }
-        //            }
-        //            return links
-        //            */
-        //            return full.id
-        //        }
-        //    }
-        //},
         column_assigned_officer: function(){
             return {
                 data: "id",
@@ -339,17 +310,11 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
-                    let ret_str = ''
                     if (full.assigned_officer){
-                        ret_str += full.assigned_officer
+                        return full.assigned_officer.fullname
+                    } else {
+                        return ''
                     }
-                    if (full.assigned_approver){
-                        ret_str += full.assigned_approver
-                    }
-                    return ret_str
-                    */
-                    return full.id
                 },
                 name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
             }
@@ -457,8 +422,7 @@ export default {
                 serverSide: true,
                 searching: search,
                 ajax: {
-                    //"url": api_endpoints.proposals_paginated_list + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,
-                    "url": api_endpoints.proposals_paginated_list + '?format=datatables',
+                    "url": api_endpoints.proposals_paginated_list + '?format=datatables&email_user_id_assigned=' + vm.email_user_id_assigned,
                     "dataSrc": 'data',
 
                     // adding extra GET params for Custom filtering
@@ -618,7 +582,7 @@ export default {
                     // Expand
 
                     // If we don't need to retrieve the data from the server, follow the code below
-                    let contents = 'Display whatever you want'
+                    let contents = '<div><strong>Site:</strong> (site name here)</div><div><strong>Group:</strong> (group name here)</div>'
                     let details_elem = $('<tr class="' + vm.expandable_row_class_name +'"><td colspan="' + vm.number_of_columns + '">' + contents + '</td></tr>')
                     details_elem.hide()
                     details_elem.insertAfter(tr)
