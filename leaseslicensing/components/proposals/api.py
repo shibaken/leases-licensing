@@ -83,7 +83,7 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalParkSerializer,
     ChecklistQuestionSerializer,
     ProposalAssessmentSerializer,
-    ProposalAssessmentAnswerSerializer,
+    ProposalAssessmentAnswerSerializer, ListProposalMinimalSerializer,
 )
 from leaseslicensing.components.main.process_document import (
         process_generic_document, 
@@ -325,6 +325,11 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
         qs = self.get_queryset()
         qs = self.filter_queryset(qs)
 
+        email_user_id_assigned = int(request.query_params.get('email_user_id_assigned', '0'))
+
+        if email_user_id_assigned:
+            qs = qs.filter(Q(assigned_officer=email_user_id_assigned) | Q(assigned_approver=email_user_id_assigned))
+
         self.paginator.page_size = qs.count()
         result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
         serializer = ListProposalSerializer(result_page, context={'request': request}, many=True)
@@ -501,9 +506,10 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if is_internal(self.request): #user.is_authenticated():
-            qs = Proposal.objects.all().exclude(application_type=self.excluded_type)
-            return qs.exclude(migrated=True)
+        if is_internal(self.request):  #user.is_authenticated():
+            return Proposal.objects.all()
+            # qs = Proposal.objects.all().exclude(application_type=self.excluded_type)
+            # return qs.exclude(migrated=True)
             #return Proposal.objects.filter(region__isnull=False)
         elif is_customer(self.request):
             # user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
@@ -773,6 +779,11 @@ class ProposalViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
+
+    def list(self, request, *args, **kwargs):
+        proposals = self.get_queryset()
+        serializer = ListProposalMinimalSerializer(proposals, context={'request': request}, many=True)
+        return Response(serializer.data)
 
     @list_route(methods=['GET',], detail=False)
     def list_paginated(self, request, *args, **kwargs):

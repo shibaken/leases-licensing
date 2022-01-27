@@ -121,7 +121,7 @@ import 'select2-bootstrap-theme/dist/select2-bootstrap.min.css'
 import MeasureStyles, { formatLength } from '@/components/common/measure.js'
 
 export default {
-    name: 'MapComponent',
+    name: 'MapComponentWithFilters',
     props: {
         level:{
             type: String,
@@ -144,10 +144,10 @@ export default {
 
         return {
             // selected values for filtering
-            filterApplicationType: sessionStorage.getItem('filterApplicationType') ? sessionStorage.getItem('filterApplicationType') : 'all',
-            filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
-            filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFrom') ? sessionStorage.getItem('filterProposalLodgedFrom') : '',
-            filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedTo') ? sessionStorage.getItem('filterProposalLodgedTo') : '',
+            filterApplicationType: sessionStorage.getItem('filterApplicationTypeForMap') ? sessionStorage.getItem('filterApplicationTypeForMap') : 'all',
+            filterApplicationStatus: sessionStorage.getItem('filterApplicationStatusForMap') ? sessionStorage.getItem('filterApplicationStatusForMap') : 'all',
+            filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFromForMap') ? sessionStorage.getItem('filterProposalLodgedFromForMap') : '',
+            filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedToForMap') ? sessionStorage.getItem('filterProposalLodgedToForMap') : '',
 
             // filtering options
             application_types: [],
@@ -176,6 +176,10 @@ export default {
             segmentStyle: MeasureStyles.segmentStyle,
             labelStyle: MeasureStyles.labelStyle,
             segmentStyles: null,
+
+            proposals: null,
+            proposalQuerySource: null,
+            proposalQueryLayer: null,
         }
     },
     computed: {
@@ -212,6 +216,28 @@ export default {
         }
     },
     methods: {
+        showProposals: function(){
+            let vm = this
+            for (let proposal of vm.proposals){
+                if (proposal.proposalgeometry){
+                    for (let poly of proposal.proposalgeometry.features) {
+                        const feature = (new GeoJSON).readFeature(poly);
+                        //if (!feature.getProperties().intersects) {
+                            //feature.setStyle(nonIntersectingStyle);
+                        //}
+                        //feature.setProperties({"id": this.newFeatureId});
+                        this.proposalQuerySource.addFeature(feature);
+                        //this.newFeatureId++;
+                    }
+                }
+            }
+        },
+        addProposalPolygonToMap: function(polygon_geojson) {
+            let vm = this
+            let feature = (new GeoJSON()).readFeature(polygon_geojson)
+            this.proposalQuerySource.addFeature(feature)
+            return feature
+        },
         setBaseLayer: function(selected_layer_name){
             let vm = this
             if (selected_layer_name == 'sat') {
@@ -425,9 +451,28 @@ export default {
             vm.map.addInteraction(vm.drawForMeasure)
             vm.map.addLayer(vm.measurementLayer)
 
+            vm.proposalQuerySource = new VectorSource({ });
+            vm.proposalQueryLayer = new VectorLayer({
+                source: vm.proposalQuerySource,
+            //    style: function(feature, resolution){
+            //        let status = getStatusForColour(feature, false, vm.display_at_time_of_submitted)
+            //        return getApiaryFeatureStyle(status, feature.get('checked'))
+            //    },
+            });
+            vm.map.addLayer(vm.proposalQueryLayer);
         },
         collapsible_component_mounted: function(){
             this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
+        },
+        fetchProposals: function(){
+            let vm = this;
+
+            vm.$http.get('/api/proposal/').then((response) => {
+                vm.proposals = response.body
+                vm.showProposals()
+            },(error) => {
+
+            })
         },
         fetchFilterLists: function(){
             let vm = this;
@@ -436,6 +481,7 @@ export default {
             vm.$http.get(api_endpoints.application_types_dict+'?apply_page=False').then((response) => {
                 vm.application_types = response.body
             },(error) => {
+
             })
 
             // Application Statuses
@@ -483,6 +529,7 @@ export default {
     created: function(){
         console.log('created()')
         this.fetchFilterLists()
+        this.fetchProposals()
     },
     mounted: function(){
         console.log('mounted()')

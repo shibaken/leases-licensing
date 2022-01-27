@@ -43,11 +43,21 @@
                 <FormSection :formCollapse="false" label="Applications" Index="applications">
                     <ApplicationsTable
                         level="internal"
+                        filterApplicationType_cache_name="filterApplicationTypeForApplicationTabley"
+                        filterApplicationStatus_cache_name="filterApplicationStatusForApplicationTable"
+                        filterApplicationLodgedFrom_cache_name="filterApplicationLodgedFromForApplicationTable"
+                        filterApplicationLodgedTo_cache_name="filterApplicationLodgedToForApplicationTable"
                     />
                 </FormSection>
                 <FormSection :formCollapse="false" label="Applications referred to me" Index="leases_and_licences">
                     <ApplicationsReferredToMeTable
+                        v-if="accessing_user"
                         level="internal"
+                        :email_user_id_assigned="accessing_user.id"
+                        filterApplicationType_cache_name="filterApplicationTypeForApplicationReferredToMeTable"
+                        filterApplicationStatus_cache_name="filterApplicationStatusForApplicationReferredToMeTable"
+                        filterApplicationLodgedFrom_cache_name="filterApplicationLodgedFromForApplicationReferredToMeTable"
+                        filterApplicationLodgedTo_cache_name="filterApplicationLodgedToForApplicationReferredToMeTable"
                     />
                 </FormSection>
             </div>
@@ -74,7 +84,7 @@
 import datatable from '@/utils/vue/datatable.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
 import ApplicationsTable from "@/components/common/table_proposals"
-import ApplicationsReferredToMeTable from "@/components/common/table_proposals_referred_to_me"
+import ApplicationsReferredToMeTable from "@/components/common/table_proposals"
 import CompetitiveProcessesTable from "@/components/common/table_competitive_processes"
 import MapComponent from "@/components/common/component_map_with_filters"
 import { api_endpoints, helpers } from '@/utils/hooks'
@@ -85,6 +95,7 @@ export default {
         let vm = this;
         return {
             empty_list: '/api/empty_list',
+            accessing_user: null,
             //proposals_url: helpers.add_endpoint_json(api_endpoints.proposals,'user_list'),
             //approvals_url: helpers.add_endpoint_json(api_endpoints.approvals,'user_list'),
             //compliances_url: helpers.add_endpoint_json(api_endpoints.compliances,'user_list'),
@@ -130,7 +141,11 @@ export default {
         },
     },
     mounted: function () {
-        this.set_tabs();
+        let vm = this
+        vm.set_tabs();
+        vm.$http.get('/api/profile').then(res => {
+            vm.accessing_user = res.body
+        })
     },
     created: function() {
 
