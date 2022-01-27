@@ -347,7 +347,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
 class ListProposalSerializer(BaseProposalSerializer):
     #submitter = EmailUserSerializer()
     submitter = serializers.SerializerMethodField(read_only=True)
-    applicant = serializers.CharField(read_only=True)
+    # applicant = serializers.CharField(read_only=True)
     applicant_name = serializers.CharField(read_only=True)
     processing_status = serializers.SerializerMethodField(read_only=True)
     review_status = serializers.SerializerMethodField(read_only=True)
@@ -420,15 +420,17 @@ class ListProposalSerializer(BaseProposalSerializer):
                 #'fee_paid',
                 )
 
-    def get_submitter(self,obj):
+    def get_submitter(self, obj):
         email_user = retrieve_email_user(obj.submitter)
         return EmailUserSerializer(email_user).data
 
-    def get_assigned_officer(self,obj):
-        if obj.processing_status==Proposal.PROCESSING_STATUS_WITH_APPROVER and obj.assigned_approver:
-            return obj.assigned_approver.get_full_name()
+    def get_assigned_officer(self, obj):
+        if obj.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER and obj.assigned_approver:
+            email_user = retrieve_email_user(obj.assigned_approver)
+            return EmailUserSerializer(email_user).data
         if obj.assigned_officer:
-            return obj.assigned_officer.get_full_name()
+            email_user = retrieve_email_user(obj.assigned_officer)
+            return EmailUserSerializer(email_user).data
         return None
 
     def get_assessor_process(self,obj):
