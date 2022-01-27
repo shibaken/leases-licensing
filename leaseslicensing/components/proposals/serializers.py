@@ -236,6 +236,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     #proposalgeometry = ProposalGeometrySerializer()
     proposalgeometry = ProposalGeometrySerializer(many=True, read_only=True)
 
+    applicant = serializers.SerializerMethodField()
+
     class Meta:
         model = Proposal
         fields = (
@@ -298,7 +300,13 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'mining_tenement',
 
                 )
-        read_only_fields=('documents',)
+        read_only_fields = ('documents',)
+
+    def get_applicant(self, obj):
+        if isinstance(obj, Organisation):
+            return obj.applicant.name
+        else:
+            return ' '.join([obj.applicant.first_name, obj.applicant.last_name,])
 
     def get_documents_url(self,obj):
         return '/media/{}/proposals/{}/documents/'.format(settings.MEDIA_APP_DIR, obj.id)

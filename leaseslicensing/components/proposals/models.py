@@ -463,7 +463,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     assigned_approver = models.IntegerField(null=True) #EmailUserRO
     approved_by = models.IntegerField(null=True) #EmailUserRO
     processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES,
-                                         default=PROCESSING_STATUS_CHOICES[1][0])
+                                         default=PROCESSING_STATUS_CHOICES[0][0])
     prev_processing_status = models.CharField(max_length=30, blank=True, null=True)
     id_check_status = models.CharField('Identification Check Status', max_length=30, choices=ID_CHECK_STATUS_CHOICES,
                                        default=ID_CHECK_STATUS_CHOICES[0][0])
