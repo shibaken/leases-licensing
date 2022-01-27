@@ -14,7 +14,7 @@
 
         <FormSection 
             :formCollapse="false" 
-            label="Licences and Permits" 
+            label="Leases and Licences" 
             subtitle="- View existing licences / permits and renew them" 
             Index="licences_and_permits"
         >

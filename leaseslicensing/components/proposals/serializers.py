@@ -74,10 +74,25 @@ class ProposalTypeSerializer(serializers.ModelSerializer):
     def get_activities(self,obj):
         return obj.activities.names()
 
+
 class EmailUserSerializer(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+
     class Meta:
         model = EmailUser
-        fields = ('id','email','first_name','last_name','title','organisation')
+        fields = (
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+            'title',
+            'organisation',
+            'fullname',
+        )
+
+    def get_fullname(self, obj):
+        return '{} {}'.format(obj.first_name, obj.last_name)
+
 
 class EmailUserAppViewSerializer(serializers.ModelSerializer):
     residential_address = UserAddressSerializer()
@@ -221,6 +236,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     #proposalgeometry = ProposalGeometrySerializer()
     proposalgeometry = ProposalGeometrySerializer(many=True, read_only=True)
 
+    applicant = serializers.SerializerMethodField()
+
     class Meta:
         model = Proposal
         fields = (
@@ -283,7 +300,13 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'mining_tenement',
 
                 )
-        read_only_fields=('documents',)
+        read_only_fields = ('documents',)
+
+    def get_applicant(self, obj):
+        if isinstance(obj, Organisation):
+            return obj.applicant.name
+        else:
+            return ' '.join([obj.applicant.first_name, obj.applicant.last_name,])
 
     def get_documents_url(self,obj):
         return '/media/{}/proposals/{}/documents/'.format(settings.MEDIA_APP_DIR, obj.id)
@@ -303,7 +326,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         return obj.get_review_status_display()
 
     def get_customer_status(self,obj):
-        return obj.get_customer_status_display()
+        # return obj.get_customer_status_display()
+        return obj.get_processing_status_display()
 
     def get_proposal_type(self,obj):
         return obj.proposal_type.description if obj.proposal_type else ''
@@ -320,10 +344,22 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         return True if obj.application_type.name==ApplicationType.TCLASS and obj.allow_full_discount else False
 
 
+class ListProposalMinimalSerializer(BaseProposalSerializer):
+
+    class Meta:
+        model = Proposal
+        fields = (
+            'id',
+            'processing_status',
+            'proposalgeometry',
+        )
+
+
 class ListProposalSerializer(BaseProposalSerializer):
     #submitter = EmailUserSerializer()
     submitter = serializers.SerializerMethodField(read_only=True)
-    applicant = serializers.CharField(read_only=True)
+    # applicant = serializers.CharField(read_only=True)
+    applicant_name = serializers.CharField(read_only=True)
     processing_status = serializers.SerializerMethodField(read_only=True)
     review_status = serializers.SerializerMethodField(read_only=True)
     customer_status = serializers.SerializerMethodField(read_only=True)
@@ -346,6 +382,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'processing_status',
                 'review_status',
                 'applicant',
+                'applicant_name',
                 'proxy_applicant',
                 'submitter',
                 'assigned_officer',
@@ -378,6 +415,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'customer_status',
                 'processing_status',
                 'applicant',
+                'applicant_name',
                 'submitter',
                 'assigned_officer',
                 'lodgement_date',
@@ -393,15 +431,17 @@ class ListProposalSerializer(BaseProposalSerializer):
                 #'fee_paid',
                 )
 
-    def get_submitter(self,obj):
+    def get_submitter(self, obj):
         email_user = retrieve_email_user(obj.submitter)
         return EmailUserSerializer(email_user).data
 
-    def get_assigned_officer(self,obj):
-        if obj.processing_status==Proposal.PROCESSING_STATUS_WITH_APPROVER and obj.assigned_approver:
-            return obj.assigned_approver.get_full_name()
+    def get_assigned_officer(self, obj):
+        if obj.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER and obj.assigned_approver:
+            email_user = retrieve_email_user(obj.assigned_approver)
+            return EmailUserSerializer(email_user).data
         if obj.assigned_officer:
-            return obj.assigned_officer.get_full_name()
+            email_user = retrieve_email_user(obj.assigned_officer)
+            return EmailUserSerializer(email_user).data
         return None
 
     def get_assessor_process(self,obj):
@@ -453,12 +493,14 @@ class ProposalSerializer(BaseProposalSerializer):
 class CreateProposalSerializer(BaseProposalSerializer):
     application_type_id = serializers.IntegerField(write_only=True, required=False)
     proposal_type_id = serializers.IntegerField(write_only=True, required=False)
+
     class Meta:
         model = Proposal
         fields = (
                 'id',
                 'application_type_id',
                 'submitter',
+                'ind_applicant',
                 'org_applicant',
                 'proposal_type_id',
                 )
@@ -501,7 +543,7 @@ class SaveProposalSerializer(BaseProposalSerializer):
                 'id',
                 'application_type',
                 'title',
-                'customer_status',
+                # 'customer_status',
                 'processing_status',
                 'applicant_type',
                 'applicant',
