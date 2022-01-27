@@ -161,7 +161,7 @@ export default {
         },
         debug: function(){
             if (this.$route.query.debug){
-                return this.$route.query.debug === 'Tru3'
+                return this.$route.query.debug === 'true'
             }
             return false
         },
@@ -363,18 +363,12 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
                     let links = '';
                     if (vm.is_internal){
-                        if (vm.debug){
+                        if(full.assessor_process){
                             links +=  `<a href='/internal/proposal/${full.id}'>Process</a><br/>`;
-                            links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
                         } else {
-                            if(full.assessor_process){
-                                links +=  `<a href='/internal/proposal/${full.id}'>Process</a><br/>`;
-                            } else {
-                                links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
-                            }
+                            links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
                         }
                     }
                     if (vm.is_external){
@@ -385,19 +379,17 @@ export default {
                         else if (full.can_user_view) {
                             links +=  `<a href='/external/proposal/${full.id}'>View</a><br/>`;
                         }
-                        for (let invoice of full.invoices){
-                            console.log(invoice.payment_status.toLowerCase())
-                            if (invoice.payment_status.toLowerCase() === 'unpaid' || invoice.payment_status.toLowerCase() === 'partially paid'){
-                                links +=  `<a href='/application_fee_existing/${full.id}'>Pay</a>`
-                            }
-                        }
-                        if (full.document_upload_url){
-                            links +=  `<a href='${full.document_upload_url}'>Upload Documents</a>`
-                        }
+                        //for (let invoice of full.invoices){
+                        //    console.log(invoice.payment_status.toLowerCase())
+                        //    if (invoice.payment_status.toLowerCase() === 'unpaid' || invoice.payment_status.toLowerCase() === 'partially paid'){
+                        //        links +=  `<a href='/application_fee_existing/${full.id}'>Pay</a>`
+                        //    }
+                        //}
+                        //if (full.document_upload_url){
+                        //    links +=  `<a href='${full.document_upload_url}'>Upload Documents</a>`
+                        //}
                     }
                     return links;
-                    */
-                    return full.id
                 }
             }
         },
