@@ -335,6 +335,17 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     instance = serializer.save()
     if request.data.get('lease_licensing_geometry'):
         save_geometry(instance, request, viewset)
+    if viewset.action == 'submit':
+        check_geometry(instance)
+
+def check_geometry(instance):
+    geom_ok = True
+    for geom in instance.proposalgeometry.all():
+        if not geom.intersects:
+            geom_ok = False
+
+    if not geom_ok:
+        raise ValidationError('One or more polygons does not intersect with a relevant layer')
 
 def save_geometry(instance, request, viewset):
     # geometry
@@ -410,7 +421,6 @@ def proposal_submit(proposal,request):
         with transaction.atomic():
             if proposal.can_user_edit:
                 proposal.submitter = request.user
-                #proposal.lodgement_date = datetime.datetime.strptime(timezone.now().strftime('%Y-%m-%d'),'%Y-%m-%d').date()
                 proposal.lodgement_date = timezone.now()
                 proposal.training_completed = True
                 if (proposal.amendment_requests):
@@ -425,20 +435,9 @@ def proposal_submit(proposal,request):
                 # Create a log entry for the organisation
                 #proposal.applicant.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(proposal.id),request)
                 applicant_field=getattr(proposal, proposal.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(proposal.id),request)
-
-                # print('requirement block')
-                # default_requirements=ProposalStandardRequirement.objects.filter(application_type=proposal.application_type, default=True, obsolete=False)
-                # print('default', default_requirements)
-                # if default_requirements:
-                #     for req in default_requirements:
-                #         print ('req',req)
-                #         try:
-                #             r, created=ProposalRequirement.objects.get_or_create(proposal=proposal, standard_requirement=req)
-                #             print(r, created, r.id)
-                #         except:
-                #             raise
-        
+                ## 20220128 Ledger to handle EmailUser logging?
+                #applicant_field.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(proposal.id),request)
+                ## 20220128 - update ProposalAssessorGroup, ProposalApproverGroup as SystemGroups
                 ret1 = send_submit_email_notification(request, proposal)
                 ret2 = send_external_submit_email_notification(request, proposal)
 

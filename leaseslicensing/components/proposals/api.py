@@ -1173,12 +1173,12 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def submit(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            #instance.submit(request,self)
+            save_proponent_data(instance,request,self)
+            #return redirect(reverse('external'))
             proposal_submit(instance, request)
             instance.save()
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
-            #return redirect(reverse('external'))
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise

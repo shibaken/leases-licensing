@@ -21,6 +21,7 @@ from taggit.models import TaggedItemBase
 #from ledger.accounts.models import OrganisationAddress
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from ledger_api_client.country_models import Country
+from ledger_api_client.managed_models import SystemGroup
 from leaseslicensing import exceptions
 from leaseslicensing.components.organisations.models import Organisation, OrganisationContact, UserDelegation
 from leaseslicensing.components.main.models import (
@@ -1116,35 +1117,15 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return False
 
     def __assessor_group(self):
-        # TODO get list of assessor groups based on region and activity
-        #if self.region and self.activity:
-        #    try:
-        #        check_group = ProposalAssessorGroup.objects.filter(
-        #            #activities__name__in=[self.activity],
-        #            region__name__in=self.regions_list
-        #        ).distinct()
-        #        if check_group:
-        #            return check_group[0]
-        #    except ProposalAssessorGroup.DoesNotExist:
-        #        pass
-        default_group = ProposalAssessorGroup.objects.get(default=True)
+        #default_group = ProposalAssessorGroup.objects.get(default=True)
+        default_group = SystemGroup.objects.get(name='ProposalAssessorGroup')
 
         return default_group
 
 
     def __approver_group(self):
-        # TODO get list of approver groups based on region and activity
-        #if self.region and self.activity:
-        #    try:
-        #        check_group = ProposalApproverGroup.objects.filter(
-        #            #activities__name__in=[self.activity],
-        #            region__name__in=self.regions_list
-        #        ).distinct()
-        #        if check_group:
-        #            return check_group[0]
-        #    except ProposalApproverGroup.DoesNotExist:
-        #        pass
-        default_group = ProposalApproverGroup.objects.get(default=True)
+        #default_group = ProposalApproverGroup.objects.get(default=True)
+        default_group = SystemGroup.objects.get(name='ProposalApproverGroup')
 
         return default_group
 
@@ -1253,7 +1234,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 return self.__assessor_group() in user.proposalassessorgroup_set.all()
 
     def log_user_action(self, action, request):
-        return ProposalUserAction.log_action(self, action, request.user)
+        return ProposalUserAction.log_action(self, action, request.user.id)
 
     def submit(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
