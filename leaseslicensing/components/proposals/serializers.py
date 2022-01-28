@@ -352,6 +352,7 @@ class ListProposalMinimalSerializer(BaseProposalSerializer):
             'id',
             'processing_status',
             'proposalgeometry',
+            'application_type',
         )
 
 

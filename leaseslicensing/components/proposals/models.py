@@ -691,10 +691,12 @@ class Proposal(DirtyFieldsMixin, models.Model):
         if isinstance(self.applicant, Organisation):
             return '{} \n{}'.format(self.org_applicant.organisation.name, self.org_applicant.address)
         else:
-            return "{} {}\n{}".format(
+            # return "{} {}\n{}".format(
+            return "{} {}".format(
                 self.applicant.first_name,
                 self.applicant.last_name,
-                self.applicant.addresses.all().first())
+                # self.applicant.addresses.all().first()
+            )
 
     @property
     def applicant_address(self):

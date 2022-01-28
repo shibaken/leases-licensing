@@ -27,7 +27,8 @@ else
         declare -A inc_array
         for DAILY in $DAILY_IMAGE_INCREMENTS;
         do
-            INC=$(echo $DAILY | cut -c $((${#REPO}+21))-)
+            #INC=$(echo $DAILY | cut -c $((${#REPO}+21))-)
+            INC=$(echo $DAILY | cut -c $((${#REPO}+${#1}+22))-)
             inc_array[$I]=$INC
             I=$(($I+1))
         done
