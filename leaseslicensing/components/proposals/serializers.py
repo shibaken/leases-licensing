@@ -260,7 +260,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'get_history',
                 'lodgement_date',
                 #'modified_date',
-                'documents',
+                'supporting_documents',
                 'requirements',
                 'readonly',
                 'can_user_edit',
@@ -298,9 +298,23 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'aboriginal_site',
                 'native_title_consultation',
                 'mining_tenement',
+                'exclusive_use_text',
+                'long_term_use_text',
+                'consistent_purpose_text',
+                'consistent_plan_text',
+                'clearing_vegetation_text',
+                'ground_disturbing_works_text',
+                'heritage_site_text',
+                'environmentally_sensitive_text',
+                'wetlands_impact_text',
+                'building_required_text',
+                'significant_change_text',
+                'aboriginal_site_text',
+                'native_title_consultation_text',
+                'mining_tenement_text',
 
                 )
-        read_only_fields = ('documents',)
+        read_only_fields = ('supporting_documents',)
 
     def get_applicant(self, obj):
         if isinstance(obj, Organisation):
@@ -530,6 +544,21 @@ class SaveRegistrationOfInterestSerializer(BaseProposalSerializer):
                 'aboriginal_site',
                 'native_title_consultation',
                 'mining_tenement',
+                'exclusive_use_text',
+                'long_term_use_text',
+                'consistent_purpose_text',
+                'consistent_plan_text',
+                'clearing_vegetation_text',
+                'ground_disturbing_works_text',
+                'heritage_site_text',
+                'environmentally_sensitive_text',
+                'wetlands_impact_text',
+                'building_required_text',
+                'significant_change_text',
+                'aboriginal_site_text',
+                'native_title_consultation_text',
+                'mining_tenement_text',
+
                 )
         read_only_fields=('id',)
 
