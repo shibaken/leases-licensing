@@ -1,5 +1,6 @@
 <template lang="html">
     <div v-if="proposal" class="container" id="internalProposal">
+        <div v-if="debug">internal/proposals/proposal.vue</div>
         <div class="row">
             <h3 v-if="proposal.migrated">Application: {{ proposal.lodgement_number }} (Migrated)</h3>
             <h3 v-else>Application: {{ proposal.lodgement_number }}</h3>
@@ -41,9 +42,7 @@
 
             </div>
 
-            <div class="col-md-1"></div>
-
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <!-- Main contents -->
                 <template v-if="display_approval_screen">
                     <ApprovalScreen
@@ -220,6 +219,13 @@ export default {
 
     },
     computed: {
+        debug: function(){
+            console.log(this.$route.query.debug)
+            if (this.$route.query.debug){
+                return this.$route.query.debug == 'true'
+            }
+            return false
+        },
         proposedApprovalKey: function() {
             return "proposed_approval_" + this.uuid;
         },
