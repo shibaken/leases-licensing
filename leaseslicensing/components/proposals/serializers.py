@@ -315,34 +315,34 @@ class BaseProposalSerializer(serializers.ModelSerializer):
 #                 'mining_tenement',
 #
 # =======
-#                 'exclusive_use',
-#                 'long_term_use',
-#                 'consistent_purpose',
-#                 'consistent_plan',
-#                 'clearing_vegetation',
-#                 'ground_disturbing_works',
-#                 'heritage_site',
-#                 'environmentally_sensitive',
-#                 'wetlands_impact',
-#                 'building_required',
-#                 'significant_change',
-#                 'aboriginal_site',
-#                 'native_title_consultation',
-#                 'mining_tenement',
-#                 'exclusive_use_text',
-#                 'long_term_use_text',
-#                 'consistent_purpose_text',
-#                 'consistent_plan_text',
-#                 'clearing_vegetation_text',
-#                 'ground_disturbing_works_text',
-#                 'heritage_site_text',
-#                 'environmentally_sensitive_text',
-#                 'wetlands_impact_text',
-#                 'building_required_text',
-#                 'significant_change_text',
-#                 'aboriginal_site_text',
-#                 'native_title_consultation_text',
-#                 'mining_tenement_text',
+                'exclusive_use',
+                'long_term_use',
+                'consistent_purpose',
+                'consistent_plan',
+                'clearing_vegetation',
+                'ground_disturbing_works',
+                'heritage_site',
+                'environmentally_sensitive',
+                'wetlands_impact',
+                'building_required',
+                'significant_change',
+                'aboriginal_site',
+                'native_title_consultation',
+                'mining_tenement',
+                'exclusive_use_text',
+                'long_term_use_text',
+                'consistent_purpose_text',
+                'consistent_plan_text',
+                'clearing_vegetation_text',
+                'ground_disturbing_works_text',
+                'heritage_site_text',
+                'environmentally_sensitive_text',
+                'wetlands_impact_text',
+                'building_required_text',
+                'significant_change_text',
+                'aboriginal_site_text',
+                'native_title_consultation_text',
+                'mining_tenement_text',
 #
 # >>>>>>> 48436f95cf419f5d4cb2838f7da7d0be105d908a
                 )
@@ -741,7 +741,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'get_history',
                 'lodgement_date',
                 #'modified_date',
-                'documents',
+                # 'documents',
                 'requirements',
                 'readonly',
                 'can_user_edit',
@@ -773,7 +773,10 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 #'fee_paid',
                 'requirements_completed'
                 )
-        read_only_fields=('documents','requirements')
+        read_only_fields = (
+            # 'documents',
+            'requirements',
+            )
 
     def get_submitter(self, obj):
         email_user = retrieve_email_user(obj.submitter)
