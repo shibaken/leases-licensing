@@ -43,6 +43,10 @@
             </div>
         </CollapsibleFilters>
 
+        <div class="text-right">
+            <button type="button" class="btn btn-secondary" @click="geoJsonButtonClicked">GeoJson</button>
+        </div>
+
         <div :id="map_container_id">
             <div :id="elem_id" class="map" style="position: relative;">
                 <div class="basemap-button">
@@ -216,6 +220,10 @@ export default {
         }
     },
     methods: {
+        geoJsonButtonClicked: function(){
+            console.log('geoJsonButtonClicked')
+            // TODO: export all the polygons shown as geojson file
+        },
         showProposals: function(){
             let vm = this
             for (let proposal of vm.proposals){
