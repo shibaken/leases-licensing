@@ -1235,7 +1235,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def log_user_action(self, action, request):
         return ProposalUserAction.log_action(self, action, request.user.id)
-
+    
+    # proposal.utils.proposal_submit appears to be used instead
     def submit(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
         with transaction.atomic():
