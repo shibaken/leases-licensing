@@ -37,13 +37,20 @@
                     />
                   </div>
                   <div v-else>
-                    <Applicant 
+                    <!-- Applicant 
                         :email_user="proposal.submitter" 
                         :applicantType="proposal.applicant_type" 
                         id="proposalStartApplicant"
                         :readonly="readonly"
                         :showElectoralRoll="showElectoralRoll"
                         :storedSilentElector="silentElector"
+                        :proposalId="proposal.id"
+                    / -->
+                    <Applicant 
+                        :email_user="proposal.submitter" 
+                        :applicantType="proposal.applicant_type" 
+                        id="proposalStartApplicant"
+                        :readonly="readonly"
                         :proposalId="proposal.id"
                     />
                   </div>

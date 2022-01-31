@@ -61,7 +61,7 @@ class ProposalGeometrySerializer(GeoFeatureModelSerializer):
 
 
 class ProposalTypeSerializer(serializers.ModelSerializer):
-    activities = serializers.SerializerMethodField()
+
     class Meta:
         model = ProposalType
         fields = (
@@ -224,7 +224,7 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
 class BaseProposalSerializer(serializers.ModelSerializer):
     readonly = serializers.SerializerMethodField(read_only=True)
     documents_url = serializers.SerializerMethodField()
-    proposal_type = serializers.SerializerMethodField()
+    proposal_type = ProposalTypeSerializer()
     application_type = ApplicationTypeSerializer()
     # allowed_assessors = EmailUserSerializer(many=True)
     # qaofficer_referrals = QAOfficerReferralSerializer(many=True)
@@ -271,7 +271,6 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 # 'lodgement_sequence',
                 'can_officer_process',
                 'allowed_assessors',
-                'proposal_type',
                 # 'is_qa_officer',
                 # 'qaofficer_referrals',
                 # 'pending_amendment_request',
@@ -328,8 +327,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         # return obj.get_customer_status_display()
         return obj.get_processing_status_display()
 
-    def get_proposal_type(self,obj):
-        return obj.proposal_type.description if obj.proposal_type else ''
+    # def get_proposal_type(self,obj):
+    #     return obj.proposal_type.description if obj.proposal_type else ''
 
     def get_is_qa_officer(self,obj):
         #request = self.context['request']

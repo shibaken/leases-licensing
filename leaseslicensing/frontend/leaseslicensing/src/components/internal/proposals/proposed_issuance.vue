@@ -425,14 +425,14 @@ export default {
         */
         mooringLicenceApplication: function() {
             let app = false;
-            if ([constants.ML_PROPOSAL].includes(this.proposal.application_type_dict.code)){
+            if ([constants.ML_PROPOSAL].includes(this.proposal.application_type.code)){
                 app = true;
             }
             return app;
         },
         authorisedUserApplication: function() {
             let app = false;
-            if ([constants.AU_PROPOSAL].includes(this.proposal.application_type_dict.code)){
+            if ([constants.AU_PROPOSAL].includes(this.proposal.application_type.code)){
                 app = true;
             }
             return app;
@@ -460,7 +460,7 @@ export default {
             return this.authorisedUserApplication;
         },
         display_sticker_number_field: function() {
-            if ([constants.WL_PROPOSAL].includes(this.proposal.application_type_dict.code)){
+            if ([constants.WL_PROPOSAL].includes(this.proposal.application_type.code)){
                 return false
             }
             return true

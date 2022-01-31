@@ -42,9 +42,7 @@
 
             </div>
 
-            <div class="col-md-1"></div>
-
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <!-- Main contents -->
                 <template v-if="display_approval_screen">
                     <ApprovalScreen
