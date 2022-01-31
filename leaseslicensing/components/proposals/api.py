@@ -1033,13 +1033,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['GET',], detail=True)
     def internal_proposal(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = InternalProposalSerializer(instance,context={'request':request})
-        if instance.application_type.name==ApplicationType.TCLASS:
-            serializer = InternalProposalSerializer(instance,context={'request':request})
-        elif instance.application_type.name==ApplicationType.FILMING:
-            serializer = InternalFilmingProposalSerializer(instance,context={'request':request})
-        elif instance.application_type.name==ApplicationType.EVENT:
-            serializer = InternalEventProposalSerializer(instance,context={'request':request})
+        serializer = InternalProposalSerializer(instance, context={'request': request})
         return Response(serializer.data)
 
 
