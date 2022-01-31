@@ -4,19 +4,29 @@
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="">Type</label>
+                    <template v-show="select2AppliedToApplicationType">
+                        <select class="form-control" ref="filter_application_type" ></select>
+                    </template>
+<!--
                     <select class="form-control" v-model="filterApplicationType">
                         <option value="all">All</option>
                         <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
                     </select>
+-->
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="">Status</label>
+                    <template v-show="select2AppliedToApplicationStatus">
+                        <select class="form-control" ref="filter_application_status" ></select>
+                    </template>
+<!--
                     <select class="form-control" v-model="filterApplicationStatus">
                         <option value="all">All</option>
                         <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
                     </select>
+-->
                 </div>
             </div>
             <div class="col-md-3">
@@ -42,6 +52,10 @@
                 </div>
             </div>
         </CollapsibleFilters>
+
+        <div class="text-right">
+            <button type="button" class="btn btn-secondary" @click="geoJsonButtonClicked">GeoJson</button>
+        </div>
 
         <div :id="map_container_id">
             <div :id="elem_id" class="map" style="position: relative;">
@@ -141,6 +155,20 @@ export default {
     },
     data() {
         let vm = this;
+        let default_show_statuses = [
+            'draft', 
+            'with_assessor', 
+            'with_assessor_conditions', 
+            'with_approver', 
+            'with_referral', 
+            'with_referral_conditions',
+            'approved_application',
+            'approved_competitive_process',
+            'approved_editing_invoicing',
+            'approved',
+            'declined',
+            'discarded',
+        ]
 
         return {
             // selected values for filtering
@@ -150,8 +178,10 @@ export default {
             filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedToForMap') ? sessionStorage.getItem('filterProposalLodgedToForMap') : '',
 
             // filtering options
-            application_types: [],
-            application_statuses: [],
+            application_types: null,
+            application_statuses: null,
+            select2AppliedToApplicationType: false,
+            select2AppliedToApplicationStatus: false,
 
             dateFormat: 'DD/MM/YYYY',
             datepickerOptions:{
@@ -180,6 +210,117 @@ export default {
             proposals: null,
             proposalQuerySource: null,
             proposalQueryLayer: null,
+
+            show_hide_instructions: [ // This array is used as instructions when showing/hiding the apiary sites on the map
+                {
+                    'id': 'draft',
+                    'text': 'Draft',
+                    'show': default_show_statuses.includes('draft'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'with_assessor',
+                    'text': 'With Assessor',
+                    'show': default_show_statuses.includes('with_assessor'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'with_assessor_conditions',
+                    'text': 'With Assessor (Conditions)',
+                    'show': default_show_statuses.includes('with_assessor_conditions'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'with_approver',
+                    'text': 'With Approver',
+                    'show': default_show_statuses.includes('with_approver'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'with_referral',
+                    'text': 'With Referral',
+                    'show': default_show_statuses.includes('with_referral'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'with_referral_conditions',
+                    'text': 'With Referral (Conditions)',
+                    'show': default_show_statuses.includes('with_referral_conditions'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'approved_application',
+                    'text': 'Approved (Application)',
+                    'show': default_show_statuses.includes('approved_application'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'approved_competitive_process',
+                    'text': 'Approved (Competitive Process)',
+                    'show': default_show_statuses.includes('approved_competitive_process'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'approved_editing_invoiceing',
+                    'text': 'Approved (Editing Invoicing)',
+                    'show': default_show_statuses.includes('approved_editing_invoiceing'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'approved',
+                    'text': 'Approved',
+                    'show': default_show_statuses.includes('approved'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'declined',
+                    'text': 'Declined',
+                    'show': default_show_statuses.includes('declined'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+                {
+                    'id': 'discarded',
+                    'text': 'Discarded',
+                    'show': default_show_statuses.includes('discarded'),
+                    'shown': false,
+                    'loaded': false,
+                    'features': [],
+                    'ajax_obj': null,
+                },
+            ]
         }
     },
     computed: {
@@ -216,23 +357,60 @@ export default {
         }
     },
     methods: {
-        showProposals: function(){
-            let vm = this
-            for (let proposal of vm.proposals){
-                if (proposal.proposalgeometry){
-                    for (let poly of proposal.proposalgeometry.features) {
-                        const feature = (new GeoJSON).readFeature(poly);
-                        //if (!feature.getProperties().intersects) {
-                            //feature.setStyle(nonIntersectingStyle);
-                        //}
-                        //feature.setProperties({"id": this.newFeatureId});
-                        this.proposalQuerySource.addFeature(feature);
-                        //this.newFeatureId++;
-                    }
-                }
-            }
+        updateInstructions: function(){
+
         },
-        addProposalPolygonToMap: function(polygon_geojson) {
+        applySelect2ToApplicationTypes: function(application_types){
+            let vm = this
+            if (!vm.select2AppliedToApplicationType){
+                $(vm.$refs.filter_application_type).select2({
+                    "theme": "bootstrap",
+                    allowClear: false,
+                    placeholder:"Select Type",
+                    multiple:true,
+                    data: application_types,
+                }).
+                on('select2:select', function(e){
+                    vm.updateInstructions()
+                    vm.showHideProposals()
+                }).
+                on('select2:unselect', function(e){
+                    console.log('unselect')
+                    vm.updateInstructions()
+                    vm.showHideProposals()
+                })
+            }
+            vm.select2AppliedToApplicationType = true
+        },
+        applySelect2ToApplicationStatuses: function(application_statuses){
+            console.log(application_statuses)
+            let vm = this
+            if (!vm.select2AppliedToApplicationStatus){
+                $(vm.$refs.filter_application_status).select2({
+                    "theme": "bootstrap",
+                    allowClear: false,
+                    placeholder:"Select Status",
+                    multiple:true,
+                    data: application_statuses,
+                }).
+                on('select2:select', function(e){
+                    vm.updateInstructions()
+                    vm.showHideProposals()
+                }).
+                on('select2:unselect', function(e){
+                    console.log('unselect')
+                    vm.updateInstructions()
+                    vm.showHideProposals()
+                })
+            }
+            vm.select2AppliedToApplicationStatus = true
+        },
+        geoJsonButtonClicked: function(){
+            console.log('geoJsonButtonClicked')
+            // TODO: export all the polygons shown as geojson file
+        },
+        addGeojsonToMap: function(polygon_geojson) {
+            console.log(polygon_geojson)
             let vm = this
             let feature = (new GeoJSON()).readFeature(polygon_geojson)
             this.proposalQuerySource.addFeature(feature)
@@ -464,33 +642,81 @@ export default {
         collapsible_component_mounted: function(){
             this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
         },
-        fetchProposals: function(){
+        showHideProposals: function(){
             let vm = this;
 
-            vm.$http.get('/api/proposal/').then((response) => {
-                vm.proposals = response.body
-                vm.showProposals()
-            },(error) => {
+            for (let site_status of vm.show_hide_instructions){
+                if (site_status.show == site_status.shown){
+                    console.log('continue: ' + site_status.id)
+                    continue  // All the polygons have been already updated on the map.  Go to the next status
+                }
 
-            })
+                if (site_status.show){
+                    // Show
+                    if (site_status.loaded){
+                        for (let feature of site_status.features){
+                            vm.proposalQuerySource.addFeature(feature);
+                        }
+                    } else {
+                        // Polygon data not loaded yet
+                        if (site_status.ajax_obj != null) {
+                            // Cancel all the previous requests for this site status
+                            site_status.ajax_obj.abort();
+                            site_status.ajax_obj = null;
+                        }
+
+                        site_status.ajax_obj = $.ajax('/api/proposal/?status=' + site_status.id, {
+                            dataType: 'json',
+                            success: function(re, status, xhr){
+                                for (let proposal of re){
+                                    if (proposal.proposalgeometry){
+                                        for (let poly of proposal.proposalgeometry.features){
+                                            try {
+                                                let feature = (new GeoJSON()).readFeature(poly)
+                                                vm.proposalQuerySource.addFeature(feature)
+                                                site_status.features.push(feature)
+                                            } catch (err) {
+                                                console.log(err)
+                                            }
+                                        }
+                                    }
+                                }
+                                site_status.loaded = true
+                            },
+                            error: function (jqXhr, textStatus, errorMessage) { // error callback 
+                                console.log(errorMessage)
+                            }
+                        })
+                    }
+                } else {
+                    // Hide
+                    for (let feature of site_status.features){
+                        // Remove the apiary_site from the map.  There are no functions to show/hide a feature unlike the layer.
+                        if (vm.proposalQuerySource.hasFeature(feature)){
+                            try{
+                                // Remove the feature from the map
+                                vm.proposalQuerySource.removeFeature(feature)
+                            } catch (err){
+                                console.log(err)
+                            }
+                        }
+                    }
+                }
+                site_status.shown = site_status.show
+            } // END: loop for show_hide_instructions
         },
         fetchFilterLists: function(){
             let vm = this;
 
             // Application Types
-            vm.$http.get(api_endpoints.application_types_dict+'?apply_page=False').then((response) => {
-                vm.application_types = response.body
+            vm.$http.get(api_endpoints.application_types_dict + '?for_filter=true').then((response) => {
+                vm.applySelect2ToApplicationTypes(response.body)
             },(error) => {
-
             })
 
             // Application Statuses
-            vm.$http.get(api_endpoints.application_statuses_dict).then((response) => {
-                if (vm.is_internal){
-                    vm.application_statuses = response.body.internal_statuses
-                } else {
-                    vm.application_statuses = response.body.external_statuses
-                }
+            vm.$http.get(api_endpoints.application_statuses_dict + '?for_filter=true').then((response) => {
+                vm.applySelect2ToApplicationStatuses(response.body)
             },(error) => {
             })
         },
@@ -529,7 +755,6 @@ export default {
     created: function(){
         console.log('created()')
         this.fetchFilterLists()
-        this.fetchProposals()
     },
     mounted: function(){
         console.log('mounted()')
@@ -537,10 +762,10 @@ export default {
 
         this.$nextTick(() => {
             vm.addEventListeners()
-            //vm.map.setSize([window.innerWidth, window.innerHeight])  // Now sure if we need this or forceToRefreshMap() is sufficient
             vm.initMap()
             vm.setBaseLayer('osm')
             vm.addOptionalLayers()
+            vm.showHideProposals()
         });
     }
 }
