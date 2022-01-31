@@ -1,18 +1,7 @@
 <template lang="html">
     <div>
         <div class="form-group">
-            <label :id="id" for="label" class="inline" >{{ label }}</label>
-            <!--template v-if="help_text">
-                <HelpText :help_text="help_text" />
-            </template>
-
-            <template v-if="help_text_url">
-                <HelpTextUrl :help_text_url="help_text_url" />
-            </template>
-
-            <CommentBlock :label="label" :name="name" :field_data="field_data" />
-
-	    <ckeditor v-model="field_data.value" :config="editorConfig" :read-only="readonly" :name="name" :required="isRequired" ></ckeditor-->
+            <!--label :id="id" for="label" class="inline" >{{ label }}</label-->
 	    <ckeditor v-model="detailsText" :config="editorConfig" :read-only="readonly" :name="name" :required="isRequired" ></ckeditor>
         </div>
     </div>

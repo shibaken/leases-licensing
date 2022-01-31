@@ -260,7 +260,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'get_history',
                 'lodgement_date',
                 #'modified_date',
-                'documents',
+                'supporting_documents',
                 'requirements',
                 'readonly',
                 'can_user_edit',
@@ -283,6 +283,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'details_text',
                 'proposalgeometry',
                 ## additional form fields
+# <<<<<<< HEAD
                 # 'exclusive_use',
                 # 'long_term_use',
                 # 'consistent_purpose',
@@ -297,8 +298,55 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 # 'aboriginal_site',
                 # 'native_title_consultation',
                 # 'mining_tenement',
+# ||||||| 851b4af
+#                 'exclusive_use',
+#                 'long_term_use',
+#                 'consistent_purpose',
+#                 'consistent_plan',
+#                 'clearing_vegetation',
+#                 'ground_disturbing_works',
+#                 'heritage_site',
+#                 'environmentally_sensitive',
+#                 'wetlands_impact',
+#                 'building_required',
+#                 'significant_change',
+#                 'aboriginal_site',
+#                 'native_title_consultation',
+#                 'mining_tenement',
+#
+# =======
+                'exclusive_use',
+                'long_term_use',
+                'consistent_purpose',
+                'consistent_plan',
+                'clearing_vegetation',
+                'ground_disturbing_works',
+                'heritage_site',
+                'environmentally_sensitive',
+                'wetlands_impact',
+                'building_required',
+                'significant_change',
+                'aboriginal_site',
+                'native_title_consultation',
+                'mining_tenement',
+                'exclusive_use_text',
+                'long_term_use_text',
+                'consistent_purpose_text',
+                'consistent_plan_text',
+                'clearing_vegetation_text',
+                'ground_disturbing_works_text',
+                'heritage_site_text',
+                'environmentally_sensitive_text',
+                'wetlands_impact_text',
+                'building_required_text',
+                'significant_change_text',
+                'aboriginal_site_text',
+                'native_title_consultation_text',
+                'mining_tenement_text',
+#
+# >>>>>>> 48436f95cf419f5d4cb2838f7da7d0be105d908a
                 )
-        read_only_fields = ('documents',)
+        read_only_fields = ('supporting_documents',)
 
     def get_applicant(self, obj):
         if isinstance(obj, Organisation):
@@ -529,6 +577,21 @@ class SaveRegistrationOfInterestSerializer(BaseProposalSerializer):
                 'aboriginal_site',
                 'native_title_consultation',
                 'mining_tenement',
+                'exclusive_use_text',
+                'long_term_use_text',
+                'consistent_purpose_text',
+                'consistent_plan_text',
+                'clearing_vegetation_text',
+                'ground_disturbing_works_text',
+                'heritage_site_text',
+                'environmentally_sensitive_text',
+                'wetlands_impact_text',
+                'building_required_text',
+                'significant_change_text',
+                'aboriginal_site_text',
+                'native_title_consultation_text',
+                'mining_tenement_text',
+
                 )
         read_only_fields=('id',)
 
@@ -678,7 +741,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'get_history',
                 'lodgement_date',
                 #'modified_date',
-                'documents',
+                # 'documents',
                 'requirements',
                 'readonly',
                 'can_user_edit',
@@ -710,7 +773,10 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 #'fee_paid',
                 'requirements_completed'
                 )
-        read_only_fields=('documents','requirements')
+        read_only_fields = (
+            # 'documents',
+            'requirements',
+            )
 
     def get_submitter(self, obj):
         email_user = retrieve_email_user(obj.submitter)
@@ -987,13 +1053,14 @@ class ReferralSerializer(serializers.ModelSerializer):
 
     def __init__(self,*args,**kwargs):
         super(ReferralSerializer, self).__init__(*args, **kwargs)
-        try:    
-            if kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.TCLASS:
-                self.fields['proposal'] = ReferralProposalSerializer(context={'request':self.context['request']})
-            elif kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.FILMING:
-                self.fields['proposal'] = FilmingReferralProposalSerializer(context={'request':self.context['request']})
-            elif kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.EVENT:
-                self.fields['proposal'] = EventReferralProposalSerializer(context={'request':self.context['request']})
+        try:
+            self.fields['proposal'] = ReferralProposalSerializer(context={'request': self.context['request']})
+            # if kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.TCLASS:
+            #     self.fields['proposal'] = ReferralProposalSerializer(context={'request':self.context['request']})
+            # elif kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.FILMING:
+            #     self.fields['proposal'] = FilmingReferralProposalSerializer(context={'request':self.context['request']})
+            # elif kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.EVENT:
+            #     self.fields['proposal'] = EventReferralProposalSerializer(context={'request':self.context['request']})
         except:
             raise
 

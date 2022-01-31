@@ -21,6 +21,7 @@ from taggit.models import TaggedItemBase
 #from ledger.accounts.models import OrganisationAddress
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from ledger_api_client.country_models import Country
+from ledger_api_client.managed_models import SystemGroup
 from leaseslicensing import exceptions
 from leaseslicensing.components.organisations.models import Organisation, OrganisationContact, UserDelegation
 from leaseslicensing.components.main.models import (
@@ -231,8 +232,190 @@ class DeedPollDocument(Document):
         verbose_name = "Deed Poll Document"
 
 
+class MiningTenementDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='mining_tenement_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class NativeTitleConsultationDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='native_title_consultation_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class AboriginalSiteDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='aboriginal_site_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class SignificantChangeDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='significant_change_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class BuildingRequiredDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='building_required_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class WetlandsImpactDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='wetlands_impact_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class EnvironmentallySensitiveDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='environmentally_sensitive_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class HeritageSiteDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='heritage_site_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class GroundDisturbingWorksDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='ground_disturbing_works_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ClearingVegetationDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='clearing_vegetation_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ConsistentPlanDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='consistent_plan_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ConsistentPurposeDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='consistent_purpose_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class LongTermUseDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='long_term_use_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ExclusiveUseDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='exclusive_use_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
 class ProposalDocument(Document):
-    proposal = models.ForeignKey('Proposal',related_name='documents', on_delete=models.CASCADE)
+    proposal = models.ForeignKey('Proposal',related_name='supporting_documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
     input_name = models.CharField(max_length=255,null=True,blank=True)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
@@ -492,20 +675,34 @@ class Proposal(DirtyFieldsMixin, models.Model):
     ## additional form fields
     # proposal details
     exclusive_use = models.BooleanField(null=True)
+    exclusive_use_text = models.TextField(blank=True)
     long_term_use = models.BooleanField(null=True)
+    long_term_use_text = models.TextField(blank=True)
     consistent_purpose = models.BooleanField(null=True)
+    consistent_purpose_text = models.TextField(blank=True)
     consistent_plan = models.BooleanField(null=True)
+    consistent_plan_text = models.TextField(blank=True)
     # proposal impact
     clearing_vegetation = models.BooleanField(null=True)
+    clearing_vegetation_text = models.TextField(blank=True)
     ground_disturbing_works = models.BooleanField(null=True)
+    ground_disturbing_works_text = models.TextField(blank=True)
     heritage_site = models.BooleanField(null=True)
+    heritage_site_text = models.TextField(blank=True)
     environmentally_sensitive = models.BooleanField(null=True)
+    environmentally_sensitive_text = models.TextField(blank=True)
     wetlands_impact = models.BooleanField(null=True)
+    wetlands_impact_text = models.TextField(blank=True)
     building_required = models.BooleanField(null=True)
+    building_required_text = models.TextField(blank=True)
     significant_change = models.BooleanField(null=True)
+    significant_change_text = models.TextField(blank=True)
     aboriginal_site = models.BooleanField(null=True)
+    aboriginal_site_text = models.TextField(blank=True)
     native_title_consultation = models.BooleanField(null=True)
+    native_title_consultation_text = models.TextField(blank=True)
     mining_tenement = models.BooleanField(null=True)
+    mining_tenement_text = models.TextField(blank=True)
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -920,35 +1117,15 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return False
 
     def __assessor_group(self):
-        # TODO get list of assessor groups based on region and activity
-        #if self.region and self.activity:
-        #    try:
-        #        check_group = ProposalAssessorGroup.objects.filter(
-        #            #activities__name__in=[self.activity],
-        #            region__name__in=self.regions_list
-        #        ).distinct()
-        #        if check_group:
-        #            return check_group[0]
-        #    except ProposalAssessorGroup.DoesNotExist:
-        #        pass
-        default_group = ProposalAssessorGroup.objects.get(default=True)
+        #default_group = ProposalAssessorGroup.objects.get(default=True)
+        default_group = SystemGroup.objects.get(name='ProposalAssessorGroup')
 
         return default_group
 
 
     def __approver_group(self):
-        # TODO get list of approver groups based on region and activity
-        #if self.region and self.activity:
-        #    try:
-        #        check_group = ProposalApproverGroup.objects.filter(
-        #            #activities__name__in=[self.activity],
-        #            region__name__in=self.regions_list
-        #        ).distinct()
-        #        if check_group:
-        #            return check_group[0]
-        #    except ProposalApproverGroup.DoesNotExist:
-        #        pass
-        default_group = ProposalApproverGroup.objects.get(default=True)
+        #default_group = ProposalApproverGroup.objects.get(default=True)
+        default_group = SystemGroup.objects.get(name='ProposalApproverGroup')
 
         return default_group
 
@@ -1057,7 +1234,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 return self.__assessor_group() in user.proposalassessorgroup_set.all()
 
     def log_user_action(self, action, request):
-        return ProposalUserAction.log_action(self, action, request.user)
+        return ProposalUserAction.log_action(self, action, request.user.id)
 
     def submit(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
