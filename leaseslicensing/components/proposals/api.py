@@ -630,7 +630,161 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def process_supporting_document(self, request, *args, **kwargs):
         instance = self.get_object()
-        returned_data = process_generic_document(request, instance)
+        returned_data = process_generic_document(request, instance, document_type="supporting_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_exclusive_use_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="exclusive_use_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_long_term_use_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="long_term_use_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_consistent_purpose_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="consistent_purpose_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_consistent_plan_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="consistent_plan_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_clearing_vegetation_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="clearing_vegetation_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_ground_disturbing_works_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="ground_disturbing_works_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_heritage_site_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="heritage_site_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_environmentally_sensitive_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="environmentally_sensitive_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_wetlands_impact_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="wetlands_impact_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_building_required_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="building_required_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_significant_change_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="significant_change_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_aboriginal_site_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="aboriginal_site_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_native_title_consultation_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="native_title_consultation_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_mining_tenement_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="mining_tenement_document")
         if returned_data:
             return Response(returned_data)
         else:
@@ -1042,12 +1196,12 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def submit(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            #instance.submit(request,self)
+            save_proponent_data(instance,request,self)
+            #return redirect(reverse('external'))
             proposal_submit(instance, request)
             instance.save()
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
-            #return redirect(reverse('external'))
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
