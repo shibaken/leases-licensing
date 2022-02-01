@@ -253,8 +253,10 @@ class ProposalFilterBackend(DatatablesFilterBackend):
 
         if queryset.model is Proposal:
             if filter_lodged_from:
+                filter_lodged_from = datetime.strptime(filter_lodged_from, '%d/%m/%Y')
                 queryset = queryset.filter(lodgement_date__gte=filter_lodged_from)
             if filter_lodged_to:
+                filter_lodged_to = datetime.strptime(filter_lodged_to, '%d/%m/%Y')
                 queryset = queryset.filter(lodgement_date__lte=filter_lodged_to)
             if filter_application_type:
                 application_type = ApplicationType.get_application_type_by_name(filter_application_type)
