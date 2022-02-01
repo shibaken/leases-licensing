@@ -953,7 +953,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def assessor_assessment(self):
-        qs=self.assessment.filter(referral_assessment=False, referral_group=None)
+        # qs=self.assessment.filter(referral_assessment=False, referral_group=None)
+        qs = self.assessment.filter(referral_assessment=False)
         if qs:
             return qs[0]
         else:
@@ -961,7 +962,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def referral_assessments(self):
-        qs=self.assessment.filter(referral_assessment=True, referral_group__isnull=False)
+        # qs=self.assessment.filter(referral_assessment=True, referral_group__isnull=False)
+        qs = self.assessment.filter(referral_assessment=True)
         if qs:
             return qs
         else:
