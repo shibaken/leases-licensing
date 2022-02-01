@@ -317,8 +317,9 @@ export default {
     },
     computed: {
         filterApplied: function(){
+            console.log('in filterApplied')
             let filter_applied = true
-            if(this.filterApplicationStatuses == [] && this.filterApplicationTypes == [] && 
+            if(this.filterApplicationStatuses.length == 0 && this.filterApplicationTypes.length == 0 && 
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }
@@ -330,10 +331,10 @@ export default {
     },
     watch: {
         filterProposalLodgedFrom: function() {
-            sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
+            sessionStorage.setItem('filterProposalLodgedFromForMap', this.filterProposalLodgedFrom);
         },
         filterProposalLodgedTo: function() {
-            sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
+            sessionStorage.setItem('filterProposalLodgedToForMap', this.filterProposalLodgedTo);
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
@@ -345,22 +346,18 @@ export default {
     methods: {
         updateApplicationTypeFilterCache: function(){
             let vm = this
-            console.log('in updateApplicationTypeFilterCache')
-            let currently_selected = $(vm.$refs.filter_application_type).select2('data').map(x => { return x.id })
-            sessionStorage.setItem('filterApplicationTypesForMap', JSON.stringify(currently_selected));
+            vm.filterApplicationTypes = $(vm.$refs.filter_application_type).select2('data').map(x => { return x.id })
+            sessionStorage.setItem('filterApplicationTypesForMap', JSON.stringify(vm.filterApplicationTypes));
         },
         updateApplicationStatusFilterCache: function(){
             let vm = this
-            console.log('in updateApplicationStatusFilterCache')
-            let currently_selected = $(vm.$refs.filter_application_status).select2('data').map(x => { return x.id })
-            sessionStorage.setItem('filterApplicationStatusesForMap', JSON.stringify(currently_selected));
+            vm.filterApplicationStatuses = $(vm.$refs.filter_application_status).select2('data').map(x => { return x.id })
+            sessionStorage.setItem('filterApplicationStatusesForMap', JSON.stringify(vm.filterApplicationStatuses));
         },
         updateInstructions: function(){
             let vm = this
-            let statuses_currently_selected = $(vm.$refs.filter_application_status).select2('data').map(x => { return x.id })
-            let types_currently_selected = $(vm.$refs.filter_application_type).select2('data').map(x => { return x.id })
 
-            if (statuses_currently_selected.length === 0){
+            if (vm.filterApplicationStatuses.length === 0){
                 // Nothing selected means show all
                 for (let site_status of vm.show_hide_instructions){
                     console.log('Show: ' + site_status.id)
@@ -368,7 +365,7 @@ export default {
                 }
             } else {
                 for (let site_status of vm.show_hide_instructions){
-                    if (statuses_currently_selected.includes(site_status.id)){
+                    if (vm.filterApplicationStatuses.includes(site_status.id)){
                         console.log('Show: ' + site_status.id)
                         site_status.show = true
                     } else {
@@ -421,7 +418,6 @@ export default {
                 }).
                 on('select2:unselect', function(e){
                     vm.updateApplicationStatusFilterCache()
-                    console.log('unselect')
                     vm.updateInstructions()
                     vm.showHideProposals()
                 })
