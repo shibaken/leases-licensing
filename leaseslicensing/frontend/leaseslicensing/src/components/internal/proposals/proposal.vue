@@ -62,7 +62,12 @@
                         :readonly="readonly"
                         :submitterId="proposal.submitter.id"
                         :key="computedProposalId"
-                    />
+                        :show_related_items_tab="true"
+                    >
+                        <template v-slot:related-items>
+                            Related items table here
+                        </template>
+                    </ApplicationForm>
                 </template>
                 <template v-if="display_requirements">
                     <Requirements

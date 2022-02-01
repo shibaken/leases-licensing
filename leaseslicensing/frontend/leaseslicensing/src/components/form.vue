@@ -1,5 +1,6 @@
 <template lang="html">
     <div class="">
+        <div v-if="debug">components/form.vue</div>
 
         <div v-if="proposal && show_application_title" id="scrollspy-heading" class="" >
             <h4>{{applicationTypeText}} Application: {{proposal.lodgement_number}}</h4>
@@ -22,6 +23,14 @@
                   Details
                 </a>
               </li>
+
+              <!-- Related Items tab is shown on the internal proposal page -->
+              <template v-if="show_related_items_tab">
+                  <li class="nav-item">
+                      <a class="nav-link" id="pills-related-items-tab" data-toggle="pill" href="#pills-related-items" role="tab" aria-controls="pills-related-items" aria-selected="false">Related Items </a>
+                  </li>
+              </template>
+
             </ul>
             <div class="tab-content" id="pills-tabContent">
               <div class="tab-pane fade" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
@@ -105,6 +114,14 @@
                     </div>
                 </FormSection>
               </div>
+
+              <!-- Related Items tab is shown on the internal proposal page -->
+              <template v-if="show_related_items_tab">
+                  <div class="tab-pane fade" id="pills-related-items" role="tabpanel" aria-labelledby="pills-related-items-tab">
+                      <slot name="related-items"></slot>
+                  </div>
+              </template>
+
             </div>
         </div>
     </div>
@@ -129,6 +146,10 @@ import Confirmation from '@/components/common/confirmation.vue'
     export default {
         name: 'ApplicationForm',
         props:{
+            show_related_items_tab: {
+                type: Boolean,
+                default: false,
+            },
             proposal:{
                 type: Object,
                 required:true
@@ -210,6 +231,12 @@ import Confirmation from '@/components/common/confirmation.vue'
         },
         */
         computed:{
+            debug: function(){
+                if (this.$route.query.debug){
+                    return this.$route.query.debug === 'true'
+                }
+                return false
+            },
             proposalId: function() {
                 return this.proposal ? this.proposal.id : null;
             },
