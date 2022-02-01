@@ -102,17 +102,16 @@ class GlobalSettingsAdmin(admin.ModelAdmin):
     list_display = ['key', 'value']
     ordering = ('key',)
 
-@admin.register(models.ReferralRecipientGroup)
-class ReferralRecipientGroupAdmin(admin.ModelAdmin):
-    #filter_horizontal = ('members',)
-    list_display = ['name']
-    exclude = ('site',)
-    actions = None
-
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        if db_field.name == "members":
-            kwargs["queryset"] = EmailUser.objects.filter(is_staff=True)
-        return super(ReferralRecipientGroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+# @admin.register(models.ReferralRecipientGroup)
+# class ReferralRecipientGroupAdmin(admin.ModelAdmin):
+#     list_display = ['name']
+#     exclude = ('site',)
+#     actions = None
+#
+#     def formfield_for_manytomany(self, db_field, request, **kwargs):
+#         if db_field.name == "members":
+#             kwargs["queryset"] = EmailUser.objects.filter(is_staff=True)
+#         return super(ReferralRecipientGroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
 @admin.register(models.QAOfficerGroup)
 class QAOfficerGroupAdmin(admin.ModelAdmin):

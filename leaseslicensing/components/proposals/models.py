@@ -2558,7 +2558,6 @@ class QAOfficerGroup(models.Model):
         return Proposal.objects.filter(processing_status__in=assessable_states)
 
 
-#class Referral(models.Model):
 class Referral(RevisionedMixin):
     SENT_CHOICES = (
         (1,'Sent From Assessor'),
@@ -2605,12 +2604,12 @@ class Referral(RevisionedMixin):
 
     @property
     def referral_assessment(self):
-        qs=self.assessment.filter(referral_assessment=True, referral_group=self.referral_group)
+        # qs=self.assessment.filter(referral_assessment=True, referral_group=self.referral_group)
+        qs = self.assessment.filter(referral_assessment=True)
         if qs:
             return qs[0]
         else:
             return None
-
 
     @property
     def can_be_completed(self):
@@ -2625,9 +2624,10 @@ class Referral(RevisionedMixin):
     @property
     def allowed_assessors(self):
         ## must be SystemGroup
-        group = self.referral_group
+        # group = self.referral_group
         #return group.members.all() if group else []
-        return group.get_system_group_member_ids() if group else []
+        # return group.get_system_group_member_ids() if group else []
+        return []  # TODO: correct this
 
     def can_process(self, user):
         if self.processing_status=='with_referral':
@@ -2971,25 +2971,25 @@ class ProposalAssessment(RevisionedMixin):
     #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='proposal_assessment', on_delete=models.SET_NULL)
     submitter = models.IntegerField() #EmailUserRO
     referral_assessment=models.BooleanField(default=False)
-    referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='referral_assessment', on_delete=models.SET_NULL)
+    # referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='referral_assessment', on_delete=models.SET_NULL)
     referral=models.ForeignKey(Referral, related_name='assessment',blank=True, null=True, on_delete=models.SET_NULL)
     # def __str__(self):
     #     return self.proposal
 
     class Meta:
         app_label = 'leaseslicensing'
-        unique_together = ('proposal', 'referral_group',)
+        # unique_together = ('proposal', 'referral_group',)
 
     @property
     def checklist(self):
         return self.answers.all()
 
-    @property
-    def referral_group_name(self):
-        if self.referral_group:
-            return self.referral_group.name
-        else:
-            return ''
+    # @property
+    # def referral_group_name(self):
+    #     if self.referral_group:
+    #         return self.referral_group.name
+    #     else:
+    #         return ''
 
 
 class ProposalAssessmentAnswer(RevisionedMixin):
