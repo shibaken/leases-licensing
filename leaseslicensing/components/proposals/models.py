@@ -2575,7 +2575,7 @@ class Referral(RevisionedMixin):
     sent_by = models.IntegerField() #EmailUserRO
     #referral = models.ForeignKey(EmailUser,null=True,blank=True,related_name='leaseslicensing_referalls', on_delete=models.SET_NULL)
     referral = models.IntegerField() #EmailUserRO
-    referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
+    # referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
     linked = models.BooleanField(default=False)
     sent_from = models.SmallIntegerField(choices=SENT_CHOICES,default=SENT_CHOICES[0][0])
     processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES,
