@@ -61,7 +61,7 @@ class ProposalGeometrySerializer(GeoFeatureModelSerializer):
 
 
 class ProposalTypeSerializer(serializers.ModelSerializer):
-    activities = serializers.SerializerMethodField()
+
     class Meta:
         model = ProposalType
         fields = (
@@ -224,10 +224,10 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
 class BaseProposalSerializer(serializers.ModelSerializer):
     readonly = serializers.SerializerMethodField(read_only=True)
     documents_url = serializers.SerializerMethodField()
-    proposal_type = serializers.SerializerMethodField()
+    proposal_type = ProposalTypeSerializer()
     application_type = ApplicationTypeSerializer()
-    allowed_assessors = EmailUserSerializer(many=True)
-    qaofficer_referrals = QAOfficerReferralSerializer(many=True)
+    # allowed_assessors = EmailUserSerializer(many=True)
+    # qaofficer_referrals = QAOfficerReferralSerializer(many=True)
 
     #get_history = serializers.ReadOnlyField()
     is_qa_officer = serializers.SerializerMethodField()
@@ -245,15 +245,15 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'application_type',
                 # 'application_type_display',
                 'proposal_type',
-                'approval_level',
+                # 'approval_level',
                 'title',
-                'customer_status',
+                # 'customer_status',
                 'processing_status',
-                'review_status',
-                'applicant_type',
+                # 'review_status',
+                # 'applicant_type',
                 'applicant',
-                'org_applicant',
-                'proxy_applicant',
+                # 'org_applicant',
+                # 'proxy_applicant',
                 'submitter',
                 'assigned_officer',
                 'previous_application',
@@ -268,14 +268,13 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'documents_url',
                 'reference',
                 'lodgement_number',
-                'lodgement_sequence',
+                # 'lodgement_sequence',
                 'can_officer_process',
                 'allowed_assessors',
-                'proposal_type',
-                'is_qa_officer',
-                'qaofficer_referrals',
-                'pending_amendment_request',
-                'is_amendment_proposal',
+                # 'is_qa_officer',
+                # 'qaofficer_referrals',
+                # 'pending_amendment_request',
+                # 'is_amendment_proposal',
 
                 # tab field models
                 'applicant_details',
@@ -284,6 +283,38 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'details_text',
                 'proposalgeometry',
                 ## additional form fields
+# <<<<<<< HEAD
+                # 'exclusive_use',
+                # 'long_term_use',
+                # 'consistent_purpose',
+                # 'consistent_plan',
+                # 'clearing_vegetation',
+                # 'ground_disturbing_works',
+                # 'heritage_site',
+                # 'environmentally_sensitive',
+                # 'wetlands_impact',
+                # 'building_required',
+                # 'significant_change',
+                # 'aboriginal_site',
+                # 'native_title_consultation',
+                # 'mining_tenement',
+# ||||||| 851b4af
+#                 'exclusive_use',
+#                 'long_term_use',
+#                 'consistent_purpose',
+#                 'consistent_plan',
+#                 'clearing_vegetation',
+#                 'ground_disturbing_works',
+#                 'heritage_site',
+#                 'environmentally_sensitive',
+#                 'wetlands_impact',
+#                 'building_required',
+#                 'significant_change',
+#                 'aboriginal_site',
+#                 'native_title_consultation',
+#                 'mining_tenement',
+#
+# =======
                 'exclusive_use',
                 'long_term_use',
                 'consistent_purpose',
@@ -312,7 +343,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'aboriginal_site_text',
                 'native_title_consultation_text',
                 'mining_tenement_text',
-
+#
+# >>>>>>> 48436f95cf419f5d4cb2838f7da7d0be105d908a
                 )
         read_only_fields = ('supporting_documents',)
 
@@ -343,8 +375,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         # return obj.get_customer_status_display()
         return obj.get_processing_status_display()
 
-    def get_proposal_type(self,obj):
-        return obj.proposal_type.description if obj.proposal_type else ''
+    # def get_proposal_type(self,obj):
+    #     return obj.proposal_type.description if obj.proposal_type else ''
 
     def get_is_qa_officer(self,obj):
         #request = self.context['request']
@@ -481,12 +513,13 @@ class ListProposalSerializer(BaseProposalSerializer):
     #def get_fee_invoice_url(self,obj):
      #   return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
 
+
 class ProposalSerializer(BaseProposalSerializer):
     #submitter = serializers.CharField(source='submitter.get_full_name')
     submitter = serializers.SerializerMethodField(read_only=True)
     processing_status = serializers.SerializerMethodField(read_only=True)
-    review_status = serializers.SerializerMethodField(read_only=True)
-    customer_status = serializers.SerializerMethodField(read_only=True)
+    # review_status = serializers.SerializerMethodField(read_only=True)
+    # customer_status = serializers.SerializerMethodField(read_only=True)
     application_type = serializers.CharField(source='application_type.name', read_only=True)
 
     def get_readonly(self,obj):
@@ -666,11 +699,12 @@ class InternalProposalSerializer(BaseProposalSerializer):
     org_applicant = OrganisationSerializer()
     processing_status = serializers.SerializerMethodField(read_only=True)
     review_status = serializers.SerializerMethodField(read_only=True)
-    customer_status = serializers.SerializerMethodField(read_only=True)
-    submitter = EmailUserAppViewSerializer()
+    # customer_status = serializers.SerializerMethodField(read_only=True)
+    # submitter = EmailUserAppViewSerializer()
+    submitter = serializers.SerializerMethodField(read_only=True)
     proposaldeclineddetails = ProposalDeclinedDetailsSerializer()
     assessor_mode = serializers.SerializerMethodField()
-    can_edit_activities = serializers.SerializerMethodField()
+    # can_edit_activities = serializers.SerializerMethodField()
     can_edit_period = serializers.SerializerMethodField()
     current_assessor = serializers.SerializerMethodField()
     latest_referrals = ProposalReferralSerializer(many=True)
@@ -678,10 +712,10 @@ class InternalProposalSerializer(BaseProposalSerializer):
     approval_level_document = serializers.SerializerMethodField()
     application_type = serializers.CharField(source='application_type.name', read_only=True)
     #qaofficer_referrals = QAOfficerReferralSerializer(many=True)
-    reversion_ids = serializers.SerializerMethodField()
+    # reversion_ids = serializers.SerializerMethodField()
     assessor_assessment=ProposalAssessmentSerializer(read_only=True)
     referral_assessments=ProposalAssessmentSerializer(read_only=True, many=True)
-    fee_invoice_url = serializers.SerializerMethodField()
+    # fee_invoice_url = serializers.SerializerMethodField()
     requirements_completed=serializers.SerializerMethodField()
 
     class Meta:
@@ -689,11 +723,11 @@ class InternalProposalSerializer(BaseProposalSerializer):
         fields = (
                 'id',
                 'application_type',
-                'activity',
+                # 'activity',
                 'approval_level',
                 'approval_level_document',
                 'title',
-                'customer_status',
+                # 'customer_status',
                 'processing_status',
                 'review_status',
                 'applicant',
@@ -707,7 +741,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'get_history',
                 'lodgement_date',
                 #'modified_date',
-                'documents',
+                # 'documents',
                 'requirements',
                 'readonly',
                 'can_user_edit',
@@ -730,16 +764,23 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 # tab field models
                 'applicant_details',
                 'other_details',
-                'can_edit_activities',
+                # 'can_edit_activities',
                 'can_edit_period',
-                'reversion_ids',
+                # 'reversion_ids',
                 'assessor_assessment',
                 'referral_assessments',
-                'fee_invoice_url',
+                # 'fee_invoice_url',
                 #'fee_paid',
                 'requirements_completed'
                 )
-        read_only_fields=('documents','requirements')
+        read_only_fields = (
+            # 'documents',
+            'requirements',
+            )
+
+    def get_submitter(self, obj):
+        email_user = retrieve_email_user(obj.submitter)
+        return EmailUserSerializer(email_user).data
 
     def get_approval_level_document(self,obj):
         if obj.approval_level_document is not None:
@@ -780,8 +821,8 @@ class InternalProposalSerializer(BaseProposalSerializer):
     def get_reversion_ids(self,obj):
         return obj.reversion_ids[:5]
 
-    def get_fee_invoice_url(self,obj):
-        return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
+    # def get_fee_invoice_url(self,obj):
+    #     return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
 
 class ProposalUserActionSerializer(serializers.ModelSerializer):
     who = serializers.CharField(source='who.get_full_name')
@@ -1012,13 +1053,14 @@ class ReferralSerializer(serializers.ModelSerializer):
 
     def __init__(self,*args,**kwargs):
         super(ReferralSerializer, self).__init__(*args, **kwargs)
-        try:    
-            if kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.TCLASS:
-                self.fields['proposal'] = ReferralProposalSerializer(context={'request':self.context['request']})
-            elif kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.FILMING:
-                self.fields['proposal'] = FilmingReferralProposalSerializer(context={'request':self.context['request']})
-            elif kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.EVENT:
-                self.fields['proposal'] = EventReferralProposalSerializer(context={'request':self.context['request']})
+        try:
+            self.fields['proposal'] = ReferralProposalSerializer(context={'request': self.context['request']})
+            # if kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.TCLASS:
+            #     self.fields['proposal'] = ReferralProposalSerializer(context={'request':self.context['request']})
+            # elif kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.FILMING:
+            #     self.fields['proposal'] = FilmingReferralProposalSerializer(context={'request':self.context['request']})
+            # elif kwargs.get('context')['view'].get_object().proposal.application_type.name == ApplicationType.EVENT:
+            #     self.fields['proposal'] = EventReferralProposalSerializer(context={'request':self.context['request']})
         except:
             raise
 

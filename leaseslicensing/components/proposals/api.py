@@ -135,16 +135,25 @@ class GetApplicationTypeDict(views.APIView):
     renderer_classes = [JSONRenderer, ]
 
     def get(self, request, format=None):
-        payload = {}
-        data = cache.get('application_type_dict')
+        for_filter = request.query_params.get('for_filter', '')
+        for_filter = True if for_filter == 'true' else False
+        cache_data_name = 'application_type_dict_for_filter' if for_filter else 'application_type_dict'
+
+        data = cache.get(cache_data_name)
         if not data:
-            cache.set(
-                    'application_type_dict', 
-                    #[{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES], 
-                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'], 
-                        settings.LOV_CACHE_TIMEOUT
-                        )
-            data = cache.get('application_type_dict')
+            if for_filter:
+                cache.set(
+                    cache_data_name,
+                    [{"id": app_type[0], "text": app_type[1]} for app_type in settings.APPLICATION_TYPES],
+                    settings.LOV_CACHE_TIMEOUT,
+                )
+            else:
+                cache.set(
+                    cache_data_name,
+                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'],
+                    settings.LOV_CACHE_TIMEOUT,
+                )
+            data = cache.get(cache_data_name)
         return Response(data)
 
 
@@ -167,12 +176,26 @@ class GetApplicationStatusesDict(views.APIView):
 
     def get(self, request, format=None):
         data = {}
-        if True or not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
-            cache.set('application_internal_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
-            cache.set('application_external_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
-        data['external_statuses'] = cache.get('application_external_statuses_dict')
-        data['internal_statuses'] = cache.get('application_internal_statuses_dict')
-        return Response(data)
+
+        for_filter = request.query_params.get('for_filter', '')
+        for_filter = True if for_filter == 'true' else False
+
+        if for_filter:
+            cache_name = 'application_internal_statuses_dict_for_filter',
+            cache.set(
+                cache_name,
+                [{'id': i[0], 'text': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES],
+                settings.LOV_CACHE_TIMEOUT
+                )
+            data = cache.get(cache_name)
+            return Response(data)
+        else:
+            if not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
+                cache.set('application_internal_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+                cache.set('application_external_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+            data['external_statuses'] = cache.get('application_external_statuses_dict')
+            data['internal_statuses'] = cache.get('application_internal_statuses_dict')
+            return Response(data)
 
 class GetProposalType(views.APIView):
     renderer_classes = [JSONRenderer, ]
@@ -919,7 +942,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
                 instance.save(version_comment='QA Officer File Added: {}'.format(filename)) # to allow revision to be added to reversion history
                 #instance.current_proposal.save(version_comment='File Added: {}'.format(filename)) # to allow revision to be added to reversion history
 
-            return  Response( [dict(input_name=d.input_name, name=d.name,file=d._file.url, id=d.id, can_delete=d.can_delete) for d in instance.qaofficer_documents.filter(input_name=section, visible=True) if d._file] )
+            return Response( [dict(input_name=d.input_name, name=d.name,file=d._file.url, id=d.id, can_delete=d.can_delete) for d in instance.qaofficer_documents.filter(input_name=section, visible=True) if d._file] )
 
         except serializers.ValidationError:
             print(traceback.print_exc())
@@ -936,6 +959,12 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         proposals = self.get_queryset()
+
+        statuses = list(map(lambda x: x[0], Proposal.PROCESSING_STATUS_CHOICES))
+        status = request.query_params.get('status', '')
+        if status in statuses:
+            # status passed as a parameter exists as a stataus
+            proposals = proposals.filter(Q(processing_status=status))
         serializer = ListProposalMinimalSerializer(proposals, context={'request': request}, many=True)
         return Response(serializer.data)
 
@@ -1158,13 +1187,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['GET',], detail=True)
     def internal_proposal(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = InternalProposalSerializer(instance,context={'request':request})
-        if instance.application_type.name==ApplicationType.TCLASS:
-            serializer = InternalProposalSerializer(instance,context={'request':request})
-        elif instance.application_type.name==ApplicationType.FILMING:
-            serializer = InternalFilmingProposalSerializer(instance,context={'request':request})
-        elif instance.application_type.name==ApplicationType.EVENT:
-            serializer = InternalEventProposalSerializer(instance,context={'request':request})
+        serializer = InternalProposalSerializer(instance, context={'request': request})
         return Response(serializer.data)
 
 
