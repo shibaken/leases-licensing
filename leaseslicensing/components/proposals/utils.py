@@ -420,7 +420,7 @@ def save_assessor_data(instance,request,viewset):
 def proposal_submit(proposal,request):
         with transaction.atomic():
             if proposal.can_user_edit:
-                proposal.submitter = request.user
+                proposal.submitter = request.user.id
                 proposal.lodgement_date = timezone.now()
                 proposal.training_completed = True
                 if (proposal.amendment_requests):
