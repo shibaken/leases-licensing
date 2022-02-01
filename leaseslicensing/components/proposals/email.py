@@ -11,6 +11,7 @@ from django.core.files.base import ContentFile
 from leaseslicensing.components.emails.emails import TemplateEmailBase
 from leaseslicensing.components.bookings.awaiting_payment_invoice_pdf import create_awaiting_payment_invoice_pdf_bytes
 from datetime import datetime
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 
 logger = logging.getLogger(__name__)
 
@@ -287,12 +288,12 @@ def send_submit_email_notification(request, proposal):
     }
 
     msg = email.send(proposal.assessor_recipients, context=context)
-    sender = request.user if request else settings.DEFAULT_FROM_EMAIL
+    sender = request.user.id if request else settings.DEFAULT_FROM_EMAIL
     _log_proposal_email(msg, proposal, sender=sender)
-    if proposal.org_applicant:
-        _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    #if proposal.org_applicant:
+    #    _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
+    #else:
+    #    _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
     return msg
 
 def send_external_submit_email_notification(request, proposal):
@@ -305,22 +306,23 @@ def send_external_submit_email_notification(request, proposal):
 
     context = {
         'proposal': proposal,
-        'submitter': proposal.submitter.get_full_name(),
+        #'submitter': proposal.submitter.get_full_name(),
+        'submitter': EmailUser.objects.get(id=proposal.submitter).get_full_name(),
         'url': url
     }
     all_ccs = []
-    if proposal.org_applicant and proposal.org_applicant.email:
-        cc_list = proposal.org_applicant.email
-        if cc_list:
-            all_ccs = [cc_list]
+    #if proposal.org_applicant and proposal.org_applicant.email:
+    #    cc_list = proposal.org_applicant.email
+    #    if cc_list:
+    #        all_ccs = [cc_list]
 
-    msg = email.send(proposal.submitter.email,cc=all_ccs, context=context)
-    sender = request.user if request else settings.DEFAULT_FROM_EMAIL
+    msg = email.send(EmailUser.objects.get(id=proposal.submitter).email,cc=all_ccs, context=context)
+    sender = request.user.id if request else settings.DEFAULT_FROM_EMAIL
     _log_proposal_email(msg, proposal, sender=sender)
-    if proposal.org_applicant:
-        _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    #if proposal.org_applicant:
+    #    _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
+    #else:
+    #    _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
     return msg
 
 #send email when Proposal is 'proposed to decline' by assessor.
@@ -787,10 +789,12 @@ def _log_proposal_email(email_message, proposal, sender=None, file_bytes=None, f
     else:
         text = smart_text(email_message)
         subject = ''
-        to = proposal.submitter.email
+        #to = proposal.submitter.email
+        to = EmailUser.objects.get(id=proposal.submitter).email
         fromm = smart_text(sender) if sender else SYSTEM_NAME
         all_ccs = ''
-
+    print("proposal.submitter")
+    print(proposal.submitter)
     customer = proposal.submitter
 
     staff = sender
@@ -864,49 +868,49 @@ def _log_org_email(email_message, organisation, customer ,sender=None):
 
     return email_entry
 
-def _log_user_email(email_message, emailuser, customer ,sender=None):
-    from ledger.accounts.models import EmailUserLogEntry
-    if isinstance(email_message, (EmailMultiAlternatives, EmailMessage,)):
-        # TODO this will log the plain text body, should we log the html instead
-        text = email_message.body
-        subject = email_message.subject
-        fromm = smart_text(sender) if sender else smart_text(email_message.from_email)
-        # the to email is normally a list
-        if isinstance(email_message.to, list):
-            to = ','.join(email_message.to)
-        else:
-            to = smart_text(email_message.to)
-        # we log the cc and bcc in the same cc field of the log entry as a ',' comma separated string
-        all_ccs = []
-        if email_message.cc:
-            all_ccs += list(email_message.cc)
-        if email_message.bcc:
-            all_ccs += list(email_message.bcc)
-        all_ccs = ','.join(all_ccs)
-
-    else:
-        text = smart_text(email_message)
-        subject = ''
-        to = customer
-        fromm = smart_text(sender) if sender else SYSTEM_NAME
-        all_ccs = ''
-
-    customer = customer
-
-    staff = sender
-
-    kwargs = {
-        'subject': subject,
-        'text': text,
-        'emailuser': emailuser,
-        'customer': customer,
-        'staff': staff,
-        'to': to,
-        'fromm': fromm,
-        'cc': all_ccs
-    }
-
-    email_entry = EmailUserLogEntry.objects.create(**kwargs)
-
-    return email_entry
+#def _log_user_email(email_message, emailuser, customer ,sender=None):
+#    from ledger.accounts.models import EmailUserLogEntry
+#    if isinstance(email_message, (EmailMultiAlternatives, EmailMessage,)):
+#        # TODO this will log the plain text body, should we log the html instead
+#        text = email_message.body
+#        subject = email_message.subject
+#        fromm = smart_text(sender) if sender else smart_text(email_message.from_email)
+#        # the to email is normally a list
+#        if isinstance(email_message.to, list):
+#            to = ','.join(email_message.to)
+#        else:
+#            to = smart_text(email_message.to)
+#        # we log the cc and bcc in the same cc field of the log entry as a ',' comma separated string
+#        all_ccs = []
+#        if email_message.cc:
+#            all_ccs += list(email_message.cc)
+#        if email_message.bcc:
+#            all_ccs += list(email_message.bcc)
+#        all_ccs = ','.join(all_ccs)
+#
+#    else:
+#        text = smart_text(email_message)
+#        subject = ''
+#        to = customer
+#        fromm = smart_text(sender) if sender else SYSTEM_NAME
+#        all_ccs = ''
+#
+#    customer = customer
+#
+#    staff = sender
+#
+#    kwargs = {
+#        'subject': subject,
+#        'text': text,
+#        'emailuser': emailuser,
+#        'customer': customer,
+#        'staff': staff,
+#        'to': to,
+#        'fromm': fromm,
+#        'cc': all_ccs
+#    }
+#
+#    email_entry = EmailUserLogEntry.objects.create(**kwargs)
+#
+#    return email_entry
 

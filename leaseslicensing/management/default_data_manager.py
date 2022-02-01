@@ -17,9 +17,10 @@ from leaseslicensing.components.main.models import (
 #from leaseslicensing.components.payments_ml.models import OracleCodeItem, FeeItemStickerReplacement
 from leaseslicensing.components.proposals.models import (
     ProposalType,
-    Proposal, ProposalAssessorGroup, ProposalApproverGroup,
+    Proposal,
     #StickerPrintingContact
 )
+from ledger_api_client.managed_models import SystemGroup
 
 logger = logging.getLogger(__name__)
 
