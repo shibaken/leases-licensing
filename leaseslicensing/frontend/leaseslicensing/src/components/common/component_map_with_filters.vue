@@ -160,8 +160,12 @@ export default {
 
         return {
             // selected values for filtering
-            filterApplicationType: sessionStorage.getItem('filterApplicationTypeForMap') ? sessionStorage.getItem('filterApplicationTypeForMap') : 'all',
-            filterApplicationStatus: sessionStorage.getItem('filterApplicationStatusForMap') ? sessionStorage.getItem('filterApplicationStatusForMap') : 'all',
+            filterApplicationTypes: sessionStorage.getItem('filterApplicationTypesForMap') ?
+                JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) :
+                [],
+            filterApplicationStatuses: sessionStorage.getItem('filterApplicationStatusesForMap') ? 
+                JSON.parse(sessionStorage.getItem('filterApplicationStatusesForMap')) : 
+                [],
             filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFromForMap') ? sessionStorage.getItem('filterProposalLodgedFromForMap') : '',
             filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedToForMap') ? sessionStorage.getItem('filterProposalLodgedToForMap') : '',
 
@@ -314,7 +318,7 @@ export default {
     computed: {
         filterApplied: function(){
             let filter_applied = true
-            if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
+            if(this.filterApplicationStatuses == [] && this.filterApplicationTypes == [] && 
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }
@@ -325,12 +329,6 @@ export default {
         CollapsibleFilters,
     },
     watch: {
-        filterApplicationStatus: function() {
-            sessionStorage.setItem('filterApplicationStatus', this.filterApplicationStatus);
-        },
-        filterApplicationType: function() {
-            sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
-        },
         filterProposalLodgedFrom: function() {
             sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
         },
@@ -345,6 +343,18 @@ export default {
         }
     },
     methods: {
+        updateApplicationTypeFilterCache: function(){
+            let vm = this
+            console.log('in updateApplicationTypeFilterCache')
+            let currently_selected = $(vm.$refs.filter_application_type).select2('data').map(x => { return x.id })
+            sessionStorage.setItem('filterApplicationTypesForMap', JSON.stringify(currently_selected));
+        },
+        updateApplicationStatusFilterCache: function(){
+            let vm = this
+            console.log('in updateApplicationStatusFilterCache')
+            let currently_selected = $(vm.$refs.filter_application_status).select2('data').map(x => { return x.id })
+            sessionStorage.setItem('filterApplicationStatusesForMap', JSON.stringify(currently_selected));
+        },
         updateInstructions: function(){
             let vm = this
             let statuses_currently_selected = $(vm.$refs.filter_application_status).select2('data').map(x => { return x.id })
@@ -379,18 +389,21 @@ export default {
                     data: application_types,
                 }).
                 on('select2:select', function(e){
+                    vm.updateApplicationTypeFilterCache()
                     vm.updateInstructions()
                     vm.showHideProposals()
                 }).
                 on('select2:unselect', function(e){
-                    console.log('unselect')
+                    vm.updateApplicationTypeFilterCache()
                     vm.updateInstructions()
                     vm.showHideProposals()
                 })
             }
             vm.select2AppliedToApplicationType = true
+            $(vm.$refs.filter_application_type).val(vm.filterApplicationTypes).trigger('change')
         },
         applySelect2ToApplicationStatuses: function(application_statuses){
+            console.log('in applySelect2ToApplicationStatuses')
             console.log(application_statuses)
             let vm = this
             if (!vm.select2AppliedToApplicationStatus){
@@ -402,16 +415,19 @@ export default {
                     data: application_statuses,
                 }).
                 on('select2:select', function(e){
+                    vm.updateApplicationStatusFilterCache()
                     vm.updateInstructions()
                     vm.showHideProposals()
                 }).
                 on('select2:unselect', function(e){
+                    vm.updateApplicationStatusFilterCache()
                     console.log('unselect')
                     vm.updateInstructions()
                     vm.showHideProposals()
                 })
             }
             vm.select2AppliedToApplicationStatus = true
+            $(vm.$refs.filter_application_status).val(vm.filterApplicationStatuses).trigger('change')
         },
         geoJsonButtonClicked: function(){
             console.log('geoJsonButtonClicked')
@@ -676,7 +692,6 @@ export default {
                                             let features = (new GeoJSON()).readFeatures(proposal.proposalgeometry)
                                             vm.proposalQuerySource.addFeatures(features)
                                             site_status.features.push(...features)
-                                            console.log(features)
                                         } catch (err) {
                                             console.log(err)
                                         }
