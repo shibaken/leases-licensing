@@ -444,26 +444,27 @@ def proposal_submit(proposal,request):
                 #proposal.save_form_tabs(request)
                 if ret1 and ret2:
                     proposal.processing_status = 'with_assessor'
-                    # proposal.customer_status = 'with_assessor'
-                    proposal.documents.all().update(can_delete=False)
-                    proposal.required_documents.all().update(can_delete=False)
+                    #TODO: do we need the following 2?
+                    #proposal.documents.all().update(can_delete=False)
+                    #proposal.required_documents.all().update(can_delete=False)
                     proposal.save()
                 else:
                     raise ValidationError('An error occurred while submitting proposal (Submit email notifications failed)')
                 #Create assessor checklist with the current assessor_list type questions
                 #Assessment instance already exits then skip.
-                try:
-                    assessor_assessment=ProposalAssessment.objects.get(proposal=proposal,referral_group=None, referral_assessment=False)
-                except ProposalAssessment.DoesNotExist:
-                    assessor_assessment=ProposalAssessment.objects.create(proposal=proposal,referral_group=None, referral_assessment=False)
-                    checklist=ChecklistQuestion.objects.filter(list_type='assessor_list', application_type=proposal.application_type, obsolete=False)
-                    for chk in checklist:
-                        try:
-                            chk_instance=ProposalAssessmentAnswer.objects.get(question=chk, assessment=assessor_assessment)
-                        except ProposalAssessmentAnswer.DoesNotExist:
-                            chk_instance=ProposalAssessmentAnswer.objects.create(question=chk, assessment=assessor_assessment)
+                #TODO: fix ProposalAssessment if still required
+                #try:
+                #    assessor_assessment=ProposalAssessment.objects.get(proposal=proposal,referral_group=None, referral_assessment=False)
+                #except ProposalAssessment.DoesNotExist:
+                #    assessor_assessment=ProposalAssessment.objects.create(proposal=proposal,referral_group=None, referral_assessment=False)
+                #    checklist=ChecklistQuestion.objects.filter(list_type='assessor_list', application_type=proposal.application_type, obsolete=False)
+                #    for chk in checklist:
+                #        try:
+                #            chk_instance=ProposalAssessmentAnswer.objects.get(question=chk, assessment=assessor_assessment)
+                #        except ProposalAssessmentAnswer.DoesNotExist:
+                #            chk_instance=ProposalAssessmentAnswer.objects.create(question=chk, assessment=assessor_assessment)
 
-                return proposal
+                #return proposal
 
             else:
                 raise ValidationError('You can\'t edit this proposal at this moment')
