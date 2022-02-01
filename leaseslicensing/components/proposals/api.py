@@ -1172,13 +1172,14 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @renderer_classes((JSONRenderer,))
     def submit(self, request, *args, **kwargs):
         try:
-            instance = self.get_object()
-            save_proponent_data(instance,request,self)
-            #return redirect(reverse('external'))
-            proposal_submit(instance, request)
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
+            with transaction.atomic():
+                instance = self.get_object()
+                save_proponent_data(instance,request,self)
+                #return redirect(reverse('external'))
+                proposal_submit(instance, request)
+                instance.save()
+                serializer = self.get_serializer(instance)
+                return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
