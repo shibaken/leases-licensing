@@ -109,101 +109,6 @@ def application_type_choicelist():
 #        unique_together = ('name', 'version')
 
 
-class ProposalAssessorGroup(models.Model):
-    name = models.CharField(max_length=255)
-    #members = models.ManyToManyField(EmailUser)
-    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
-    default = models.BooleanField(default=False)
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        verbose_name = "Application Assessor Group"
-        verbose_name_plural = "Application Assessor Group"
-
-    def __str__(self):
-        return self.name
-
-    def clean(self):
-        try:
-            default = ProposalAssessorGroup.objects.get(default=True)
-        except ProposalAssessorGroup.DoesNotExist:
-            default = None
-
-        if self.pk:
-            if not self.default and not self.region:
-                raise ValidationError('Only default can have no region set for proposal assessor group. Please specifiy region')
-#            elif default and not self.default:
-#                raise ValidationError('There can only be one default proposal assessor group')
-        else:
-            if default and self.default:
-                raise ValidationError('There can only be one default proposal assessor group')
-
-    def member_is_assigned(self,member):
-        for p in self.current_proposals:
-            if p.assigned_officer == member:
-                return True
-        return False
-
-    @property
-    def current_proposals(self):
-        assessable_states = ['with_assessor','with_referral','with_assessor_requirements']
-        return Proposal.objects.filter(processing_status__in=assessable_states)
-
-    @property
-    def members_email(self):
-        return [i.email for i in self.members.all()]
-
-
-class ProposalApproverGroup(models.Model):
-    name = models.CharField(max_length=255)
-    #members = models.ManyToManyField(EmailUser,blank=True)
-    #regions = TaggableManager(verbose_name="Regions",help_text="A comma-separated list of regions.",through=TaggedProposalApproverGroupRegions,related_name = "+",blank=True)
-    #activities = TaggableManager(verbose_name="Activities",help_text="A comma-separated list of activities.",through=TaggedProposalApproverGroupActivities,related_name = "+",blank=True)
-    #members = models.ManyToManyField(EmailUser)
-    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
-    default = models.BooleanField(default=False)
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        verbose_name = "Application Approver Group"
-        verbose_name_plural = "Application Approver Group"
-
-    def __str__(self):
-        return self.name
-
-    def clean(self):
-        try:
-            default = ProposalApproverGroup.objects.get(default=True)
-        except ProposalApproverGroup.DoesNotExist:
-            default = None
-
-        if self.pk:
-            if not self.default and not self.region:
-                raise ValidationError('Only default can have no region set for proposal assessor group. Please specifiy region')
-
-#            if int(self.pk) != int(default.id):
-#                if default and self.default:
-#                    raise ValidationError('There can only be one default proposal approver group')
-        else:
-            if default and self.default:
-                raise ValidationError('There can only be one default proposal approver group')
-
-    def member_is_assigned(self,member):
-        for p in self.current_proposals:
-            if p.assigned_approver == member:
-                return True
-        return False
-
-    @property
-    def current_proposals(self):
-        assessable_states = ['with_approver']
-        return Proposal.objects.filter(processing_status__in=assessable_states)
-
-    @property
-    def members_email(self):
-        return [i.email for i in self.members.all()]
-
-
 class DefaultDocument(Document):
     input_name = models.CharField(max_length=255,null=True,blank=True)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
@@ -1076,7 +981,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         else:
             group = self.__assessor_group()
         # return group.members.all() if group else []
-        return group.members if group else []
+        return group.get_system_group_member_ids() if group else []
 
     @property
     def compliance_assessors(self):
@@ -1118,16 +1023,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def __assessor_group(self):
         #default_group = ProposalAssessorGroup.objects.get(default=True)
-        default_group = SystemGroup.objects.get(name='ProposalAssessorGroup')
-
-        return default_group
-
+        return SystemGroup.objects.get(name='ProposalAssessorGroup')
 
     def __approver_group(self):
         #default_group = ProposalApproverGroup.objects.get(default=True)
-        default_group = SystemGroup.objects.get(name='ProposalApproverGroup')
-
-        return default_group
+        return SystemGroup.objects.get(name='ProposalApproverGroup')
 
     def __check_proposal_filled_out(self):
         if not self.data:
@@ -1147,11 +1047,15 @@ class Proposal(DirtyFieldsMixin, models.Model):
     @property
     def assessor_recipients(self):
         recipients = []
-        try:
-            recipients = ProposalAssessorGroup.objects.get(region=self.region).members_email
-        except:
-            recipients = ProposalAssessorGroup.objects.get(default=True).members_email
+        group_ids = self.__assessor_group().get_system_group_member_ids()
+        for id in group_ids:
+            recipients.append(EmailUser.objects.get(id=id).email)
+        #try:
+            #recipients = ProposalAssessorGroup.objects.get(region=self.region).members_email
+        #except:
+            #recipients = ProposalAssessorGroup.objects.get(default=True).members_email
 
+        ## dead code from COLS - required here?
         #if self.submitter.email not in recipients:
         #    recipients.append(self.submitter.email)
         return recipients
@@ -1159,30 +1063,38 @@ class Proposal(DirtyFieldsMixin, models.Model):
     @property
     def approver_recipients(self):
         recipients = []
-        try:
-            recipients = ProposalApproverGroup.objects.get(region=self.region).members_email
-        except:
-            recipients = ProposalApproverGroup.objects.get(default=True).members_email
+        group_ids = self.__approver_group().get_system_group_member_ids()
+        for id in group_ids:
+            recipients.append(EmailUser.objects.get(id=id).email)
+        #try:
+            #recipients = ProposalApproverGroup.objects.get(region=self.region).members_email
+        #except:
+            #recipients = ProposalApproverGroup.objects.get(default=True).members_email
 
+        ## dead code from COLS - required here?
         #if self.submitter.email not in recipients:
         #    recipients.append(self.submitter.email)
         return recipients
 
     #Check if the user is member of assessor group for the Proposal
     def is_assessor(self,user):
-            return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
 
     #Check if the user is member of assessor group for the Proposal
     def is_approver(self,user):
-            return self.__approver_group() in user.proposalapprovergroup_set.all()
+            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
 
 
     def can_assess(self,user):
         #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_requirements':
         if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_requirements']:
-            return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
         elif self.processing_status == 'with_approver':
-            return self.__approver_group() in user.proposalapprovergroup_set.all()
+            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+            return user.id in self.__approver_group().get_system_group_member_ids()
         else:
             return False
 
@@ -1190,15 +1102,18 @@ class Proposal(DirtyFieldsMixin, models.Model):
     #still need to check to assessor mode in on or not
     def can_edit_activities(self,user):
         if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_requirements':
-            return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
         elif self.processing_status == 'with_approver':
-            return self.__approver_group() in user.proposalapprovergroup_set.all()
+            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+            return user.id in self.__approver_group().get_system_group_member_ids()
         else:
             return False
 
     def can_edit_period(self,user):
         if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_requirements':
-            return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
         else:
             return False
 
@@ -1211,9 +1126,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 referral = None
             if referral:
                 return True
-            elif self.__assessor_group() in user.proposalassessorgroup_set.all():
+            #elif self.__assessor_group() in user.proposalassessorgroup_set.all():
+            elif user.id in self.__assessor_group().get_system_group_member_ids():
                 return True
-            elif self.__approver_group() in user.proposalapprovergroup_set.all():
+            #elif self.__approver_group() in user.proposalapprovergroup_set.all():
+            elif user.id in self.__approver_group().get_system_group_member_ids():
                 return True
             else:
                 return False
@@ -1226,16 +1143,19 @@ class Proposal(DirtyFieldsMixin, models.Model):
             return False
         else:
             if self.assigned_officer:
-                if self.assigned_officer == user:
-                    return self.__assessor_group() in user.proposalassessorgroup_set.all()
+                if self.assigned_officer == user.id:
+                    #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+                    return user.id in self.__assessor_group().get_system_group_member_ids()
                 else:
                     return False
             else:
-                return self.__assessor_group() in user.proposalassessorgroup_set.all()
+                #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+                return user.id in self.__assessor_group().get_system_group_member_ids()
 
     def log_user_action(self, action, request):
         return ProposalUserAction.log_action(self, action, request.user.id)
-
+    
+    # proposal.utils.proposal_submit appears to be used instead
     def submit(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
         with transaction.atomic():
@@ -2704,8 +2624,10 @@ class Referral(RevisionedMixin):
 
     @property
     def allowed_assessors(self):
+        ## must be SystemGroup
         group = self.referral_group
-        return group.members.all() if group else []
+        #return group.members.all() if group else []
+        return group.get_system_group_member_ids() if group else []
 
     def can_process(self, user):
         if self.processing_status=='with_referral':
