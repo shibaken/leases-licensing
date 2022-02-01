@@ -196,6 +196,11 @@ CKEDITOR_CONFIGS = {
     },
 }
 
+
+CONSOLE_EMAIL_BACKEND = env('CONSOLE_EMAIL_BACKEND', False)
+if CONSOLE_EMAIL_BACKEND:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # Additional logging for leaseslicensing
 LOGGING['handlers']['payment_checkout'] = {
             'level': 'INFO',
