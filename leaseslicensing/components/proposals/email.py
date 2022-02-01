@@ -793,8 +793,6 @@ def _log_proposal_email(email_message, proposal, sender=None, file_bytes=None, f
         to = EmailUser.objects.get(id=proposal.submitter).email
         fromm = smart_text(sender) if sender else SYSTEM_NAME
         all_ccs = ''
-    print("proposal.submitter")
-    print(proposal.submitter)
     customer = proposal.submitter
 
     staff = sender
