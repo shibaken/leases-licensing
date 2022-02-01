@@ -356,7 +356,9 @@ export default {
 
             },
         }
-        payload.proposal.details_text = this.$refs.application_form.$refs.registration_of_interest.$refs.details_text.detailsText;
+
+        //payload.proposal.details_text = this.$refs.application_form.$refs.registration_of_interest.$refs.details_text.detailsText;
+        payload.proposal.exclusive_use_text = this.$refs.application_form.$refs.registration_of_interest.$refs.exclusive_use_text.sdf ? this.$refs.application_form.$refs.registration_of_interest.$refs.exclusive_use_text : '';
         payload.proposal.exclusive_use_text = this.$refs.application_form.$refs.registration_of_interest.$refs.exclusive_use_text.detailsText;
         payload.proposal.long_term_use_text = this.$refs.application_form.$refs.registration_of_interest.$refs.long_term_use_text.detailsText;
         payload.proposal.consistent_purpose_text = this.$refs.application_form.$refs.registration_of_interest.$refs.consistent_purpose_text.detailsText;
@@ -375,7 +377,6 @@ export default {
         if (this.$refs.application_form.componentMapOn) {
             payload.lease_licensing_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
         }
-        this.$refs.details_text
         const res = await vm.$http.post(url, payload);
         if (res.ok) {
             if (withConfirm) {
