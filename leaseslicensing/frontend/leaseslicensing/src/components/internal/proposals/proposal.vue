@@ -51,6 +51,13 @@
                     />
                 </template>
 
+                <template v-if="display_requirements">
+                    <Requirements
+                        :proposal="proposal"
+                        @refreshRequirements="refreshRequirements"
+                    />
+                </template>
+
                 <template v-if="canSeeSubmission || (!canSeeSubmission && showingProposal)">
                     <ApplicationForm
                         v-if="proposal"
@@ -71,12 +78,7 @@
                         </template>
                     </ApplicationForm>
                 </template>
-                <template v-if="display_requirements">
-                    <Requirements
-                        :proposal="proposal"
-                        @refreshRequirements="refreshRequirements"
-                    />
-                </template>
+
             </div>
         </div>
 
@@ -584,7 +586,7 @@ export default {
             console.log(status)
 
             let vm = this;
-            if(vm.proposal.processing_status == 'With Assessor' && status == 'with_assessor_conditions'){
+            if(vm.proposal.processing_status == 'With Assessor' && status == 'with_assessor_requirements'){
                 vm.checkAssessorData();
                 let formData = new FormData(vm.form);
                 let data = {'status': status, 'approver_comment': vm.approver_comment}
@@ -614,7 +616,7 @@ export default {
             }
 
             //if approver is pushing back proposal to Assessor then navigate the approver back to dashboard page
-            else if(vm.proposal.processing_status == 'With Approver' && (status == 'with_assessor_conditions' || status=='with_assessor')) {
+            else if(vm.proposal.processing_status == 'With Approver' && (status == 'with_assessor_requirements' || status=='with_assessor')) {
                 let data = {'status': status, 'approver_comment': vm.approver_comment}
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')),JSON.stringify(data),{
                     emulateJSON:true,
