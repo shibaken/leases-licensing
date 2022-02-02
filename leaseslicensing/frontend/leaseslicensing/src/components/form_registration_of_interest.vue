@@ -42,7 +42,7 @@
                         <label for="exclusive_use_no">No</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.exclusive_use">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.exclusive_use">
                     <RichText
                     :proposalData="proposal.exclusive_use_text"
                     ref="exclusive_use_text"
@@ -78,7 +78,7 @@
                         <label for="long_term_use_no">No</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.long_term_use">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.long_term_use">
                     <RichText
                     :proposalData="proposal.long_term_use_text"
                     ref="long_term_use_text"
@@ -119,7 +119,7 @@
                         <label for="consistent_purpose_null">Unsure</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.consistent_purpose">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.consistent_purpose">
                     <RichText
                     :proposalData="proposal.consistent_purpose_text"
                     ref="consistent_purpose_text"
@@ -160,7 +160,7 @@
                         <label for="consistent_plan_null">Unsure</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.consistent_plan">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.consistent_plan">
                     <RichText
                     :proposalData="proposal.consistent_plan_text"
                     ref="consistent_plan_text"
@@ -204,7 +204,7 @@
                         <label for="clearing_vegetation_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.clearing_vegetation">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.clearing_vegetation">
                     <RichText
                     :proposalData="proposal.clearing_vegetation_text"
                     ref="clearing_vegetation_text"
@@ -245,7 +245,7 @@
                         <label for="ground_disturbing_works_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.ground_disturbing_works">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.ground_disturbing_works">
                     <RichText
                     :proposalData="proposal.ground_disturbing_works_text"
                     ref="ground_disturbing_works_text"
@@ -286,7 +286,7 @@
                         <label for="heritage_site_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.heritage_site">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.heritage_site">
                     <RichText
                     :proposalData="proposal.heritage_site_text"
                     ref="heritage_site_text"
@@ -327,7 +327,7 @@
                         <label for="environmentally_sensitive_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.environmentally_sensitive">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.environmentally_sensitive">
                     <RichText
                     :proposalData="proposal.environmentally_sensitive_text"
                     ref="environmentally_sensitive_text"
@@ -368,7 +368,7 @@
                         <label for="wetlands_impact_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.wetlands_impact">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.wetlands_impact">
                     <RichText
                     :proposalData="proposal.wetlands_impact_text"
                     ref="wetlands_impact_text"
@@ -409,7 +409,7 @@
                         <label for="building_required_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.building_required">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.building_required">
                     <RichText
                     :proposalData="proposal.building_required_text"
                     ref="building_required_text"
@@ -450,7 +450,7 @@
                         <label for="significant_change_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.significant_change">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.significant_change">
                     <RichText
                     :proposalData="proposal.significant_change_text"
                     ref="significant_change_text"
@@ -491,7 +491,7 @@
                         <label for="aboriginal_site_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.aboriginal_site">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.aboriginal_site">
                     <RichText
                     :proposalData="proposal.aboriginal_site_text"
                     ref="aboriginal_site_text"
@@ -532,7 +532,7 @@
                         <label for="native_title_consultation_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.native_title_consultation">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.native_title_consultation">
                     <RichText
                     :proposalData="proposal.native_title_consultation_text"
                     ref="native_title_consultation_text"
@@ -573,7 +573,7 @@
                         <label for="mining_tenement_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.mining_tenement">
+                <div class="col-sm-11 inline-details-text" v-show="proposal.mining_tenement">
                     <RichText
                     :proposalData="proposal.mining_tenement_text"
                     ref="mining_tenement_text"
