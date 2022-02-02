@@ -614,7 +614,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
     cash_flow_text = models.TextField(blank=True)
     capital_investment_text = models.TextField(blank=True)
     financial_capacity_text = models.TextField(blank=True)
+    available_activities_text = models.TextField(blank=True)
+    market_analysis_text = models.TextField(blank=True)
+    staffing_text = models.TextField(blank=True)
     # proposal impact
+    key_personnel_text = models.TextField(blank=True)
+    key_milestones_text = models.TextField(blank=True)
+    risk_factors_text = models.TextField(blank=True)
+    legislative_requirements_text = models.TextField(blank=True)
 
     class Meta:
         app_label = 'leaseslicensing'
