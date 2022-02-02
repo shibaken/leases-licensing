@@ -297,7 +297,7 @@ export default {
         },
         canAction: function(){
 
-            //return true  // TODO: implement this.  This is just temporary solution
+            return true  // TODO: implement this.  This is just temporary solution
 
             if (this.proposal.processing_status == 'With Approver'){
                 return this.proposal && (this.proposal.processing_status == 'With Approver' || this.proposal.processing_status == 'With Assessor' || this.proposal.processing_status == 'With Assessor (Requirements)') && !this.isFinalised && !this.proposal.can_user_edit && (this.proposal.current_assessor.id == this.proposal.assigned_approver || this.proposal.assigned_approver == null ) && this.proposal.assessor_mode.assessor_can_assess? true : false;
