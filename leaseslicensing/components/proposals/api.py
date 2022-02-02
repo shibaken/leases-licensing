@@ -29,6 +29,8 @@ from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from leaseslicensing.components.proposals.utils import save_proponent_data,save_assessor_data, proposal_submit
 from leaseslicensing.components.proposals.models import searchKeyWords, search_reference, ProposalUserAction
+from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE, \
+    APPLICATION_TYPE_LICENCE
 from leaseslicensing.utils import missing_required_fields
 from leaseslicensing.components.main.utils import check_db_connection
 from leaseslicensing.components.main.decorators import basic_exception_handler
@@ -574,12 +576,12 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def internal_serializer_class(self):
         try:
             application_type = Proposal.objects.get(id=self.kwargs.get('id')).application_type.name
-            if application_type == ApplicationType.TCLASS:
+            if application_type == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
                 return InternalProposalSerializer
-            elif application_type == ApplicationType.FILMING:
-                return InternalFilmingProposalSerializer
-            elif application_type == ApplicationType.EVENT:
-                return InternalEventProposalSerializer
+            elif application_type == APPLICATION_TYPE_LEASE:
+                return InternalProposalSerializer
+            elif application_type == APPLICATION_TYPE_LICENCE:
+                return InternalProposalSerializer
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -1293,7 +1295,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
             if not status:
                 raise serializers.ValidationError('Status is required')
             else:
-                if not status in ['with_assessor','with_assessor_requirements','with_approver']:
+                if not status in ['with_assessor','with_assessor_conditions','with_approver']:
                     raise serializers.ValidationError('The status provided is not allowed')
             instance.move_to_status(request,status, approver_comment)
             #serializer = InternalProposalSerializer(instance,context={'request':request})
