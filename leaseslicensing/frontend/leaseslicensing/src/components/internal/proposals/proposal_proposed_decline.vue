@@ -86,7 +86,7 @@ export default {
                 callFinalDecline = true
             }
             if ([constants.WL_PROPOSAL, constants.AA_PROPOSAL].includes(this.proposal.application_type_dict.code)){
-                if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_REQUIREMENTS].includes(this.processing_status)){
+                if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.processing_status)){
                     // For the WLA or AAA, assessor can final decline
                     callFinalDecline = true
                 }
