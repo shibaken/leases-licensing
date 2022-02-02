@@ -62,7 +62,14 @@
                         :readonly="readonly"
                         :submitterId="proposal.submitter.id"
                         :key="computedProposalId"
-                    />
+                        :show_related_items_tab="true"
+                    >
+                        <template v-slot:related-items>
+                            <FormSection :formCollapse="false" label="Related Items" Index="related_items">
+                                Related Items table here
+                            </FormSection>
+                        </template>
+                    </ApplicationForm>
                 </template>
                 <template v-if="display_requirements">
                     <Requirements
@@ -117,6 +124,7 @@ import Workflow from '@common-utils/workflow.vue'
 import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import ApplicationForm from '@/components/form.vue';
+import FormSection from "@/components/forms/section_toggle.vue"
 
 export default {
     name: 'InternalProposal',
@@ -209,6 +217,7 @@ export default {
         //NewApply,
         //MapLocations,
         ApplicationForm,
+        FormSection,
     },
     props: {
         proposalId: {
@@ -244,7 +253,7 @@ export default {
         },
         display_requirements: function(){
             let ret_val =
-                this.proposal.processing_status == constants.WITH_ASSESSOR_REQUIREMENTS ||
+                this.proposal.processing_status == constants.WITH_ASSESSOR_CONDITIONS ||
                 ((this.proposal.processing_status == constants.WITH_APPROVER || this.isFinalised) && this.showingRequirements)
             return ret_val
         },
@@ -575,7 +584,7 @@ export default {
             console.log(status)
 
             let vm = this;
-            if(vm.proposal.processing_status == 'With Assessor' && status == 'with_assessor_requirements'){
+            if(vm.proposal.processing_status == 'With Assessor' && status == 'with_assessor_conditions'){
                 vm.checkAssessorData();
                 let formData = new FormData(vm.form);
                 let data = {'status': status, 'approver_comment': vm.approver_comment}
@@ -605,7 +614,7 @@ export default {
             }
 
             //if approver is pushing back proposal to Assessor then navigate the approver back to dashboard page
-            else if(vm.proposal.processing_status == 'With Approver' && (status == 'with_assessor_requirements' || status=='with_assessor')) {
+            else if(vm.proposal.processing_status == 'With Approver' && (status == 'with_assessor_conditions' || status=='with_assessor')) {
                 let data = {'status': status, 'approver_comment': vm.approver_comment}
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')),JSON.stringify(data),{
                     emulateJSON:true,

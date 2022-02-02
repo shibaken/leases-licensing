@@ -960,7 +960,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def assessor_assessment(self):
-        qs=self.assessment.filter(referral_assessment=False, referral_group=None)
+        # qs=self.assessment.filter(referral_assessment=False, referral_group=None)
+        qs = self.assessment.filter(referral_assessment=False)
         if qs:
             return qs[0]
         else:
@@ -968,7 +969,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def referral_assessments(self):
-        qs=self.assessment.filter(referral_assessment=True, referral_group__isnull=False)
+        # qs=self.assessment.filter(referral_assessment=True, referral_group__isnull=False)
+        qs = self.assessment.filter(referral_assessment=True)
         if qs:
             return qs
         else:
@@ -981,14 +983,17 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def allowed_assessors(self):
-        if self.processing_status == 'with_approver':
+        group = None
+        if self.processing_status in [Proposal.PROCESSING_STATUS_WITH_APPROVER,]:
             group = self.__approver_group()
-        elif self.processing_status =='with_qa_officer':
-            group = QAOfficerGroup.objects.get(default=True)
-        else:
+        # elif self.processing_status =='with_qa_officer':
+        #     group = QAOfficerGroup.objects.get(default=True)
+        elif self.processing_status in [Proposal.PROCESSING_STATUS_WITH_ASSESSOR, Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS,]:
             group = self.__assessor_group()
         # return group.members.all() if group else []
-        return group.get_system_group_member_ids() if group else []
+        # return group.get_system_group_member_ids() if group else []
+        users = list(map(lambda id: retrieve_email_user(id), group.get_system_group_member_ids())) if group else []
+        return users
 
     @property
     def compliance_assessors(self):
@@ -1095,8 +1100,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
 
     def can_assess(self,user):
-        #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_requirements':
-        if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_requirements']:
+        #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions':
+        if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
             #return self.__assessor_group() in user.proposalassessorgroup_set.all()
             return user.id in self.__assessor_group().get_system_group_member_ids()
         elif self.processing_status == 'with_approver':
@@ -1108,7 +1113,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     #To allow/ prevent internal user to edit activities (Land and Marine) for T-class licence
     #still need to check to assessor mode in on or not
     def can_edit_activities(self,user):
-        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_requirements':
+        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
             #return self.__assessor_group() in user.proposalassessorgroup_set.all()
             return user.id in self.__assessor_group().get_system_group_member_ids()
         elif self.processing_status == 'with_approver':
@@ -1118,7 +1123,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
             return False
 
     def can_edit_period(self,user):
-        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_requirements':
+        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
             #return self.__assessor_group() in user.proposalassessorgroup_set.all()
             return user.id in self.__assessor_group().get_system_group_member_ids()
         else:
@@ -1126,7 +1131,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def assessor_comments_view(self,user):
 
-        if self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_requirements' or self.processing_status == 'with_approver':
+        if self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions' or self.processing_status == 'with_approver':
             try:
                 referral = Referral.objects.get(proposal=self,referral=user)
             except:
@@ -1404,7 +1409,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def move_to_status(self,request,status, approver_comment):
         if not self.can_assess(request.user):
             raise exceptions.ProposalNotAuthorized()
-        if status in ['with_assessor','with_assessor_requirements','with_approver']:
+        if status in ['with_assessor','with_assessor_conditions','with_approver']:
             if self.processing_status == 'with_referral' or self.can_user_edit:
                 raise ValidationError('You cannot change the current status at this time')
             if self.processing_status != status:
@@ -1416,13 +1421,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         send_proposal_approver_sendback_email_notification(request, self)
                 self.processing_status = status
                 self.save()
-                if status=='with_assessor_requirements':
+                if status=='with_assessor_conditions':
                     self.add_default_requirements()
 
                 # Create a log entry for the proposal
                 if self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR:
                     self.log_user_action(ProposalUserAction.ACTION_BACK_TO_PROCESSING.format(self.id),request)
-                elif self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS:
+                elif self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS:
                     self.log_user_action(ProposalUserAction.ACTION_ENTER_REQUIREMENTS.format(self.id),request)
         else:
             raise ValidationError('The provided status cannot be found.')
@@ -1627,7 +1632,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
             try:
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
-                if self.processing_status != 'with_assessor_requirements':
+                if self.processing_status != 'with_assessor_conditions':
                     raise ValidationError('You cannot propose for approval if it is not with assessor for requirements')
                 self.proposed_issuance_approval = {
                     'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
@@ -1654,8 +1659,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         from leaseslicensing.components.approvals.models import PreviewTempApproval
         with transaction.atomic():
             try:
-                #if self.processing_status != 'with_assessor_requirements' or self.processing_status != 'with_approver':
-                if not (self.processing_status == 'with_assessor_requirements' or self.processing_status == 'with_approver'):
+                #if self.processing_status != 'with_assessor_conditions' or self.processing_status != 'with_approver':
+                if not (self.processing_status == 'with_assessor_conditions' or self.processing_status == 'with_approver'):
                     raise ValidationError('Licence preview only available when processing status is with_approver. Current status {}'.format(self.processing_status))
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
@@ -2565,7 +2570,6 @@ class QAOfficerGroup(models.Model):
         return Proposal.objects.filter(processing_status__in=assessable_states)
 
 
-#class Referral(models.Model):
 class Referral(RevisionedMixin):
     SENT_CHOICES = (
         (1,'Sent From Assessor'),
@@ -2582,7 +2586,7 @@ class Referral(RevisionedMixin):
     sent_by = models.IntegerField() #EmailUserRO
     #referral = models.ForeignKey(EmailUser,null=True,blank=True,related_name='leaseslicensing_referalls', on_delete=models.SET_NULL)
     referral = models.IntegerField() #EmailUserRO
-    referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
+    # referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
     linked = models.BooleanField(default=False)
     sent_from = models.SmallIntegerField(choices=SENT_CHOICES,default=SENT_CHOICES[0][0])
     processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES,
@@ -2612,12 +2616,12 @@ class Referral(RevisionedMixin):
 
     @property
     def referral_assessment(self):
-        qs=self.assessment.filter(referral_assessment=True, referral_group=self.referral_group)
+        # qs=self.assessment.filter(referral_assessment=True, referral_group=self.referral_group)
+        qs = self.assessment.filter(referral_assessment=True)
         if qs:
             return qs[0]
         else:
             return None
-
 
     @property
     def can_be_completed(self):
@@ -2632,9 +2636,10 @@ class Referral(RevisionedMixin):
     @property
     def allowed_assessors(self):
         ## must be SystemGroup
-        group = self.referral_group
+        # group = self.referral_group
         #return group.members.all() if group else []
-        return group.get_system_group_member_ids() if group else []
+        # return group.get_system_group_member_ids() if group else []
+        return []  # TODO: correct this
 
     def can_process(self, user):
         if self.processing_status=='with_referral':
@@ -2917,7 +2922,7 @@ class ProposalRequirement(OrderedModel):
 
     def can_district_assessor_edit(self,user):
         allowed_status=['with_district_assessor', 'partially_approved', 'partially_declined']
-        if self.district_proposal and self.district_proposal.processing_status=='with_assessor_requirements' and self.proposal.processing_status in allowed_status:
+        if self.district_proposal and self.district_proposal.processing_status=='with_assessor_conditions' and self.proposal.processing_status in allowed_status:
             if self.district_proposal.can_process_requirements(user):
                 return True
         return False
@@ -2978,25 +2983,25 @@ class ProposalAssessment(RevisionedMixin):
     #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='proposal_assessment', on_delete=models.SET_NULL)
     submitter = models.IntegerField() #EmailUserRO
     referral_assessment=models.BooleanField(default=False)
-    referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='referral_assessment', on_delete=models.SET_NULL)
+    # referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='referral_assessment', on_delete=models.SET_NULL)
     referral=models.ForeignKey(Referral, related_name='assessment',blank=True, null=True, on_delete=models.SET_NULL)
     # def __str__(self):
     #     return self.proposal
 
     class Meta:
         app_label = 'leaseslicensing'
-        unique_together = ('proposal', 'referral_group',)
+        # unique_together = ('proposal', 'referral_group',)
 
     @property
     def checklist(self):
         return self.answers.all()
 
-    @property
-    def referral_group_name(self):
-        if self.referral_group:
-            return self.referral_group.name
-        else:
-            return ''
+    # @property
+    # def referral_group_name(self):
+    #     if self.referral_group:
+    #         return self.referral_group.name
+    #     else:
+    #         return ''
 
 
 class ProposalAssessmentAnswer(RevisionedMixin):
