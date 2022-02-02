@@ -577,7 +577,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     details_text = models.TextField(blank=True)
     #If the proposal is created as part of migration of approvals
     migrated=models.BooleanField(default=False)
-    ## additional form fields
+    ## Registration of Interest additional form fields
     # proposal details
     exclusive_use = models.BooleanField(null=True)
     exclusive_use_text = models.TextField(blank=True)
@@ -608,6 +608,20 @@ class Proposal(DirtyFieldsMixin, models.Model):
     native_title_consultation_text = models.TextField(blank=True)
     mining_tenement = models.BooleanField(null=True)
     mining_tenement_text = models.TextField(blank=True)
+    ## Lease Licence additional form fields
+    # proposal details
+    profit_and_loss_text = models.TextField(blank=True)
+    cash_flow_text = models.TextField(blank=True)
+    capital_investment_text = models.TextField(blank=True)
+    financial_capacity_text = models.TextField(blank=True)
+    available_activities_text = models.TextField(blank=True)
+    market_analysis_text = models.TextField(blank=True)
+    staffing_text = models.TextField(blank=True)
+    # proposal impact
+    key_personnel_text = models.TextField(blank=True)
+    key_milestones_text = models.TextField(blank=True)
+    risk_factors_text = models.TextField(blank=True)
+    legislative_requirements_text = models.TextField(blank=True)
 
     class Meta:
         app_label = 'leaseslicensing'
