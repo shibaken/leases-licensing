@@ -416,6 +416,7 @@ class ListProposalSerializer(BaseProposalSerializer):
     assessor_process = serializers.SerializerMethodField(read_only=True)
     qaofficer_referrals = QAOfficerReferralSerializer(many=True)
     #fee_invoice_url = serializers.SerializerMethodField()
+    allowed_assessors = EmailUserSerializer(many=True)
 
     class Meta:
         model = Proposal
@@ -472,7 +473,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'lodgement_number',
                 'can_officer_process',
                 'assessor_process',
-                'allowed_assessors',
+                # 'allowed_assessors',
                 #'fee_invoice_url',
                 #'fee_invoice_reference',
                 #'fee_paid',

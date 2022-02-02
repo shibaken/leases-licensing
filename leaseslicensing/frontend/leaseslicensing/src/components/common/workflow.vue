@@ -17,10 +17,10 @@
                         <strong>Currently assigned to</strong><br/>
                         <div class="form-group">
                             <template v-if="proposal.processing_status == 'With Approver'">
-                                    <select 
-                                        ref="assigned_officer" 
-                                        :disabled="!canAction" 
-                                        class="form-control" 
+                                    <select
+                                        ref="assigned_officer"
+                                        :disabled="!canAction"
+                                        class="form-control"
                                         v-model="proposal.assigned_approver"
                                         @change="assignTo()">
                                         <option v-for="member in proposal.allowed_assessors" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
@@ -28,10 +28,10 @@
                                     <a v-if="canAssess && proposal.assigned_approver != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
                             </template>
                             <template v-else>
-                                    <select 
-                                        ref="assigned_officer" 
-                                        :disabled="!canAction" 
-                                        class="form-control" 
+                                    <select
+                                        ref="assigned_officer"
+                                        :disabled="!canAction"
+                                        class="form-control"
                                         v-model="proposal.assigned_officer"
                                         @change="assignTo()">
                                         <option v-for="member in proposal.allowed_assessors" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
@@ -73,19 +73,19 @@
 -->
                             <div class="row" v-if="display_action_enter_conditions">
                                 <div class="col-sm-12">
-                                    <button 
-                                        class="btn btn-primary w-btn" 
-                                        :disabled="can_user_edit" 
-                                        @click.prevent="switchStatus('with_assessor_requirements')"
+                                    <button
+                                        class="btn btn-primary w-btn"
+                                        :disabled="can_user_edit"
+                                        @click.prevent="switchStatus('with_assessor_conditions')"
                                     >Enter Conditions</button><br/>
                                 </div>
                             </div>
 
                             <div class="row" v-if="display_action_request_amendment">
                                 <div class="col-sm-12">
-                                    <button 
-                                        class="btn btn-primary top-buffer-s w-btn" 
-                                        :disabled="can_user_edit" 
+                                    <button
+                                        class="btn btn-primary top-buffer-s w-btn"
+                                        :disabled="can_user_edit"
                                         @click.prevent="amendmentRequest()"
                                     >Request Amendment</button><br/>
                                 </div>
@@ -93,9 +93,9 @@
 
                             <div class="row" v-if="display_action_propose_decline">
                                 <div class="col-sm-12">
-                                    <button 
-                                        class="btn btn-primary top-buffer-s w-btn" 
-                                        :disabled="can_user_edit" 
+                                    <button
+                                        class="btn btn-primary top-buffer-s w-btn"
+                                        :disabled="can_user_edit"
                                         @click.prevent="proposedDecline()"
                                     >Propose Decline</button>
                                 </div>
@@ -106,9 +106,9 @@
 -->
                             <div class="row" v-if="display_action_back_to_application">
                                 <div class="col-sm-12">
-                                    <button 
-                                        class="btn btn-primary top-buffer-s w-btn" 
-                                        :disabled="can_user_edit" 
+                                    <button
+                                        class="btn btn-primary top-buffer-s w-btn"
+                                        :disabled="can_user_edit"
                                         @click.prevent="switchStatus('with_assessor')"
                                     >Back To Application</button>
                                 </div>
@@ -120,9 +120,9 @@
 -->
                             <div class="row" v-if="display_action_propose_grant">
                                 <div class="col-sm-12">
-                                    <button 
-                                        class="btn btn-primary top-buffer-s w-btn" 
-                                        :disabled="can_user_edit" 
+                                    <button
+                                        class="btn btn-primary top-buffer-s w-btn"
+                                        :disabled="can_user_edit"
                                         @click.prevent="proposedApproval()"
                                     >Propose Approve</button>
                                 </div>
@@ -135,9 +135,9 @@
 -->
                             <div class="row" v-if="display_action_back_to_assessor">
                                 <div class="col-sm-12">
-                                    <button 
-                                        class="btn btn-primary top-buffer-s w-btn" 
-                                        :disabled="can_user_edit" 
+                                    <button
+                                        class="btn btn-primary top-buffer-s w-btn"
+                                        :disabled="can_user_edit"
                                         @click.prevent="switchStatus('with_assessor')"
                                     ><!-- Back To Processing -->Back To Assessor</button>
                                 </div>
@@ -148,18 +148,18 @@
 -->
                             <div class="row" v-if="display_action_back_to_assessor_requirements">
                                 <div class="col-sm-12">
-                                    <button 
-                                        class="btn btn-primary top-buffer-s w-btn" 
-                                        :disabled="can_user_edit" 
-                                        @click.prevent="switchStatus('with_assessor_requirements')"
+                                    <button
+                                        class="btn btn-primary top-buffer-s w-btn"
+                                        :disabled="can_user_edit"
+                                        @click.prevent="switchStatus('with_assessor_conditions')"
                                     ><!-- Back To Requirements -->Back To Assessor</button><br/>
                                 </div>
                             </div>
 
                             <div class="row" v-if="display_action_grant">
                                 <div class="col-sm-12" >
-                                    <button 
-                                        class="btn btn-primary top-buffer-s w-btn" 
+                                    <button
+                                        class="btn btn-primary top-buffer-s w-btn"
                                         @click.prevent="issueProposal()"
                                     >Grant</button><br/>
                                 </div>
@@ -167,8 +167,8 @@
 
                             <div class="row" v-if="display_action_decline">
                                 <div class="col-sm-12">
-                                    <button 
-                                        class="btn btn-primary top-buffer-s w-btn" 
+                                    <button
+                                        class="btn btn-primary top-buffer-s w-btn"
                                         @click.prevent="declineProposal()"
                                     >Decline</button><br/>
                                 </div>
@@ -235,7 +235,7 @@ export default {
         },
         display_actions: function(){
             if (this.debug) return true
-            
+
             return !this.isFinalised && this.canAction
         },
         display_action_request_amendment: function(){
@@ -278,7 +278,7 @@ export default {
 
             let display = false
             try {
-                if(this.proposal.processing_status === constants.WITH_ASSESSOR_REQUIREMENTS){
+                if(this.proposal.processing_status === constants.WITH_ASSESSOR_CONDITIONS){
                     display = true
                 }
             } catch(err) {}
@@ -293,7 +293,7 @@ export default {
                     //if(this.proposal.requirements_completed){
                     //    display = true
                     //}
-                    if(this.proposal.processing_status === constants.WITH_ASSESSOR_REQUIREMENTS){
+                    if(this.proposal.processing_status === constants.WITH_ASSESSOR_CONDITIONS){
                         display = true
                     }
                 }
@@ -333,7 +333,7 @@ export default {
                     display = true
                 }
                 if([constants.WL_PROPOSAL, constants.AA_PROPOSAL].includes(this.proposal.application_type_dict.code)){
-                    if(this.proposal.processing_status === constants.WITH_ASSESSOR_REQUIREMENTS){
+                    if(this.proposal.processing_status === constants.WITH_ASSESSOR_CONDITIONS){
                         display = true
                     }
                 }

@@ -7,12 +7,6 @@
                     <template v-show="select2AppliedToApplicationType">
                         <select class="form-control" ref="filter_application_type" ></select>
                     </template>
-<!--
-                    <select class="form-control" v-model="filterApplicationType">
-                        <option value="all">All</option>
-                        <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
-                    </select>
--->
                 </div>
             </div>
             <div class="col-md-3">
@@ -21,12 +15,6 @@
                     <template v-show="select2AppliedToApplicationStatus">
                         <select class="form-control" ref="filter_application_status" ></select>
                     </template>
-<!--
-                    <select class="form-control" v-model="filterApplicationStatus">
-                        <option value="all">All</option>
-                        <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
-                    </select>
--->
                 </div>
             </div>
             <div class="col-md-3">
@@ -172,8 +160,12 @@ export default {
 
         return {
             // selected values for filtering
-            filterApplicationType: sessionStorage.getItem('filterApplicationTypeForMap') ? sessionStorage.getItem('filterApplicationTypeForMap') : 'all',
-            filterApplicationStatus: sessionStorage.getItem('filterApplicationStatusForMap') ? sessionStorage.getItem('filterApplicationStatusForMap') : 'all',
+            filterApplicationTypes: sessionStorage.getItem('filterApplicationTypesForMap') ?
+                JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) :
+                [],
+            filterApplicationStatuses: sessionStorage.getItem('filterApplicationStatusesForMap') ? 
+                JSON.parse(sessionStorage.getItem('filterApplicationStatusesForMap')) : 
+                [],
             filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFromForMap') ? sessionStorage.getItem('filterProposalLodgedFromForMap') : '',
             filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedToForMap') ? sessionStorage.getItem('filterProposalLodgedToForMap') : '',
 
@@ -285,9 +277,9 @@ export default {
                     'ajax_obj': null,
                 },
                 {
-                    'id': 'approved_editing_invoiceing',
+                    'id': 'approved_editing_invoicing',
                     'text': 'Approved (Editing Invoicing)',
-                    'show': default_show_statuses.includes('approved_editing_invoiceing'),
+                    'show': default_show_statuses.includes('approved_editing_invoicing'),
                     'shown': false,
                     'loaded': false,
                     'features': [],
@@ -325,8 +317,9 @@ export default {
     },
     computed: {
         filterApplied: function(){
+            console.log('in filterApplied')
             let filter_applied = true
-            if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
+            if(this.filterApplicationStatuses.length == 0 && this.filterApplicationTypes.length == 0 && 
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }
@@ -337,17 +330,11 @@ export default {
         CollapsibleFilters,
     },
     watch: {
-        filterApplicationStatus: function() {
-            sessionStorage.setItem('filterApplicationStatus', this.filterApplicationStatus);
-        },
-        filterApplicationType: function() {
-            sessionStorage.setItem('filterApplicationType', this.filterApplicationType);
-        },
         filterProposalLodgedFrom: function() {
-            sessionStorage.setItem('filterProposalLodgedFrom', this.filterProposalLodgedFrom);
+            sessionStorage.setItem('filterProposalLodgedFromForMap', this.filterProposalLodgedFrom);
         },
         filterProposalLodgedTo: function() {
-            sessionStorage.setItem('filterProposalLodgedTo', this.filterProposalLodgedTo);
+            sessionStorage.setItem('filterProposalLodgedToForMap', this.filterProposalLodgedTo);
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
@@ -357,8 +344,36 @@ export default {
         }
     },
     methods: {
+        updateApplicationTypeFilterCache: function(){
+            let vm = this
+            vm.filterApplicationTypes = $(vm.$refs.filter_application_type).select2('data').map(x => { return x.id })
+            sessionStorage.setItem('filterApplicationTypesForMap', JSON.stringify(vm.filterApplicationTypes));
+        },
+        updateApplicationStatusFilterCache: function(){
+            let vm = this
+            vm.filterApplicationStatuses = $(vm.$refs.filter_application_status).select2('data').map(x => { return x.id })
+            sessionStorage.setItem('filterApplicationStatusesForMap', JSON.stringify(vm.filterApplicationStatuses));
+        },
         updateInstructions: function(){
+            let vm = this
 
+            if (vm.filterApplicationStatuses.length === 0){
+                // Nothing selected means show all
+                for (let site_status of vm.show_hide_instructions){
+                    console.log('Show: ' + site_status.id)
+                    site_status.show = true
+                }
+            } else {
+                for (let site_status of vm.show_hide_instructions){
+                    if (vm.filterApplicationStatuses.includes(site_status.id)){
+                        console.log('Show: ' + site_status.id)
+                        site_status.show = true
+                    } else {
+                        console.log('Hide: ' + site_status.id)
+                        site_status.show = false
+                    }
+                }
+            }
         },
         applySelect2ToApplicationTypes: function(application_types){
             let vm = this
@@ -371,18 +386,21 @@ export default {
                     data: application_types,
                 }).
                 on('select2:select', function(e){
+                    vm.updateApplicationTypeFilterCache()
                     vm.updateInstructions()
                     vm.showHideProposals()
                 }).
                 on('select2:unselect', function(e){
-                    console.log('unselect')
+                    vm.updateApplicationTypeFilterCache()
                     vm.updateInstructions()
                     vm.showHideProposals()
                 })
             }
             vm.select2AppliedToApplicationType = true
+            $(vm.$refs.filter_application_type).val(vm.filterApplicationTypes).trigger('change')
         },
         applySelect2ToApplicationStatuses: function(application_statuses){
+            console.log('in applySelect2ToApplicationStatuses')
             console.log(application_statuses)
             let vm = this
             if (!vm.select2AppliedToApplicationStatus){
@@ -394,27 +412,22 @@ export default {
                     data: application_statuses,
                 }).
                 on('select2:select', function(e){
+                    vm.updateApplicationStatusFilterCache()
                     vm.updateInstructions()
                     vm.showHideProposals()
                 }).
                 on('select2:unselect', function(e){
-                    console.log('unselect')
+                    vm.updateApplicationStatusFilterCache()
                     vm.updateInstructions()
                     vm.showHideProposals()
                 })
             }
             vm.select2AppliedToApplicationStatus = true
+            $(vm.$refs.filter_application_status).val(vm.filterApplicationStatuses).trigger('change')
         },
         geoJsonButtonClicked: function(){
             console.log('geoJsonButtonClicked')
             // TODO: export all the polygons shown as geojson file
-        },
-        addGeojsonToMap: function(polygon_geojson) {
-            console.log(polygon_geojson)
-            let vm = this
-            let feature = (new GeoJSON()).readFeature(polygon_geojson)
-            this.proposalQuerySource.addFeature(feature)
-            return feature
         },
         setBaseLayer: function(selected_layer_name){
             let vm = this
@@ -647,12 +660,13 @@ export default {
 
             for (let site_status of vm.show_hide_instructions){
                 if (site_status.show == site_status.shown){
-                    console.log('continue: ' + site_status.id)
+                    console.log('skip: ' + site_status.id)
                     continue  // All the polygons have been already updated on the map.  Go to the next status
                 }
 
                 if (site_status.show){
                     // Show
+                    console.log('show: ' + site_status.id)
                     if (site_status.loaded){
                         for (let feature of site_status.features){
                             vm.proposalQuerySource.addFeature(feature);
@@ -670,14 +684,12 @@ export default {
                             success: function(re, status, xhr){
                                 for (let proposal of re){
                                     if (proposal.proposalgeometry){
-                                        for (let poly of proposal.proposalgeometry.features){
-                                            try {
-                                                let feature = (new GeoJSON()).readFeature(poly)
-                                                vm.proposalQuerySource.addFeature(feature)
-                                                site_status.features.push(feature)
-                                            } catch (err) {
-                                                console.log(err)
-                                            }
+                                        try {
+                                            let features = (new GeoJSON()).readFeatures(proposal.proposalgeometry)
+                                            vm.proposalQuerySource.addFeatures(features)
+                                            site_status.features.push(...features)
+                                        } catch (err) {
+                                            console.log(err)
                                         }
                                     }
                                 }
@@ -690,6 +702,7 @@ export default {
                     }
                 } else {
                     // Hide
+                    console.log('hide: ' + site_status.id)
                     for (let feature of site_status.features){
                         // Remove the apiary_site from the map.  There are no functions to show/hide a feature unlike the layer.
                         if (vm.proposalQuerySource.hasFeature(feature)){
