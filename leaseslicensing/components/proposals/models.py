@@ -3070,10 +3070,10 @@ class QAOfficerReferral(RevisionedMixin):
         return self.can_be_processed and self.proposal.is_qa_officer()
 
 
-@receiver(pre_delete, sender=Proposal)
-def delete_documents(sender, instance, *args, **kwargs):
-    for document in instance.documents.all():
-        document.delete()
+#@receiver(pre_delete, sender=Proposal)
+#def delete_documents(sender, instance, *args, **kwargs):
+#    for document in instance.documents.all():
+#        document.delete()
 
 def clone_proposal_with_status_reset(proposal, copy_requirement_documents=False):
     """
