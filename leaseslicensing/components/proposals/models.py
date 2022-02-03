@@ -3013,30 +3013,21 @@ class ChecklistQuestion(RevisionedMixin):
 
 
 class ProposalAssessment(RevisionedMixin):
-    proposal=models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
+    proposal = models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
-    #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='proposal_assessment', on_delete=models.SET_NULL)
-    submitter = models.IntegerField() #EmailUserRO
-    referral_assessment=models.BooleanField(default=False)
-    # referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='referral_assessment', on_delete=models.SET_NULL)
-    referral=models.ForeignKey(Referral, related_name='assessment',blank=True, null=True, on_delete=models.SET_NULL)
-    # def __str__(self):
-    #     return self.proposal
+    submitter = models.IntegerField()  #EmailUserRO
+    referral = models.ForeignKey(Referral, related_name='assessment', blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         app_label = 'leaseslicensing'
-        # unique_together = ('proposal', 'referral_group',)
 
     @property
     def checklist(self):
         return self.answers.all()
 
-    # @property
-    # def referral_group_name(self):
-    #     if self.referral_group:
-    #         return self.referral_group.name
-    #     else:
-    #         return ''
+    @property
+    def referral_assessment(self):
+        return True if self.referral else False
 
 
 class ProposalAssessmentAnswer(RevisionedMixin):
