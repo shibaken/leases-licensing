@@ -2955,24 +2955,53 @@ class ProposalRequirement(OrderedModel):
         return
 
 
+class ChecklistQuestions(RevisionedMixin):
+    '''
+    This object is per section per type(assessor/referral)
+    '''
+    SECTION_MAP = 'map'
+    SECTION_PROPOSAL_DETAILS = 'proposal_details'
+    SECTION_PROPOSAL_IMPACT = 'proposal_impact'
+    SECTION_OTHER = 'other'
+    SECTION_DEED_POLL = 'deed_poll'
+    SECTION_RELATED_ITEMS = 'related_items'
+    SECTION_CHOICES = (
+        (SECTION_MAP, 'Map'),
+        (SECTION_PROPOSAL_DETAILS, 'Proposal Details'),
+        (SECTION_PROPOSAL_IMPACT, 'Proposal Impact'),
+        (SECTION_OTHER, 'Other'),
+        (SECTION_DEED_POLL, 'Deed Poll'),
+        (SECTION_RELATED_ITEMS, 'Related Items'),
+    )
+    LIST_TYPE_CHOICES = (
+        ('assessor_list', 'Assessor Checklist'),
+        ('referral_list', 'Referral Checklist')
+    )
 
-#class ProposalStandardRequirement(models.Model):
+    application_type = models.ForeignKey(ApplicationType, blank=True, null=True, on_delete=models.SET_NULL)
+    section = models.CharField('Section', max_length=50, choices=SECTION_CHOICES, default=SECTION_CHOICES[0][0])
+    list_type = models.CharField('Checklist type', max_length=30, choices=LIST_TYPE_CHOICES, default=LIST_TYPE_CHOICES[0][0])
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+    def __str__(self):
+        return 'Questions for {}:'.format(self.get_section_display())
+
+
 class ChecklistQuestion(RevisionedMixin):
     TYPE_CHOICES = (
-        ('assessor_list','Assessor Checklist'),
-        ('referral_list','Referral Checklist')
+        ('assessor_list', 'Assessor Checklist'),
+        ('referral_list', 'Referral Checklist')
     )
     ANSWER_TYPE_CHOICES = (
-        ('yes_no','Yes/No type'),
-        ('free_text','Free text type')
+        ('yes_no', 'Yes/No type'),
+        ('free_text', 'Free text type')
     )
     text = models.TextField()
-    list_type = models.CharField('Checklist type', max_length=30, choices=TYPE_CHOICES,
-                                         default=TYPE_CHOICES[0][0])
-    answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES,
-                                         default=ANSWER_TYPE_CHOICES[0][0])
-
-    #correct_answer= models.BooleanField(default=False)
+    list_type = models.CharField('Checklist type', max_length=30, choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0])
+    answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES, default=ANSWER_TYPE_CHOICES[0][0])
     application_type = models.ForeignKey(ApplicationType,blank=True, null=True, on_delete=models.SET_NULL)
     obsolete = models.BooleanField(default=False)
     order = models.PositiveSmallIntegerField(default=1)
