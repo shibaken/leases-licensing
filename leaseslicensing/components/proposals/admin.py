@@ -131,9 +131,9 @@ class QAOfficerGroupAdmin(admin.ModelAdmin):
     ordering = ('id',)
 
 
-@admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['question_text', 'answer_one', 'answer_two', 'answer_three', 'answer_four', 'application_type',]
-    ordering = ('question_text',)
+# @admin.register(Question)
+# class QuestionAdmin(admin.ModelAdmin):
+#     list_display = ['question_text', 'answer_one', 'answer_two', 'answer_three', 'answer_four', 'application_type',]
+#     ordering = ('question_text',)
 
 
