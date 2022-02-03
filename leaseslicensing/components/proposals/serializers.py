@@ -617,7 +617,7 @@ class SaveProposalSerializer(BaseProposalSerializer):
                 'assigned_officer',
                 'previous_application',
                 'lodgement_date',
-                'documents',
+                #'documents',
                 'requirements',
                 'readonly',
                 'can_user_edit',

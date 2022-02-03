@@ -1,11 +1,11 @@
 <template lang="html">
     <div>
     <FormSection label="Proposal Details" Index="application_details" v-if="proposal">
-        <div class="section-style">
-            <div class="col-sm-3 details-text">
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3">
                 <label for="details_text" class="control-label pull-left">Provide a description of your proposal</label>
             </div>
-            <div class="col-sm-8 details-text">
+            <div class="col-sm-8">
                 <RichText
                 id="details_text"
                 :proposalData="proposal.details_text"
@@ -16,16 +16,20 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <label for="supporting_documents">Attach any supporting documents</label>
-            <FileField 
-                :readonly="readonly"
-                ref="supporting_documents"
-                name="supporting_documents"
-                id="supporting_documents"
-                :isRepeatable="true"
-                :documentActionUrl="supportingDocumentsUrl"
-                :replace_button_by_text="true"
-            />
+            <div class="col-sm-3">
+                <label for="supporting_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9">
+                <FileField 
+                    :readonly="readonly"
+                    ref="supporting_documents"
+                    name="supporting_documents"
+                    id="supporting_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="supportingDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
         </div>
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
@@ -42,27 +46,37 @@
                         <label for="exclusive_use_no">No</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.exclusive_use">
-                    <RichText
-                    :proposalData="proposal.exclusive_use_text"
-                    ref="exclusive_use_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="exclusive_use_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="exclusive_use_documents"
-                        name="exclusive_use_documents"
-                        id="exclusive_use_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="exclusiveUseDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.exclusive_use">
+            <div class="col-sm-3 question-title">
+                <label class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.exclusive_use_text"
+                ref="exclusive_use_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="exclusive_use_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="exclusive_use_documents"
+                    name="exclusive_use_documents"
+                    id="exclusive_use_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="exclusiveUseDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal require long-term use of or access to a site?</label>
@@ -78,28 +92,38 @@
                         <label for="long_term_use_no">No</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.long_term_use">
-                    <RichText
-                    :proposalData="proposal.long_term_use_text"
-                    ref="long_term_use_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="long_term_use_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="long_term_use_documents"
-                        name="long_term_use_documents"
-                        id="long_term_use_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="longTermUseDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
-
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.long_term_use">
+            <div class="col-sm-3 question-title">
+                <label for="long_term_use_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.long_term_use_text"
+                ref="long_term_use_text"
+                id="long_term_use_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="long_term_use_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="long_term_use_documents"
+                    name="long_term_use_documents"
+                    id="long_term_use_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="longTermUseDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Is the proposal consistent with the purpose of the park or reserve?</label>
@@ -119,28 +143,39 @@
                         <label for="consistent_purpose_null">Unsure</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.consistent_purpose">
-                    <RichText
-                    :proposalData="proposal.consistent_purpose_text"
-                    ref="consistent_purpose_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="consistent_purpose_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="consistent_purpose_documents"
-                        name="consistent_purpose_documents"
-                        id="consistent_purpose_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="consistentPurposeDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.consistent_purpose">
+            <div class="col-sm-3 question-title">
+                <label for="consistent_purpose_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.consistent_purpose_text"
+                ref="consistent_purpose_text"
+                id="consistent_purpose_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="consistent_purpose_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="consistent_purpose_documents"
+                    name="consistent_purpose_documents"
+                    id="consistent_purpose_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="consistentPurposeDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Is the proposal consistent with the <a href="http://www.google.com" target="_blank">park or reserve management plan</a>?</label>
@@ -160,26 +195,36 @@
                         <label for="consistent_plan_null">Unsure</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.consistent_plan">
-                    <RichText
-                    :proposalData="proposal.consistent_plan_text"
-                    ref="consistent_plan_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="consistent_plan_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="consistent_plan_documents"
-                        name="consistent_plan_documents"
-                        id="consistent_plan_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="consistentPlanDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
+            </div>
+        </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.consistent_plan">
+            <div class="col-sm-3 question-title">
+                <label for="consistent_plan_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.consistent_plan_text"
+                ref="consistent_plan_text"
+                id="consistent_plan_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="consistent_plan_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="consistent_plan_documents"
+                    name="consistent_plan_documents"
+                    id="consistent_plan_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="consistentPlanDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
             </div>
         </div>
 
@@ -204,28 +249,39 @@
                         <label for="clearing_vegetation_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.clearing_vegetation">
-                    <RichText
-                    :proposalData="proposal.clearing_vegetation_text"
-                    ref="clearing_vegetation_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="clearing_vegetation_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="clearing_vegetation_documents"
-                        name="clearing_vegetation_documents"
-                        id="clearing_vegetation_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="clearingVegetationDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.clearing_vegetation">
+            <div class="col-sm-3 question-title">
+                <label for="clearing_vegetation_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.clearing_vegetation_text"
+                ref="clearing_vegetation_text"
+                id="clearing_vegetation_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="clearing_vegetation_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="clearing_vegetation_documents"
+                    name="clearing_vegetation_documents"
+                    id="clearing_vegetation_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="clearingVegetationDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal involve ground-disturbing works?</label>
@@ -245,28 +301,39 @@
                         <label for="ground_disturbing_works_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.ground_disturbing_works">
-                    <RichText
-                    :proposalData="proposal.ground_disturbing_works_text"
-                    ref="ground_disturbing_works_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="ground_disturbing_works_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="ground_disturbing_works_documents"
-                        name="ground_disturbing_works_documents"
-                        id="ground_disturbing_works_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="groundDisturbingWorksDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.ground_disturbing_works">
+            <div class="col-sm-3 question-title">
+                <label for="ground_disturbing_works_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.ground_disturbing_works_text"
+                ref="ground_disturbing_works_text"
+                id="ground_disturbing_works_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="ground_disturbing_works_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="ground_disturbing_works_documents"
+                    name="ground_disturbing_works_documents"
+                    id="ground_disturbing_works_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="groundDisturbingWorksDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal impact on a World or National Heritage area?</label>
@@ -286,28 +353,39 @@
                         <label for="heritage_site_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.heritage_site">
-                    <RichText
-                    :proposalData="proposal.heritage_site_text"
-                    ref="heritage_site_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="heritage_site_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="heritage_site_documents"
-                        name="heritage_site_documents"
-                        id="heritage_site_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="heritageSiteDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.heritage_site">
+            <div class="col-sm-3 question-title">
+                <label for="heritage_site_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.heritage_site_text"
+                ref="heritage_site_text"
+                id="heritage_site_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="heritage_site_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="heritage_site_documents"
+                    name="heritage_site_documents"
+                    id="heritage_site_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="heritageSiteDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Is the proposal located in a environmentally sensitive area or habitat for significant flora and fauna?</label>
@@ -327,28 +405,39 @@
                         <label for="environmentally_sensitive_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.environmentally_sensitive">
-                    <RichText
-                    :proposalData="proposal.environmentally_sensitive_text"
-                    ref="environmentally_sensitive_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="environmentally_sensitive_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="environmentally_sensitive_documents"
-                        name="environmentally_sensitive_documents"
-                        id="environmentally_sensitive_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="environmentallySensitiveDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.environmentally_sensitive">
+            <div class="col-sm-3 question-title">
+                <label for="environmentally_sensitive_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.environmentally_sensitive_text"
+                ref="environmentally_sensitive_text"
+                id="environmentally_sensitive_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="environmentally_sensitive_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="environmentally_sensitive_documents"
+                    name="environmentally_sensitive_documents"
+                    id="environmentally_sensitive_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="environmentallySensitiveDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal impact on wetlands or water courses?</label>
@@ -368,28 +457,39 @@
                         <label for="wetlands_impact_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.wetlands_impact">
-                    <RichText
-                    :proposalData="proposal.wetlands_impact_text"
-                    ref="wetlands_impact_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="wetlands_impact_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="wetlands_impact_documents"
-                        name="wetlands_impact_documents"
-                        id="wetlands_impact_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="wetlandsImpactDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.wetlands_impact">
+            <div class="col-sm-3 question-title">
+                <label for="wetlands_impact_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.wetlands_impact_text"
+                ref="wetlands_impact_text"
+                id="wetlands_impact_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="wetlands_impact_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="wetlands_impact_documents"
+                    name="wetlands_impact_documents"
+                    id="wetlands_impact_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="wetlandsImpactDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal involve building a structure or building?</label>
@@ -409,28 +509,39 @@
                         <label for="building_required_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.building_required">
-                    <RichText
-                    :proposalData="proposal.building_required_text"
-                    ref="building_required_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="building_required_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="building_required_documents"
-                        name="building_required_documents"
-                        id="building_required_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="buildingRequiredDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.building_required">
+            <div class="col-sm-3 question-title">
+                <label for="building_required_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.building_required_text"
+                ref="building_required_text"
+                id="building_required_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="building_required_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="building_required_documents"
+                    name="building_required_documents"
+                    id="building_required_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="buildingRequiredDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal create a significant change to or visual impact on the proposed site?</label>
@@ -450,28 +561,39 @@
                         <label for="significant_change_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.significant_change">
-                    <RichText
-                    :proposalData="proposal.significant_change_text"
-                    ref="significant_change_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="significant_change_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="significant_change_documents"
-                        name="significant_change_documents"
-                        id="significant_change_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="significantChangeDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.significant_change">
+            <div class="col-sm-3 question-title">
+                <label for="significant_change_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.significant_change_text"
+                ref="significant_change_text"
+                id="significant_change_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="significant_change_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="significant_change_documents"
+                    name="significant_change_documents"
+                    id="significant_change_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="significantChangeDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal impact on a <a target="_blank" href="http://www.google.com">registered Aboriginal site</a>?</label>
@@ -491,28 +613,39 @@
                         <label for="aboriginal_site_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.aboriginal_site">
-                    <RichText
-                    :proposalData="proposal.aboriginal_site_text"
-                    ref="aboriginal_site_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="aboriginal_site_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="aboriginal_site_documents"
-                        name="aboriginal_site_documents"
-                        id="aboriginal_site_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="aboriginalSiteDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.aboriginal_site">
+            <div class="col-sm-3 question-title">
+                <label for="aboriginal_site_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.aboriginal_site_text"
+                ref="aboriginal_site_text"
+                id="aboriginal_site_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="aboriginal_site_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="aboriginal_site_documents"
+                    name="aboriginal_site_documents"
+                    id="aboriginal_site_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="aboriginalSiteDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Has any consultation occurred with the relevant Aboriginal native title party?</label>
@@ -532,28 +665,39 @@
                         <label for="native_title_consultation_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.native_title_consultation">
-                    <RichText
-                    :proposalData="proposal.native_title_consultation_text"
-                    ref="native_title_consultation_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="native_title_consultation_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="native_title_consultation_documents"
-                        name="native_title_consultation_documents"
-                        id="native_title_consultation_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="nativeTitleConsultationDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
             </div>
         </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.native_title_consultation">
+            <div class="col-sm-3 question-title">
+                <label for="native_title_consultation_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.native_title_consultation_text"
+                ref="native_title_consultation_text"
+                id="native_title_consultation_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="native_title_consultation_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="native_title_consultation_documents"
+                    name="native_title_consultation_documents"
+                    id="native_title_consultation_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="nativeTitleConsultationDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal impact on a <a target="_blank" href="http://google.com">mining tenement</a>?</label>
@@ -573,26 +717,36 @@
                         <label for="mining_tenement_null">Unknown at this stage</label>
                     </li>
                 </ul>
-                <div class="col-sm-11 inline-details-text" v-if="proposal.mining_tenement">
-                    <RichText
-                    :proposalData="proposal.mining_tenement_text"
-                    ref="mining_tenement_text"
-                    :readonly="readonly" 
-                    :can_view_richtext_src=true
-                    v-bind:key="proposal.id"
-                    />
-                    <label for="mining_tenement_documents">Attach any supporting documents</label>
-                    <FileField 
-                        :readonly="readonly"
-                        ref="mining_tenement_documents"
-                        name="mining_tenement_documents"
-                        id="mining_tenement_documents"
-                        :isRepeatable="true"
-                        :documentActionUrl="miningTenementDocumentsUrl"
-                        :replace_button_by_text="true"
-                    />
-                </div>
 
+            </div>
+        </div>
+        <div class="col-sm-12 inline-details-text" v-show="proposal.mining_tenement">
+            <div class="col-sm-3 question-title">
+                <label for="mining_tenement_text" class="control-label pull-left">Provide details</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.mining_tenement_text"
+                ref="mining_tenement_text"
+                id="mining_tenement_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="mining_tenement_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="mining_tenement_documents"
+                    name="mining_tenement_documents"
+                    id="mining_tenement_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="miningTenementDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
             </div>
         </div>
 
@@ -751,7 +905,7 @@ from '@/utils/hooks'
         padding-left: 15px;
     }
     .section-style{
-        padding-left: 30px;
+        padding-left: 15px;
         margin-bottom: 20px;
     }
     .list-inline-item{
