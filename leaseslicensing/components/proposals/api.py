@@ -29,9 +29,7 @@ from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from leaseslicensing.components.proposals.utils import save_proponent_data,save_assessor_data, proposal_submit
 from leaseslicensing.components.proposals.models import searchKeyWords, search_reference, ProposalUserAction
-from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE, \
-    APPLICATION_TYPE_LICENCE
-from leaseslicensing.utils import missing_required_fields
+from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
 from leaseslicensing.components.main.utils import check_db_connection
 from leaseslicensing.components.main.decorators import basic_exception_handler
 

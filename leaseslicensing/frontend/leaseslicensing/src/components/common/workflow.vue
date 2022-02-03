@@ -200,14 +200,6 @@ export default {
             type: Object,
             default: null,
         },
-        //display_status: {
-        //    type: String,
-        //    default: '',
-        //},
-        //processing_status: {
-        //    type: String,
-        //    default: '',
-        //},
         isFinalised: {
             type: Boolean,
             default: false,
@@ -289,14 +281,14 @@ export default {
 
             let display = false
             try {
-                if([constants.AU_PROPOSAL, constants.ML_PROPOSAL].includes(this.proposal.application_type_dict.code)){
+                //if([constants.AU_PROPOSAL, constants.ML_PROPOSAL].includes(this.proposal.application_type_dict.code)){
                     //if(this.proposal.requirements_completed){
                     //    display = true
                     //}
                     if(this.proposal.processing_status === constants.WITH_ASSESSOR_CONDITIONS){
                         display = true
                     }
-                }
+                //}
             } catch(err) {}
             return display
         },

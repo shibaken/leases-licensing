@@ -1402,16 +1402,16 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def add_default_requirements(self):
         #Add default standard requirements to Proposal
         due_date=None
-        if self.application_type.name==ApplicationType.TCLASS:
-            due_date=self.other_details.nominated_start_date
-        if self.application_type.name==ApplicationType.FILMING:
-            due_date=self.filming_activity.commencement_date
-        if self.application_type.name==ApplicationType.EVENT:
-            due_date=self.event_activity.commencement_date
+        # if self.application_type.name==ApplicationType.TCLASS:
+        #     due_date=self.other_details.nominated_start_date
+        # if self.application_type.name==ApplicationType.FILMING:
+        #     due_date=self.filming_activity.commencement_date
+        # if self.application_type.name==ApplicationType.EVENT:
+        #     due_date=self.event_activity.commencement_date
         default_requirements=ProposalStandardRequirement.objects.filter(application_type=self.application_type, default=True, obsolete=False)
         if default_requirements:
             for req in default_requirements:
-                r, created=ProposalRequirement.objects.get_or_create(proposal=self, standard_requirement=req, due_date= due_date)
+                r, created = ProposalRequirement.objects.get_or_create(proposal=self, standard_requirement=req, due_date=due_date)
 
     def move_to_status(self,request,status, approver_comment):
         if not self.can_assess(request.user):
@@ -2955,60 +2955,107 @@ class ProposalRequirement(OrderedModel):
         return
 
 
+class SectionChecklistQuestions(RevisionedMixin):
+    '''
+    This object is per section per type(assessor/referral) grouping the ChecklistQuestion objects
+    '''
+    SECTION_MAP = 'map'
+    SECTION_PROPOSAL_DETAILS = 'proposal_details'
+    SECTION_PROPOSAL_IMPACT = 'proposal_impact'
+    SECTION_OTHER = 'other'
+    SECTION_DEED_POLL = 'deed_poll'
+    SECTION_RELATED_ITEMS = 'related_items'
+    SECTION_CHOICES = (
+        (SECTION_MAP, 'Map'),
+        (SECTION_PROPOSAL_DETAILS, 'Proposal Details'),
+        (SECTION_PROPOSAL_IMPACT, 'Proposal Impact'),
+        (SECTION_OTHER, 'Other'),
+        (SECTION_DEED_POLL, 'Deed Poll'),
+        (SECTION_RELATED_ITEMS, 'Related Items'),
+    )
+    LIST_TYPE_CHOICES = (
+        ('assessor_list', 'Assessor Checklist'),
+        ('referral_list', 'Referral Checklist')
+    )
 
-#class ProposalStandardRequirement(models.Model):
+    application_type = models.ForeignKey(ApplicationType, blank=True, null=True, on_delete=models.SET_NULL)
+    section = models.CharField('Section', max_length=50, choices=SECTION_CHOICES, default=SECTION_CHOICES[0][0])
+    list_type = models.CharField('Checklist type', max_length=30, choices=LIST_TYPE_CHOICES, default=LIST_TYPE_CHOICES[0][0])
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = 'Section Questions'
+        verbose_name_plural = 'Section Questions'
+
+    def __str__(self):
+        return 'Questions for {}:'.format(self.get_section_display())
+
+    @property
+    def number_of_questions(self):
+        return '{}/{}'.format(self.number_of_enabled_questions, self.number_of_total_questions)
+
+    @property
+    def number_of_total_questions(self):
+        return self.questions.count() if self.questions else 0  # 'questions' is a related_name of ChecklistQuestion
+
+    @property
+    def number_of_enabled_questions(self):
+        return self.questions.filter(enabled=True).count() if self.questions and self.questions.filter(enabled=True) else 0  # 'questions' is a related_name of ChecklistQuestion
+
+    # @property
+    # def application_type_name(self):
+    #     return self.application_type.get_name_display()
+    #
+    # @property
+    # def section_name(self):
+    #     return self.get_section_display()
+    #
+    # @property
+    # def type_name(self):
+    #     return self.get_list_type_display()
+
+
 class ChecklistQuestion(RevisionedMixin):
     TYPE_CHOICES = (
-        ('assessor_list','Assessor Checklist'),
-        ('referral_list','Referral Checklist')
+        ('assessor_list', 'Assessor Checklist'),
+        ('referral_list', 'Referral Checklist')
     )
     ANSWER_TYPE_CHOICES = (
-        ('yes_no','Yes/No type'),
-        ('free_text','Free text type')
+        ('yes_no', 'Yes/No type'),
+        ('free_text', 'Free text type')
     )
     text = models.TextField()
-    list_type = models.CharField('Checklist type', max_length=30, choices=TYPE_CHOICES,
-                                         default=TYPE_CHOICES[0][0])
-    answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES,
-                                         default=ANSWER_TYPE_CHOICES[0][0])
-
-    #correct_answer= models.BooleanField(default=False)
-    application_type = models.ForeignKey(ApplicationType,blank=True, null=True, on_delete=models.SET_NULL)
-    obsolete = models.BooleanField(default=False)
+    answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES, default=ANSWER_TYPE_CHOICES[0][0])
+    enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=1)
+    checklist_questions = models.ForeignKey(SectionChecklistQuestions, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.text
 
     class Meta:
         app_label = 'leaseslicensing'
+        ordering = ['order',]
 
 
 class ProposalAssessment(RevisionedMixin):
-    proposal=models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
+    proposal = models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
-    #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='proposal_assessment', on_delete=models.SET_NULL)
-    submitter = models.IntegerField() #EmailUserRO
-    referral_assessment=models.BooleanField(default=False)
-    # referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='referral_assessment', on_delete=models.SET_NULL)
-    referral=models.ForeignKey(Referral, related_name='assessment',blank=True, null=True, on_delete=models.SET_NULL)
-    # def __str__(self):
-    #     return self.proposal
+    submitter = models.IntegerField()  #EmailUserRO
+    referral = models.ForeignKey(Referral, related_name='assessment', blank=True, null=True, on_delete=models.SET_NULL)  # WHen none, this ProposalAssessment is for assessor.
 
     class Meta:
         app_label = 'leaseslicensing'
-        # unique_together = ('proposal', 'referral_group',)
 
     @property
     def checklist(self):
         return self.answers.all()
 
-    # @property
-    # def referral_group_name(self):
-    #     if self.referral_group:
-    #         return self.referral_group.name
-    #     else:
-    #         return ''
+    @property
+    def referral_assessment(self):
+        # When referral exists, self is for referral otherwise for assessor
+        return True if self.referral else False
 
 
 class ProposalAssessmentAnswer(RevisionedMixin):
