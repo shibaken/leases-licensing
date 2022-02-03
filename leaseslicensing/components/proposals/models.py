@@ -2957,7 +2957,7 @@ class ProposalRequirement(OrderedModel):
 
 class ChecklistQuestions(RevisionedMixin):
     '''
-    This object is per section per type(assessor/referral)
+    This object is per section per type(assessor/referral) grouping the ChecklistQuestion objects
     '''
     SECTION_MAP = 'map'
     SECTION_PROPOSAL_DETAILS = 'proposal_details'
@@ -3000,11 +3000,10 @@ class ChecklistQuestion(RevisionedMixin):
         ('free_text', 'Free text type')
     )
     text = models.TextField()
-    list_type = models.CharField('Checklist type', max_length=30, choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0])
     answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES, default=ANSWER_TYPE_CHOICES[0][0])
-    application_type = models.ForeignKey(ApplicationType,blank=True, null=True, on_delete=models.SET_NULL)
-    obsolete = models.BooleanField(default=False)
+    enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=1)
+    checklist_questions = models.ForeignKey(ChecklistQuestions, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.text
