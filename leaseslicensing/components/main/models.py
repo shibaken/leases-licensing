@@ -164,11 +164,7 @@ class ApplicationType(models.Model):
 class OracleCode(models.Model):
     CODE_TYPE_CHOICES = (
         (settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST, settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST),
-        (settings.APPLICATION_TYPE_LEASE, settings.APPLICATION_TYPE_LEASE),
-        (settings.APPLICATION_TYPE_LICENCE, settings.APPLICATION_TYPE_LICENCE),
-        #(ApplicationType.TCLASS, ApplicationType.TCLASS),
-        #(ApplicationType.FILMING, ApplicationType.FILMING),
-        #(ApplicationType.EVENT, ApplicationType.EVENT),
+        (settings.APPLICATION_TYPE_LEASE_LICENCE, settings.APPLICATION_TYPE_LEASE_LICENCE),
     )
     code_type = models.CharField('Application Type', max_length=64, choices=CODE_TYPE_CHOICES,
                                         default=CODE_TYPE_CHOICES[0][0])
