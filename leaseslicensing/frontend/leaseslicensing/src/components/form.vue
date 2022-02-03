@@ -1,7 +1,6 @@
 <template lang="html">
     <div class="">
         <div v-if="debug">components/form.vue</div>
-
         <div v-if="proposal && show_application_title" id="scrollspy-heading" class="" >
             <h4>{{applicationTypeText}} Application: {{proposal.lodgement_number}}</h4>
         </div>
@@ -67,6 +66,7 @@
               <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                 <div class="row col-sm-12">
                     <FormSection :formCollapse="false" label="Map" Index="proposal_geometry">
+                        <slot name="assessor-questions"></slot>
                         <ComponentMap
                             ref="component_map"
                             :is_internal="is_internal"
