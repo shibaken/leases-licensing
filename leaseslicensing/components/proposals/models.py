@@ -2985,13 +2985,35 @@ class SectionChecklistQuestions(RevisionedMixin):
 
     class Meta:
         app_label = 'leaseslicensing'
+        verbose_name = 'Section Questions'
+        verbose_name_plural = 'Section Questions'
 
     def __str__(self):
         return 'Questions for {}:'.format(self.get_section_display())
 
     @property
     def number_of_questions(self):
+        return '{}/{}'.format(self.number_of_enabled_questions, self.number_of_total_questions)
+
+    @property
+    def number_of_total_questions(self):
         return self.questions.count() if self.questions else 0  # 'questions' is a related_name of ChecklistQuestion
+
+    @property
+    def number_of_enabled_questions(self):
+        return self.questions.filter(enabled=True).count() if self.questions and self.questions.filter(enabled=True) else 0  # 'questions' is a related_name of ChecklistQuestion
+
+    # @property
+    # def application_type_name(self):
+    #     return self.application_type.get_name_display()
+    #
+    # @property
+    # def section_name(self):
+    #     return self.get_section_display()
+    #
+    # @property
+    # def type_name(self):
+    #     return self.get_list_type_display()
 
 
 class ChecklistQuestion(RevisionedMixin):
@@ -3014,6 +3036,7 @@ class ChecklistQuestion(RevisionedMixin):
 
     class Meta:
         app_label = 'leaseslicensing'
+        ordering = ['order',]
 
 
 class ProposalAssessment(RevisionedMixin):

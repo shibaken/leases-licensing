@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import TextField
+from django.forms import Textarea
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.proposals import models
 from leaseslicensing.components.bookings.models import ApplicationFeeInvoice
@@ -14,6 +16,9 @@ from leaseslicensing.components.main.models import (
 from django.conf.urls import url
 from django.template.response import TemplateResponse
 from django.http import HttpResponse, HttpResponseRedirect
+
+from leaseslicensing.components.proposals.forms import SectionChecklistQuestionsForm
+from leaseslicensing.components.proposals.models import ChecklistQuestion
 from leaseslicensing.utils import create_helppage_object
 # Register your models here.
 
@@ -67,10 +72,36 @@ class HelpPageAdmin(admin.ModelAdmin):
         create_helppage_object(application_type='T Class', help_type=models.HelpPage.HELP_TEXT_INTERNAL)
         return HttpResponseRedirect("../")
 
-@admin.register(models.ChecklistQuestion)
-class ChecklistQuestionAdmin(admin.ModelAdmin):
-    list_display = ['text', 'enabled', 'answer_type', 'order']
-    ordering = ('order',)
+
+class ChecklistQuestionInline(admin.TabularInline):
+    model = ChecklistQuestion
+    extra = 0
+    can_delete = False
+    ordering = ['order',]
+    formfield_overrides = {
+        TextField: {'widget': Textarea(attrs={'rows': 3, 'cols': 60})},
+    }
+
+@admin.register(models.SectionChecklistQuestions)
+class SectionChecklistQuestionsAdmin(admin.ModelAdmin):
+    list_display = ['application_type_name', 'section_name', 'list_type_name', 'enabled', 'number_of_questions']
+    list_filter = ['application_type', 'section', 'list_type', 'enabled',]
+    inlines = [ChecklistQuestionInline,]
+    form = SectionChecklistQuestionsForm
+
+    def application_type_name(self, obj):
+        return obj.application_type.get_name_display()
+
+    def list_type_name(self, obj):
+        return obj.get_list_type_display()
+
+    def section_name(self, obj):
+        return obj.get_section_display()
+
+    # Configure column titles
+    application_type_name.short_description = 'Application Type'
+    list_type_name.short_description = 'List Type'
+
 
 @admin.register(SystemMaintenance)
 class SystemMaintenanceAdmin(admin.ModelAdmin):
@@ -79,9 +110,10 @@ class SystemMaintenanceAdmin(admin.ModelAdmin):
     readonly_fields = ('duration',)
     form = forms.SystemMaintenanceAdminForm
 
+
 @admin.register(ApplicationType)
 class ApplicationTypeAdmin(admin.ModelAdmin):
-    #list_display = ['name', 'order', 'visible', 'max_renewals', 'max_renewal_period', 'application_fee']
+    list_display = ['name_display', 'order', 'visible', 'application_fee', 'oracle_code_application', 'oracle_code_licence', 'is_gst_exempt',]
     ordering = ('order',)
     readonly_fields = ['name']
 
@@ -113,22 +145,22 @@ class GlobalSettingsAdmin(admin.ModelAdmin):
 #             kwargs["queryset"] = EmailUser.objects.filter(is_staff=True)
 #         return super(ReferralRecipientGroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
-@admin.register(models.QAOfficerGroup)
-class QAOfficerGroupAdmin(admin.ModelAdmin):
-    #filter_horizontal = ('members',)
-    list_display = ['name']
-    exclude = ('site',)
-    actions = None
-
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        if db_field.name == "members":
-            #kwargs["queryset"] = EmailUser.objects.filter(email__icontains='@dbca.wa.gov.au')
-            kwargs["queryset"] = EmailUser.objects.filter(is_staff=True)
-        return super(QAOfficerGroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
-
-    #list_display = ['id','name', 'visible']
-    list_display = ['name']
-    ordering = ('id',)
+#@admin.register(models.QAOfficerGroup)
+#class QAOfficerGroupAdmin(admin.ModelAdmin):
+#    #filter_horizontal = ('members',)
+#    list_display = ['name']
+#    exclude = ('site',)
+#    actions = None
+#
+#    def formfield_for_manytomany(self, db_field, request, **kwargs):
+#        if db_field.name == "members":
+#            #kwargs["queryset"] = EmailUser.objects.filter(email__icontains='@dbca.wa.gov.au')
+#            kwargs["queryset"] = EmailUser.objects.filter(is_staff=True)
+#        return super(QAOfficerGroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+#
+#    #list_display = ['id','name', 'visible']
+#    list_display = ['name']
+#    ordering = ('id',)
 
 
 # @admin.register(Question)

@@ -156,6 +156,10 @@ class ApplicationType(models.Model):
         except:
             return None
 
+    @property
+    def name_display(self):
+        return self.get_name_display()
+
     def __str__(self):
         return self.name
 
