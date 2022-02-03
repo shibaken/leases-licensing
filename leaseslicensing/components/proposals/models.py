@@ -2955,7 +2955,7 @@ class ProposalRequirement(OrderedModel):
         return
 
 
-class ChecklistQuestions(RevisionedMixin):
+class SectionChecklistQuestions(RevisionedMixin):
     '''
     This object is per section per type(assessor/referral) grouping the ChecklistQuestion objects
     '''
@@ -2989,6 +2989,10 @@ class ChecklistQuestions(RevisionedMixin):
     def __str__(self):
         return 'Questions for {}:'.format(self.get_section_display())
 
+    @property
+    def number_of_questions(self):
+        return self.questions.count() if self.questions else 0  # 'questions' is a related_name of ChecklistQuestion
+
 
 class ChecklistQuestion(RevisionedMixin):
     TYPE_CHOICES = (
@@ -3003,7 +3007,7 @@ class ChecklistQuestion(RevisionedMixin):
     answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES, default=ANSWER_TYPE_CHOICES[0][0])
     enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=1)
-    checklist_questions = models.ForeignKey(ChecklistQuestions, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
+    checklist_questions = models.ForeignKey(SectionChecklistQuestions, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.text
@@ -3016,7 +3020,7 @@ class ProposalAssessment(RevisionedMixin):
     proposal = models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
     submitter = models.IntegerField()  #EmailUserRO
-    referral = models.ForeignKey(Referral, related_name='assessment', blank=True, null=True, on_delete=models.SET_NULL)
+    referral = models.ForeignKey(Referral, related_name='assessment', blank=True, null=True, on_delete=models.SET_NULL)  # WHen none, this ProposalAssessment is for assessor.
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -3027,6 +3031,7 @@ class ProposalAssessment(RevisionedMixin):
 
     @property
     def referral_assessment(self):
+        # When referral exists, self is for referral otherwise for assessor
         return True if self.referral else False
 
 
