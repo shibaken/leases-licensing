@@ -1,6 +1,8 @@
 <template lang="html">
     <div>
+    <div v-if="debug">components/form_registration_of_interest.vue</div>
     <FormSection label="Proposal Details" Index="application_details" v-if="proposal">
+        <slot name="slot_proposal_details_checklist_questions"></slot>
         <div class="col-sm-12 inline-details-text">
             <div class="col-sm-3">
                 <label for="details_text" class="control-label pull-left">Provide a description of your proposal</label>
@@ -230,6 +232,7 @@
 
     </FormSection>
     <FormSection label="Proposal Impact" Index="proposal_impact" v-if="proposal">
+        <slot name="slot_proposal_impact_checklist_questions"></slot>
         <div class="col-sm-12">
             <div class="col-sm-3 question-title">
                 <label class="control-label pull-left">Will the proposal involve clearing of native vegetation?</label>
@@ -887,6 +890,12 @@ from '@/utils/hooks'
             },
         },
         methods:{
+            debug: function(){
+                if (this.$route.query.debug){
+                    return this.$route.query.debug === 'true'
+                }
+                return false
+            },
         },
         mounted: function() {
         }
