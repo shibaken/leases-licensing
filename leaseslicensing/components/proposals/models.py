@@ -2957,7 +2957,7 @@ class ProposalRequirement(OrderedModel):
         return
 
 
-class SectionChecklistQuestions(RevisionedMixin):
+class SectionChecklist(RevisionedMixin):
     '''
     This object is per section per type(assessor/referral) grouping the ChecklistQuestion objects
     '''
@@ -3031,7 +3031,7 @@ class ChecklistQuestion(RevisionedMixin):
     answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES, default=ANSWER_TYPE_CHOICES[0][0])
     enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=1)
-    checklist_questions = models.ForeignKey(SectionChecklistQuestions, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
+    checklist_questions = models.ForeignKey(SectionChecklist, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.text
