@@ -305,7 +305,8 @@ import Confirmation from '@/components/common/confirmation.vue'
                 }
                 */
                 if (this.proposal) {
-                    text = this.proposal.application_type_display;
+                    //text = this.proposal.application_type_display;
+                    text = this.proposal.application_type.name_display;
                 }
                 return text;
             },
