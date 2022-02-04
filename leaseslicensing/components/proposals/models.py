@@ -542,7 +542,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     #proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
     #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
-    submitter = models.IntegerField()  #EmailUserRO
+    submitter = models.IntegerField(null=True)  #EmailUserRO
 
     #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
     #assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
@@ -3148,7 +3148,6 @@ def clone_proposal_with_status_reset(original_proposal):
         try:
             proposal = Proposal.objects.create(
                     application_type=ApplicationType.objects.get(name='lease_licence'),
-                    submitter=original_proposal.submitter,
                     ind_applicant=original_proposal.ind_applicant,
                     org_applicant=original_proposal.org_applicant,
                     previous_application=original_proposal,
