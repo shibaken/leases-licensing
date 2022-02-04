@@ -186,38 +186,43 @@ class ChecklistQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChecklistQuestion
-        #fields = '__all__'
-        fields=('id',
-                'text',
-                'answer_type',
-                )
+        fields = (
+            'id',
+            'text',
+            'answer_type',
+        )
+
+
 class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
     question=ChecklistQuestionSerializer(read_only=True)
+
     class Meta:
         model = ProposalAssessmentAnswer
-        fields = ('id',
-                'question',
-                'answer',
-                'text_answer',
-                )
+        fields = (
+            'id',
+            'question',
+            'answer',
+            'text_answer',
+        )
+
 
 class ProposalAssessmentSerializer(serializers.ModelSerializer):
-    #checklist=ProposalAssessmentAnswerSerializer(many=True, read_only=True)
-    checklist=serializers.SerializerMethodField()
+    checklist = serializers.SerializerMethodField()
 
     class Meta:
         model = ProposalAssessment
-        fields = ('id',
-                'completed',
-                'submitter',
-                'referral_assessment',
-                'referral_group',
-                'referral_group_name',
-                'checklist'
-                )
+        fields = (
+            'id',
+            'completed',
+            'submitter',
+            'referral_assessment',
+            'referral_group',
+            'referral_group_name',
+            'checklist'
+        )
 
     def get_checklist(self,obj):
-        qs= obj.checklist.order_by('question__order')
+        qs = obj.checklist.order_by('question__order')
         return ProposalAssessmentAnswerSerializer(qs, many=True, read_only=True).data
 
 
