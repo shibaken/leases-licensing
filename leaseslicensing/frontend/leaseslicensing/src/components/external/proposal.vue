@@ -539,7 +539,8 @@ export default {
             if (res.ok) {
                 // change this to confirmation page
                 this.$router.push({
-                    name: 'external-dashboard',
+                    name: 'submit-proposal',
+                    params: {proposal: this.proposal},
                 });
             }
         } catch(err) {
