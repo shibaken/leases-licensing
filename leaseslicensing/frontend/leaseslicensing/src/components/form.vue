@@ -7,118 +7,134 @@
 
         <div class="">
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
-                  Applicant
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
-                  Map
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="pills-details-tab" data-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
-                  Details
-                </a>
-              </li>
+                <li class="nav-item">
+                    <a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
+                      Applicant
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
+                      Map
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="pills-details-tab" data-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
+                      Details
+                    </a>
+                </li>
 
-              <!-- Related Items tab is shown on the internal proposal page -->
-              <template v-if="show_related_items_tab">
-                  <li class="nav-item">
-                      <a class="nav-link" id="pills-related-items-tab" data-toggle="pill" href="#pills-related-items" role="tab" aria-controls="pills-related-items" aria-selected="false">Related Items </a>
-                  </li>
-              </template>
-
+                <!-- Related Items tab is shown on the internal proposal page -->
+                <template v-if="show_related_items_tab">
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-related-items-tab" data-toggle="pill" href="#pills-related-items" role="tab" aria-controls="pills-related-items" aria-selected="false">Related Items </a>
+                    </li>
+                </template>
             </ul>
             <div class="tab-content" id="pills-tabContent">
               <div class="tab-pane fade" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
                   <div v-if="is_external">
-                    <Profile 
-                    :isApplication="true" 
-                    v-if="applicantType == 'SUB'" 
-                    ref="profile"
-                    @profile-fetched="populateProfile"
-                    :proposalId="proposal.id"
-                    :readonly="readonly"
-                    :submitterId="submitterId"
-                    />
+                      <Profile
+                      :isApplication="true"
+                      v-if="applicantType == 'SUB'"
+                      ref="profile"
+                      @profile-fetched="populateProfile"
+                      :proposalId="proposal.id"
+                      :readonly="readonly"
+                      :submitterId="submitterId"
+                      />
                   </div>
                   <div v-else>
-                    <!-- Applicant 
-                        :email_user="proposal.submitter" 
-                        :applicantType="proposal.applicant_type" 
+                    <!-- Applicant
+                        :email_user="proposal.submitter"
+                        :applicantType="proposal.applicant_type"
                         id="proposalStartApplicant"
                         :readonly="readonly"
                         :showElectoralRoll="showElectoralRoll"
                         :storedSilentElector="silentElector"
                         :proposalId="proposal.id"
                     / -->
-                    <Applicant 
-                        :email_user="proposal.submitter" 
-                        :applicantType="proposal.applicant_type" 
-                        id="proposalStartApplicant"
-                        :readonly="readonly"
-                        :proposalId="proposal.id"
-                    />
+                      <Applicant
+                          :email_user="proposal.submitter"
+                          :applicantType="proposal.applicant_type"
+                          id="proposalStartApplicant"
+                          :readonly="readonly"
+                          :proposalId="proposal.id"
+                      />
                   </div>
               </div>
               <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
-                <div class="row col-sm-12">
-                    <FormSection :formCollapse="false" label="Map" Index="proposal_geometry">
-                        <slot name="assessor-questions"></slot>
-                        <ComponentMap
-                            ref="component_map"
-                            :is_internal="is_internal"
-                            :is_external="is_external"
-                            :key="componentMapKey"
-                            v-if="componentMapOn"
-                            @featuresDisplayed="updateTableByFeatures"
-                            :can_modify="can_modify"
-                            :display_at_time_of_submitted="show_col_status_when_submitted"
-                            @featureGeometryUpdated="featureGeometryUpdated"
-                            @popupClosed="popupClosed"
-                            :proposal="proposal"
-                        />
-                    </FormSection>
-                </div>
+                  <div class="row col-sm-12">
+                      <FormSection :formCollapse="false" label="Map" Index="proposal_geometry">
+                          <slot name="slot_map_checklist_questions"></slot>
+                          <ComponentMap
+                              ref="component_map"
+                              :is_internal="is_internal"
+                              :is_external="is_external"
+                              :key="componentMapKey"
+                              v-if="componentMapOn"
+                              @featuresDisplayed="updateTableByFeatures"
+                              :can_modify="can_modify"
+                              :display_at_time_of_submitted="show_col_status_when_submitted"
+                              @featureGeometryUpdated="featureGeometryUpdated"
+                              @popupClosed="popupClosed"
+                              :proposal="proposal"
+                          />
+                      </FormSection>
+                  </div>
               </div>
               <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
-                  <RegistrationOfInterest 
-                  :proposal="proposal" 
-                  :readonly="readonly" 
-                  ref="registration_of_interest" 
-                  />
-                <FormSection label="Other" Index="other_section">
-                </FormSection>
-                <FormSection label="Deed Poll" Index="deed_poll">
-                    <div class="col-sm-12 section-style">
-                        <p>
-                            <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.  
-                            Please note: electronic or digital signatures cannot be accepted.</br>
-                            Please click <a href="www.google.com">here</a> to download the deed poll.</br>
-                            The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
-                            </strong>
-                        </p>
+                  <RegistrationOfInterest
+                  :proposal="proposal"
+                  :readonly="readonly"
+                  ref="registration_of_interest"
+                  >
+                      <template v-slot:slot_proposal_details_checklist_questions>
+                          <slot name="slot_proposal_details_checklist_questions"></slot>
+                      </template>
 
-                        <label for="deed_poll_document">Deed poll:</label>
-                        <FileField 
-                            :readonly="readonly"
-                            ref="deed_poll_document"
-                            name="deed_poll_document"
-                            id="deed_poll_document"
-                            :isRepeatable="true"
-                            :documentActionUrl="deedPollDocumentUrl"
-                            :replace_button_by_text="true"
-                        />
-                    </div>
-                </FormSection>
+                      <template v-slot:slot_proposal_impact_checklist_questions>
+                          <slot name="slot_proposal_impact_checklist_questions"></slot>
+                      </template>
+
+                  </RegistrationOfInterest>
+
+                  <FormSection label="Other" Index="other_section">
+                      <slot name="slot_other_checklist_questions"></slot>
+                  </FormSection>
+
+                  <FormSection label="Deed Poll" Index="deed_poll">
+                      <slot name="slot_deed_poll_checklist_questions"></slot>
+                      <div class="col-sm-12 section-style">
+                          <p>
+                              <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.
+                              Please note: electronic or digital signatures cannot be accepted.</br>
+                              Please click <a href="www.google.com">here</a> to download the deed poll.</br>
+                              The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
+                              </strong>
+                          </p>
+
+                          <label for="deed_poll_document">Deed poll:</label>
+                          <FileField
+                              :readonly="readonly"
+                              ref="deed_poll_document"
+                              name="deed_poll_document"
+                              id="deed_poll_document"
+                              :isRepeatable="true"
+                              :documentActionUrl="deedPollDocumentUrl"
+                              :replace_button_by_text="true"
+                          />
+                      </div>
+                  </FormSection>
+
+                  <FormSection label="Additional Documents" Index="additional_documents">
+                      <slot name="slot_additional_documents_checklist_questions"></slot>
+                  </FormSection>
               </div>
 
               <!-- Related Items tab is shown on the internal proposal page -->
               <template v-if="show_related_items_tab">
                   <div class="tab-pane fade" id="pills-related-items" role="tabpanel" aria-labelledby="pills-related-items-tab">
-                      <slot name="related-items"></slot>
+                      <slot name="slot_section_related_items"></slot>
                   </div>
               </template>
 
@@ -260,7 +276,7 @@ import Confirmation from '@/components/common/confirmation.vue'
                     if (!this.proposal.previous_application_id) {
                         // new application
                         show = true;
-                    } else if (this.proposal.max_vessel_length_with_no_payment && 
+                    } else if (this.proposal.max_vessel_length_with_no_payment &&
                         this.proposal.max_vessel_length_with_no_payment <= this.vesselLength) {
                         // vessel length is in higher category
                         show = true;
@@ -321,7 +337,7 @@ import Confirmation from '@/components/common/confirmation.vue'
                 $('#pills-tab a[href="#pills-applicant"]').tab('show');
                 /*
                 if (vm.proposal.fee_paid) {
-                    // Online Training tab 
+                    // Online Training tab
                     $('#pills-online-training-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
                     $('#li-training').attr('class', 'nav-item disabled');
                     $('#pills-online-training-tab').attr("href", "")
@@ -364,7 +380,7 @@ import Confirmation from '@/components/common/confirmation.vue'
             //indow.addEventListener('onblur', vm.leaving);
 
         }
- 
+
     }
 </script>
 
