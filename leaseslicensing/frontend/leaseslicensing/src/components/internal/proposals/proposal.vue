@@ -69,16 +69,9 @@
                         :key="computedProposalId"
                         :show_related_items_tab="true"
                     >
-                        <!-- Inserted into the slot on the form.vue: Related Items -->
-                        <template v-slot:related-items>
-                            <FormSection :formCollapse="false" label="Related Items" Index="related_items">
-                                Related Items table here
-                            </FormSection>
-                        </template>
-
                         <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
-                        <template v-slot:assessor-questions>
-                            <CollapsibleAssessorQuestions ref="collapsible_assessor_questions" @created="collapsible_component_mounted">
+                        <template v-slot:slot_map_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_map_checklist_questions" @created="collapsible_map_checklist_questions_component_mounted">
                                 <div class="row form-group">
                                     <div class="col-md-3">
                                         <label for="deficiency_comments_textarea">Deficiency comments</label>
@@ -87,7 +80,44 @@
                                         <textarea class="form-control" id="deficiency_comments_textarea"/>
                                     </div>
                                 </div>
-                            </CollapsibleAssessorQuestions>
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_proposal_details_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_proposal_details_checklist_questions" @created="collapsible_proposal_details_checklist_questions_component_mounted">
+                                Questions proposal details here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_proposal_impact_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_proposal_impact_checklist_questions" @created="collapsible_proposal_impact_checklist_questions_component_mounted">
+                                Questions proposal impact here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_other_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_other_checklist_questions" @created="collapsible_other_checklist_questions_component_mounted">
+                                Questions other here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_deed_poll_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_deed_poll_checklist_questions" @created="collapsible_deed_poll_checklist_questions_component_mounted">
+                                Questions deed_poll here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_additional_documents_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_additional_documents_checklist_questions" @created="collapsible_additional_documents_checklist_questions_component_mounted">
+                                Questions additional_documents here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <!-- Inserted into the slot on the form.vue: Related Items -->
+                        <template v-slot:slot_section_related_items>
+                            <FormSection :formCollapse="false" label="Related Items" Index="related_items">
+                                Related Items table here
+                            </FormSection>
                         </template>
 
                     </ApplicationForm>
@@ -141,7 +171,7 @@ import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import ApplicationForm from '@/components/form.vue';
 import FormSection from "@/components/forms/section_toggle.vue"
-import CollapsibleAssessorQuestions from '@/components/forms/collapsible_component.vue'
+import CollapsibleQuestions from '@/components/forms/collapsible_component.vue'
 
 export default {
     name: 'InternalProposal',
@@ -235,7 +265,7 @@ export default {
         //MapLocations,
         ApplicationForm,
         FormSection,
-        CollapsibleAssessorQuestions,
+        CollapsibleQuestions,
     },
     props: {
         proposalId: {
@@ -365,8 +395,23 @@ export default {
         },
     },
     methods: {
-        collapsible_component_mounted: function(){
-            this.$refs.collapsible_assessor_questions.show_warning_icon(false)
+        collapsible_map_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_map_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_other_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_other_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_deed_poll_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_deed_poll_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_additional_documents_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_additional_documents_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_proposal_details_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_proposal_details_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_proposal_impact_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_proposal_impact_checklist_questions.show_warning_icon(false)
         },
         locationUpdated: function(){
             console.log('in locationUpdated()');
