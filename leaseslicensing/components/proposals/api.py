@@ -621,6 +621,127 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['POST'], detail=True)
     @renderer_classes((JSONRenderer,))
     @basic_exception_handler
+    def process_legislative_requirements_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='legislative_requirements_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_risk_factors_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='risk_factors_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_key_milestones_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='key_milestones_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_key_personnel_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='key_personnel_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_staffing_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='staffing_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_market_analysis_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='market_analysis_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_available_activities_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='available_activities_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_financial_capacity_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='financial_capacity_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_capital_investment_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='capital_investment_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_cash_flow_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='cash_flow_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_profit_and_loss_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='profit_and_loss_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
     def process_deed_poll_document(self, request, *args, **kwargs):
         instance = self.get_object()
         returned_data = process_generic_document(request, instance, document_type='deed_poll_document')
