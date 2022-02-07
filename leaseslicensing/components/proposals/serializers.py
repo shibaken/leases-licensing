@@ -534,7 +534,7 @@ class ProposalSerializer(BaseProposalSerializer):
             email_user = retrieve_email_user(obj.submitter)
             return email_user.get_full_name()
         else:
-            return ''
+            return None
 
 #class ProposalApplicantDetailsSerializer(serializers.ModelSerializer):
 #
@@ -790,7 +790,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
             email_user = retrieve_email_user(obj.submitter)
             return EmailUserSerializer(email_user).data
         else:
-            return ''
+            return None
 
     def get_approval_level_document(self,obj):
         if obj.approval_level_document is not None:
