@@ -317,10 +317,8 @@ class SpecialFieldsSearch(object):
 def save_proponent_data(instance,request,viewset,parks=None,trails=None):
     if instance.application_type.name==settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
         save_proponent_data_registration_of_interest(instance,request,viewset)
-    elif instance.application_type.name==settings.APPLICATION_TYPE.LEASE:
-        save_proponent_data_registration_of_interest(instance,request,viewset)
-    elif instance.application_type.name==settings.APPLICATION_TYPE.LICENCE:
-        save_proponent_data_registration_of_interest(instance,request,viewset)
+    elif instance.application_type.name==settings.APPLICATION_TYPE_LEASE_LICENCE:
+        save_proponent_data_lease_licence(instance,request,viewset)
 
 def save_proponent_data_registration_of_interest(instance, request, viewset):
     # proposal

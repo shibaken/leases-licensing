@@ -1,86 +1,304 @@
 <template lang="html">
     <div>
     <div v-if="debug">components/form_lease_licence.vue</div>
-    <FormSection label="Proposal Details" Index="application_details" v-if="proposal">
+    <FormSection label="Tourism Proposal Details" Index="tourism_proposal_details" v-if="proposal">
         <slot name="slot_proposal_details_checklist_questions"></slot>
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3">
-                <label for="details_text" class="control-label pull-left">Provide a description of your proposal</label>
+            <div class="col-sm-3 question-title">
+                <label for="profit_and_loss_text" class="control-label pull-left">Provide five-year integrated profit and loss, balance sheet and cash flow projections (preferably by month).  State clearly the underlying assumptions made in respect to design, construction, rental, operations and target markets</label>
             </div>
-            <div class="col-sm-8">
+            <div class="col-sm-8 question-title">
                 <RichText
-                id="details_text"
-                :proposalData="proposal.details_text"
-                ref="details_text"
-                label="Rich text in here" 
+                :proposalData="proposal.profit_and_loss_text"
+                ref="profit_and_loss_text"
+                id="profit_and_loss_text"
                 :readonly="readonly" 
                 :can_view_richtext_src=true
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3">
-                <label for="supporting_documents">Attach any supporting documents</label>
+            <div class="col-sm-3 question-title">
+                <label for="profit_and_loss_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9">
+            <div class="col-sm-9 question-title">
                 <FileField 
                     :readonly="readonly"
-                    ref="supporting_documents"
-                    name="supporting_documents"
-                    id="supporting_documents"
+                    ref="profit_and_loss_documents"
+                    name="profit_and_loss_documents"
+                    id="profit_and_loss_documents"
                     :isRepeatable="true"
-                    :documentActionUrl="supportingDocumentsUrl"
+                    :documentActionUrl="profitAndLossDocumentsUrl"
                     :replace_button_by_text="true"
                 />
             </div>
         </div>
 
-        <div class="col-sm-12">
+        <div class="col-sm-12 inline-details-text">
             <div class="col-sm-3 question-title">
-                <label class="control-label pull-left">Is the proposal consistent with the purpose of the park or reserve?</label>
-            </div>
-            <div class="col-sm-9">
-                <ul  class="list-inline col-sm-6">
-                    <li class="list-inline-item">
-                        <input class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_yes" id="consistent_purpose_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                        <label for="consistent_purpose_yes">Yes</label>
-                    </li>
-                    <li class="list-inline-item">
-                        <input  class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_no" id="consistent_purpose_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                        <label for="consistent_purpose_no">No</label>
-                    </li>
-                    <li class="list-inline-item">
-                        <input  class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_null" id="consistent_purpose_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                        <label for="consistent_purpose_null">Unsure</label>
-                    </li>
-                </ul>
-
-            </div>
-        </div>
-        <div class="col-sm-12 inline-details-text" v-show="proposal.consistent_purpose">
-            <div class="col-sm-3 question-title">
-                <label for="consistent_purpose_text" class="control-label pull-left">Provide details</label>
+                <label for="cash_flow_text" class="control-label pull-left">Provide cash flow projections to demonstrate time to amortize the capital investment</label>
             </div>
             <div class="col-sm-8 question-title">
                 <RichText
-                :proposalData="proposal.consistent_purpose_text"
-                ref="consistent_purpose_text"
-                id="consistent_purpose_text"
+                :proposalData="proposal.cash_flow_text"
+                ref="cash_flow_text"
+                id="cash_flow_text"
                 :readonly="readonly" 
                 :can_view_richtext_src=true
                 v-bind:key="proposal.id"
                 />
             </div>
             <div class="col-sm-3 question-title">
-                <label for="consistent_purpose_documents">Attach any supporting documents</label>
+                <label for="cash_flow_documents">Attach any supporting documents</label>
             </div>
             <div class="col-sm-9 question-title">
                 <FileField 
                     :readonly="readonly"
-                    ref="consistent_purpose_documents"
-                    name="consistent_purpose_documents"
-                    id="consistent_purpose_documents"
+                    ref="cash_flow_documents"
+                    name="cash_flow_documents"
+                    id="cash_flow_documents"
                     :isRepeatable="true"
-                    :documentActionUrl="consistentPurposeDocumentsUrl"
+                    :documentActionUrl="cashFlowDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
+                <label for="capital_investment_text" class="control-label pull-left">Include proposed capital investment showing costing against each component of the built development and start-up costs</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.capital_investment_text"
+                ref="capital_investment_text"
+                id="capital_investment_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="capital_investment_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="capital_investment_documents"
+                    name="capital_investment_documents"
+                    id="capital_investment_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="capitalInvestmentDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
+                <label for="financial_capacity_text" class="control-label pull-left">Demonstrate that you and/or the nominated operator have the financial capacity to build and operate the proposal.  Information/evidence from banks/financiers/accountants would assist in demonstrating this, for example, audited financial statements for the last 3 years or letter from a financier confirming access to the required finance</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.financial_capacity_text"
+                ref="financial_capacity_text"
+                id="financial_capacity_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="financial_capacity_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="financial_capacity_documents"
+                    name="financial_capacity_documents"
+                    id="financial_capacity_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="financialCapacityDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
+                <label for="available_activities_text" class="control-label pull-left">Specify the full range of recreational, educational, cultural and other activities that will be available to visitors through your proposal and what will be required/developed to undertake them.  Articulate the timeline for the introduction of each activity over a five-year period</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.available_activities_text"
+                ref="available_activities_text"
+                id="available_activities_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="available_activities_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="available_activities_documents"
+                    name="available_activities_documents"
+                    id="available_activities_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="availableActivitiesDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
+                <label for="market_analysis_text" class="control-label pull-left">Outline a market analysis that identifies the target markets for the operation and how these will be accommodated as well as a competitor analysis.  (Note the market analysis should inform the integrated profit and loss and cash flow projections with realistic assumptions and estimations)</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.market_analysis_text"
+                ref="market_analysis_text"
+                id="market_analysis_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="market_analysis_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="market_analysis_documents"
+                    name="market_analysis_documents"
+                    id="market_analysis_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="marketAnalysisDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
+                <label for="staffing_text" class="control-label pull-left">Provide details of staffing, workforce management. (Note the market analysis should inform the integrated profit and loss and cash flow projections with realistic assumptions and estimations)</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.staffing_text"
+                ref="staffing_text"
+                id="staffing_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="staffing_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="staffing_documents"
+                    name="staffing_documents"
+                    id="staffing_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="staffingDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
+
+    </FormSection>
+    <FormSection label="General Proposal Details" Index="general_proposal_details" v-if="proposal">
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
+                <label for="key_personnel_text" class="control-label pull-left">Provide details of the key personnel and their qualifications and experience that is appropriate to developing and operating the venture under the proposed tourism lease.  Include bios of the proposed board and management team demonstrating capability in delivering and maintaining the proposal</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.key_personnel_text"
+                ref="key_personnel_text"
+                id="key_personnel_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="key_personnel_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="key_personnel_documents"
+                    name="key_personnel_documents"
+                    id="key_personnel_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="keyPersonnelDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
+                <label for="risk_factors_text" class="control-label pull-left">Identify specific risk factors and likely impacts to allow consideration of options.  Include how key risks will be avoided, reduced, managed or mitigated.  (Note the management of risk should inform the integrated profit and loss and cash flow projections).</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.risk_factors_text"
+                ref="risk_factors_text"
+                id="risk_factors_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="risk_factors_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="risk_factors_documents"
+                    name="risk_factors_documents"
+                    id="risk_factors_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="riskFactorsDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
+                <label for="legislative_requirements_text" class="control-label pull-left">If legislative or regulatory requirements apply to thie proposal, please provide details and upload any approvals already received</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.legislative_requirements_text"
+                ref="legislative_requirements_text"
+                id="legislative_requirements_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="legislative_requirements_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="legislative_requirements_documents"
+                    name="legislative_requirements_documents"
+                    id="legislative_requirements_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="legislativeRequirementsDocumentsUrl"
                     :replace_button_by_text="true"
                 />
             </div>
@@ -124,6 +342,72 @@ from '@/utils/hooks'
         computed:{
             proposalId: function() {
                 return this.proposal ? this.proposal.id : null;
+            },
+            profitAndLossDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_profit_and_loss_document/'
+                    )
+            },
+            cashFlowDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_cash_flow_document/'
+                    )
+            },
+            capitalInvestmentDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_capital_investment_document/'
+                    )
+            },
+            financialCapacityDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_financial_capacity_document/'
+                    )
+            },
+            availableActivitiesDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_available_activities_document/'
+                    )
+            },
+            marketAnalysisDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_market_analysis_document/'
+                    )
+            },
+            staffingDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_staffing_document/'
+                    )
+            },
+            keyPersonnelDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_key_personnel_document/'
+                    )
+            },
+            keyMilestonesDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_key_milestones_document/'
+                    )
+            },
+            riskFactorsDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_risk_factors_document/'
+                    )
+            },
+            legislativeRequirementsDocumentsUrl: function() {
+                return helpers.add_endpoint_join(
+                    api_endpoints.proposal,
+                    this.proposal.id + '/process_legislative_requirements_document/'
+                    )
             },
             deedPollDocumentUrl: function() {
                 return helpers.add_endpoint_join(
