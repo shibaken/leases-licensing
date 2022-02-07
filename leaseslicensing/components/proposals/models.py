@@ -3059,13 +3059,13 @@ class ProposalAssessment(RevisionedMixin):
 
 
 class ProposalAssessmentAnswer(RevisionedMixin):
-    question = models.ForeignKey(ChecklistQuestion, related_name='answers', on_delete=models.CASCADE)
+    checklist_question = models.ForeignKey(ChecklistQuestion, related_name='answers', on_delete=models.CASCADE)
     answer = models.BooleanField(null=True)
     proposal_assessment = models.ForeignKey(ProposalAssessment, related_name='answers', null=True, blank=True, on_delete=models.SET_NULL)
     text_answer = models.CharField(max_length=256, blank=True, null=True)
 
     def __str__(self):
-        return self.question.text
+        return self.checklist_question.text
 
     class Meta:
         app_label = 'leaseslicensing'
