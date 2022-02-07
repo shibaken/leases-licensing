@@ -967,24 +967,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def assessor_assessment(self):
-        # qs=self.assessment.filter(referral_assessment=False, referral_group=None)
-        # qs = self.assessment.filter(referral_assessment=False)
         qs = self.assessment.filter(referral=None)
-        if qs:
-            return qs[0]
-        else:
-            return None
+        return qs[0] if qs else None
 
     @property
     def referral_assessments(self):
-        # qs=self.assessment.filter(referral_assessment=True, referral_group__isnull=False)
-        # qs = self.assessment.filter(referral_assessment=True)
         qs = self.assessment.exclude(referral=None)
-        if qs:
-            return qs
-        else:
-            return None
-
+        return qs if qs else None
 
     @property
     def permit(self):
@@ -1223,7 +1212,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def make_questions_ready(self, referral=None):
         """
-        Create checklist questions
+        Create checklist answers
         Assessment instance already exits then skip.
         """
         proposal_assessment, created = ProposalAssessment.objects.get_or_create(proposal=self, referral=referral)
@@ -1232,7 +1221,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
             section_checklists = SectionChecklist.objects.filter(application_type=self.application_type, list_type=list_type, enabled=True)
             for section_checklist in section_checklists:
                 for checklist_question in section_checklist.questions.filter(enabled=True):
-                    answer = ProposalAssessmentAnswer.objects.create(proposal_assessment=proposal_assessment, question=checklist_question)
+                    answer = ProposalAssessmentAnswer.objects.create(proposal_assessment=proposal_assessment, checklist_question=checklist_question)
 
     def make_referral_questions_ready(self):
         """
@@ -3060,9 +3049,9 @@ class ProposalAssessment(RevisionedMixin):
 
 class ProposalAssessmentAnswer(RevisionedMixin):
     checklist_question = models.ForeignKey(ChecklistQuestion, related_name='answers', on_delete=models.CASCADE)
-    answer = models.BooleanField(null=True)
+    answer_yes_no = models.BooleanField(null=True)
     proposal_assessment = models.ForeignKey(ProposalAssessment, related_name='answers', null=True, blank=True, on_delete=models.SET_NULL)
-    text_answer = models.CharField(max_length=256, blank=True, null=True)
+    answer_text = models.CharField(max_length=256, blank=True, null=True)
 
     def __str__(self):
         return self.checklist_question.text

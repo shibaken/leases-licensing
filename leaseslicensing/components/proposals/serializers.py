@@ -3,25 +3,25 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
 from leaseslicensing.components.main.models import ApplicationType
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.proposals.models import (
-                                    ProposalType,
-                                    Proposal,
-                                    ProposalUserAction,
-                                    ProposalLogEntry,
-                                    Referral,
-                                    ProposalRequirement,
-                                    ProposalStandardRequirement,
-                                    ProposalDeclinedDetails,
-                                    AmendmentRequest,
-                                    AmendmentReason,
-                                    ProposalApplicantDetails,
-                                    QAOfficerReferral,
-                                    ProposalOtherDetails,
-                                    ChecklistQuestion,
-                                    ProposalAssessmentAnswer,
-                                    ProposalAssessment,
-                                    RequirementDocument,
-                                    ProposalGeometry,
-                                )
+    ProposalType,
+    Proposal,
+    ProposalUserAction,
+    ProposalLogEntry,
+    Referral,
+    ProposalRequirement,
+    ProposalStandardRequirement,
+    ProposalDeclinedDetails,
+    AmendmentRequest,
+    AmendmentReason,
+    ProposalApplicantDetails,
+    QAOfficerReferral,
+    ProposalOtherDetails,
+    ChecklistQuestion,
+    ProposalAssessmentAnswer,
+    ProposalAssessment,
+    RequirementDocument,
+    ProposalGeometry, SectionChecklist,
+)
 from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer, ApplicationTypeSerializer
 from leaseslicensing.components.organisations.serializers import OrganisationSerializer
 from leaseslicensing.components.users.serializers import UserAddressSerializer, DocumentSerializer
@@ -194,20 +194,20 @@ class ChecklistQuestionSerializer(serializers.ModelSerializer):
 
 
 class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
-    question=ChecklistQuestionSerializer(read_only=True)
+    checklist_question = ChecklistQuestionSerializer(read_only=True)
 
     class Meta:
         model = ProposalAssessmentAnswer
         fields = (
             'id',
-            'question',
-            'answer',
-            'text_answer',
+            'checklist_question',
+            'answer_yes_no',
+            'answer_text',
         )
 
 
 class ProposalAssessmentSerializer(serializers.ModelSerializer):
-    checklist = serializers.SerializerMethodField()
+    section_answers = serializers.SerializerMethodField()
 
     class Meta:
         model = ProposalAssessment
@@ -216,14 +216,21 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
             'completed',
             'submitter',
             'referral_assessment',
-            'referral_group',
-            'referral_group_name',
-            'checklist'
+            'referral',
+            'section_answers',
         )
 
-    def get_checklist(self,obj):
-        qs = obj.checklist.order_by('question__order')
-        return ProposalAssessmentAnswerSerializer(qs, many=True, read_only=True).data
+    def get_section_answers(self, obj):
+        ret_dict = {}
+
+        # Retrieve all the SectionChecklist objects used for this ProposalAssessment
+        section_checklists_used = SectionChecklist.objects.filter(id__in=(obj.answers.values_list('checklist_question__section_checklist', flat=True).distinct()))
+        for section_checklist in section_checklists_used:
+            # Retrieve all the answers for this section_checklist
+            answers = obj.answers.filter(checklist_question__section_checklist=section_checklist).order_by('checklist_question__order')
+            ret_dict[section_checklist.section] = ProposalAssessmentAnswerSerializer(answers, many=True).data
+
+        return ret_dict
 
 
 class BaseProposalSerializer(serializers.ModelSerializer):
@@ -275,7 +282,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'lodgement_number',
                 # 'lodgement_sequence',
                 'can_officer_process',
-                'allowed_assessors',
+                # 'allowed_assessors',
                 # 'is_qa_officer',
                 # 'qaofficer_referrals',
                 # 'pending_amendment_request',
@@ -720,13 +727,13 @@ class InternalProposalSerializer(BaseProposalSerializer):
     can_edit_period = serializers.SerializerMethodField()
     current_assessor = serializers.SerializerMethodField()
     latest_referrals = ProposalReferralSerializer(many=True)
-    allowed_assessors = EmailUserSerializer(many=True)
+    # allowed_assessors = EmailUserSerializer(many=True)
     approval_level_document = serializers.SerializerMethodField()
     #application_type = serializers.CharField(source='application_type.name', read_only=True)
     #qaofficer_referrals = QAOfficerReferralSerializer(many=True)
     # reversion_ids = serializers.SerializerMethodField()
-    assessor_assessment=ProposalAssessmentSerializer(read_only=True)
-    referral_assessments=ProposalAssessmentSerializer(read_only=True, many=True)
+    assessor_assessment = ProposalAssessmentSerializer(read_only=True)
+    referral_assessments = ProposalAssessmentSerializer(read_only=True, many=True)
     # fee_invoice_url = serializers.SerializerMethodField()
     requirements_completed=serializers.SerializerMethodField()
 
@@ -762,7 +769,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'assessor_mode',
                 'current_assessor',
                 'latest_referrals',
-                'allowed_assessors',
+                # 'allowed_assessors',
                 'proposed_issuance_approval',
                 'proposed_decline_status',
                 'proposaldeclineddetails',

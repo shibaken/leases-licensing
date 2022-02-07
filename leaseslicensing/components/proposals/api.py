@@ -358,7 +358,8 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
             qs = qs.filter(Q(assigned_officer=email_user_id_assigned) | Q(assigned_approver=email_user_id_assigned))
 
         self.paginator.page_size = qs.count()
-        result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
+        # result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
+        result_page = self.paginator.paginate_queryset(qs, request)
         serializer = ListProposalSerializer(result_page, context={'request': request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
 
