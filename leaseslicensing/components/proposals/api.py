@@ -1662,7 +1662,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
                 proposal_type = ProposalType.objects.get(code='new')
 
                 data = {
-                    'submitter': request.user.id,
                     'org_applicant': request.data.get('org_applicant'),
                     'ind_applicant': request.user.id if not request.data.get('org_applicant') else None,  # if no org_applicant, assume this application is for individual.
                     'application_type_id': application_type.id,

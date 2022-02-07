@@ -521,7 +521,7 @@ class ProposalSerializer(BaseProposalSerializer):
     processing_status = serializers.SerializerMethodField(read_only=True)
     # review_status = serializers.SerializerMethodField(read_only=True)
     # customer_status = serializers.SerializerMethodField(read_only=True)
-    application_type = serializers.CharField(source='application_type.name', read_only=True)
+    #application_type = serializers.CharField(source='application_type.name', read_only=True)
 
     def get_readonly(self,obj):
         return obj.can_user_view
@@ -711,7 +711,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     latest_referrals = ProposalReferralSerializer(many=True)
     allowed_assessors = EmailUserSerializer(many=True)
     approval_level_document = serializers.SerializerMethodField()
-    application_type = serializers.CharField(source='application_type.name', read_only=True)
+    #application_type = serializers.CharField(source='application_type.name', read_only=True)
     #qaofficer_referrals = QAOfficerReferralSerializer(many=True)
     # reversion_ids = serializers.SerializerMethodField()
     assessor_assessment=ProposalAssessmentSerializer(read_only=True)
