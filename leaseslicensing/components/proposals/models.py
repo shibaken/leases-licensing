@@ -1177,7 +1177,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return ProposalUserAction.log_action(self, action, request.user.id)
     
     # proposal.utils.proposal_submit appears to be used instead
-    def submit(self,request,viewset):
+    def submit(self, request, viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
         with transaction.atomic():
             if self.can_user_edit:
@@ -1191,9 +1191,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 self.submitter = request.user
                 #self.lodgement_date = datetime.datetime.strptime(timezone.now().strftime('%Y-%m-%d'),'%Y-%m-%d').date()
                 self.lodgement_date = timezone.now()
-                if (self.amendment_requests):
-                    qs = self.amendment_requests.filter(status = "requested")
-                    if (qs):
+                if self.amendment_requests:
+                    qs = self.amendment_requests.filter(status="requested")
+                    if qs:
                         for q in qs:
                             q.status = 'amended'
                             q.save()
@@ -1210,33 +1210,47 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                 #self.save_form_tabs(request)
                 if ret1 and ret2:
-                    self.processing_status = 'with_assessor'
-                    # self.customer_status = 'with_assessor'
+                    self.processing_status = self.PROCESSING_STATUS_WITH_ASSESSOR
                     self.documents.all().update(can_delete=False)
                     self.save()
                 else:
                     raise ValidationError('An error occurred while submitting proposal (Submit email notifications failed)')
-                #Create assessor checklist with the current assessor_list type questions
-                #Assessment instance already exits then skip.
-                try:
-                    assessor_assessment=ProposalAssessment.objects.get(proposal=self,referral_group=None, referral_assessment=False)
-                except ProposalAssessment.DoesNotExist:
-                    assessor_assessment=ProposalAssessment.objects.create(proposal=self,referral_group=None, referral_assessment=False)
-                    checklist=ChecklistQuestion.objects.filter(list_type='assessor_list', application_type=self.application_type, obsolete=False)
-                    for chk in checklist:
-                        try:
-                            chk_instance=ProposalAssessmentAnswer.objects.get(question=chk, assessment=assessor_assessment)
-                        except ProposalAssessmentAnswer.DoesNotExist:
-                            chk_instance=ProposalAssessmentAnswer.objects.create(question=chk, assessment=assessor_assessment)
 
+                # Create questions if not exist
+                self.make_questions_ready()
             else:
                 raise ValidationError('You can\'t edit this proposal at this moment')
 
-    #def save_form_tabs(self,request):
-    #    #self.applicant_details = ProposalApplicantDetails.objects.create(first_name=request.data['first_name'])
-    #    self.activities_land = ProposalActivitiesLand.objects.create(activities_land=request.data['activities_land'])
-    #    self.activities_marine = ProposalActivitiesMarine.objects.create(activities_marine=request.data['activities_marine'])
-    #    #self.save()
+    def make_questions_ready(self, referral=None):
+        """
+        Create checklist questions
+        Assessment instance already exits then skip.
+        """
+        proposal_assessment, created = ProposalAssessment.objects.get_or_create(proposal=self, referral=referral)
+        if created:
+            list_type = SectionChecklist.LIST_TYPE_REFERRAL if referral else SectionChecklist.LIST_TYPE_ASSESSOR
+            section_checklists = SectionChecklist.objects.filter(application_type=self.application_type, list_type=list_type, enabled=True)
+            for section_checklist in section_checklists:
+                for checklist_question in section_checklist.questions.filter(enabled=True):
+                    answer = ProposalAssessmentAnswer.objects.create(proposal_assessment=proposal_assessment, question=checklist_question)
+
+    def make_referral_questions_ready(self):
+        """
+        Create referral checklist questions
+        Assessment instance already exits then skip.
+        """
+        try:
+            assessor_assessment = ProposalAssessment.objects.get(proposal=self, referral=None)
+        except ProposalAssessment.DoesNotExist:
+            assessor_assessment = ProposalAssessment.objects.create(proposal=self)
+            section_checklists = SectionChecklist.objects.filter(
+                application_type=self.application_type, list_type=SectionChecklist.LIST_TYPE_ASSESSOR, enabled=True
+            )
+            for section_checklist in section_checklists:
+                for checklist_question in section_checklist.questions.filter(enabled=True):
+                    answer = ProposalAssessmentAnswer.objects.create(
+                        proposal_assessment=assessor_assessment, question=checklist_question
+                        )
 
     def update(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
@@ -1251,8 +1265,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def send_referral(self,request,referral_email,referral_text):
         with transaction.atomic():
             try:
-                if self.processing_status == 'with_assessor' or self.processing_status == 'with_referral':
-                    self.processing_status = 'with_referral'
+                if self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR or self.processing_status == self.PROCESSING_STATUS_WITH_REFERRAL:
+                    self.processing_status = self.PROCESSING_STATUS_WITH_REFERRAL
                     self.save()
                     referral = None
 
@@ -1277,29 +1291,19 @@ class Proposal(DirtyFieldsMixin, models.Model):
 #                            user.save()
                     try:
                         #Referral.objects.get(referral=user,proposal=self)
-                        Referral.objects.get(referral_group=referral_group,proposal=self)
+                        Referral.objects.get(referral_group=referral_group, proposal=self)
                         raise ValidationError('A referral has already been sent to this group')
                     except Referral.DoesNotExist:
                         # Create Referral
                         referral = Referral.objects.create(
                             proposal = self,
                             #referral=user,
-                            referral_group=referral_group,
+                            # referral_group=referral_group,
                             sent_by=request.user,
                             text=referral_text
                         )
-                        #Create assessor checklist with the current assessor_list type questions
-                        #Assessment instance already exits then skip.
-                        try:
-                            referral_assessment=ProposalAssessment.objects.get(proposal=self,referral_group=referral_group, referral_assessment=True, referral=referral)
-                        except ProposalAssessment.DoesNotExist:
-                            referral_assessment=ProposalAssessment.objects.create(proposal=self,referral_group=referral_group, referral_assessment=True, referral=referral)
-                            checklist=ChecklistQuestion.objects.filter(list_type='referral_list', application_type=self.application_type, obsolete=False)
-                            for chk in checklist:
-                                try:
-                                    chk_instance=ProposalAssessmentAnswer.objects.get(question=chk, assessment=referral_assessment)
-                                except ProposalAssessmentAnswer.DoesNotExist:
-                                    chk_instance=ProposalAssessmentAnswer.objects.create(question=chk, assessment=referral_assessment)
+                        self.make_questions_ready(referral)
+
                     # Create a log entry for the proposal
                     #self.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}({})'.format(user.get_full_name(),user.email)),request)
                     self.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}'.format(referral_group.name)),request)
@@ -2580,31 +2584,25 @@ class QAOfficerGroup(models.Model):
 
 class Referral(RevisionedMixin):
     SENT_CHOICES = (
-        (1,'Sent From Assessor'),
-        (2,'Sent From Referral')
+        (1, 'Sent From Assessor'),
+        (2, 'Sent From Referral')
     )
     PROCESSING_STATUS_CHOICES = (
-                                 ('with_referral', 'Awaiting'),
-                                 ('recalled', 'Recalled'),
-                                 ('completed', 'Completed'),
-                                 )
+        ('with_referral', 'Awaiting'),
+        ('recalled', 'Recalled'),
+        ('completed', 'Completed'),
+    )
     lodged_on = models.DateTimeField(auto_now_add=True)
     proposal = models.ForeignKey(Proposal,related_name='referrals', on_delete=models.CASCADE)
-    #sent_by = models.ForeignKey(EmailUser,related_name='leaseslicensing_assessor_referrals', on_delete=models.CASCADE)
-    sent_by = models.IntegerField() #EmailUserRO
-    #referral = models.ForeignKey(EmailUser,null=True,blank=True,related_name='leaseslicensing_referalls', on_delete=models.SET_NULL)
-    referral = models.IntegerField() #EmailUserRO
-    # referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
+    sent_by = models.IntegerField()  #EmailUserRO
+    referral = models.IntegerField()  #EmailUserRO
     linked = models.BooleanField(default=False)
     sent_from = models.SmallIntegerField(choices=SENT_CHOICES,default=SENT_CHOICES[0][0])
-    processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES,
-                                         default=PROCESSING_STATUS_CHOICES[0][0])
+    processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES, default=PROCESSING_STATUS_CHOICES[0][0])
     text = models.TextField(blank=True) #Assessor text
     referral_text = models.TextField(blank=True)
     document = models.ForeignKey(ReferralDocument, blank=True, null=True, related_name='referral_document', on_delete=models.SET_NULL)
-    #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_referrals_assigned', on_delete=models.SET_NULL)
     assigned_officer = models.IntegerField() #EmailUserRO
-
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -2796,7 +2794,6 @@ class Referral(RevisionedMixin):
             except:
                 raise
 
-
     def send_referral(self,request,referral_email,referral_text):
         with transaction.atomic():
             try:
@@ -2974,9 +2971,11 @@ class SectionChecklist(RevisionedMixin):
         (SECTION_DEED_POLL, 'Deed Poll'),
         (SECTION_ADDITIONAL_DOCUMENTS, 'Additional Documents'),
     )
+    LIST_TYPE_ASSESSOR = 'assessor_list'
+    LIST_TYPE_REFERRAL = 'referral_list'
     LIST_TYPE_CHOICES = (
-        ('assessor_list', 'Assessor Checklist'),
-        ('referral_list', 'Referral Checklist')
+        (LIST_TYPE_ASSESSOR, 'Assessor Checklist'),
+        (LIST_TYPE_REFERRAL, 'Referral Checklist')
     )
 
     application_type = models.ForeignKey(ApplicationType, blank=True, null=True, on_delete=models.SET_NULL)
@@ -3030,7 +3029,7 @@ class ChecklistQuestion(RevisionedMixin):
     answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES, default=ANSWER_TYPE_CHOICES[0][0])
     enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=1)
-    checklist_questions = models.ForeignKey(SectionChecklist, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
+    section_checklist = models.ForeignKey(SectionChecklist, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.text
@@ -3060,10 +3059,10 @@ class ProposalAssessment(RevisionedMixin):
 
 
 class ProposalAssessmentAnswer(RevisionedMixin):
-    question=models.ForeignKey(ChecklistQuestion, related_name='answers', on_delete=models.CASCADE)
+    question = models.ForeignKey(ChecklistQuestion, related_name='answers', on_delete=models.CASCADE)
     answer = models.BooleanField(null=True)
-    assessment=models.ForeignKey(ProposalAssessment, related_name='answers', null=True, blank=True, on_delete=models.SET_NULL)
-    text_answer= models.CharField(max_length=256, blank=True, null=True)
+    proposal_assessment = models.ForeignKey(ProposalAssessment, related_name='answers', null=True, blank=True, on_delete=models.SET_NULL)
+    text_answer = models.CharField(max_length=256, blank=True, null=True)
 
     def __str__(self):
         return self.question.text
