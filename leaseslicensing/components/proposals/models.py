@@ -1177,49 +1177,49 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return ProposalUserAction.log_action(self, action, request.user.id)
     
     # proposal.utils.proposal_submit appears to be used instead
-    def submit(self, request, viewset):
-        from leaseslicensing.components.proposals.utils import save_proponent_data
-        with transaction.atomic():
-            if self.can_user_edit:
-                # Save the data first
-                save_proponent_data(self,request,viewset)
-                # Check if the special fields have been completed
-                missing_fields = self.__check_proposal_filled_out()
-                if missing_fields:
-                    error_text = 'The proposal has these missing fields, {}'.format(','.join(missing_fields))
-                    raise exceptions.ProposalMissingFields(detail=error_text)
-                self.submitter = request.user
-                #self.lodgement_date = datetime.datetime.strptime(timezone.now().strftime('%Y-%m-%d'),'%Y-%m-%d').date()
-                self.lodgement_date = timezone.now()
-                if self.amendment_requests:
-                    qs = self.amendment_requests.filter(status="requested")
-                    if qs:
-                        for q in qs:
-                            q.status = 'amended'
-                            q.save()
+    #def submit(self, request, viewset):
+    #    from leaseslicensing.components.proposals.utils import save_proponent_data
+    #    with transaction.atomic():
+    #        if self.can_user_edit:
+    #            # Save the data first
+    #            save_proponent_data(self,request,viewset)
+    #            # Check if the special fields have been completed
+    #            missing_fields = self.__check_proposal_filled_out()
+    #            if missing_fields:
+    #                error_text = 'The proposal has these missing fields, {}'.format(','.join(missing_fields))
+    #                raise exceptions.ProposalMissingFields(detail=error_text)
+    #            self.submitter = request.user
+    #            #self.lodgement_date = datetime.datetime.strptime(timezone.now().strftime('%Y-%m-%d'),'%Y-%m-%d').date()
+    #            self.lodgement_date = timezone.now()
+    #            if self.amendment_requests:
+    #                qs = self.amendment_requests.filter(status="requested")
+    #                if qs:
+    #                    for q in qs:
+    #                        q.status = 'amended'
+    #                        q.save()
 
-                # Create a log entry for the proposal
-                self.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
-                # Create a log entry for the organisation
-                #self.applicant.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
-                applicant_field=getattr(self, self.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
+    #            # Create a log entry for the proposal
+    #            self.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
+    #            # Create a log entry for the organisation
+    #            #self.applicant.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
+    #            applicant_field=getattr(self, self.applicant_field)
+    #            applicant_field.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
 
-                ret1 = send_submit_email_notification(request, self)
-                ret2 = send_external_submit_email_notification(request, self)
+    #            ret1 = send_submit_email_notification(request, self)
+    #            ret2 = send_external_submit_email_notification(request, self)
 
-                #self.save_form_tabs(request)
-                if ret1 and ret2:
-                    self.processing_status = self.PROCESSING_STATUS_WITH_ASSESSOR
-                    self.documents.all().update(can_delete=False)
-                    self.save()
-                else:
-                    raise ValidationError('An error occurred while submitting proposal (Submit email notifications failed)')
+    #            #self.save_form_tabs(request)
+    #            if ret1 and ret2:
+    #                self.processing_status = self.PROCESSING_STATUS_WITH_ASSESSOR
+    #                self.documents.all().update(can_delete=False)
+    #                self.save()
+    #            else:
+    #                raise ValidationError('An error occurred while submitting proposal (Submit email notifications failed)')
 
-                # Create questions if not exist
-                self.make_questions_ready()
-            else:
-                raise ValidationError('You can\'t edit this proposal at this moment')
+    #            # Create questions if not exist
+    #            self.make_questions_ready()
+    #        else:
+    #            raise ValidationError('You can\'t edit this proposal at this moment')
 
     def make_questions_ready(self, referral=None):
         """
