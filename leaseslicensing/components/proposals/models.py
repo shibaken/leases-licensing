@@ -1232,12 +1232,12 @@ class Proposal(DirtyFieldsMixin, models.Model):
             else:
                 raise ValidationError('You can\'t edit this proposal at this moment')
 
-    #TODO: remove this function as it is not used anywhere.
-    def save_form_tabs(self,request):
-        #self.applicant_details = ProposalApplicantDetails.objects.create(first_name=request.data['first_name'])
-        self.activities_land = ProposalActivitiesLand.objects.create(activities_land=request.data['activities_land'])
-        self.activities_marine = ProposalActivitiesMarine.objects.create(activities_marine=request.data['activities_marine'])
-        #self.save()
+    ##TODO: remove this function as it is not used anywhere.
+    #def save_form_tabs(self,request):
+    #    #self.applicant_details = ProposalApplicantDetails.objects.create(first_name=request.data['first_name'])
+    #    self.activities_land = ProposalActivitiesLand.objects.create(activities_land=request.data['activities_land'])
+    #    self.activities_marine = ProposalActivitiesMarine.objects.create(activities_marine=request.data['activities_marine'])
+    #    #self.save()
 
     def update(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
