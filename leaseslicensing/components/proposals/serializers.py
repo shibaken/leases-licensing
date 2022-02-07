@@ -282,39 +282,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 #'fee_paid',
                 'details_text',
                 'proposalgeometry',
-                ## additional form fields
-# <<<<<<< HEAD
-                # 'exclusive_use',
-                # 'long_term_use',
-                # 'consistent_purpose',
-                # 'consistent_plan',
-                # 'clearing_vegetation',
-                # 'ground_disturbing_works',
-                # 'heritage_site',
-                # 'environmentally_sensitive',
-                # 'wetlands_impact',
-                # 'building_required',
-                # 'significant_change',
-                # 'aboriginal_site',
-                # 'native_title_consultation',
-                # 'mining_tenement',
-# ||||||| 851b4af
-#                 'exclusive_use',
-#                 'long_term_use',
-#                 'consistent_purpose',
-#                 'consistent_plan',
-#                 'clearing_vegetation',
-#                 'ground_disturbing_works',
-#                 'heritage_site',
-#                 'environmentally_sensitive',
-#                 'wetlands_impact',
-#                 'building_required',
-#                 'significant_change',
-#                 'aboriginal_site',
-#                 'native_title_consultation',
-#                 'mining_tenement',
-#
-# =======
+                ## additional form fields for registration of interest
                 'exclusive_use',
                 'long_term_use',
                 'consistent_purpose',
@@ -343,8 +311,18 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'aboriginal_site_text',
                 'native_title_consultation_text',
                 'mining_tenement_text',
-#
-# >>>>>>> 48436f95cf419f5d4cb2838f7da7d0be105d908a
+                ## additional form fields for lease_licence
+                'profit_and_loss_text',
+                'cash_flow_text',
+                'capital_investment_text',
+                'financial_capacity_text',
+                'available_activities_text',
+                'market_analysis_text',
+                'staffing_text',
+                'key_personnel_text',
+                'key_milestones_text',
+                'risk_factors_text',
+                'legislative_requirements_text',
                 )
         read_only_fields = ('supporting_documents',)
 
@@ -558,6 +536,30 @@ class CreateProposalSerializer(BaseProposalSerializer):
                 'ind_applicant',
                 'org_applicant',
                 'proposal_type_id',
+                )
+        read_only_fields=('id',)
+
+
+class SaveLeaseLicenceSerializer(BaseProposalSerializer):
+
+    class Meta:
+        model = Proposal
+        fields = (
+                'id',
+                'details_text',
+                ## additional form fields for lease_licence
+                'profit_and_loss_text',
+                'cash_flow_text',
+                'capital_investment_text',
+                'financial_capacity_text',
+                'available_activities_text',
+                'market_analysis_text',
+                'staffing_text',
+                'key_personnel_text',
+                'key_milestones_text',
+                'risk_factors_text',
+                'legislative_requirements_text',
+
                 )
         read_only_fields=('id',)
 

@@ -22,6 +22,7 @@ from leaseslicensing.components.proposals.serializers import (
         SaveRegistrationOfInterestSerializer,
         ProposalOtherDetailsSerializer, 
         ProposalGeometrySaveSerializer,
+        SaveLeaseLicenceSerializer,
         )
 import traceback
 import os
@@ -325,6 +326,23 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     # proposal
     proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
     serializer = SaveRegistrationOfInterestSerializer(
+            instance, 
+            data=proposal_data, 
+            context={
+                "action": viewset.action,
+                }
+    )
+    serializer.is_valid(raise_exception=True)
+    instance = serializer.save()
+    if request.data.get('lease_licensing_geometry'):
+        save_geometry(instance, request, viewset)
+    if viewset.action == 'submit':
+        check_geometry(instance)
+
+def save_proponent_data_lease_licence(instance, request, viewset):
+    # proposal
+    proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
+    serializer = SaveLeaseLicenceSerializer(
             instance, 
             data=proposal_data, 
             context={
