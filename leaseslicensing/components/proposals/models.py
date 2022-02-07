@@ -1232,7 +1232,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
             else:
                 raise ValidationError('You can\'t edit this proposal at this moment')
 
-    ##TODO: remove this function as it is not used anywhere.
     #def save_form_tabs(self,request):
     #    #self.applicant_details = ProposalApplicantDetails.objects.create(first_name=request.data['first_name'])
     #    self.activities_land = ProposalActivitiesLand.objects.create(activities_land=request.data['activities_land'])
