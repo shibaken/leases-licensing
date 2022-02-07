@@ -55,7 +55,8 @@ export default {
   },
   computed: {
     applicationType: function() {
-      return this.proposal && this.proposal.id ? this.proposal.application_type.name_display : '';
+      //return this.proposal && this.proposal.id ? this.proposal.application_type.name_display : '';
+      return this.proposal && this.proposal.id ? this.proposal.application_type.confirmation_text : '';
     },
     isProposal: function(){
       return this.proposal && this.proposal.id ? true : false;
