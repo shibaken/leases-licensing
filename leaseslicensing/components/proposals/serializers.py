@@ -480,8 +480,11 @@ class ListProposalSerializer(BaseProposalSerializer):
                 )
 
     def get_submitter(self, obj):
-        email_user = retrieve_email_user(obj.submitter)
-        return EmailUserSerializer(email_user).data
+        if obj.submitter:
+            email_user = retrieve_email_user(obj.submitter)
+            return EmailUserSerializer(email_user).data
+        else:
+            return ''
 
     def get_assigned_officer(self, obj):
         if obj.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER and obj.assigned_approver:
@@ -527,8 +530,11 @@ class ProposalSerializer(BaseProposalSerializer):
         return obj.can_user_view
 
     def get_submitter(self,obj):
-        email_user = retrieve_email_user(obj.submitter)
-        return email_user.get_full_name()
+        if obj.submitter:
+            email_user = retrieve_email_user(obj.submitter)
+            return email_user.get_full_name()
+        else:
+            return None
 
 #class ProposalApplicantDetailsSerializer(serializers.ModelSerializer):
 #
@@ -629,7 +635,7 @@ class SaveProposalSerializer(BaseProposalSerializer):
                 'applicant_details',
                 'details_text',
                 )
-        read_only_fields=('documents','requirements',)
+        read_only_fields=('requirements',)
 
 
 
@@ -780,8 +786,11 @@ class InternalProposalSerializer(BaseProposalSerializer):
             )
 
     def get_submitter(self, obj):
-        email_user = retrieve_email_user(obj.submitter)
-        return EmailUserSerializer(email_user).data
+        if obj.submitter:
+            email_user = retrieve_email_user(obj.submitter)
+            return EmailUserSerializer(email_user).data
+        else:
+            return None
 
     def get_approval_level_document(self,obj):
         if obj.approval_level_document is not None:
