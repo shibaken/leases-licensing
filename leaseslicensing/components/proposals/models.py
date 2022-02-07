@@ -2966,14 +2966,14 @@ class SectionChecklist(RevisionedMixin):
     SECTION_PROPOSAL_IMPACT = 'proposal_impact'
     SECTION_OTHER = 'other'
     SECTION_DEED_POLL = 'deed_poll'
-    SECTION_RELATED_ITEMS = 'related_items'
+    SECTION_ADDITIONAL_DOCUMENTS = 'additional_documents'
     SECTION_CHOICES = (
         (SECTION_MAP, 'Map'),
         (SECTION_PROPOSAL_DETAILS, 'Proposal Details'),
         (SECTION_PROPOSAL_IMPACT, 'Proposal Impact'),
         (SECTION_OTHER, 'Other'),
         (SECTION_DEED_POLL, 'Deed Poll'),
-        (SECTION_RELATED_ITEMS, 'Related Items'),
+        (SECTION_ADDITIONAL_DOCUMENTS, 'Additional Documents'),
     )
     LIST_TYPE_CHOICES = (
         ('assessor_list', 'Assessor Checklist'),
