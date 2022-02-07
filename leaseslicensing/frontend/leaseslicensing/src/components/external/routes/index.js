@@ -63,7 +63,7 @@ export default
                 {
                     path: 'submit',
                     component: ProposalSubmit,
-                    name:"submit_proposal"
+                    name:"submit-proposal"
                 },
                 {
                     path: ':proposal_id',
