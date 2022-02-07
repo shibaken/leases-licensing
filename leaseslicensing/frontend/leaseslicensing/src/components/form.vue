@@ -87,6 +87,7 @@
                   :proposal="proposal"
                   :readonly="readonly"
                   ref="registration_of_interest"
+                  v-if="registrationOfInterest"
                   >
                       <template v-slot:slot_proposal_details_checklist_questions>
                           <slot name="slot_proposal_details_checklist_questions"></slot>
@@ -97,6 +98,14 @@
                       </template>
 
                   </RegistrationOfInterest>
+                  <LeaseLicence
+                  :proposal="proposal"
+                  :readonly="readonly"
+                  ref="lease_licence"
+                  v-if="leaseLicence"
+                  >
+                  </LeaseLicence>
+
 
                   <FormSection label="Other" Index="other_section">
                       <slot name="slot_other_checklist_questions"></slot>
@@ -151,6 +160,7 @@ import RichText from '@/components/forms/richtext.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
 import ComponentMap from '@/components/common/component_map.vue'
 import RegistrationOfInterest from './form_registration_of_interest.vue'
+import LeaseLicence from './form_lease_licence.vue'
 import {
   api_endpoints,
   helpers
@@ -209,6 +219,14 @@ import Confirmation from '@/components/common/confirmation.vue'
                 type: Boolean,
                 default: true,
             },
+            registrationOfInterest:{
+                type: Boolean,
+                default: true,
+            },
+            leaseLicence:{
+                type: Boolean,
+                default: true,
+            },
         },
         data:function () {
             return{
@@ -228,6 +246,7 @@ import Confirmation from '@/components/common/confirmation.vue'
         },
         components: {
             RegistrationOfInterest,
+            LeaseLicence,
             Applicant,
             /*
             Confirmation,
@@ -310,6 +329,7 @@ import Confirmation from '@/components/common/confirmation.vue'
                 }
                 return text;
             },
+
         },
         methods:{
             incrementComponentMapKey: function() {
