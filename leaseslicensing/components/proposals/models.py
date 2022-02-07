@@ -542,7 +542,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     #proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
     #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
-    submitter = models.IntegerField()  #EmailUserRO
+    submitter = models.IntegerField(null=True)  #EmailUserRO
 
     #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
     #assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
@@ -3143,55 +3143,17 @@ class QAOfficerReferral(RevisionedMixin):
 #    for document in instance.documents.all():
 #        document.delete()
 
-def clone_proposal_with_status_reset(proposal, copy_requirement_documents=False):
-    """
-    To Test:
-         from leaseslicensing.components.proposals.models import clone_proposal_with_status_reset
-         p=Proposal.objects.get(id=57)
-         p0=clone_proposal_with_status_reset(p)
-    """
+def clone_proposal_with_status_reset(original_proposal):
     with transaction.atomic():
         try:
-            original_proposal = copy.deepcopy(proposal)
-            #proposal = duplicate_object(proposal) # clone object and related objects
-            if original_proposal.application_type.name==ApplicationType.TCLASS:
-                proposal=duplicate_tclass(proposal)
-            if original_proposal.application_type.name==ApplicationType.FILMING:
-                proposal=duplicate_filming(proposal)
-            if original_proposal.application_type.name==ApplicationType.EVENT:
-                proposal=duplicate_event(proposal)
-            # manually duplicate the comms logs -- hck, not hndled by duplicate object (maybe due to inheritance?)
-            # proposal.comms_logs.create(text='cloning proposal reset (original proposal {}, new proposal {})'.format(original_proposal.id, proposal.id))
-            # for comms_log in proposal.comms_logs.all():
-            #     comms_log.id=None
-            #     comms_log.communicationslogentry_ptr_id=None
-            #     comms_log.proposal_id=original_proposal.id
-            #     comms_log.save()
-
-            # reset some properties
-            proposal.customer_status = 'draft'
-            proposal.processing_status = 'draft'
-            proposal.assessor_data = None
-            proposal.comment_data = None
-
-            proposal.lodgement_number = ''
-            proposal.lodgement_sequence = 0
-            proposal.lodgement_date = None
-
-            proposal.assigned_officer = None
-            proposal.assigned_approver = None
-
-            proposal.approval = None
-            proposal.approval_level_document = None
-            proposal.migrated=False
-
-            proposal.save(no_revision=True)
-
-            #clone_documents(proposal, original_proposal, media_prefix='media')
-            if copy_requirement_documents:
-                _clone_requirement_documents(proposal, original_proposal, media_prefix='media')
-            else:
-                _clone_documents(proposal, original_proposal, media_prefix='media')
+            proposal = Proposal.objects.create(
+                    application_type=ApplicationType.objects.get(name='lease_licence'),
+                    ind_applicant=original_proposal.ind_applicant,
+                    org_applicant=original_proposal.org_applicant,
+                    previous_application=original_proposal,
+                    approval=original_proposal.approval
+                    )
+            #proposal.save(no_revision=True)
             return proposal
         except:
             raise
