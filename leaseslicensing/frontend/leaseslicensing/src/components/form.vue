@@ -101,7 +101,7 @@
                   <LeaseLicence
                   :proposal="proposal"
                   :readonly="readonly"
-                  ref="registration_of_interest"
+                  ref="lease_licence"
                   v-if="leaseLicence"
                   >
                   </LeaseLicence>
@@ -219,6 +219,14 @@ import Confirmation from '@/components/common/confirmation.vue'
                 type: Boolean,
                 default: true,
             },
+            registrationOfInterest:{
+                type: Boolean,
+                default: true,
+            },
+            leaseLicence:{
+                type: Boolean,
+                default: true,
+            },
         },
         data:function () {
             return{
@@ -320,20 +328,6 @@ import Confirmation from '@/components/common/confirmation.vue'
                     text = this.proposal.application_type.name_display;
                 }
                 return text;
-            },
-            registrationOfInterest: function(){
-                let retVal = false;
-                if (this.proposal && this.proposal.application_type.name === 'registration_of_interest') {
-                    retVal = true;
-                }
-                return retVal;
-            },
-            leaseLicence: function(){
-                let retVal = false;
-                if (this.proposal && this.proposal.application_type.name === 'lease_licence') {
-                    retVal = true;
-                }
-                return retVal;
             },
 
         },

@@ -578,9 +578,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
             application_type = Proposal.objects.get(id=self.kwargs.get('id')).application_type.name
             if application_type == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
                 return InternalProposalSerializer
-            elif application_type == APPLICATION_TYPE_LEASE:
-                return InternalProposalSerializer
-            elif application_type == APPLICATION_TYPE_LICENCE:
+            elif application_type == APPLICATION_TYPE_LEASE_LICENCE:
                 return InternalProposalSerializer
         except serializers.ValidationError:
             print(traceback.print_exc())
