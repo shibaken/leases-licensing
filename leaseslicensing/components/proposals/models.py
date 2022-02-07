@@ -3042,7 +3042,7 @@ class ChecklistQuestion(RevisionedMixin):
 class ProposalAssessment(RevisionedMixin):
     proposal = models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
-    submitter = models.IntegerField()  #EmailUserRO
+    submitter = models.IntegerField(blank=True, null=True)  #EmailUserRO
     referral = models.ForeignKey(Referral, related_name='assessment', blank=True, null=True, on_delete=models.SET_NULL)  # When referral is none, this ProposalAssessment is for assessor.
 
     class Meta:

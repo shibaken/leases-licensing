@@ -41,6 +41,7 @@ class AmendmentReasonAdmin(admin.ModelAdmin):
 @admin.register(models.Proposal)
 #class ProposalAdmin(VersionAdmin):
 class ProposalAdmin(admin.ModelAdmin):
+    list_display = ['lodgement_number', 'application_type', 'proposal_type', 'processing_status', 'submitter', 'assigned_officer', 'applicant']
     inlines =[ProposalDocumentInline,]
 
 @admin.register(models.ProposalStandardRequirement)
