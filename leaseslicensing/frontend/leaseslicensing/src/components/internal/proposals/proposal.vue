@@ -72,14 +72,28 @@
                         <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
                         <template v-slot:slot_map_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_map_checklist_questions" @created="collapsible_map_checklist_questions_component_mounted">
-                                <div class="row form-group">
-                                    <div class="col-md-3">
-                                        <label for="deficiency_comments_textarea">Deficiency comments</label>
+                                <template v-for="item in questions_answers_for_map">
+                                    <div class="row form-group">
+                                        <div class="col-md-3">
+                                            <label for="deficiency_comments_textarea">{{ item.checklist_question.text }}</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <template v-if="item.checklist_question.answer_type=='free_text'">
+                                                <textarea class="form-control" id="deficiency_comments_textarea" v-model="item.answer_text"/>
+                                            </template>
+                                            <template v-else>
+                                                <div>
+                                                    <input type="radio" :id="'answer_yes_' + item.id" value="true" v-model="item.answer_yes_no">
+                                                    <label :for="'answer_yes_' + item.id">Yes</label>
+                                                </div>
+                                                <div>
+                                                    <input type="radio" :id="'answer_no_' + item.id" value="false" v-model="item.answer_yes_no">
+                                                    <label :for="'answer_no_' + item.id">No</label>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
-                                    <div class="col-md-9">
-                                        <textarea class="form-control" id="deficiency_comments_textarea"/>
-                                    </div>
-                                </div>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
@@ -276,8 +290,14 @@ export default {
 
     },
     computed: {
+        questions_answers_for_map: function(){
+            try {
+                return this.proposal.assessor_assessment.section_answers.map
+            } catch (err) {
+                return []
+            }
+        },
         debug: function(){
-            console.log(this.$route.query.debug)
             if (this.$route.query.debug){
                 return this.$route.query.debug == 'true'
             }
