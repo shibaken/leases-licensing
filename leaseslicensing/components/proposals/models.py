@@ -1393,64 +1393,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
             else:
                 raise ValidationError('You can\'t edit this proposal at this moment')
 
-    # This function is not used...
-#    def send_referral(self,request,referral_email,referral_text):
-#        with transaction.atomic():
-#            try:
-#                if self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR or self.processing_status == self.PROCESSING_STATUS_WITH_REFERRAL:
-#                    self.processing_status = self.PROCESSING_STATUS_WITH_REFERRAL
-#                    self.save()
-#                    referral = None
-#
-#                    # Check if the user is in ledger
-#                    try:
-#                        #user = EmailUser.objects.get(email__icontains=referral_email)
-#                        #referral_group = ReferralRecipientGroup.objects.get(name__icontains=referral_email)
-#                        referral_group = ReferralRecipientGroup.objects.get(name__iexact=referral_email)
-#                    #except EmailUser.DoesNotExist:
-#                    except ReferralRecipientGroup.DoesNotExist:
-#                        raise exceptions.ProposalReferralCannotBeSent()
-##                        # Validate if it is a deparment user
-##                        department_user = get_department_user(referral_email)
-##                        if not department_user:
-##                            raise ValidationError('The user you want to send the referral to is not a member of the department')
-##                        # Check if the user is in ledger or create
-##                        email = department_user['email'].lower()
-##                        user,created = EmailUser.objects.get_or_create(email=department_user['email'].lower())
-##                        if created:
-##                            user.first_name = department_user['given_name']
-##                            user.last_name = department_user['surname']
-##                            user.save()
-#                    try:
-#                        #Referral.objects.get(referral=user,proposal=self)
-#                        Referral.objects.get(referral_group=referral_group, proposal=self)
-#                        raise ValidationError('A referral has already been sent to this group')
-#                    except Referral.DoesNotExist:
-#                        # Create Referral
-#                        referral = Referral.objects.create(
-#                            proposal = self,
-#                            #referral=user,
-#                            # referral_group=referral_group,
-#                            sent_by=request.user,
-#                            text=referral_text
-#                        )
-#                        self.make_questions_ready(referral)
-#
-#                    # Create a log entry for the proposal
-#                    #self.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}({})'.format(user.get_full_name(),user.email)),request)
-#                    self.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}'.format(referral_group.name)),request)
-#                    # Create a log entry for the organisation
-#                    #self.applicant.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}({})'.format(user.get_full_name(),user.email)),request)
-#                    applicant_field=getattr(self, self.applicant_field)
-#                    applicant_field.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}'.format(referral_group.name)),request)
-#                    # send email
-#                    recipients = referral_group.members_list
-#                    send_referral_email_notification(referral,recipients,request)
-#                else:
-#                    raise exceptions.ProposalReferralCannotBeSent()
-#            except:
-#                raise
-
     def assign_officer(self,request,officer):
         with transaction.atomic():
             try:
