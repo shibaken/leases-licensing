@@ -72,6 +72,30 @@ def process_generic_document(request, instance, document_type=None, *args, **kwa
                 documents_qs = instance.native_title_consultation_documents
             elif document_type == 'mining_tenement_document':
                 documents_qs = instance.mining_tenement_documents
+            elif document_type == 'profit_and_loss_document':
+                documents_qs = instance.profit_and_loss_documents
+            elif document_type == 'cash_flow_document':
+                documents_qs = instance.cash_flow_documents
+            elif document_type == 'capital_investment_document':
+                documents_qs = instance.capital_investment_documents
+            elif document_type == 'financial_capacity_document':
+                documents_qs = instance.financial_capacity_documents
+            elif document_type == 'mining_tenement_document':
+                documents_qs = instance.mining_tenement_documents
+            elif document_type == 'available_activities_document':
+                documents_qs = instance.available_activities_documents
+            elif document_type == 'market_analysis_document':
+                documents_qs = instance.market_analysis_documents
+            elif document_type == 'staffing_document':
+                documents_qs = instance.staffing_documents
+            elif document_type == 'key_personnel_document':
+                documents_qs = instance.key_personnel_documents
+            elif document_type == 'key_milestones_document':
+                documents_qs = instance.key_milestones_documents
+            elif document_type == 'risk_factors_document':
+                documents_qs = instance.risk_factors_documents
+            elif document_type == 'legislative_requirements_document':
+                documents_qs = instance.legislative_requirements_documents
 
             returned_file_data = [dict(file=d._file.url, id=d.id, name=d.name,) for d in documents_qs.filter(input_name=input_name) if d._file]
             return { 'filedata': returned_file_data }
@@ -122,6 +146,29 @@ def delete_document(request, instance, comms_instance, document_type, input_name
             document = instance.native_title_consultation_documents.get(id=document_id)
         elif document_type == 'mining_tenement_document':
             document = instance.mining_tenement_documents.get(id=document_id)
+        elif document_type == 'profit_and_loss_document':
+            document = instance.profit_and_loss_documents.get(id=document_id)
+        elif document_type == 'cash_flow_document':
+            document = instance.cash_flow_documents.get(id=document_id)
+        elif document_type == 'capital_investment_document':
+            document = instance.capital_investment_documents.get(id=document_id)
+        elif document_type == 'financial_capacity_document':
+            document = instance.financial_capacity_documents.get(id=document_id)
+        elif document_type == 'available_activities_document':
+            document = instance.available_activities_documents.get(id=document_id)
+        elif document_type == 'market_analysis_document':
+            document = instance.market_analysis_documents.get(id=document_id)
+        elif document_type == 'staffing_document':
+            document = instance.staffing_documents.get(id=document_id)
+        elif document_type == 'key_personnel_document':
+            document = instance.key_personnel_documents.get(id=document_id)
+        elif document_type == 'key_milestones_document':
+            document = instance.key_milestones_documents.get(id=document_id)
+        elif document_type == 'risk_factors_document':
+            document = instance.risk_factors_documents.get(id=document_id)
+        elif document_type == 'legislative_requirements_document':
+            document = instance.legislative_requirements_documents.get(id=document_id)
+
 
     # comms_log doc store delete
     elif comms_instance and 'document_id' in request.data:
@@ -157,6 +204,18 @@ def cancel_document(request, instance, comms_instance, document_type, input_name
                 'aboriginal_site_document',
                 'native_title_consultation_document',
                 'mining_tenement_document',
+                ## additional form fields for lease_licence
+                'profit_and_loss_text',
+                'cash_flow_text',
+                'capital_investment_text',
+                'financial_capacity_text',
+                'available_activities_text',
+                'market_analysis_text',
+                'staffing_text',
+                'key_personnel_text',
+                'key_milestones_text',
+                'risk_factors_text',
+                'legislative_requirements_text',
 
                 ]:
             document_id = request.data.get('document_id')
@@ -228,6 +287,39 @@ def save_document(request, instance, comms_instance, document_type, input_name=N
         elif document_type == 'mining_tenement_document':
             document = instance.mining_tenement_documents.get_or_create(input_name=input_name, name=filename)[0]
             path_format_string = '{}/proposals/{}/mining_tenement_documents/{}'
+        elif document_type == 'profit_and_loss_document':
+            document = instance.profit_and_loss_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/profit_and_loss_documents/{}'
+        elif document_type == 'cash_flow_document':
+            document = instance.cash_flow_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/cash_flow_documents/{}'
+        elif document_type == 'capital_investment_document':
+            document = instance.capital_investment_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/capital_investment_documents/{}'
+        elif document_type == 'financial_capacity_document':
+            document = instance.financial_capacity_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/financial_capacity_documents/{}'
+        elif document_type == 'available_activities_document':
+            document = instance.available_activities_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/available_activities_documents/{}'
+        elif document_type == 'market_analysis_document':
+            document = instance.market_analysis_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/market_analysis_documents/{}'
+        elif document_type == 'staffing_document':
+            document = instance.staffing_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/staffing_documents/{}'
+        elif document_type == 'key_personnel_document':
+            document = instance.key_personnel_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/key_personnel_documents/{}'
+        elif document_type == 'key_milestones_document':
+            document = instance.key_milestones_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/key_milestones_documents/{}'
+        elif document_type == 'risk_factors_document':
+            document = instance.risk_factors_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/risk_factors_documents/{}'
+        elif document_type == 'legislative_requirements_document':
+            document = instance.legislative_requirements_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/legislative_requirements_documents/{}'
 
         path = default_storage.save(path_format_string.format(settings.MEDIA_APP_DIR, instance.id, filename), ContentFile(_file.read()))
         document._file = path

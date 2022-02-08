@@ -136,6 +136,148 @@ class DeedPollDocument(Document):
         app_label = 'leaseslicensing'
         verbose_name = "Deed Poll Document"
 
+class LegislativeRequirementsDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='legislative_requirements_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class RiskFactorsDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='risk_factors_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class KeyMilestonesDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='key_milestones_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class KeyPersonnelDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='key_personnel_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class StaffingDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='staffing_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class MarketAnalysisDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='market_analysis_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class AvailableActivitiesDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='available_activities_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class FinancialCapacityDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='financial_capacity_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class CapitalInvestmentDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='capital_investment_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class CashFlowDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='cash_flow_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ProfitAndLossDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='profit_and_loss_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
 
 class MiningTenementDocument(Document):
     proposal = models.ForeignKey('Proposal',related_name='mining_tenement_documents', on_delete=models.CASCADE)
