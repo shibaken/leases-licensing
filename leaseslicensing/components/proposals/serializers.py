@@ -222,6 +222,7 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
 
     def get_section_answers(self, obj):
         ret_dict = {}
+        request = self.context.get('request', None)
 
         # Retrieve all the SectionChecklist objects used for this ProposalAssessment
         section_checklists_used = SectionChecklist.objects.filter(id__in=(obj.answers.values_list('checklist_question__section_checklist', flat=True).distinct()))
