@@ -1732,19 +1732,40 @@ class ProposalViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
         raise serializers.ValidationError(str(e))
 
-
     @detail_route(methods=['post'], detail=True)
     @renderer_classes((JSONRenderer,))
     def assessor_save(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            save_assessor_data(instance,request,self)
+            save_assessor_data(instance, request, self)
             return redirect(reverse('external'))
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
         except ValidationError as e:
             raise serializers.ValidationError(repr(e.error_dict))
+        except Exception as e:
+            print(traceback.print_exc())
+            raise serializers.ValidationError(str(e))
+
+    @detail_route(methods=['post'], detail=True)
+    def assesor_send_referral(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = SendReferralSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            #text=serializer.validated_data['text']
+            #instance.send_referral(request,serializer.validated_data['email'])
+            instance.send_referral(request, serializer.validated_data['email'], serializer.validated_data['text'])
+            #serializer = InternalProposalSerializer(instance,context={'request':request})
+            serializer_class = self.internal_serializer_class()
+            serializer = serializer_class(instance, context={'request': request})
+            return Response(serializer.data)
+        except serializers.ValidationError:
+            print(traceback.print_exc())
+            raise
+        except ValidationError as e:
+            handle_validation_error(e)
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))

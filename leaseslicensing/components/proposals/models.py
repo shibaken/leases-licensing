@@ -23,6 +23,7 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from ledger_api_client.country_models import Country
 from ledger_api_client.managed_models import SystemGroup
 from leaseslicensing import exceptions
+from leaseslicensing.components.main.utils import get_department_user
 from leaseslicensing.components.organisations.models import Organisation, OrganisationContact, UserDelegation
 from leaseslicensing.components.main.models import (
         #Organisation as ledger_organisation, OrganisationAddress,
@@ -1392,6 +1393,66 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 self.save()
             else:
                 raise ValidationError('You can\'t edit this proposal at this moment')
+
+    def send_referral(self, request, referral_email, referral_text):
+        with transaction.atomic():
+            try:
+                referral_email = referral_email.lower()
+                if self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR or self.processing_status == Proposal.PROCESSING_STATUS_WITH_REFERRAL:
+                    self.processing_status = Proposal.PROCESSING_STATUS_WITH_REFERRAL
+                    self.save()
+                    referral = None
+
+                    # Check if the user is in ledger
+                    try:
+                        user = EmailUser.objects.get(email__icontains=referral_email)
+                    except EmailUser.DoesNotExist:
+                        # Validate if it is a deparment user
+                        department_user = get_department_user(referral_email)
+                        if not department_user:
+                            raise ValidationError(
+                                'The user you want to send the referral to is not a member of the department'
+                            )
+                        # Check if the user is in ledger or create
+
+                        user, created = EmailUser.objects.get_or_create(email=department_user['email'].lower())
+                        if created:
+                            user.first_name = department_user['given_name']
+                            user.last_name = department_user['surname']
+                            user.save()
+                    try:
+                        referral = Referral.objects.get(referral=user.id, proposal=self)
+                        raise ValidationError('A referral has already been sent to this user')
+                    except Referral.DoesNotExist:
+                        # Create Referral
+                        referral = Referral.objects.create(
+                            proposal=self,
+                            referral=user.id,
+                            sent_by=request.user.id,
+                            text=referral_text,
+                            assigned_officer=request.user.id
+                        )
+                    # Create a log entry for the proposal
+                    self.log_user_action(
+                        ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(
+                            referral.id, self.lodgement_number, '{}({})'.format(user.get_full_name(), user.email)
+                        ), request
+                    )
+                    # Create a log entry for the organisation
+                    if self.applicant:
+                        pass
+                        # TODO: implement logging to ledger/application???
+                        #self.applicant.log_user_action(
+                        #    ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(
+                        #        referral.id, self.lodgement_number, '{}({})'.format(user.get_full_name(), user.email)
+                        #    ), request
+                        #)
+                    # send email
+                    send_referral_email_notification(referral, [user.email,], request)
+                else:
+                    raise exceptions.ProposalReferralCannotBeSent()
+            except:
+                raise
 
     def assign_officer(self,request,officer):
         with transaction.atomic():

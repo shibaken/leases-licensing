@@ -222,7 +222,7 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
 
     def get_section_answers(self, obj):
         ret_dict = {}
-        request = self.context.get('request', None)
+        request = self.context.get('request')
 
         # Retrieve all the SectionChecklist objects used for this ProposalAssessment
         section_checklists_used = SectionChecklist.objects.filter(id__in=(obj.answers.values_list('checklist_question__section_checklist', flat=True).distinct()))
@@ -640,16 +640,19 @@ class ApplicantSerializer(serializers.ModelSerializer):
 
 class ProposalReferralSerializer(serializers.ModelSerializer):
     #referral = serializers.CharField(source='referral.get_full_name')
-    referral = serializers.CharField(source='referral_group.name')
+    # referral = serializers.CharField(source='referral_group.name')
     processing_status = serializers.CharField(source='get_processing_status_display')
+
     class Meta:
         model = Referral
         fields = '__all__'
+
 
 class ProposalDeclinedDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProposalDeclinedDetails
         fields = '__all__'
+
 
 class ProposalParkSerializer(BaseProposalSerializer):
     applicant = ApplicantSerializer()
@@ -825,10 +828,12 @@ class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
     def get_documents(self,obj):
         return [[d.name,d._file.url] for d in obj.documents.all()]
 
+
 class SendReferralSerializer(serializers.Serializer):
-    #email = serializers.EmailField()
-    email_group = serializers.CharField()
+    email = serializers.EmailField()
+    # email_group = serializers.CharField()
     text = serializers.CharField(allow_blank=True)
+
 
 class DTReferralSerializer(serializers.ModelSerializer):
     processing_status = serializers.CharField(source='proposal.get_processing_status_display')

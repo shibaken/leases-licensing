@@ -79,7 +79,7 @@
                                         </div>
                                         <div class="col-md-9">
                                             <template v-if="item.checklist_question.answer_type=='free_text'">
-                                                <textarea class="form-control" id="deficiency_comments_textarea" v-model="item.answer_text"/>
+                                                <textarea class="form-control free_text_area" :id="'free_text_' + item.id" v-model="item.answer_text"/>
                                             </template>
                                             <template v-else>
                                                 <div>
@@ -894,5 +894,7 @@ export default {
 }
 </script>
 <style scoped>
-
+.free_text_area {
+    resize: vertical;
+}
 </style>
