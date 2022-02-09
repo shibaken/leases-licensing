@@ -36,6 +36,9 @@ from leaseslicensing.components.main.utils import get_dbca_lands_and_waters_geos
 
 
 import logging
+
+from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
+
 logger = logging.getLogger(__name__)
 
 def create_data_from_form(schema, post_data, file_data, post_data_index=None,special_fields=[],assessor_data=False):
@@ -314,11 +317,13 @@ class SpecialFieldsSearch(object):
             item_data[item['name']] = item_data_list
         return item_data
 
+
 def save_proponent_data(instance,request,viewset,parks=None,trails=None):
     if instance.application_type.name==settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
         save_proponent_data_registration_of_interest(instance,request,viewset)
     elif instance.application_type.name==settings.APPLICATION_TYPE_LEASE_LICENCE:
         save_proponent_data_lease_licence(instance,request,viewset)
+
 
 def save_proponent_data_registration_of_interest(instance, request, viewset):
     # proposal
@@ -337,6 +342,7 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     if viewset.action == 'submit':
         check_geometry(instance)
 
+
 def save_proponent_data_lease_licence(instance, request, viewset):
     # proposal
     proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
@@ -354,6 +360,17 @@ def save_proponent_data_lease_licence(instance, request, viewset):
     if viewset.action == 'submit':
         check_geometry(instance)
 
+
+def save_assessor_data_registration_of_interest(instance, request, viewset):
+    # TODO: implement
+    pass
+
+
+def save_assessor_data_lease_licence(instance, request, viewset):
+    # TODO: implement
+    pass
+
+
 def check_geometry(instance):
     geom_ok = True
     for geom in instance.proposalgeometry.all():
@@ -362,6 +379,7 @@ def check_geometry(instance):
 
     if not geom_ok:
         raise ValidationError('One or more polygons does not intersect with a relevant layer')
+
 
 def save_geometry(instance, request, viewset):
     # geometry
@@ -411,8 +429,6 @@ def save_geometry(instance, request, viewset):
     [poly.delete() for poly in polygons_to_delete]
 
 
-from leaseslicensing.components.main.models import ApplicationType
-
 def save_assessor_data(instance,request,viewset):
     with transaction.atomic():
         try:
@@ -424,12 +440,18 @@ def save_assessor_data(instance,request,viewset):
             #     'assessor_data': assessor_data,
             #     'comment_data': comment_data,
             # }
-            if instance.application_type.name==ApplicationType.FILMING:
-                save_assessor_data_filming(instance,request,viewset)
-            if instance.application_type.name==ApplicationType.TCLASS:
-                save_assessor_data_tclass(instance,request,viewset)
-            if instance.application_type.name==ApplicationType.EVENT:
-                save_assessor_data_event(instance,request,viewset)            
+            # if instance.application_type.name==ApplicationType.FILMING:
+            #     save_assessor_data_filming(instance,request,viewset)
+            # if instance.application_type.name==ApplicationType.TCLASS:
+            #     save_assessor_data_tclass(instance,request,viewset)
+            # if instance.application_type.name==ApplicationType.EVENT:
+            #     save_assessor_data_event(instance,request,viewset)
+            if instance.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
+                save_assessor_data_registration_of_interest(instance, request, viewset)
+            elif instance.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+                save_assessor_data_lease_licence(instance, request, viewset)
+            else:
+                pass
         except:
             raise
 

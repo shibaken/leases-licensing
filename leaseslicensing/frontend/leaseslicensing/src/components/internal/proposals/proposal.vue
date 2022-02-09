@@ -72,28 +72,55 @@
                         <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
                         <template v-slot:slot_map_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_map_checklist_questions" @created="collapsible_map_checklist_questions_component_mounted">
-                                <template v-for="item in questions_answers_for_map">
+
+                                <template v-for="question in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
                                     <div class="row form-group">
                                         <div class="col-md-3">
-                                            <label for="deficiency_comments_textarea">{{ item.checklist_question.text }}</label>
+                                            <label for="deficiency_comments_textarea">{{ question.checklist_question.text }}</label>
                                         </div>
                                         <div class="col-md-9">
-                                            <template v-if="item.checklist_question.answer_type=='free_text'">
-                                                <textarea class="form-control" id="deficiency_comments_textarea" v-model="item.answer_text"/>
+                                            <template v-if="question.checklist_question.answer_type=='free_text'">
+                                                <textarea class="form-control free_text_area" :id="'free_text_' + question.id" v-model="question.answer_text" :disabled="!question.accessing_user_can_answer"/>
                                             </template>
                                             <template v-else>
                                                 <div>
-                                                    <input type="radio" :id="'answer_yes_' + item.id" value="true" v-model="item.answer_yes_no">
-                                                    <label :for="'answer_yes_' + item.id">Yes</label>
+                                                    <input type="radio" :id="'answer_yes_' + question.id" value="true" v-model="question.answer_yes_no" :disabled="!question.accessing_user_can_answer">
+                                                    <label :for="'answer_yes_' + question.id">Yes</label>
                                                 </div>
                                                 <div>
-                                                    <input type="radio" :id="'answer_no_' + item.id" value="false" v-model="item.answer_yes_no">
-                                                    <label :for="'answer_no_' + item.id">No</label>
+                                                    <input type="radio" :id="'answer_no_' + question.id" value="false" v-model="question.answer_yes_no" :disabled="!question.accessing_user_can_answer">
+                                                    <label :for="'answer_no_' + question.id">No</label>
                                                 </div>
                                             </template>
                                         </div>
                                     </div>
                                 </template>
+
+                                <template v-for="assessment in assessments_for_referrals_map"> <!-- There can be multiple referral assessments -->
+                                    <template v-for="question in assessment"> <!-- per question -->
+                                        <div class="row form-group">
+                                            <div class="col-md-3">
+                                                <label for="deficiency_comments_textarea">{{ question.checklist_question.text }}</label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <template v-if="question.checklist_question.answer_type=='free_text'">
+                                                    <textarea class="form-control free_text_area" :id="'free_text_' + question.id" v-model="question.answer_text" :disabled="!question.accessing_user_can_answer"/>
+                                                </template>
+                                                <template v-else>
+                                                    <div>
+                                                        <input type="radio" :id="'answer_yes_' + question.id" value="true" v-model="question.answer_yes_no" :disabled="!question.accessing_user_can_answer">
+                                                        <label :for="'answer_yes_' + question.id">Yes</label>
+                                                    </div>
+                                                    <div>
+                                                        <input type="radio" :id="'answer_no_' + question.id" value="false" v-model="question.answer_yes_no" :disabled="!question.accessing_user_can_answer">
+                                                        <label :for="'answer_no_' + question.id">No</label>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+
                             </CollapsibleQuestions>
                         </template>
 
@@ -290,9 +317,20 @@ export default {
 
     },
     computed: {
-        questions_answers_for_map: function(){
+        assessment_for_assessor_map: function(){
             try {
                 return this.proposal.assessor_assessment.section_answers.map
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_map: function(){
+            try {
+                let ret_array = []
+                for (let assessment of this.proposal.referral_assessments){
+                    ret_array.push(assessment.section_answers.map)
+                }
+                return ret_array
             } catch (err) {
                 return []
             }
@@ -894,5 +932,7 @@ export default {
 }
 </script>
 <style scoped>
-
+.free_text_area {
+    resize: vertical;
+}
 </style>

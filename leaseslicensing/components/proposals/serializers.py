@@ -27,6 +27,8 @@ from leaseslicensing.components.organisations.serializers import OrganisationSer
 from leaseslicensing.components.users.serializers import UserAddressSerializer, DocumentSerializer
 from rest_framework import serializers
 from django.db.models import Q
+
+from leaseslicensing.helpers import is_assessor
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 #from reversion.models import Version
@@ -195,6 +197,7 @@ class ChecklistQuestionSerializer(serializers.ModelSerializer):
 
 class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
     checklist_question = ChecklistQuestionSerializer(read_only=True)
+    accessing_user_can_answer = serializers.SerializerMethodField()
 
     class Meta:
         model = ProposalAssessmentAnswer
@@ -203,7 +206,12 @@ class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
             'checklist_question',
             'answer_yes_no',
             'answer_text',
+            'accessing_user_can_answer',
         )
+
+    def get_accessing_user_can_answer(self, obj):
+        accessing_user_can_answer = self.context.get('accessing_user_can_answer', False)
+        return accessing_user_can_answer
 
 
 class ProposalAssessmentSerializer(serializers.ModelSerializer):
@@ -220,15 +228,26 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
             'section_answers',
         )
 
-    def get_section_answers(self, obj):
+    def get_section_answers(self, proposal_assessment):
         ret_dict = {}
+        request = self.context.get('request')
+
+        accessing_user_can_answer = False
+        if proposal_assessment.referral:
+            # This assessment is for referrals
+            if proposal_assessment.referral.referral == request.user.id:
+                accessing_user_can_answer = True
+        else:
+            # This assessment is for assessors
+            if request.user.is_authenticated and is_assessor(request.user.id):
+                accessing_user_can_answer = True
 
         # Retrieve all the SectionChecklist objects used for this ProposalAssessment
-        section_checklists_used = SectionChecklist.objects.filter(id__in=(obj.answers.values_list('checklist_question__section_checklist', flat=True).distinct()))
+        section_checklists_used = SectionChecklist.objects.filter(id__in=(proposal_assessment.answers.values_list('checklist_question__section_checklist', flat=True).distinct()))
         for section_checklist in section_checklists_used:
             # Retrieve all the answers for this section_checklist
-            answers = obj.answers.filter(checklist_question__section_checklist=section_checklist).order_by('checklist_question__order')
-            ret_dict[section_checklist.section] = ProposalAssessmentAnswerSerializer(answers, many=True).data
+            answers = proposal_assessment.answers.filter(checklist_question__section_checklist=section_checklist).order_by('checklist_question__order')
+            ret_dict[section_checklist.section] = ProposalAssessmentAnswerSerializer(answers, context={'accessing_user_can_answer': accessing_user_can_answer}, many=True).data
 
         return ret_dict
 
@@ -639,16 +658,19 @@ class ApplicantSerializer(serializers.ModelSerializer):
 
 class ProposalReferralSerializer(serializers.ModelSerializer):
     #referral = serializers.CharField(source='referral.get_full_name')
-    referral = serializers.CharField(source='referral_group.name')
+    # referral = serializers.CharField(source='referral_group.name')
     processing_status = serializers.CharField(source='get_processing_status_display')
+
     class Meta:
         model = Referral
         fields = '__all__'
+
 
 class ProposalDeclinedDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProposalDeclinedDetails
         fields = '__all__'
+
 
 class ProposalParkSerializer(BaseProposalSerializer):
     applicant = ApplicantSerializer()
@@ -824,10 +846,12 @@ class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
     def get_documents(self,obj):
         return [[d.name,d._file.url] for d in obj.documents.all()]
 
+
 class SendReferralSerializer(serializers.Serializer):
-    #email = serializers.EmailField()
-    email_group = serializers.CharField()
+    email = serializers.EmailField()
+    # email_group = serializers.CharField()
     text = serializers.CharField(allow_blank=True)
+
 
 class DTReferralSerializer(serializers.ModelSerializer):
     processing_status = serializers.CharField(source='proposal.get_processing_status_display')

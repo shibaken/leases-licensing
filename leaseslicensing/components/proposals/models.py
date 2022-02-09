@@ -23,6 +23,7 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from ledger_api_client.country_models import Country
 from ledger_api_client.managed_models import SystemGroup
 from leaseslicensing import exceptions
+from leaseslicensing.components.main.utils import get_department_user
 from leaseslicensing.components.organisations.models import Organisation, OrganisationContact, UserDelegation
 from leaseslicensing.components.main.models import (
         #Organisation as ledger_organisation, OrganisationAddress,
@@ -1365,23 +1366,23 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 for checklist_question in section_checklist.questions.filter(enabled=True):
                     answer = ProposalAssessmentAnswer.objects.create(proposal_assessment=proposal_assessment, checklist_question=checklist_question)
 
-    def make_referral_questions_ready(self):
-        """
-        Create referral checklist questions
-        Assessment instance already exits then skip.
-        """
-        try:
-            assessor_assessment = ProposalAssessment.objects.get(proposal=self, referral=None)
-        except ProposalAssessment.DoesNotExist:
-            assessor_assessment = ProposalAssessment.objects.create(proposal=self)
-            section_checklists = SectionChecklist.objects.filter(
-                application_type=self.application_type, list_type=SectionChecklist.LIST_TYPE_ASSESSOR, enabled=True
-            )
-            for section_checklist in section_checklists:
-                for checklist_question in section_checklist.questions.filter(enabled=True):
-                    answer = ProposalAssessmentAnswer.objects.create(
-                        proposal_assessment=assessor_assessment, question=checklist_question
-                        )
+    #def make_referral_questions_ready(self):
+    #    """
+    #    Create referral checklist questions
+    #    Assessment instance already exits then skip.
+    #    """
+    #    try:
+    #        assessor_assessment = ProposalAssessment.objects.get(proposal=self, referral=None)
+    #    except ProposalAssessment.DoesNotExist:
+    #        assessor_assessment = ProposalAssessment.objects.create(proposal=self)
+    #        section_checklists = SectionChecklist.objects.filter(
+    #            application_type=self.application_type, list_type=SectionChecklist.LIST_TYPE_ASSESSOR, enabled=True
+    #        )
+    #        for section_checklist in section_checklists:
+    #            for checklist_question in section_checklist.questions.filter(enabled=True):
+    #                answer = ProposalAssessmentAnswer.objects.create(
+    #                    proposal_assessment=assessor_assessment, question=checklist_question
+    #                    )
 
     def update(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
@@ -1393,58 +1394,65 @@ class Proposal(DirtyFieldsMixin, models.Model):
             else:
                 raise ValidationError('You can\'t edit this proposal at this moment')
 
-    def send_referral(self,request,referral_email,referral_text):
+    def send_referral(self, request, referral_email, referral_text):
         with transaction.atomic():
             try:
-                if self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR or self.processing_status == self.PROCESSING_STATUS_WITH_REFERRAL:
-                    self.processing_status = self.PROCESSING_STATUS_WITH_REFERRAL
+                referral_email = referral_email.lower()
+                if self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR or self.processing_status == Proposal.PROCESSING_STATUS_WITH_REFERRAL:
+                    self.processing_status = Proposal.PROCESSING_STATUS_WITH_REFERRAL
                     self.save()
-                    referral = None
 
                     # Check if the user is in ledger
                     try:
-                        #user = EmailUser.objects.get(email__icontains=referral_email)
-                        #referral_group = ReferralRecipientGroup.objects.get(name__icontains=referral_email)
-                        referral_group = ReferralRecipientGroup.objects.get(name__iexact=referral_email)
-                    #except EmailUser.DoesNotExist:
-                    except ReferralRecipientGroup.DoesNotExist:
-                        raise exceptions.ProposalReferralCannotBeSent()
-#                        # Validate if it is a deparment user
-#                        department_user = get_department_user(referral_email)
-#                        if not department_user:
-#                            raise ValidationError('The user you want to send the referral to is not a member of the department')
-#                        # Check if the user is in ledger or create
-#                        email = department_user['email'].lower()
-#                        user,created = EmailUser.objects.get_or_create(email=department_user['email'].lower())
-#                        if created:
-#                            user.first_name = department_user['given_name']
-#                            user.last_name = department_user['surname']
-#                            user.save()
+                        user = EmailUser.objects.get(email__icontains=referral_email)
+                    except EmailUser.DoesNotExist:
+                        # Validate if it is a deparment user
+                        department_user = get_department_user(referral_email)
+                        if not department_user:
+                            raise ValidationError(
+                                'The user you want to send the referral to is not a member of the department'
+                            )
+                        # Check if the user is in ledger or create
+
+                        user, created = EmailUser.objects.get_or_create(email=department_user['email'].lower())
+                        if created:
+                            user.first_name = department_user['given_name']
+                            user.last_name = department_user['surname']
+                            user.save()
+
+                    referral = None
                     try:
-                        #Referral.objects.get(referral=user,proposal=self)
-                        Referral.objects.get(referral_group=referral_group, proposal=self)
-                        raise ValidationError('A referral has already been sent to this group')
+                        referral = Referral.objects.get(referral=user.id, proposal=self)
+                        raise ValidationError('A referral has already been sent to this user')
                     except Referral.DoesNotExist:
                         # Create Referral
                         referral = Referral.objects.create(
-                            proposal = self,
-                            #referral=user,
-                            # referral_group=referral_group,
-                            sent_by=request.user,
-                            text=referral_text
+                            proposal=self,
+                            referral=user.id,
+                            sent_by=request.user.id,
+                            text=referral_text,
+                            assigned_officer=request.user.id
                         )
+                        # Create answers for this referral
                         self.make_questions_ready(referral)
 
                     # Create a log entry for the proposal
-                    #self.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}({})'.format(user.get_full_name(),user.email)),request)
-                    self.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}'.format(referral_group.name)),request)
+                    self.log_user_action(
+                        ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(
+                            referral.id, self.lodgement_number, '{}({})'.format(user.get_full_name(), user.email)
+                        ), request
+                    )
                     # Create a log entry for the organisation
-                    #self.applicant.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}({})'.format(user.get_full_name(),user.email)),request)
-                    applicant_field=getattr(self, self.applicant_field)
-                    applicant_field.log_user_action(ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(referral.id,self.id,'{}'.format(referral_group.name)),request)
+                    if self.applicant:
+                        pass
+                        # TODO: implement logging to ledger/application???
+                        #self.applicant.log_user_action(
+                        #    ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(
+                        #        referral.id, self.lodgement_number, '{}({})'.format(user.get_full_name(), user.email)
+                        #    ), request
+                        #)
                     # send email
-                    recipients = referral_group.members_list
-                    send_referral_email_notification(referral,recipients,request)
+                    send_referral_email_notification(referral, [user.email,], request)
                 else:
                     raise exceptions.ProposalReferralCannotBeSent()
             except:
@@ -1575,7 +1583,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         else:
             raise ValidationError('The provided status cannot be found.')
 
-
     def reissue_approval(self,request,status):
         if self.application_type.name==ApplicationType.FILMING and self.filming_approval_type=='lawful_authority':
             allowed_status=['approved', 'partially_approved']
@@ -1607,7 +1614,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     raise ValidationError('Cannot reissue Approval. User not permitted.')
             else:
                 raise ValidationError('Cannot reissue Approval')
-
 
     def proposed_decline(self,request,details):
         with transaction.atomic():
@@ -1769,7 +1775,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
             except:
                 raise
 
-
     def proposed_approval(self,request,details):
         with transaction.atomic():
             try:
@@ -1834,7 +1839,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 return licence_buffer
             except:
                 raise
-
 
     def final_approval(self,request,details):
         from leaseslicensing.components.approvals.models import Approval
@@ -2074,8 +2078,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                     compliance.log_user_action(ComplianceUserAction.ACTION_CREATE.format(compliance.id),request)
             except:
                 raise
-
-
 
     def renew_approval(self,request):
         with transaction.atomic():
