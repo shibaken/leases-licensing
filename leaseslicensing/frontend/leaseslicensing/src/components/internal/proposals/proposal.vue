@@ -1,12 +1,11 @@
 <template lang="html">
     <div v-if="proposal" class="container" id="internalProposal">
+        <div v-if="debug">internal/proposals/proposal.vue</div>
         <div class="row">
             <h3 v-if="proposal.migrated">Application: {{ proposal.lodgement_number }} (Migrated)</h3>
             <h3 v-else>Application: {{ proposal.lodgement_number }}</h3>
             <h4>Application Type: {{ proposal.proposal_type.description }}</h4>
-            <!--div v-if="proposal.application_type!='Apiary'">
-                <h4>Approval Level: {{ proposal.approval_level }}</h4>
-            </div-->
+
             <div class="col-md-3">
                 <CommsLogs
                     :comms_url="comms_url"
@@ -41,14 +40,19 @@
 
             </div>
 
-            <div class="col-md-1"></div>
-
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <!-- Main contents -->
                 <template v-if="display_approval_screen">
                     <ApprovalScreen
                         :proposal="proposal"
                         @refreshFromResponse="refreshFromResponse"
+                    />
+                </template>
+
+                <template v-if="display_requirements">
+                    <Requirements
+                        :proposal="proposal"
+                        @refreshRequirements="refreshRequirements"
                     />
                 </template>
 
@@ -63,14 +67,62 @@
                         :readonly="readonly"
                         :submitterId="proposal.submitter.id"
                         :key="computedProposalId"
-                    />
+                        :show_related_items_tab="true"
+                    >
+                        <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
+                        <template v-slot:slot_map_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_map_checklist_questions" @created="collapsible_map_checklist_questions_component_mounted">
+                                <div class="row form-group">
+                                    <div class="col-md-3">
+                                        <label for="deficiency_comments_textarea">Deficiency comments</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea class="form-control" id="deficiency_comments_textarea"/>
+                                    </div>
+                                </div>
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_proposal_details_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_proposal_details_checklist_questions" @created="collapsible_proposal_details_checklist_questions_component_mounted">
+                                Questions proposal details here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_proposal_impact_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_proposal_impact_checklist_questions" @created="collapsible_proposal_impact_checklist_questions_component_mounted">
+                                Questions proposal impact here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_other_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_other_checklist_questions" @created="collapsible_other_checklist_questions_component_mounted">
+                                Questions other here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_deed_poll_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_deed_poll_checklist_questions" @created="collapsible_deed_poll_checklist_questions_component_mounted">
+                                Questions deed_poll here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <template v-slot:slot_additional_documents_checklist_questions>
+                            <CollapsibleQuestions ref="collapsible_additional_documents_checklist_questions" @created="collapsible_additional_documents_checklist_questions_component_mounted">
+                                Questions additional_documents here
+                            </CollapsibleQuestions>
+                        </template>
+
+                        <!-- Inserted into the slot on the form.vue: Related Items -->
+                        <template v-slot:slot_section_related_items>
+                            <FormSection :formCollapse="false" label="Related Items" Index="related_items">
+                                Related Items table here
+                            </FormSection>
+                        </template>
+
+                    </ApplicationForm>
                 </template>
-                <template v-if="display_requirements">
-                    <Requirements
-                        :proposal="proposal"
-                        @refreshRequirements="refreshRequirements"
-                    />
-                </template>
+
             </div>
         </div>
 
@@ -118,6 +170,8 @@ import Workflow from '@common-utils/workflow.vue'
 import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import ApplicationForm from '@/components/form.vue';
+import FormSection from "@/components/forms/section_toggle.vue"
+import CollapsibleQuestions from '@/components/forms/collapsible_component.vue'
 
 export default {
     name: 'InternalProposal',
@@ -210,6 +264,8 @@ export default {
         //NewApply,
         //MapLocations,
         ApplicationForm,
+        FormSection,
+        CollapsibleQuestions,
     },
     props: {
         proposalId: {
@@ -220,6 +276,13 @@ export default {
 
     },
     computed: {
+        debug: function(){
+            console.log(this.$route.query.debug)
+            if (this.$route.query.debug){
+                return this.$route.query.debug == 'true'
+            }
+            return false
+        },
         proposedApprovalKey: function() {
             return "proposed_approval_" + this.uuid;
         },
@@ -238,7 +301,7 @@ export default {
         },
         display_requirements: function(){
             let ret_val =
-                this.proposal.processing_status == constants.WITH_ASSESSOR_REQUIREMENTS ||
+                this.proposal.processing_status == constants.WITH_ASSESSOR_CONDITIONS ||
                 ((this.proposal.processing_status == constants.WITH_APPROVER || this.isFinalised) && this.showingRequirements)
             return ret_val
         },
@@ -280,7 +343,7 @@ export default {
         },
         canAction: function(){
 
-            //return true  // TODO: implement this.  This is just temporary solution
+            return true  // TODO: implement this.  This is just temporary solution
 
             if (this.proposal.processing_status == 'With Approver'){
                 return this.proposal && (this.proposal.processing_status == 'With Approver' || this.proposal.processing_status == 'With Assessor' || this.proposal.processing_status == 'With Assessor (Requirements)') && !this.isFinalised && !this.proposal.can_user_edit && (this.proposal.current_assessor.id == this.proposal.assigned_approver || this.proposal.assigned_approver == null ) && this.proposal.assessor_mode.assessor_can_assess? true : false;
@@ -332,6 +395,24 @@ export default {
         },
     },
     methods: {
+        collapsible_map_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_map_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_other_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_other_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_deed_poll_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_deed_poll_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_additional_documents_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_additional_documents_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_proposal_details_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_proposal_details_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_proposal_impact_checklist_questions_component_mounted: function(){
+            this.$refs.collapsible_proposal_impact_checklist_questions.show_warning_icon(false)
+        },
         locationUpdated: function(){
             console.log('in locationUpdated()');
         },

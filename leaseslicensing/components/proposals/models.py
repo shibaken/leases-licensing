@@ -21,6 +21,7 @@ from taggit.models import TaggedItemBase
 #from ledger.accounts.models import OrganisationAddress
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from ledger_api_client.country_models import Country
+from ledger_api_client.managed_models import SystemGroup
 from leaseslicensing import exceptions
 from leaseslicensing.components.organisations.models import Organisation, OrganisationContact, UserDelegation
 from leaseslicensing.components.main.models import (
@@ -108,101 +109,6 @@ def application_type_choicelist():
 #        unique_together = ('name', 'version')
 
 
-class ProposalAssessorGroup(models.Model):
-    name = models.CharField(max_length=255)
-    #members = models.ManyToManyField(EmailUser)
-    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
-    default = models.BooleanField(default=False)
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        verbose_name = "Application Assessor Group"
-        verbose_name_plural = "Application Assessor Group"
-
-    def __str__(self):
-        return self.name
-
-    def clean(self):
-        try:
-            default = ProposalAssessorGroup.objects.get(default=True)
-        except ProposalAssessorGroup.DoesNotExist:
-            default = None
-
-        if self.pk:
-            if not self.default and not self.region:
-                raise ValidationError('Only default can have no region set for proposal assessor group. Please specifiy region')
-#            elif default and not self.default:
-#                raise ValidationError('There can only be one default proposal assessor group')
-        else:
-            if default and self.default:
-                raise ValidationError('There can only be one default proposal assessor group')
-
-    def member_is_assigned(self,member):
-        for p in self.current_proposals:
-            if p.assigned_officer == member:
-                return True
-        return False
-
-    @property
-    def current_proposals(self):
-        assessable_states = ['with_assessor','with_referral','with_assessor_requirements']
-        return Proposal.objects.filter(processing_status__in=assessable_states)
-
-    @property
-    def members_email(self):
-        return [i.email for i in self.members.all()]
-
-
-class ProposalApproverGroup(models.Model):
-    name = models.CharField(max_length=255)
-    #members = models.ManyToManyField(EmailUser,blank=True)
-    #regions = TaggableManager(verbose_name="Regions",help_text="A comma-separated list of regions.",through=TaggedProposalApproverGroupRegions,related_name = "+",blank=True)
-    #activities = TaggableManager(verbose_name="Activities",help_text="A comma-separated list of activities.",through=TaggedProposalApproverGroupActivities,related_name = "+",blank=True)
-    #members = models.ManyToManyField(EmailUser)
-    members = ArrayField(models.IntegerField(), blank=True) #EmailUserRO
-    default = models.BooleanField(default=False)
-
-    class Meta:
-        app_label = 'leaseslicensing'
-        verbose_name = "Application Approver Group"
-        verbose_name_plural = "Application Approver Group"
-
-    def __str__(self):
-        return self.name
-
-    def clean(self):
-        try:
-            default = ProposalApproverGroup.objects.get(default=True)
-        except ProposalApproverGroup.DoesNotExist:
-            default = None
-
-        if self.pk:
-            if not self.default and not self.region:
-                raise ValidationError('Only default can have no region set for proposal assessor group. Please specifiy region')
-
-#            if int(self.pk) != int(default.id):
-#                if default and self.default:
-#                    raise ValidationError('There can only be one default proposal approver group')
-        else:
-            if default and self.default:
-                raise ValidationError('There can only be one default proposal approver group')
-
-    def member_is_assigned(self,member):
-        for p in self.current_proposals:
-            if p.assigned_approver == member:
-                return True
-        return False
-
-    @property
-    def current_proposals(self):
-        assessable_states = ['with_approver']
-        return Proposal.objects.filter(processing_status__in=assessable_states)
-
-    @property
-    def members_email(self):
-        return [i.email for i in self.members.all()]
-
-
 class DefaultDocument(Document):
     input_name = models.CharField(max_length=255,null=True,blank=True)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
@@ -230,9 +136,333 @@ class DeedPollDocument(Document):
         app_label = 'leaseslicensing'
         verbose_name = "Deed Poll Document"
 
+class LegislativeRequirementsDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='legislative_requirements_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class RiskFactorsDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='risk_factors_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class KeyMilestonesDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='key_milestones_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class KeyPersonnelDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='key_personnel_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class StaffingDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='staffing_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class MarketAnalysisDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='market_analysis_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class AvailableActivitiesDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='available_activities_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class FinancialCapacityDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='financial_capacity_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class CapitalInvestmentDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='capital_investment_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class CashFlowDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='cash_flow_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ProfitAndLossDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='profit_and_loss_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class MiningTenementDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='mining_tenement_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class NativeTitleConsultationDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='native_title_consultation_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class AboriginalSiteDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='aboriginal_site_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class SignificantChangeDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='significant_change_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class BuildingRequiredDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='building_required_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class WetlandsImpactDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='wetlands_impact_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class EnvironmentallySensitiveDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='environmentally_sensitive_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class HeritageSiteDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='heritage_site_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class GroundDisturbingWorksDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='ground_disturbing_works_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ClearingVegetationDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='clearing_vegetation_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ConsistentPlanDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='consistent_plan_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ConsistentPurposeDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='consistent_purpose_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class LongTermUseDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='long_term_use_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
+
+class ExclusiveUseDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='exclusive_use_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = "Application Document"
+
 
 class ProposalDocument(Document):
-    proposal = models.ForeignKey('Proposal',related_name='documents', on_delete=models.CASCADE)
+    proposal = models.ForeignKey('Proposal',related_name='supporting_documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
     input_name = models.CharField(max_length=255,null=True,blank=True)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
@@ -454,7 +684,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     #proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
     #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
-    submitter = models.IntegerField()  #EmailUserRO
+    submitter = models.IntegerField(null=True)  #EmailUserRO
 
     #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
     #assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
@@ -489,23 +719,51 @@ class Proposal(DirtyFieldsMixin, models.Model):
     details_text = models.TextField(blank=True)
     #If the proposal is created as part of migration of approvals
     migrated=models.BooleanField(default=False)
-    ## additional form fields
+    ## Registration of Interest additional form fields
     # proposal details
     exclusive_use = models.BooleanField(null=True)
+    exclusive_use_text = models.TextField(blank=True)
     long_term_use = models.BooleanField(null=True)
+    long_term_use_text = models.TextField(blank=True)
     consistent_purpose = models.BooleanField(null=True)
+    consistent_purpose_text = models.TextField(blank=True)
     consistent_plan = models.BooleanField(null=True)
+    consistent_plan_text = models.TextField(blank=True)
     # proposal impact
     clearing_vegetation = models.BooleanField(null=True)
+    clearing_vegetation_text = models.TextField(blank=True)
     ground_disturbing_works = models.BooleanField(null=True)
+    ground_disturbing_works_text = models.TextField(blank=True)
     heritage_site = models.BooleanField(null=True)
+    heritage_site_text = models.TextField(blank=True)
     environmentally_sensitive = models.BooleanField(null=True)
+    environmentally_sensitive_text = models.TextField(blank=True)
     wetlands_impact = models.BooleanField(null=True)
+    wetlands_impact_text = models.TextField(blank=True)
     building_required = models.BooleanField(null=True)
+    building_required_text = models.TextField(blank=True)
     significant_change = models.BooleanField(null=True)
+    significant_change_text = models.TextField(blank=True)
     aboriginal_site = models.BooleanField(null=True)
+    aboriginal_site_text = models.TextField(blank=True)
     native_title_consultation = models.BooleanField(null=True)
+    native_title_consultation_text = models.TextField(blank=True)
     mining_tenement = models.BooleanField(null=True)
+    mining_tenement_text = models.TextField(blank=True)
+    ## Lease Licence additional form fields
+    # proposal details
+    profit_and_loss_text = models.TextField(blank=True)
+    cash_flow_text = models.TextField(blank=True)
+    capital_investment_text = models.TextField(blank=True)
+    financial_capacity_text = models.TextField(blank=True)
+    available_activities_text = models.TextField(blank=True)
+    market_analysis_text = models.TextField(blank=True)
+    staffing_text = models.TextField(blank=True)
+    # proposal impact
+    key_personnel_text = models.TextField(blank=True)
+    key_milestones_text = models.TextField(blank=True)
+    risk_factors_text = models.TextField(blank=True)
+    legislative_requirements_text = models.TextField(blank=True)
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -691,10 +949,12 @@ class Proposal(DirtyFieldsMixin, models.Model):
         if isinstance(self.applicant, Organisation):
             return '{} \n{}'.format(self.org_applicant.organisation.name, self.org_applicant.address)
         else:
-            return "{} {}\n{}".format(
+            # return "{} {}\n{}".format(
+            return "{} {}".format(
                 self.applicant.first_name,
                 self.applicant.last_name,
-                self.applicant.addresses.all().first())
+                # self.applicant.addresses.all().first()
+            )
 
     @property
     def applicant_address(self):
@@ -849,7 +1109,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def assessor_assessment(self):
-        qs=self.assessment.filter(referral_assessment=False, referral_group=None)
+        # qs=self.assessment.filter(referral_assessment=False, referral_group=None)
+        # qs = self.assessment.filter(referral_assessment=False)
+        qs = self.assessment.filter(referral=None)
         if qs:
             return qs[0]
         else:
@@ -857,7 +1119,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def referral_assessments(self):
-        qs=self.assessment.filter(referral_assessment=True, referral_group__isnull=False)
+        # qs=self.assessment.filter(referral_assessment=True, referral_group__isnull=False)
+        # qs = self.assessment.filter(referral_assessment=True)
+        qs = self.assessment.exclude(referral=None)
         if qs:
             return qs
         else:
@@ -870,14 +1134,17 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def allowed_assessors(self):
-        if self.processing_status == 'with_approver':
+        group = None
+        if self.processing_status in [Proposal.PROCESSING_STATUS_WITH_APPROVER,]:
             group = self.__approver_group()
-        elif self.processing_status =='with_qa_officer':
-            group = QAOfficerGroup.objects.get(default=True)
-        else:
+        # elif self.processing_status =='with_qa_officer':
+        #     group = QAOfficerGroup.objects.get(default=True)
+        elif self.processing_status in [Proposal.PROCESSING_STATUS_WITH_ASSESSOR, Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS,]:
             group = self.__assessor_group()
         # return group.members.all() if group else []
-        return group.members if group else []
+        # return group.get_system_group_member_ids() if group else []
+        users = list(map(lambda id: retrieve_email_user(id), group.get_system_group_member_ids())) if group else []
+        return users
 
     @property
     def compliance_assessors(self):
@@ -918,37 +1185,12 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return False
 
     def __assessor_group(self):
-        # TODO get list of assessor groups based on region and activity
-        #if self.region and self.activity:
-        #    try:
-        #        check_group = ProposalAssessorGroup.objects.filter(
-        #            #activities__name__in=[self.activity],
-        #            region__name__in=self.regions_list
-        #        ).distinct()
-        #        if check_group:
-        #            return check_group[0]
-        #    except ProposalAssessorGroup.DoesNotExist:
-        #        pass
-        default_group = ProposalAssessorGroup.objects.get(default=True)
-
-        return default_group
-
+        #default_group = ProposalAssessorGroup.objects.get(default=True)
+        return SystemGroup.objects.get(name='ProposalAssessorGroup')
 
     def __approver_group(self):
-        # TODO get list of approver groups based on region and activity
-        #if self.region and self.activity:
-        #    try:
-        #        check_group = ProposalApproverGroup.objects.filter(
-        #            #activities__name__in=[self.activity],
-        #            region__name__in=self.regions_list
-        #        ).distinct()
-        #        if check_group:
-        #            return check_group[0]
-        #    except ProposalApproverGroup.DoesNotExist:
-        #        pass
-        default_group = ProposalApproverGroup.objects.get(default=True)
-
-        return default_group
+        #default_group = ProposalApproverGroup.objects.get(default=True)
+        return SystemGroup.objects.get(name='ProposalApproverGroup')
 
     def __check_proposal_filled_out(self):
         if not self.data:
@@ -968,11 +1210,15 @@ class Proposal(DirtyFieldsMixin, models.Model):
     @property
     def assessor_recipients(self):
         recipients = []
-        try:
-            recipients = ProposalAssessorGroup.objects.get(region=self.region).members_email
-        except:
-            recipients = ProposalAssessorGroup.objects.get(default=True).members_email
+        group_ids = self.__assessor_group().get_system_group_member_ids()
+        for id in group_ids:
+            recipients.append(EmailUser.objects.get(id=id).email)
+        #try:
+            #recipients = ProposalAssessorGroup.objects.get(region=self.region).members_email
+        #except:
+            #recipients = ProposalAssessorGroup.objects.get(default=True).members_email
 
+        ## dead code from COLS - required here?
         #if self.submitter.email not in recipients:
         #    recipients.append(self.submitter.email)
         return recipients
@@ -980,61 +1226,74 @@ class Proposal(DirtyFieldsMixin, models.Model):
     @property
     def approver_recipients(self):
         recipients = []
-        try:
-            recipients = ProposalApproverGroup.objects.get(region=self.region).members_email
-        except:
-            recipients = ProposalApproverGroup.objects.get(default=True).members_email
+        group_ids = self.__approver_group().get_system_group_member_ids()
+        for id in group_ids:
+            recipients.append(EmailUser.objects.get(id=id).email)
+        #try:
+            #recipients = ProposalApproverGroup.objects.get(region=self.region).members_email
+        #except:
+            #recipients = ProposalApproverGroup.objects.get(default=True).members_email
 
+        ## dead code from COLS - required here?
         #if self.submitter.email not in recipients:
         #    recipients.append(self.submitter.email)
         return recipients
 
     #Check if the user is member of assessor group for the Proposal
     def is_assessor(self,user):
-            return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
 
     #Check if the user is member of assessor group for the Proposal
     def is_approver(self,user):
-            return self.__approver_group() in user.proposalapprovergroup_set.all()
+            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
 
 
     def can_assess(self,user):
-        #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_requirements':
-        if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_requirements']:
-            return self.__assessor_group() in user.proposalassessorgroup_set.all()
+        #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions':
+        if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
         elif self.processing_status == 'with_approver':
-            return self.__approver_group() in user.proposalapprovergroup_set.all()
+            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+            return user.id in self.__approver_group().get_system_group_member_ids()
         else:
             return False
 
     #To allow/ prevent internal user to edit activities (Land and Marine) for T-class licence
     #still need to check to assessor mode in on or not
     def can_edit_activities(self,user):
-        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_requirements':
-            return self.__assessor_group() in user.proposalassessorgroup_set.all()
+        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
         elif self.processing_status == 'with_approver':
-            return self.__approver_group() in user.proposalapprovergroup_set.all()
+            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+            return user.id in self.__approver_group().get_system_group_member_ids()
         else:
             return False
 
     def can_edit_period(self,user):
-        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_requirements':
-            return self.__assessor_group() in user.proposalassessorgroup_set.all()
+        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            return user.id in self.__assessor_group().get_system_group_member_ids()
         else:
             return False
 
     def assessor_comments_view(self,user):
 
-        if self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_requirements' or self.processing_status == 'with_approver':
+        if self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions' or self.processing_status == 'with_approver':
             try:
                 referral = Referral.objects.get(proposal=self,referral=user)
             except:
                 referral = None
             if referral:
                 return True
-            elif self.__assessor_group() in user.proposalassessorgroup_set.all():
+            #elif self.__assessor_group() in user.proposalassessorgroup_set.all():
+            elif user.id in self.__assessor_group().get_system_group_member_ids():
                 return True
-            elif self.__approver_group() in user.proposalapprovergroup_set.all():
+            #elif self.__approver_group() in user.proposalapprovergroup_set.all():
+            elif user.id in self.__approver_group().get_system_group_member_ids():
                 return True
             else:
                 return False
@@ -1047,16 +1306,19 @@ class Proposal(DirtyFieldsMixin, models.Model):
             return False
         else:
             if self.assigned_officer:
-                if self.assigned_officer == user:
-                    return self.__assessor_group() in user.proposalassessorgroup_set.all()
+                if self.assigned_officer == user.id:
+                    #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+                    return user.id in self.__assessor_group().get_system_group_member_ids()
                 else:
                     return False
             else:
-                return self.__assessor_group() in user.proposalassessorgroup_set.all()
+                #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+                return user.id in self.__assessor_group().get_system_group_member_ids()
 
     def log_user_action(self, action, request):
-        return ProposalUserAction.log_action(self, action, request.user)
-
+        return ProposalUserAction.log_action(self, action, request.user.id)
+    
+    # proposal.utils.proposal_submit appears to be used instead
     def submit(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
         with transaction.atomic():
@@ -1284,21 +1546,21 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def add_default_requirements(self):
         #Add default standard requirements to Proposal
         due_date=None
-        if self.application_type.name==ApplicationType.TCLASS:
-            due_date=self.other_details.nominated_start_date
-        if self.application_type.name==ApplicationType.FILMING:
-            due_date=self.filming_activity.commencement_date
-        if self.application_type.name==ApplicationType.EVENT:
-            due_date=self.event_activity.commencement_date
+        # if self.application_type.name==ApplicationType.TCLASS:
+        #     due_date=self.other_details.nominated_start_date
+        # if self.application_type.name==ApplicationType.FILMING:
+        #     due_date=self.filming_activity.commencement_date
+        # if self.application_type.name==ApplicationType.EVENT:
+        #     due_date=self.event_activity.commencement_date
         default_requirements=ProposalStandardRequirement.objects.filter(application_type=self.application_type, default=True, obsolete=False)
         if default_requirements:
             for req in default_requirements:
-                r, created=ProposalRequirement.objects.get_or_create(proposal=self, standard_requirement=req, due_date= due_date)
+                r, created = ProposalRequirement.objects.get_or_create(proposal=self, standard_requirement=req, due_date=due_date)
 
     def move_to_status(self,request,status, approver_comment):
         if not self.can_assess(request.user):
             raise exceptions.ProposalNotAuthorized()
-        if status in ['with_assessor','with_assessor_requirements','with_approver']:
+        if status in ['with_assessor','with_assessor_conditions','with_approver']:
             if self.processing_status == 'with_referral' or self.can_user_edit:
                 raise ValidationError('You cannot change the current status at this time')
             if self.processing_status != status:
@@ -1310,13 +1572,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         send_proposal_approver_sendback_email_notification(request, self)
                 self.processing_status = status
                 self.save()
-                if status=='with_assessor_requirements':
+                if status=='with_assessor_conditions':
                     self.add_default_requirements()
 
                 # Create a log entry for the proposal
                 if self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR:
                     self.log_user_action(ProposalUserAction.ACTION_BACK_TO_PROCESSING.format(self.id),request)
-                elif self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS:
+                elif self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS:
                     self.log_user_action(ProposalUserAction.ACTION_ENTER_REQUIREMENTS.format(self.id),request)
         else:
             raise ValidationError('The provided status cannot be found.')
@@ -1521,7 +1783,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
             try:
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
-                if self.processing_status != 'with_assessor_requirements':
+                if self.processing_status != 'with_assessor_conditions':
                     raise ValidationError('You cannot propose for approval if it is not with assessor for requirements')
                 self.proposed_issuance_approval = {
                     'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
@@ -1548,8 +1810,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         from leaseslicensing.components.approvals.models import PreviewTempApproval
         with transaction.atomic():
             try:
-                #if self.processing_status != 'with_assessor_requirements' or self.processing_status != 'with_approver':
-                if not (self.processing_status == 'with_assessor_requirements' or self.processing_status == 'with_approver'):
+                #if self.processing_status != 'with_assessor_conditions' or self.processing_status != 'with_approver':
+                if not (self.processing_status == 'with_assessor_conditions' or self.processing_status == 'with_approver'):
                     raise ValidationError('Licence preview only available when processing status is with_approver. Current status {}'.format(self.processing_status))
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
@@ -2459,7 +2721,6 @@ class QAOfficerGroup(models.Model):
         return Proposal.objects.filter(processing_status__in=assessable_states)
 
 
-#class Referral(models.Model):
 class Referral(RevisionedMixin):
     SENT_CHOICES = (
         (1,'Sent From Assessor'),
@@ -2476,7 +2737,7 @@ class Referral(RevisionedMixin):
     sent_by = models.IntegerField() #EmailUserRO
     #referral = models.ForeignKey(EmailUser,null=True,blank=True,related_name='leaseslicensing_referalls', on_delete=models.SET_NULL)
     referral = models.IntegerField() #EmailUserRO
-    referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
+    # referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='leaseslicensing_referral_groups', on_delete=models.SET_NULL)
     linked = models.BooleanField(default=False)
     sent_from = models.SmallIntegerField(choices=SENT_CHOICES,default=SENT_CHOICES[0][0])
     processing_status = models.CharField('Processing Status', max_length=30, choices=PROCESSING_STATUS_CHOICES,
@@ -2506,12 +2767,12 @@ class Referral(RevisionedMixin):
 
     @property
     def referral_assessment(self):
-        qs=self.assessment.filter(referral_assessment=True, referral_group=self.referral_group)
+        # qs=self.assessment.filter(referral_assessment=True, referral_group=self.referral_group)
+        qs = self.assessment.filter(referral_assessment=True)
         if qs:
             return qs[0]
         else:
             return None
-
 
     @property
     def can_be_completed(self):
@@ -2525,8 +2786,11 @@ class Referral(RevisionedMixin):
 
     @property
     def allowed_assessors(self):
-        group = self.referral_group
-        return group.members.all() if group else []
+        ## must be SystemGroup
+        # group = self.referral_group
+        #return group.members.all() if group else []
+        # return group.get_system_group_member_ids() if group else []
+        return []  # TODO: correct this
 
     def can_process(self, user):
         if self.processing_status=='with_referral':
@@ -2809,7 +3073,7 @@ class ProposalRequirement(OrderedModel):
 
     def can_district_assessor_edit(self,user):
         allowed_status=['with_district_assessor', 'partially_approved', 'partially_declined']
-        if self.district_proposal and self.district_proposal.processing_status=='with_assessor_requirements' and self.proposal.processing_status in allowed_status:
+        if self.district_proposal and self.district_proposal.processing_status=='with_assessor_conditions' and self.proposal.processing_status in allowed_status:
             if self.district_proposal.can_process_requirements(user):
                 return True
         return False
@@ -2835,60 +3099,107 @@ class ProposalRequirement(OrderedModel):
         return
 
 
+class SectionChecklistQuestions(RevisionedMixin):
+    '''
+    This object is per section per type(assessor/referral) grouping the ChecklistQuestion objects
+    '''
+    SECTION_MAP = 'map'
+    SECTION_PROPOSAL_DETAILS = 'proposal_details'
+    SECTION_PROPOSAL_IMPACT = 'proposal_impact'
+    SECTION_OTHER = 'other'
+    SECTION_DEED_POLL = 'deed_poll'
+    SECTION_RELATED_ITEMS = 'related_items'
+    SECTION_CHOICES = (
+        (SECTION_MAP, 'Map'),
+        (SECTION_PROPOSAL_DETAILS, 'Proposal Details'),
+        (SECTION_PROPOSAL_IMPACT, 'Proposal Impact'),
+        (SECTION_OTHER, 'Other'),
+        (SECTION_DEED_POLL, 'Deed Poll'),
+        (SECTION_RELATED_ITEMS, 'Related Items'),
+    )
+    LIST_TYPE_CHOICES = (
+        ('assessor_list', 'Assessor Checklist'),
+        ('referral_list', 'Referral Checklist')
+    )
 
-#class ProposalStandardRequirement(models.Model):
+    application_type = models.ForeignKey(ApplicationType, blank=True, null=True, on_delete=models.SET_NULL)
+    section = models.CharField('Section', max_length=50, choices=SECTION_CHOICES, default=SECTION_CHOICES[0][0])
+    list_type = models.CharField('Checklist type', max_length=30, choices=LIST_TYPE_CHOICES, default=LIST_TYPE_CHOICES[0][0])
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        app_label = 'leaseslicensing'
+        verbose_name = 'Section Questions'
+        verbose_name_plural = 'Section Questions'
+
+    def __str__(self):
+        return 'Questions for {}:'.format(self.get_section_display())
+
+    @property
+    def number_of_questions(self):
+        return '{}/{}'.format(self.number_of_enabled_questions, self.number_of_total_questions)
+
+    @property
+    def number_of_total_questions(self):
+        return self.questions.count() if self.questions else 0  # 'questions' is a related_name of ChecklistQuestion
+
+    @property
+    def number_of_enabled_questions(self):
+        return self.questions.filter(enabled=True).count() if self.questions and self.questions.filter(enabled=True) else 0  # 'questions' is a related_name of ChecklistQuestion
+
+    # @property
+    # def application_type_name(self):
+    #     return self.application_type.get_name_display()
+    #
+    # @property
+    # def section_name(self):
+    #     return self.get_section_display()
+    #
+    # @property
+    # def type_name(self):
+    #     return self.get_list_type_display()
+
+
 class ChecklistQuestion(RevisionedMixin):
     TYPE_CHOICES = (
-        ('assessor_list','Assessor Checklist'),
-        ('referral_list','Referral Checklist')
+        ('assessor_list', 'Assessor Checklist'),
+        ('referral_list', 'Referral Checklist')
     )
     ANSWER_TYPE_CHOICES = (
-        ('yes_no','Yes/No type'),
-        ('free_text','Free text type')
+        ('yes_no', 'Yes/No type'),
+        ('free_text', 'Free text type')
     )
     text = models.TextField()
-    list_type = models.CharField('Checklist type', max_length=30, choices=TYPE_CHOICES,
-                                         default=TYPE_CHOICES[0][0])
-    answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES,
-                                         default=ANSWER_TYPE_CHOICES[0][0])
-
-    #correct_answer= models.BooleanField(default=False)
-    application_type = models.ForeignKey(ApplicationType,blank=True, null=True, on_delete=models.SET_NULL)
-    obsolete = models.BooleanField(default=False)
+    answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES, default=ANSWER_TYPE_CHOICES[0][0])
+    enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=1)
+    checklist_questions = models.ForeignKey(SectionChecklistQuestions, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.text
 
     class Meta:
         app_label = 'leaseslicensing'
+        ordering = ['order',]
 
 
 class ProposalAssessment(RevisionedMixin):
-    proposal=models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
+    proposal = models.ForeignKey(Proposal, related_name='assessment', on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
-    #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='proposal_assessment', on_delete=models.SET_NULL)
-    submitter = models.IntegerField() #EmailUserRO
-    referral_assessment=models.BooleanField(default=False)
-    referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='referral_assessment', on_delete=models.SET_NULL)
-    referral=models.ForeignKey(Referral, related_name='assessment',blank=True, null=True, on_delete=models.SET_NULL)
-    # def __str__(self):
-    #     return self.proposal
+    submitter = models.IntegerField()  #EmailUserRO
+    referral = models.ForeignKey(Referral, related_name='assessment', blank=True, null=True, on_delete=models.SET_NULL)  # When referral is none, this ProposalAssessment is for assessor.
 
     class Meta:
         app_label = 'leaseslicensing'
-        unique_together = ('proposal', 'referral_group',)
 
     @property
     def checklist(self):
         return self.answers.all()
 
     @property
-    def referral_group_name(self):
-        if self.referral_group:
-            return self.referral_group.name
-        else:
-            return ''
+    def referral_assessment(self):
+        # When referral exists, self is for referral otherwise for assessor
+        return True if self.referral else False
 
 
 class ProposalAssessmentAnswer(RevisionedMixin):
@@ -2969,60 +3280,22 @@ class QAOfficerReferral(RevisionedMixin):
         return self.can_be_processed and self.proposal.is_qa_officer()
 
 
-@receiver(pre_delete, sender=Proposal)
-def delete_documents(sender, instance, *args, **kwargs):
-    for document in instance.documents.all():
-        document.delete()
+#@receiver(pre_delete, sender=Proposal)
+#def delete_documents(sender, instance, *args, **kwargs):
+#    for document in instance.documents.all():
+#        document.delete()
 
-def clone_proposal_with_status_reset(proposal, copy_requirement_documents=False):
-    """
-    To Test:
-         from leaseslicensing.components.proposals.models import clone_proposal_with_status_reset
-         p=Proposal.objects.get(id=57)
-         p0=clone_proposal_with_status_reset(p)
-    """
+def clone_proposal_with_status_reset(original_proposal):
     with transaction.atomic():
         try:
-            original_proposal = copy.deepcopy(proposal)
-            #proposal = duplicate_object(proposal) # clone object and related objects
-            if original_proposal.application_type.name==ApplicationType.TCLASS:
-                proposal=duplicate_tclass(proposal)
-            if original_proposal.application_type.name==ApplicationType.FILMING:
-                proposal=duplicate_filming(proposal)
-            if original_proposal.application_type.name==ApplicationType.EVENT:
-                proposal=duplicate_event(proposal)
-            # manually duplicate the comms logs -- hck, not hndled by duplicate object (maybe due to inheritance?)
-            # proposal.comms_logs.create(text='cloning proposal reset (original proposal {}, new proposal {})'.format(original_proposal.id, proposal.id))
-            # for comms_log in proposal.comms_logs.all():
-            #     comms_log.id=None
-            #     comms_log.communicationslogentry_ptr_id=None
-            #     comms_log.proposal_id=original_proposal.id
-            #     comms_log.save()
-
-            # reset some properties
-            proposal.customer_status = 'draft'
-            proposal.processing_status = 'draft'
-            proposal.assessor_data = None
-            proposal.comment_data = None
-
-            proposal.lodgement_number = ''
-            proposal.lodgement_sequence = 0
-            proposal.lodgement_date = None
-
-            proposal.assigned_officer = None
-            proposal.assigned_approver = None
-
-            proposal.approval = None
-            proposal.approval_level_document = None
-            proposal.migrated=False
-
-            proposal.save(no_revision=True)
-
-            #clone_documents(proposal, original_proposal, media_prefix='media')
-            if copy_requirement_documents:
-                _clone_requirement_documents(proposal, original_proposal, media_prefix='media')
-            else:
-                _clone_documents(proposal, original_proposal, media_prefix='media')
+            proposal = Proposal.objects.create(
+                    application_type=ApplicationType.objects.get(name='lease_licence'),
+                    ind_applicant=original_proposal.ind_applicant,
+                    org_applicant=original_proposal.org_applicant,
+                    previous_application=original_proposal,
+                    approval=original_proposal.approval
+                    )
+            #proposal.save(no_revision=True)
             return proposal
         except:
             raise

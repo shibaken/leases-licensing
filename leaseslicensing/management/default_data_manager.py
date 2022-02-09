@@ -17,9 +17,10 @@ from leaseslicensing.components.main.models import (
 #from leaseslicensing.components.payments_ml.models import OracleCodeItem, FeeItemStickerReplacement
 from leaseslicensing.components.proposals.models import (
     ProposalType,
-    Proposal, ProposalAssessorGroup, ProposalApproverGroup,
+    Proposal,
     #StickerPrintingContact
 )
+from ledger_api_client.managed_models import SystemGroup
 
 logger = logging.getLogger(__name__)
 
@@ -67,38 +68,10 @@ class DefaultDataManager(object):
                 logger.error('{}, Key: {}'.format(e, item[0]))
 
         # ProposalAssessorGroup
-        default_groups = ProposalAssessorGroup.objects.filter(default=True)
-        if default_groups.count() == 1:
-            pass
-        elif default_groups.count() == 0:
-            try:
-                group = ProposalAssessorGroup.objects.create()
-                group.name = 'Default Assessor Group'
-                group.default = True
-                group.save()
-                logger.info('Created ProposalAssessorGroup(default): {}'.format(group))
-            except Exception as e:
-                logger.error('{}'.format(e))
-        else:
-            logger.error('There are {} default PropsalAssessorGroups.  There must be only 1 default group.'.format(default_groups.count()))
-
+        group, created = SystemGroup.objects.get_or_create(name="ProposalAssessorGroup")
 
         # ProposalApproverGroup
-        default_groups = ProposalApproverGroup.objects.filter(default=True)
-        if default_groups.count() == 1:
-            pass
-        elif default_groups.count() == 0:
-            try:
-                group = ProposalApproverGroup.objects.create()
-                group.name = 'Default Approver Group'
-                group.default = True
-                group.save()
-                logger.info('Created ProposalApproverGroup(default): {}'.format(group))
-            except Exception as e:
-                logger.error('{}'.format(e))
-        else:
-            logger.error('There are {} default PropsalApproverGroups.  There must be only 1 default group.'.format(default_groups.count()))
-
+        group, created = SystemGroup.objects.get_or_create(name="ProposalApproverGroup")
 
         ## Oracle account codes
         #today = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE)).date()

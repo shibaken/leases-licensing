@@ -156,7 +156,7 @@ DEP_FAX = env('DEP_FAX','(08) 9423 8242')
 DEP_POSTAL = env('DEP_POSTAL','Locked Bag 104, Bentley Delivery Centre, Western Australia 6983')
 DEP_NAME = env('DEP_NAME','Department of Biodiversity, Conservation and Attractions')
 DEP_NAME_SHORT = env('DEP_NAME_SHORT','DBCA')
-BRANCH_NAME = env('BRANCH_NAME','Tourism and Concessions Branch')
+BRANCH_NAME = env('BRANCH_NAME','Leases and Licensing Branch')
 DEP_ADDRESS = env('DEP_ADDRESS','17 Dick Perry Avenue, Kensington WA 6151')
 SITE_URL = env('SITE_URL', 'https://' + SITE_PREFIX + '.' + SITE_DOMAIN)
 PUBLIC_URL=env('PUBLIC_URL', SITE_URL)
@@ -197,6 +197,11 @@ CKEDITOR_CONFIGS = {
     },
 }
 
+
+CONSOLE_EMAIL_BACKEND = env('CONSOLE_EMAIL_BACKEND', False)
+if CONSOLE_EMAIL_BACKEND:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # Additional logging for leaseslicensing
 LOGGING['handlers']['payment_checkout'] = {
             'level': 'INFO',
@@ -228,12 +233,10 @@ PROPOSAL_TYPES = [
 ]
 
 APPLICATION_TYPE_REGISTRATION_OF_INTEREST = 'registration_of_interest'
-APPLICATION_TYPE_LEASE = 'lease'
-APPLICATION_TYPE_LICENCE = 'licence'
+APPLICATION_TYPE_LEASE_LICENCE = 'lease_licence'
 APPLICATION_TYPES = [
     (APPLICATION_TYPE_REGISTRATION_OF_INTEREST, 'Registration of Interest'),
-    (APPLICATION_TYPE_LEASE, 'Lease'),
-    (APPLICATION_TYPE_LICENCE, 'Licence'),
+    (APPLICATION_TYPE_LEASE_LICENCE, 'Lease Licence'),
 ]
 KMI_SERVER_URL = env('KMI_SERVER_URL', 'https://kmi.dbca.wa.gov.au')
 template_title = "Leases and Licensing"

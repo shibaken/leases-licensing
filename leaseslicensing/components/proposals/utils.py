@@ -22,6 +22,7 @@ from leaseslicensing.components.proposals.serializers import (
         SaveRegistrationOfInterestSerializer,
         ProposalOtherDetailsSerializer, 
         ProposalGeometrySaveSerializer,
+        SaveLeaseLicenceSerializer,
         )
 import traceback
 import os
@@ -316,10 +317,8 @@ class SpecialFieldsSearch(object):
 def save_proponent_data(instance,request,viewset,parks=None,trails=None):
     if instance.application_type.name==settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
         save_proponent_data_registration_of_interest(instance,request,viewset)
-    elif instance.application_type.name==settings.APPLICATION_TYPE.LEASE:
-        save_proponent_data_registration_of_interest(instance,request,viewset)
-    elif instance.application_type.name==settings.APPLICATION_TYPE.LICENCE:
-        save_proponent_data_registration_of_interest(instance,request,viewset)
+    elif instance.application_type.name==settings.APPLICATION_TYPE_LEASE_LICENCE:
+        save_proponent_data_lease_licence(instance,request,viewset)
 
 def save_proponent_data_registration_of_interest(instance, request, viewset):
     # proposal
@@ -335,6 +334,34 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     instance = serializer.save()
     if request.data.get('lease_licensing_geometry'):
         save_geometry(instance, request, viewset)
+    if viewset.action == 'submit':
+        check_geometry(instance)
+
+def save_proponent_data_lease_licence(instance, request, viewset):
+    # proposal
+    proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
+    serializer = SaveLeaseLicenceSerializer(
+            instance, 
+            data=proposal_data, 
+            context={
+                "action": viewset.action,
+                }
+    )
+    serializer.is_valid(raise_exception=True)
+    instance = serializer.save()
+    if request.data.get('lease_licensing_geometry'):
+        save_geometry(instance, request, viewset)
+    if viewset.action == 'submit':
+        check_geometry(instance)
+
+def check_geometry(instance):
+    geom_ok = True
+    for geom in instance.proposalgeometry.all():
+        if not geom.intersects:
+            geom_ok = False
+
+    if not geom_ok:
+        raise ValidationError('One or more polygons does not intersect with a relevant layer')
 
 def save_geometry(instance, request, viewset):
     # geometry
@@ -409,8 +436,7 @@ def save_assessor_data(instance,request,viewset):
 def proposal_submit(proposal,request):
         with transaction.atomic():
             if proposal.can_user_edit:
-                proposal.submitter = request.user
-                #proposal.lodgement_date = datetime.datetime.strptime(timezone.now().strftime('%Y-%m-%d'),'%Y-%m-%d').date()
+                proposal.submitter = request.user.id
                 proposal.lodgement_date = timezone.now()
                 proposal.training_completed = True
                 if (proposal.amendment_requests):
@@ -425,46 +451,36 @@ def proposal_submit(proposal,request):
                 # Create a log entry for the organisation
                 #proposal.applicant.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(proposal.id),request)
                 applicant_field=getattr(proposal, proposal.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(proposal.id),request)
-
-                # print('requirement block')
-                # default_requirements=ProposalStandardRequirement.objects.filter(application_type=proposal.application_type, default=True, obsolete=False)
-                # print('default', default_requirements)
-                # if default_requirements:
-                #     for req in default_requirements:
-                #         print ('req',req)
-                #         try:
-                #             r, created=ProposalRequirement.objects.get_or_create(proposal=proposal, standard_requirement=req)
-                #             print(r, created, r.id)
-                #         except:
-                #             raise
-        
+                ## 20220128 Ledger to handle EmailUser logging?
+                #applicant_field.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(proposal.id),request)
+                ## 20220128 - update ProposalAssessorGroup, ProposalApproverGroup as SystemGroups
                 ret1 = send_submit_email_notification(request, proposal)
                 ret2 = send_external_submit_email_notification(request, proposal)
 
                 #proposal.save_form_tabs(request)
                 if ret1 and ret2:
                     proposal.processing_status = 'with_assessor'
-                    # proposal.customer_status = 'with_assessor'
-                    proposal.documents.all().update(can_delete=False)
-                    proposal.required_documents.all().update(can_delete=False)
+                    #TODO: do we need the following 2?
+                    #proposal.documents.all().update(can_delete=False)
+                    #proposal.required_documents.all().update(can_delete=False)
                     proposal.save()
                 else:
                     raise ValidationError('An error occurred while submitting proposal (Submit email notifications failed)')
                 #Create assessor checklist with the current assessor_list type questions
                 #Assessment instance already exits then skip.
-                try:
-                    assessor_assessment=ProposalAssessment.objects.get(proposal=proposal,referral_group=None, referral_assessment=False)
-                except ProposalAssessment.DoesNotExist:
-                    assessor_assessment=ProposalAssessment.objects.create(proposal=proposal,referral_group=None, referral_assessment=False)
-                    checklist=ChecklistQuestion.objects.filter(list_type='assessor_list', application_type=proposal.application_type, obsolete=False)
-                    for chk in checklist:
-                        try:
-                            chk_instance=ProposalAssessmentAnswer.objects.get(question=chk, assessment=assessor_assessment)
-                        except ProposalAssessmentAnswer.DoesNotExist:
-                            chk_instance=ProposalAssessmentAnswer.objects.create(question=chk, assessment=assessor_assessment)
+                #TODO: fix ProposalAssessment if still required
+                #try:
+                #    assessor_assessment=ProposalAssessment.objects.get(proposal=proposal,referral_group=None, referral_assessment=False)
+                #except ProposalAssessment.DoesNotExist:
+                #    assessor_assessment=ProposalAssessment.objects.create(proposal=proposal,referral_group=None, referral_assessment=False)
+                #    checklist=ChecklistQuestion.objects.filter(list_type='assessor_list', application_type=proposal.application_type, obsolete=False)
+                #    for chk in checklist:
+                #        try:
+                #            chk_instance=ProposalAssessmentAnswer.objects.get(question=chk, assessment=assessor_assessment)
+                #        except ProposalAssessmentAnswer.DoesNotExist:
+                #            chk_instance=ProposalAssessmentAnswer.objects.create(question=chk, assessment=assessor_assessment)
 
-                return proposal
+                #return proposal
 
             else:
                 raise ValidationError('You can\'t edit this proposal at this moment')

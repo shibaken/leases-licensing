@@ -1,417 +1,152 @@
 <template lang="html">
     <div class="">
-
+        <div v-if="debug">components/form.vue</div>
         <div v-if="proposal && show_application_title" id="scrollspy-heading" class="" >
             <h4>{{applicationTypeText}} Application: {{proposal.lodgement_number}}</h4>
         </div>
 
         <div class="">
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
-                  Applicant
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
-                  Map
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="pills-details-tab" data-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
-                  Details
-                </a>
-              </li>
+                <li class="nav-item">
+                    <a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
+                      Applicant
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
+                      Map
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="pills-details-tab" data-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
+                      Details
+                    </a>
+                </li>
+
+                <!-- Related Items tab is shown on the internal proposal page -->
+                <template v-if="show_related_items_tab">
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-related-items-tab" data-toggle="pill" href="#pills-related-items" role="tab" aria-controls="pills-related-items" aria-selected="false">Related Items </a>
+                    </li>
+                </template>
             </ul>
             <div class="tab-content" id="pills-tabContent">
               <div class="tab-pane fade" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
                   <div v-if="is_external">
-                    <Profile 
-                    :isApplication="true" 
-                    v-if="applicantType == 'SUB'" 
-                    ref="profile"
-                    @profile-fetched="populateProfile"
-                    :proposalId="proposal.id"
-                    :readonly="readonly"
-                    :submitterId="submitterId"
-                    />
+                      <Profile
+                      :isApplication="true"
+                      v-if="applicantType == 'SUB'"
+                      ref="profile"
+                      @profile-fetched="populateProfile"
+                      :proposalId="proposal.id"
+                      :readonly="readonly"
+                      :submitterId="submitterId"
+                      />
                   </div>
                   <div v-else>
-                    <Applicant 
-                        :email_user="proposal.submitter" 
-                        :applicantType="proposal.applicant_type" 
+                    <!-- Applicant
+                        :email_user="proposal.submitter"
+                        :applicantType="proposal.applicant_type"
                         id="proposalStartApplicant"
                         :readonly="readonly"
                         :showElectoralRoll="showElectoralRoll"
                         :storedSilentElector="silentElector"
                         :proposalId="proposal.id"
-                    />
+                    / -->
+                      <Applicant
+                          :email_user="proposal.submitter"
+                          :applicantType="proposal.applicant_type"
+                          id="proposalStartApplicant"
+                          :readonly="readonly"
+                          :proposalId="proposal.id"
+                      />
                   </div>
               </div>
               <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
-                <div class="row col-sm-12">
-                    <FormSection :formCollapse="false" label="Map" Index="proposal_geometry">
-                        <ComponentMap
-                            ref="component_map"
-                            :is_internal="is_internal"
-                            :is_external="is_external"
-                            :key="componentMapKey"
-                            v-if="componentMapOn"
-                            @featuresDisplayed="updateTableByFeatures"
-                            :can_modify="can_modify"
-                            :display_at_time_of_submitted="show_col_status_when_submitted"
-                            @featureGeometryUpdated="featureGeometryUpdated"
-                            @popupClosed="popupClosed"
-                            :proposal="proposal"
-                        />
-
-                        <!--ComponentMap
-                            ref="component_map"
-                            :key="componentMapKey"
-                            v-if="componentMapOn"
-                        /-->
-                    </FormSection>
-                </div>
-
+                  <div class="row col-sm-12">
+                      <FormSection :formCollapse="false" label="Map" Index="proposal_geometry">
+                          <slot name="slot_map_checklist_questions"></slot>
+                          <ComponentMap
+                              ref="component_map"
+                              :is_internal="is_internal"
+                              :is_external="is_external"
+                              :key="componentMapKey"
+                              v-if="componentMapOn"
+                              @featuresDisplayed="updateTableByFeatures"
+                              :can_modify="can_modify"
+                              :display_at_time_of_submitted="show_col_status_when_submitted"
+                              @featureGeometryUpdated="featureGeometryUpdated"
+                              @popupClosed="popupClosed"
+                              :proposal="proposal"
+                          />
+                      </FormSection>
+                  </div>
               </div>
               <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
-                <FormSection label="Proposal Details" Index="application_details" v-if="proposal">
-                    <div class="col-sm-12 section-style">
-                        <RichText
-                        :proposalData="proposal.details_text"
-                        ref="details_text"
-                        label="Rich text in here" 
-                        :readonly="readonly" 
-                        :can_view_richtext_src=true
-                        v-bind:key="proposal.id"
-                        />
-                        <label for="supporting_documents">Attach any supporting documents</label>
-                        <FileField 
-                            :readonly="readonly"
-                            ref="supporting_documents"
-                            name="supporting_documents"
-                            id="supporting_documents"
-                            :isRepeatable="true"
-                            :documentActionUrl="supportingDocumentsUrl"
-                            :replace_button_by_text="true"
-                        />
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal require exclusive use of or non-exclusive access to a site?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.exclusive_use" type="radio" name="exclusive_use_yes" id="exclusive_use_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="exclusive_use_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.exclusive_use" type="radio" name="exclusive_use_no" id="exclusive_use_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="exclusive_use_no">No</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal require long-term use of or access to a site?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.long_term_use" type="radio" name="long_term_use_yes" id="long_term_use_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="long_term_use_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.long_term_use" type="radio" name="long_term_use_no" id="long_term_use_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="long_term_use_no">No</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Is the proposal consistent with the purpose of the park or reserve?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_yes" id="consistent_purpose_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="consistent_purpose_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_no" id="consistent_purpose_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="consistent_purpose_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.consistent_purpose" type="radio" name="consistent_purpose_null" id="consistent_purpose_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="consistent_purpose_null">Unsure</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Is the proposal consistent with the <a href="http://www.google.com" target="_blank">park or reserve management plan</a>?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.consistent_plan" type="radio" name="consistent_plan_yes" id="consistent_plan_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="consistent_plan_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.consistent_plan" type="radio" name="consistent_plan_no" id="consistent_plan_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="consistent_plan_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.consistent_plan" type="radio" name="consistent_plan_null" id="consistent_plan_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="consistent_plan_null">Unsure</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                  <RegistrationOfInterest
+                  :proposal="proposal"
+                  :readonly="readonly"
+                  ref="registration_of_interest"
+                  v-if="registrationOfInterest"
+                  >
+                      <template v-slot:slot_proposal_details_checklist_questions>
+                          <slot name="slot_proposal_details_checklist_questions"></slot>
+                      </template>
 
-                </FormSection>
-                <FormSection label="Proposal Impact" Index="proposal_impact" v-if="proposal">
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal involve clearing of native vegetation?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.clearing_vegetation" type="radio" name="clearing_vegetation_yes" id="clearing_vegetation_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="clearing_vegetation_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.clearing_vegetation" type="radio" name="clearing_vegetation_no" id="clearing_vegetation_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="clearing_vegetation_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.clearing_vegetation" type="radio" name="clearing_vegetation_null" id="clearing_vegetation_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="clearing_vegetation_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal involve ground-disturbing works?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.ground_disturbing_works" type="radio" name="ground_disturbing_works_yes" id="ground_disturbing_works_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="ground_disturbing_works_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.ground_disturbing_works" type="radio" name="ground_disturbing_works_no" id="ground_disturbing_works_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="ground_disturbing_works_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.ground_disturbing_works" type="radio" name="ground_disturbing_works_null" id="ground_disturbing_works_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="ground_disturbing_works_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal impact on a World or National Heritage area?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.heritage_site" type="radio" name="heritage_site_yes" id="heritage_site_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="heritage_site_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.heritage_site" type="radio" name="heritage_site_no" id="heritage_site_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="heritage_site_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.heritage_site" type="radio" name="heritage_site_null" id="heritage_site_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="heritage_site_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Is the proposal located in a environmentally sensitive area or habitat for significant flora and fauna?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.environmentally_sensitive" type="radio" name="environmentally_sensitive_yes" id="environmentally_sensitive_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="environmentally_sensitive_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.environmentally_sensitive" type="radio" name="environmentally_sensitive_no" id="environmentally_sensitive_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="environmentally_sensitive_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.environmentally_sensitive" type="radio" name="environmentally_sensitive_null" id="environmentally_sensitive_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="environmentally_sensitive_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal impact on wetlands or water courses?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.wetlands_impact" type="radio" name="wetlands_impact_yes" id="wetlands_impact_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="wetlands_impact_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.wetlands_impact" type="radio" name="wetlands_impact_no" id="wetlands_impact_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="wetlands_impact_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.wetlands_impact" type="radio" name="wetlands_impact_null" id="wetlands_impact_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="wetlands_impact_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal involve building a structure or building?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.building_required" type="radio" name="building_required_yes" id="building_required_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="building_required_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.building_required" type="radio" name="building_required_no" id="building_required_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="building_required_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.building_required" type="radio" name="building_required_null" id="building_required_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="building_required_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal create a significant change to or visual impact on the proposed site?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.significant_change" type="radio" name="significant_change_yes" id="significant_change_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="significant_change_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.significant_change" type="radio" name="significant_change_no" id="significant_change_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="significant_change_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.significant_change" type="radio" name="significant_change_null" id="significant_change_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="significant_change_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal impact on a <a target="_blank" href="http://www.google.com">registered Aboriginal site</a>?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.aboriginal_site" type="radio" name="aboriginal_site_yes" id="aboriginal_site_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="aboriginal_site_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.aboriginal_site" type="radio" name="aboriginal_site_no" id="aboriginal_site_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="aboriginal_site_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.aboriginal_site" type="radio" name="aboriginal_site_null" id="aboriginal_site_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="aboriginal_site_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Has any consultation occurred with the relevant Aboriginal native title party?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.native_title_consultation" type="radio" name="native_title_consultation_yes" id="native_title_consultation_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="native_title_consultation_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.native_title_consultation" type="radio" name="native_title_consultation_no" id="native_title_consultation_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="native_title_consultation_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.native_title_consultation" type="radio" name="native_title_consultation_null" id="native_title_consultation_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="native_title_consultation_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="col-sm-3 question-title">
-                            <label class="control-label pull-left">Will the proposal impact on a <a target="_blank" href="http://google.com">mining tenement</a>?</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <ul  class="list-inline col-sm-6">
-                                <li class="list-inline-item">
-                                    <input class="form-check-input" v-model="proposal.mining_tenement" type="radio" name="mining_tenement_yes" id="mining_tenement_yes" :value="true" data-parsley-required :disabled="readonly"/>
-                                    <label for="mining_tenement_yes">Yes</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.mining_tenement" type="radio" name="mining_tenement_no" id="mining_tenement_no" :value="false" data-parsley-required :disabled="readonly"/> 
-                                    <label for="mining_tenement_no">No</label>
-                                </li>
-                                <li class="list-inline-item">
-                                    <input  class="form-check-input" v-model="proposal.mining_tenement" type="radio" name="mining_tenement_null" id="mining_tenement_null" :value="null" data-parsley-required :disabled="readonly"/> 
-                                    <label for="mining_tenement_null">Unknown at this stage</label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                      <template v-slot:slot_proposal_impact_checklist_questions>
+                          <slot name="slot_proposal_impact_checklist_questions"></slot>
+                      </template>
 
-                </FormSection>
-                <FormSection label="Other" Index="other_section">
-                </FormSection>
-                <FormSection label="Deed Poll" Index="deed_poll">
-                    <div class="col-sm-12 section-style">
-                        <p>
-                            <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.  
-                            Please note: electronic or digital signatures cannot be accepted.</br>
-                            Please click <a href="www.google.com">here</a> to download the deed poll.</br>
-                            The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
-                            </strong>
-                        </p>
+                  </RegistrationOfInterest>
+                  <LeaseLicence
+                  :proposal="proposal"
+                  :readonly="readonly"
+                  ref="lease_licence"
+                  v-if="leaseLicence"
+                  >
+                  </LeaseLicence>
 
-                        <label for="deed_poll_document">Deed poll:</label>
-                        <FileField 
-                            :readonly="readonly"
-                            ref="deed_poll_document"
-                            name="deed_poll_document"
-                            id="deed_poll_document"
-                            :isRepeatable="true"
-                            :documentActionUrl="deedPollDocumentUrl"
-                            :replace_button_by_text="true"
-                        />
-                    </div>
-                </FormSection>
+
+                  <FormSection label="Other" Index="other_section">
+                      <slot name="slot_other_checklist_questions"></slot>
+                  </FormSection>
+
+                  <FormSection label="Deed Poll" Index="deed_poll">
+                      <slot name="slot_deed_poll_checklist_questions"></slot>
+                      <div class="col-sm-12 section-style">
+                          <p>
+                              <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.
+                              Please note: electronic or digital signatures cannot be accepted.</br>
+                              Please click <a href="www.google.com">here</a> to download the deed poll.</br>
+                              The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
+                              </strong>
+                          </p>
+
+                          <label for="deed_poll_document">Deed poll:</label>
+                          <FileField
+                              :readonly="readonly"
+                              ref="deed_poll_document"
+                              name="deed_poll_document"
+                              id="deed_poll_document"
+                              :isRepeatable="true"
+                              :documentActionUrl="deedPollDocumentUrl"
+                              :replace_button_by_text="true"
+                          />
+                      </div>
+                  </FormSection>
+
+                  <FormSection label="Additional Documents" Index="additional_documents">
+                      <slot name="slot_additional_documents_checklist_questions"></slot>
+                  </FormSection>
               </div>
+
+              <!-- Related Items tab is shown on the internal proposal page -->
+              <template v-if="show_related_items_tab">
+                  <div class="tab-pane fade" id="pills-related-items" role="tabpanel" aria-labelledby="pills-related-items-tab">
+                      <slot name="slot_section_related_items"></slot>
+                  </div>
+              </template>
+
             </div>
         </div>
     </div>
@@ -423,10 +158,9 @@ import Applicant from '@/components/common/applicant.vue'
 import FormSection from '@/components/forms/section_toggle.vue'
 import RichText from '@/components/forms/richtext.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
-//import ComponentMap from '@/components/common/apiary_component_map.vue'
-//import ComponentMap from '@/components/common/apiary_component_site_selection.vue'
 import ComponentMap from '@/components/common/component_map.vue'
-//import ComponentMap from '@/components/common/tutorial_map.vue'
+import RegistrationOfInterest from './form_registration_of_interest.vue'
+import LeaseLicence from './form_lease_licence.vue'
 import {
   api_endpoints,
   helpers
@@ -438,6 +172,10 @@ import Confirmation from '@/components/common/confirmation.vue'
     export default {
         name: 'ApplicationForm',
         props:{
+            show_related_items_tab: {
+                type: Boolean,
+                default: false,
+            },
             proposal:{
                 type: Object,
                 required:true
@@ -481,6 +219,14 @@ import Confirmation from '@/components/common/confirmation.vue'
                 type: Boolean,
                 default: true,
             },
+            registrationOfInterest:{
+                type: Boolean,
+                default: true,
+            },
+            leaseLicence:{
+                type: Boolean,
+                default: true,
+            },
         },
         data:function () {
             return{
@@ -499,6 +245,8 @@ import Confirmation from '@/components/common/confirmation.vue'
             }
         },
         components: {
+            RegistrationOfInterest,
+            LeaseLicence,
             Applicant,
             /*
             Confirmation,
@@ -518,6 +266,12 @@ import Confirmation from '@/components/common/confirmation.vue'
         },
         */
         computed:{
+            debug: function(){
+                if (this.$route.query.debug){
+                    return this.$route.query.debug === 'true'
+                }
+                return false
+            },
             proposalId: function() {
                 return this.proposal ? this.proposal.id : null;
             },
@@ -541,7 +295,7 @@ import Confirmation from '@/components/common/confirmation.vue'
                     if (!this.proposal.previous_application_id) {
                         // new application
                         show = true;
-                    } else if (this.proposal.max_vessel_length_with_no_payment && 
+                    } else if (this.proposal.max_vessel_length_with_no_payment &&
                         this.proposal.max_vessel_length_with_no_payment <= this.vesselLength) {
                         // vessel length is in higher category
                         show = true;
@@ -570,10 +324,12 @@ import Confirmation from '@/components/common/confirmation.vue'
                 }
                 */
                 if (this.proposal) {
-                    text = this.proposal.application_type_display;
+                    //text = this.proposal.application_type_display;
+                    text = this.proposal.application_type.name_display;
                 }
                 return text;
             },
+
         },
         methods:{
             incrementComponentMapKey: function() {
@@ -602,7 +358,7 @@ import Confirmation from '@/components/common/confirmation.vue'
                 $('#pills-tab a[href="#pills-applicant"]').tab('show');
                 /*
                 if (vm.proposal.fee_paid) {
-                    // Online Training tab 
+                    // Online Training tab
                     $('#pills-online-training-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
                     $('#li-training').attr('class', 'nav-item disabled');
                     $('#pills-online-training-tab').attr("href", "")
@@ -645,7 +401,7 @@ import Confirmation from '@/components/common/confirmation.vue'
             //indow.addEventListener('onblur', vm.leaving);
 
         }
- 
+
     }
 </script>
 

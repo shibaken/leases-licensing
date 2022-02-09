@@ -1,4 +1,6 @@
 <template id="proposal_requirements">
+    <div>
+<!--
     <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Conditions
@@ -8,18 +10,22 @@
             </h3>
         </div>
         <div class="panel-body panel-collapse collapse in" :id="panelBody">
+        </div>
+-->
+        <FormSection :formCollapse="false" label="Conditions" Index="conditions">
             <form class="form-horizontal" action="index.html" method="post">
                 <div class="col-sm-12">
                     <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Condition</button>
                 </div>
                 <datatable ref="requirements_datatable" :id="'requirements-datatable-'+_uid" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
             </form>
-        </div>
-        <RequirementDetail
-            ref="requirement_detail"
-            :proposal_id="proposal.id"
-            :requirements="requirements"
-        />
+
+            <RequirementDetail
+                ref="requirement_detail"
+                :proposal_id="proposal.id"
+                :requirements="requirements"
+            />
+        </FormSection>
     </div>
 </template>
 <script>
@@ -30,6 +36,7 @@ import {
 from '@/utils/hooks'
 import datatable from '@vue-utils/datatable.vue'
 import RequirementDetail from '@/components/internal/proposals/proposal_add_requirement.vue'
+import FormSection from "@/components/forms/section_toggle.vue"
 
 export default {
     name: 'InternalProposalRequirements',
@@ -177,7 +184,8 @@ export default {
     },
     components:{
         datatable,
-        RequirementDetail
+        RequirementDetail,
+        FormSection,
     },
     computed:{
         hasAssessorMode(){

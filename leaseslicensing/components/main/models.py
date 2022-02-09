@@ -156,6 +156,19 @@ class ApplicationType(models.Model):
         except:
             return None
 
+    @property
+    def name_display(self):
+        return self.get_name_display()
+
+    @property
+    def confirmation_text(self):
+        text = ''
+        if self.name == 'registration_of_interest':
+            text = 'registration of interest'
+        if self.name == 'lease_licence':
+            text = 'lease or licence'
+        return text
+
     def __str__(self):
         return self.name
 
@@ -164,11 +177,7 @@ class ApplicationType(models.Model):
 class OracleCode(models.Model):
     CODE_TYPE_CHOICES = (
         (settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST, settings.APPLICATION_TYPE_REGISTRATION_OF_INTEREST),
-        (settings.APPLICATION_TYPE_LEASE, settings.APPLICATION_TYPE_LEASE),
-        (settings.APPLICATION_TYPE_LICENCE, settings.APPLICATION_TYPE_LICENCE),
-        #(ApplicationType.TCLASS, ApplicationType.TCLASS),
-        #(ApplicationType.FILMING, ApplicationType.FILMING),
-        #(ApplicationType.EVENT, ApplicationType.EVENT),
+        (settings.APPLICATION_TYPE_LEASE_LICENCE, settings.APPLICATION_TYPE_LEASE_LICENCE),
     )
     code_type = models.CharField('Application Type', max_length=64, choices=CODE_TYPE_CHOICES,
                                         default=CODE_TYPE_CHOICES[0][0])

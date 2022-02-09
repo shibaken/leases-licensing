@@ -29,7 +29,7 @@ from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from leaseslicensing.components.proposals.utils import save_proponent_data,save_assessor_data, proposal_submit
 from leaseslicensing.components.proposals.models import searchKeyWords, search_reference, ProposalUserAction
-from leaseslicensing.utils import missing_required_fields
+from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
 from leaseslicensing.components.main.utils import check_db_connection
 from leaseslicensing.components.main.decorators import basic_exception_handler
 
@@ -135,16 +135,27 @@ class GetApplicationTypeDict(views.APIView):
     renderer_classes = [JSONRenderer, ]
 
     def get(self, request, format=None):
-        payload = {}
-        data = cache.get('application_type_dict')
+        for_filter = request.query_params.get('for_filter', '')
+        for_filter = True if for_filter == 'true' else False
+        cache_data_name = 'application_type_dict_for_filter' if for_filter else 'application_type_dict'
+
+        data = cache.get(cache_data_name)
         if not data:
-            cache.set(
-                    'application_type_dict', 
-                    #[{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES], 
-                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'], 
-                        settings.LOV_CACHE_TIMEOUT
-                        )
-            data = cache.get('application_type_dict')
+            if for_filter:
+                cache.set(
+                    cache_data_name,
+                    [{"id": app_type[0], "text": app_type[1]} for app_type in settings.APPLICATION_TYPES],
+                    settings.LOV_CACHE_TIMEOUT,
+                )
+            else:
+                cache.set(
+                    cache_data_name,
+                    #[{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'],
+                    ##TODO: remove lease_licence once internal workflow is complete
+                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] in ['registration_of_interest', 'lease_licence']],
+                    settings.LOV_CACHE_TIMEOUT,
+                )
+            data = cache.get(cache_data_name)
         return Response(data)
 
 
@@ -167,12 +178,26 @@ class GetApplicationStatusesDict(views.APIView):
 
     def get(self, request, format=None):
         data = {}
-        if True or not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
-            cache.set('application_internal_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
-            cache.set('application_external_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
-        data['external_statuses'] = cache.get('application_external_statuses_dict')
-        data['internal_statuses'] = cache.get('application_internal_statuses_dict')
-        return Response(data)
+
+        for_filter = request.query_params.get('for_filter', '')
+        for_filter = True if for_filter == 'true' else False
+
+        if for_filter:
+            cache_name = 'application_internal_statuses_dict_for_filter',
+            cache.set(
+                cache_name,
+                [{'id': i[0], 'text': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES],
+                settings.LOV_CACHE_TIMEOUT
+                )
+            data = cache.get(cache_name)
+            return Response(data)
+        else:
+            if not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
+                cache.set('application_internal_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+                cache.set('application_external_statuses_dict', [{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+            data['external_statuses'] = cache.get('application_external_statuses_dict')
+            data['internal_statuses'] = cache.get('application_internal_statuses_dict')
+            return Response(data)
 
 class GetProposalType(views.APIView):
     renderer_classes = [JSONRenderer, ]
@@ -230,8 +255,10 @@ class ProposalFilterBackend(DatatablesFilterBackend):
 
         if queryset.model is Proposal:
             if filter_lodged_from:
+                filter_lodged_from = datetime.strptime(filter_lodged_from, '%d/%m/%Y')
                 queryset = queryset.filter(lodgement_date__gte=filter_lodged_from)
             if filter_lodged_to:
+                filter_lodged_to = datetime.strptime(filter_lodged_to, '%d/%m/%Y')
                 queryset = queryset.filter(lodgement_date__lte=filter_lodged_to)
             if filter_application_type:
                 application_type = ApplicationType.get_application_type_by_name(filter_application_type)
@@ -549,12 +576,10 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def internal_serializer_class(self):
         try:
             application_type = Proposal.objects.get(id=self.kwargs.get('id')).application_type.name
-            if application_type == ApplicationType.TCLASS:
+            if application_type == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
                 return InternalProposalSerializer
-            elif application_type == ApplicationType.FILMING:
-                return InternalFilmingProposalSerializer
-            elif application_type == ApplicationType.EVENT:
-                return InternalEventProposalSerializer
+            elif application_type == APPLICATION_TYPE_LEASE_LICENCE:
+                return InternalProposalSerializer
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -594,6 +619,127 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['POST'], detail=True)
     @renderer_classes((JSONRenderer,))
     @basic_exception_handler
+    def process_legislative_requirements_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='legislative_requirements_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_risk_factors_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='risk_factors_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_key_milestones_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='key_milestones_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_key_personnel_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='key_personnel_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_staffing_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='staffing_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_market_analysis_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='market_analysis_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_available_activities_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='available_activities_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_financial_capacity_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='financial_capacity_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_capital_investment_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='capital_investment_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_cash_flow_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='cash_flow_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_profit_and_loss_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type='profit_and_loss_document')
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
     def process_deed_poll_document(self, request, *args, **kwargs):
         instance = self.get_object()
         returned_data = process_generic_document(request, instance, document_type='deed_poll_document')
@@ -607,7 +753,161 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def process_supporting_document(self, request, *args, **kwargs):
         instance = self.get_object()
-        returned_data = process_generic_document(request, instance)
+        returned_data = process_generic_document(request, instance, document_type="supporting_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_exclusive_use_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="exclusive_use_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_long_term_use_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="long_term_use_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_consistent_purpose_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="consistent_purpose_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_consistent_plan_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="consistent_plan_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_clearing_vegetation_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="clearing_vegetation_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_ground_disturbing_works_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="ground_disturbing_works_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_heritage_site_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="heritage_site_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_environmentally_sensitive_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="environmentally_sensitive_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_wetlands_impact_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="wetlands_impact_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_building_required_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="building_required_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_significant_change_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="significant_change_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_aboriginal_site_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="aboriginal_site_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_native_title_consultation_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="native_title_consultation_document")
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=['POST'], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_mining_tenement_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(request, instance, document_type="mining_tenement_document")
         if returned_data:
             return Response(returned_data)
         else:
@@ -765,7 +1065,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
                 instance.save(version_comment='QA Officer File Added: {}'.format(filename)) # to allow revision to be added to reversion history
                 #instance.current_proposal.save(version_comment='File Added: {}'.format(filename)) # to allow revision to be added to reversion history
 
-            return  Response( [dict(input_name=d.input_name, name=d.name,file=d._file.url, id=d.id, can_delete=d.can_delete) for d in instance.qaofficer_documents.filter(input_name=section, visible=True) if d._file] )
+            return Response( [dict(input_name=d.input_name, name=d.name,file=d._file.url, id=d.id, can_delete=d.can_delete) for d in instance.qaofficer_documents.filter(input_name=section, visible=True) if d._file] )
 
         except serializers.ValidationError:
             print(traceback.print_exc())
@@ -782,6 +1082,12 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         proposals = self.get_queryset()
+
+        statuses = list(map(lambda x: x[0], Proposal.PROCESSING_STATUS_CHOICES))
+        status = request.query_params.get('status', '')
+        if status in statuses:
+            # status passed as a parameter exists as a stataus
+            proposals = proposals.filter(Q(processing_status=status))
         serializer = ListProposalMinimalSerializer(proposals, context={'request': request}, many=True)
         return Response(serializer.data)
 
@@ -1004,13 +1310,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['GET',], detail=True)
     def internal_proposal(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = InternalProposalSerializer(instance,context={'request':request})
-        if instance.application_type.name==ApplicationType.TCLASS:
-            serializer = InternalProposalSerializer(instance,context={'request':request})
-        elif instance.application_type.name==ApplicationType.FILMING:
-            serializer = InternalFilmingProposalSerializer(instance,context={'request':request})
-        elif instance.application_type.name==ApplicationType.EVENT:
-            serializer = InternalEventProposalSerializer(instance,context={'request':request})
+        serializer = InternalProposalSerializer(instance, context={'request': request})
         return Response(serializer.data)
 
 
@@ -1018,13 +1318,14 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @renderer_classes((JSONRenderer,))
     def submit(self, request, *args, **kwargs):
         try:
-            instance = self.get_object()
-            #instance.submit(request,self)
-            proposal_submit(instance, request)
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-            #return redirect(reverse('external'))
+            with transaction.atomic():
+                instance = self.get_object()
+                save_proponent_data(instance,request,self)
+                #return redirect(reverse('external'))
+                proposal_submit(instance, request)
+                instance.save()
+                serializer = self.get_serializer(instance)
+                return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -1113,7 +1414,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
             if not status:
                 raise serializers.ValidationError('Status is required')
             else:
-                if not status in ['with_assessor','with_assessor_requirements','with_approver']:
+                if not status in ['with_assessor','with_assessor_conditions','with_approver']:
                     raise serializers.ValidationError('The status provided is not allowed')
             instance.move_to_status(request,status, approver_comment)
             #serializer = InternalProposalSerializer(instance,context={'request':request})
@@ -1482,7 +1783,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
                 proposal_type = ProposalType.objects.get(code='new')
 
                 data = {
-                    'submitter': request.user.id,
                     'org_applicant': request.data.get('org_applicant'),
                     'ind_applicant': request.user.id if not request.data.get('org_applicant') else None,  # if no org_applicant, assume this application is for individual.
                     'application_type_id': application_type.id,

@@ -1,7 +1,8 @@
 from django import forms
-from django.core.exceptions import ValidationError
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser
-from leaseslicensing.components.proposals.models import ProposalAssessorGroup,ProposalApproverGroup, HelpPage
+from django.db import models
+from django.forms import Textarea
+from django.utils.safestring import mark_safe
+from leaseslicensing.components.proposals.models import HelpPage, SectionChecklistQuestions
 from leaseslicensing.components.main.models import SystemMaintenance
 from ckeditor.widgets import CKEditorWidget
 from django.conf import settings
@@ -9,61 +10,50 @@ import pytz
 from datetime import datetime, timedelta
 
 
-class ProposalAssessorGroupAdminForm(forms.ModelForm):
-    class Meta:
-        model = ProposalAssessorGroup
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super(ProposalAssessorGroupAdminForm, self).__init__(*args, **kwargs)
-        if self.instance:
-            #self.fields['members'].queryset = EmailUser.objects.filter(email__icontains='@dbca.wa.gov.au')
-            self.fields['members'].queryset = EmailUser.objects.filter(is_staff=True)
-
-    def clean(self):
-        super(ProposalAssessorGroupAdminForm, self).clean()
-        if self.instance and ProposalAssessorGroup.objects.all().exists():
-            try:
-                original_members = ProposalAssessorGroup.objects.get(id=self.instance.id).members.all()
-                current_members = self.cleaned_data.get('members')
-                for o in original_members:
-                    if o not in current_members:
-                        if self.instance.member_is_assigned(o):
-                            raise ValidationError('{} is currently assigned to a proposal(s)'.format(o.email))
-            except:
-                pass
-
-
-class ProposalApproverGroupAdminForm(forms.ModelForm):
-    class Meta:
-        model = ProposalApproverGroup
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super(ProposalApproverGroupAdminForm, self).__init__(*args, **kwargs)
-        if self.instance:
-            #self.fields['members'].queryset = EmailUser.objects.filter(email__icontains='@dbca.wa.gov.au')
-            self.fields['members'].queryset = EmailUser.objects.filter(is_staff=True)
-
-    def clean(self):
-        super(ProposalApproverGroupAdminForm, self).clean()
-        if self.instance:
-            try:
-                original_members = ProposalApproverGroup.objects.get(id=self.instance.id).members.all()
-                current_members = self.cleaned_data.get('members')
-                for o in original_members:
-                    if o not in current_members:
-                        if self.instance.member_is_assigned(o):
-                            raise ValidationError('{} is currently assigned to a proposal(s)'.format(o.email))
-            except:
-                pass
-
-
 class LeasesLicensingHelpPageAdminForm(forms.ModelForm):
     content = forms.CharField(widget=CKEditorWidget())
+
     class Meta:
         model = HelpPage
         fields = '__all__'
+
+
+class SectionChecklistQuestionsForm(forms.ModelForm):
+    class Meta:
+        model = SectionChecklistQuestions
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super(SectionChecklistQuestionsForm, self).clean()
+        if cleaned_data['enabled'] is False:
+            # We don't mind any disabled record
+            return cleaned_data
+        if len(self.changed_data) == 1 and self.changed_data[0] == 'enabled' and cleaned_data['enabled'] is False:
+            # When change is only setting 'enabled' field to False, no validation required
+            return cleaned_data
+
+        cleaned_application_type = cleaned_data.get('application_type', None)
+        cleaned_section = cleaned_data.get('section', None)
+        cleaned_list_type = cleaned_data.get('list_type', None)
+        cleaned_enabled = cleaned_data.get('enabled', None)
+
+        # Check if there is alreay a set of questions for the section
+        existings = SectionChecklistQuestions.objects.filter(
+            application_type=cleaned_application_type,
+            section=cleaned_section,
+            list_type=cleaned_list_type,
+            enabled=True,
+        ).exclude(id=self.instance.id)
+
+        if existings:
+            existing = existings.first()
+            raise forms.ValidationError([
+                mark_safe('There is already an enabled \'Section Questions\' for the Application Type:{}, Section:{} and Checklist type:{}').format(
+                    existing.application_type.get_name_display(),
+                    existing.get_section_display(),
+                    existing.get_list_type_display(),
+                ),
+                'You can create new one after making the existing \'Section Questions\' disabled.'])
 
 
 class SystemMaintenanceAdminForm(forms.ModelForm):
