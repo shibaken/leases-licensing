@@ -1,5 +1,5 @@
 <template lang="html">
-    <div class="accordion" :id="custom_id">
+    <!--div class="accordion" :id="custom_id">
       <div class="accordion-item">
         <div class="accordion-header" :id="section_header_id">
           <h2 class="mb-0">
@@ -14,6 +14,22 @@
           </div>
         </div>
       </div>
+    </div-->
+    <div class="card section-wrapper" :id="custom_id">
+        <div class="card-header fw-bold h4" style='padding:30px;'>
+            <div class='row'>
+                <div class='col-6'>
+                    {{ label }}
+                </div>
+                <div class='col-6 text-end'>
+                    <i class="bi fw-bold down-chevron-close chevron-toggle" :data-bs-target="'#' +section_body_id"></i>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" :id='section_body_id' >
+            <!--div id="ledger_ui_contact_details"></div-->
+            <slot></slot>
+        </div>
     </div>
 </template>
 
@@ -73,6 +89,7 @@ export default {
         */
     },
     mounted: function() {
+        console.log("mounted");
         /*
         let vm = this;
         $('#' + vm.custom_id).on('click',function () {
@@ -83,27 +100,14 @@ export default {
         });
         */
     },
+    created: function() {
+    },
 }
 </script>
+<style scoped>
 
-<style lang="css">
-    h3.panel-title{
-        font-weight: bold;
-        font-size: 25px;
-        padding:20px;
-    }
-    .flex-container {
-        display: flex;
-        flex-direction: column;
-        min-height: 325px;
-    }
-    .subtitle {
-        font-size: 0.6em;
-    }
-    .rotate_icon {
-        transition: 0.5s;
-    }
-    .chev_rotated {
-        transform: rotate(180deg);
-    }
+.section-wrapper {
+    margin-bottom: 20px;
+}
+
 </style>

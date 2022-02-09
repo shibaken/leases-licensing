@@ -92,6 +92,8 @@ export default {
     methods: {
     },
     mounted: function () {
+        // must be at top level of every page with <FormSection> component
+        chevron_toggle.init();
 
     },
     created: function() {
@@ -99,3 +101,7 @@ export default {
     },
 }
 </script>
+<style>
+
+
+</style>
