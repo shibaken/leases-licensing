@@ -133,7 +133,6 @@ export default {
         top:56px;
     }
     .nav-item {
-        background-color: rgb(200,200,200,0.8) !important;
         margin-bottom: 2px;
     }
     .nav-item>li>a {

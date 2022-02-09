@@ -4,13 +4,10 @@ import Vue from 'vue'
 import resource from 'vue-resource'
 import App from './App'
 import router from './router'
-//import bs from 'bootstrap'
 import helpers from '@/utils/helpers'
 import hooks from './packages'
 import api_endpoints from './api'
-//require('../node_modules/bootstrap/dist/css/bootstrap.css' );
-//require('../node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css')
-//require('../node_modules/font-awesome/css/font-awesome.min.css' )
+//import("./scss/custom.scss");
 
 Vue.config.devtools = true;
 Vue.config.productionTip = false

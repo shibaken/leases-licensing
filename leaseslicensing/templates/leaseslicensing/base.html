@@ -17,9 +17,16 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
     <body>
         {% block header_top_menu %}
+        {% endblock %}
+        {% block extra_css %}
+            fcxgh
+            <style>
+                .btn-primary {
+                    background-color: red;
+                }
+            </style>
         {% endblock %}
         {% block custom_js %}
             {% if not dev %}
@@ -43,3 +50,5 @@
         {% endblock %}
     </body>
 </html>
+
+
