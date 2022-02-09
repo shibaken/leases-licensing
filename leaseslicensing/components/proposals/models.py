@@ -1366,23 +1366,23 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 for checklist_question in section_checklist.questions.filter(enabled=True):
                     answer = ProposalAssessmentAnswer.objects.create(proposal_assessment=proposal_assessment, checklist_question=checklist_question)
 
-    def make_referral_questions_ready(self):
-        """
-        Create referral checklist questions
-        Assessment instance already exits then skip.
-        """
-        try:
-            assessor_assessment = ProposalAssessment.objects.get(proposal=self, referral=None)
-        except ProposalAssessment.DoesNotExist:
-            assessor_assessment = ProposalAssessment.objects.create(proposal=self)
-            section_checklists = SectionChecklist.objects.filter(
-                application_type=self.application_type, list_type=SectionChecklist.LIST_TYPE_ASSESSOR, enabled=True
-            )
-            for section_checklist in section_checklists:
-                for checklist_question in section_checklist.questions.filter(enabled=True):
-                    answer = ProposalAssessmentAnswer.objects.create(
-                        proposal_assessment=assessor_assessment, question=checklist_question
-                        )
+    #def make_referral_questions_ready(self):
+    #    """
+    #    Create referral checklist questions
+    #    Assessment instance already exits then skip.
+    #    """
+    #    try:
+    #        assessor_assessment = ProposalAssessment.objects.get(proposal=self, referral=None)
+    #    except ProposalAssessment.DoesNotExist:
+    #        assessor_assessment = ProposalAssessment.objects.create(proposal=self)
+    #        section_checklists = SectionChecklist.objects.filter(
+    #            application_type=self.application_type, list_type=SectionChecklist.LIST_TYPE_ASSESSOR, enabled=True
+    #        )
+    #        for section_checklist in section_checklists:
+    #            for checklist_question in section_checklist.questions.filter(enabled=True):
+    #                answer = ProposalAssessmentAnswer.objects.create(
+    #                    proposal_assessment=assessor_assessment, question=checklist_question
+    #                    )
 
     def update(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
@@ -1401,7 +1401,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 if self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR or self.processing_status == Proposal.PROCESSING_STATUS_WITH_REFERRAL:
                     self.processing_status = Proposal.PROCESSING_STATUS_WITH_REFERRAL
                     self.save()
-                    referral = None
 
                     # Check if the user is in ledger
                     try:
@@ -1420,6 +1419,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
                             user.first_name = department_user['given_name']
                             user.last_name = department_user['surname']
                             user.save()
+
+                    referral = None
                     try:
                         referral = Referral.objects.get(referral=user.id, proposal=self)
                         raise ValidationError('A referral has already been sent to this user')
@@ -1432,6 +1433,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                             text=referral_text,
                             assigned_officer=request.user.id
                         )
+                        # Create answers for this referral
+                        self.make_questions_ready(referral)
+
                     # Create a log entry for the proposal
                     self.log_user_action(
                         ProposalUserAction.ACTION_SEND_REFERRAL_TO.format(
