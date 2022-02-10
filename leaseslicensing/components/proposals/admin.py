@@ -82,10 +82,12 @@ class ChecklistQuestionInline(admin.TabularInline):
     formfield_overrides = {
         TextField: {'widget': Textarea(attrs={'rows': 3, 'cols': 60})},
     }
+    fields = ['text', 'answer_type', 'enabled', 'shown_to_others', 'order',]
+
 
 @admin.register(models.SectionChecklist)
 class SectionChecklistAdmin(admin.ModelAdmin):
-    list_display = ['application_type_name', 'section_name', 'list_type_name', 'enabled', 'number_of_questions']
+    list_display = ['list_type_name', 'application_type_name', 'section_name', 'enabled', 'number_of_questions']
     list_filter = ['application_type', 'section', 'list_type', 'enabled',]
     inlines = [ChecklistQuestionInline,]
     form = SectionChecklistForm

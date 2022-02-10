@@ -3158,11 +3158,12 @@ class ChecklistQuestion(RevisionedMixin):
         ('yes_no', 'Yes/No type'),
         ('free_text', 'Free text type')
     )
-    text = models.TextField()
+    text = models.TextField()  # This is question text
     answer_type = models.CharField('Answer type', max_length=30, choices=ANSWER_TYPE_CHOICES, default=ANSWER_TYPE_CHOICES[0][0])
     enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=1)
     section_checklist = models.ForeignKey(SectionChecklist, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
+    shown_to_others = models.BooleanField('Comment', default=False, help_text='When checked, question is shown to others')  # When True, this QA is shown to other parties.  Of course not editable, though.
 
     def __str__(self):
         return self.text
@@ -3199,6 +3200,10 @@ class ProposalAssessmentAnswer(RevisionedMixin):
 
     def __str__(self):
         return self.checklist_question.text
+
+    @property
+    def shown_to_others(self):
+        return self.checklist_question.shown_to_others
 
     class Meta:
         app_label = 'leaseslicensing'
