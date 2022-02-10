@@ -160,6 +160,15 @@ class ApplicationType(models.Model):
     def name_display(self):
         return self.get_name_display()
 
+    @property
+    def confirmation_text(self):
+        text = ''
+        if self.name == 'registration_of_interest':
+            text = 'registration of interest'
+        if self.name == 'lease_licence':
+            text = 'lease or licence'
+        return text
+
     def __str__(self):
         return self.name
 
