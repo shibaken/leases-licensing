@@ -72,7 +72,6 @@ class ProposalTypeSerializer(serializers.ModelSerializer):
             'description',
         )
 
-
     def get_activities(self,obj):
         return obj.activities.names()
 
@@ -212,16 +211,16 @@ class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
         )
 
     def get_accessing_user_can_answer(self, answer):
-        accessing_user_can_answer = self.context.get('accessing_user_can_answer', False)
+        accessing_user_can_answer = self.context.get('assessment_answerable_by_accessing_user_now', False)
         return accessing_user_can_answer
 
     def get_accessing_user_can_view(self, answer):
-        accessing_user_can_answer = self.context.get('accessing_user_can_answer', False)
-        if accessing_user_can_answer:
-            # This QA is for the accessing user.  Of course, this QA is shown to the person.
+        assessment_belongs_to_accessing_user = self.context.get('assessment_belongs_to_accessing_user', False)
+        if assessment_belongs_to_accessing_user:
+            # this assessment is for the accessing user. Therefore, the user should be able to see QAs anyway.
             return True
         else:
-            # This QA is not for the accessing user.
+            # this assessment is not for the accessing user. Show/Hide questions according to the configurations
             if answer.shown_to_others:
                 return True
             else:
@@ -262,22 +261,34 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
         ret_dict = {}
         request = self.context.get('request')
 
-        accessing_user_can_answer = False
+        assessment_belongs_to_accessing_user = False
+        assessment_answerable_by_accessing_user_now = False
         if proposal_assessment.referral:
             # This assessment is for referrals
-            if proposal_assessment.referral.referral == request.user.id:
-                accessing_user_can_answer = True
+            if request.user.is_authenticated and proposal_assessment.referral.referral == request.user.id:
+                # This assessment is for the accessing user
+                assessment_belongs_to_accessing_user = True
+                if proposal_assessment.proposal.processing_status == Proposal.PROCESSING_STATUS_WITH_REFERRAL:
+                    # When the proposal is in 'with_referral' status, the user can answer
+                    assessment_answerable_by_accessing_user_now = True
         else:
             # This assessment is for assessors
             if request.user.is_authenticated and is_assessor(request.user.id):
-                accessing_user_can_answer = True
+                # This assessment is for the accessing user
+                assessment_belongs_to_accessing_user = True
+                if proposal_assessment.proposal.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR:
+                    # When the proposal is in 'with_assessor' status, the user can answer
+                    assessment_answerable_by_accessing_user_now = True
 
         # Retrieve all the SectionChecklist objects used for this ProposalAssessment
         section_checklists_used = SectionChecklist.objects.filter(id__in=(proposal_assessment.answers.values_list('checklist_question__section_checklist', flat=True).distinct()))
         for section_checklist in section_checklists_used:
             # Retrieve all the answers for this section_checklist
             answers = proposal_assessment.answers.filter(checklist_question__section_checklist=section_checklist).order_by('checklist_question__order')
-            ret_dict[section_checklist.section] = ProposalAssessmentAnswerSerializer(answers, context={'accessing_user_can_answer': accessing_user_can_answer}, many=True).data
+            ret_dict[section_checklist.section] = ProposalAssessmentAnswerSerializer(answers, context={
+                'assessment_answerable_by_accessing_user_now': assessment_answerable_by_accessing_user_now,
+                'assessment_belongs_to_accessing_user': assessment_belongs_to_accessing_user,
+            }, many=True).data
 
         return ret_dict
 

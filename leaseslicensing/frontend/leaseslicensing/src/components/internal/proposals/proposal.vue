@@ -79,7 +79,7 @@
                                     <template v-if="question.accessing_user_can_view">
                                         <div class="row form-group">
                                             <div class="col-md-3">
-                                                <label for="deficiency_comments_textarea">{{ question.checklist_question.text }}</label>
+                                                <label for="">{{ question.checklist_question.text }}</label>
                                             </div>
                                             <div class="col-md-9">
                                                 <template v-if="question.checklist_question.answer_type=='free_text'">
@@ -106,7 +106,7 @@
                                         <template v-if="question.accessing_user_can_view">
                                             <div class="row form-group">
                                                 <div class="col-md-3">
-                                                    <label for="deficiency_comments_textarea">{{ question.checklist_question.text }}</label>
+                                                    <label for="">{{ question.checklist_question.text }}</label>
                                                 </div>
                                                 <div class="col-md-9">
                                                     <template v-if="question.checklist_question.answer_type=='free_text'">
