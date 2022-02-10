@@ -97,6 +97,7 @@
                                 </template>
 
                                 <template v-for="assessment in assessments_for_referrals_map"> <!-- There can be multiple referral assessments -->
+                                    <hr />
                                     <template v-for="question in assessment"> <!-- per question -->
                                         <div class="row form-group">
                                             <div class="col-md-3">
@@ -934,5 +935,8 @@ export default {
 <style scoped>
 .free_text_area {
     resize: vertical;
+}
+hr {
+    border-top: 2px solid #888;
 }
 </style>
