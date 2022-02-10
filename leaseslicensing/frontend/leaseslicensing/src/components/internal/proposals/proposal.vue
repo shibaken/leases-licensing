@@ -75,7 +75,7 @@
                                 <template v-if="assessment_for_assessor_map.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
-                                <template v-for="(question, index) in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
+                                <template v-for="question in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
                                     <template v-if="question.accessing_user_can_view">
                                         <div class="row form-group">
                                             <div class="col-md-3">

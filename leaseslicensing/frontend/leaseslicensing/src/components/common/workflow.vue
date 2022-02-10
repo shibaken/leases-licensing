@@ -633,6 +633,83 @@ export default {
                 }
             )  // END 1st vm.$http.post
         },
+        remindReferral:function(r){
+            let vm = this;
+
+            console.log('1')
+            console.log(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/remind'))
+
+            vm.$http.get(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/remind')).then(response => {
+                vm.original_proposal = helpers.copyObject(response.body);
+                vm.proposal = response.body;
+                vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
+                swal(
+                    'Referral Reminder',
+                    'A reminder has been sent to '+r.referral,
+                    'success'
+                )
+            },
+            error => {
+                swal(
+                    'Proposal Error',
+                    helpers.apiVueResourceError(error),
+                    'error'
+                )
+            });
+        },
+        resendReferral:function(r){
+            let vm = this;
+
+            vm.$http.get(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/resend')).then(response => {
+                vm.original_proposal = helpers.copyObject(response.body);
+                vm.proposal = response.body;
+                vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
+                swal(
+                    'Referral Resent',
+                    'The referral has been resent to '+r.referral,
+                    'success'
+                )
+            },
+            error => {
+                swal(
+                    'Proposal Error',
+                    helpers.apiVueResourceError(error),
+                    'error'
+                )
+            });
+        },
+        recallReferral:function(r){
+            let vm = this;
+            swal({
+                    title: "Loading...",
+                    //text: "Loading...",
+                    allowOutsideClick: false,
+                    allowEscapeKey:false,
+                    onOpen: () =>{
+                        swal.showLoading()
+                    }
+            })
+
+            vm.$http.get(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/recall')).then(response => {
+                swal.hideLoading();
+                swal.close();
+                vm.original_proposal = helpers.copyObject(response.body);
+                vm.proposal = response.body;
+                vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
+                swal(
+                    'Referral Recall',
+                    'The referall has been recalled from '+r.referral,
+                    'success'
+                )
+            },
+            error => {
+                swal(
+                    'Proposal Error',
+                    helpers.apiVueResourceError(error),
+                    'error'
+                )
+            });
+        },
         assignRequestUser: function(){
             this.$emit('assignRequestUser')
         },
