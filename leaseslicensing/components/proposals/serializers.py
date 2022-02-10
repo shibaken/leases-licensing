@@ -228,9 +228,24 @@ class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
                 return False
 
 
+class ReferralSimpleSerializer(serializers.ModelSerializer):
+    referral = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Referral
+        fields = (
+            'id',
+            'referral',
+        )
+
+    def get_referral(self, obj):
+        email_user = retrieve_email_user(obj.referral)
+        return EmailUserSerializer(email_user).data
+
 
 class ProposalAssessmentSerializer(serializers.ModelSerializer):
     section_answers = serializers.SerializerMethodField()
+    referral = ReferralSimpleSerializer()
 
     class Meta:
         model = ProposalAssessment
@@ -1053,12 +1068,13 @@ class ReferralProposalSerializer(InternalProposalSerializer):
             'assessor_box_view': obj.assessor_comments_view(user)
         }
 
+
 class ReferralSerializer(serializers.ModelSerializer):
     processing_status = serializers.CharField(source='get_processing_status_display')
     latest_referrals = ProposalReferralSerializer(many=True)
     can_be_completed = serializers.BooleanField()
     can_process=serializers.SerializerMethodField()
-    referral_assessment=ProposalAssessmentSerializer(read_only=True)
+    referral_assessment = ProposalAssessmentSerializer(read_only=True)
     application_type=serializers.CharField(read_only=True)
     allowed_assessors = EmailUserSerializer(many=True)
     current_assessor = serializers.SerializerMethodField()

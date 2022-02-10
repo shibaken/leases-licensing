@@ -72,8 +72,10 @@
                         <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
                         <template v-slot:slot_map_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_map_checklist_questions" @created="collapsible_map_checklist_questions_component_mounted">
-
-                                <template v-for="question in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
+                                <template v-if="assessment_for_assessor_map.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="(question, index) in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
                                     <template v-if="question.accessing_user_can_view">
                                         <div class="row form-group">
                                             <div class="col-md-3">
@@ -99,8 +101,8 @@
                                 </template>
 
                                 <template v-for="assessment in assessments_for_referrals_map"> <!-- There can be multiple referral assessments -->
-                                    <hr />
-                                    <template v-for="question in assessment"> <!-- per question -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
                                         <template v-if="question.accessing_user_can_view">
                                             <div class="row form-group">
                                                 <div class="col-md-3">
@@ -331,11 +333,15 @@ export default {
         },
         assessments_for_referrals_map: function(){
             try {
-                let ret_array = []
+                let assessments = []
                 for (let assessment of this.proposal.referral_assessments){
-                    ret_array.push(assessment.section_answers.map)
+                    let my_assessment = {
+                        'referral_fullname': assessment.referral.referral.fullname, 
+                        'answers': assessment.section_answers.map
+                    }
+                    assessments.push(my_assessment)
                 }
-                return ret_array
+                return assessments
             } catch (err) {
                 return []
             }
@@ -940,7 +946,14 @@ export default {
 .free_text_area {
     resize: vertical;
 }
-hr {
+.horizontal_rule {
+    margin: 15px 0 10px 0;
     border-top: 2px solid #888;
+}
+.assessment_title {
+    margin: 20px 0 10px 0;
+    border-bottom: 1px solid #888;
+    font-weight: bold;
+    font-size: 1.3em;
 }
 </style>
