@@ -90,13 +90,37 @@
 
                         <template v-slot:slot_proposal_details_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_proposal_details_checklist_questions" @created="collapsible_proposal_details_checklist_questions_component_mounted">
-                                Questions proposal details here
+                                <template v-if="assessment_for_assessor_proposal_details.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_proposal_details">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_proposal_details"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
                         <template v-slot:slot_proposal_impact_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_proposal_impact_checklist_questions" @created="collapsible_proposal_impact_checklist_questions_component_mounted">
-                                Questions proposal impact here
+                                <template v-if="assessment_for_assessor_proposal_impact.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_proposal_impact">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_proposal_impact"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
@@ -285,7 +309,24 @@ export default {
     computed: {
         assessment_for_assessor_map: function(){
             try {
-                return this.proposal.assessor_assessment.section_answers.map
+                let answers = this.proposal.assessor_assessment.section_answers.map // This may return undefined
+                return answers ? answers : []  // Check if it's undefined
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_proposal_details: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.proposal_details
+                return answers ? answers : []
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_proposal_impact: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.proposal_impact
+                return answers ? answers : []
             } catch (err) {
                 return []
             }
@@ -294,11 +335,47 @@ export default {
             try {
                 let assessments = []
                 for (let assessment of this.proposal.referral_assessments){
-                    let my_assessment = {
-                        'referral_fullname': assessment.referral.referral.fullname, 
-                        'answers': assessment.section_answers.map
+                    if (assessment.section_answers.map){  // Check if this is undefined
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.map
+                        }
+                        assessments.push(my_assessment)
                     }
-                    assessments.push(my_assessment)
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_proposal_details: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.proposal_details){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.proposal_details
+                        }
+                        assessments.push(my_assessment)
+                    }
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_proposal_impact: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.proposal_impact){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.proposal_impact
+                        }
+                        assessments.push(my_assessment)
+                    }
                 }
                 return assessments
             } catch (err) {
