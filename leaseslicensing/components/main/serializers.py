@@ -35,6 +35,7 @@ class CommunicationLogEntrySerializer(serializers.ModelSerializer):
 
 class ApplicationTypeSerializer(serializers.ModelSerializer):
     name_display = serializers.SerializerMethodField()
+    confirmation_text = serializers.SerializerMethodField()
     #regions = RegionSerializer(many=True)
     #activity_app_types = ActivitySerializer(many=True)
     #tenure_app_types = TenureSerializer(many=True)
@@ -44,10 +45,13 @@ class ApplicationTypeSerializer(serializers.ModelSerializer):
         #fields = ('id', 'name', 'activity_app_types', 'tenure_app_types')
         #fields = ('id', 'name', 'tenure_app_types')
         fields = '__all__'
-        extra_fields = ['name_display']
+        extra_fields = ['name_display', 'confirmation_text']
 
     def get_name_display(self, obj):
-        return obj.get_name_display()
+        return obj.name_display
+
+    def get_confirmation_text(self, obj):
+        return obj.confirmation_text
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
