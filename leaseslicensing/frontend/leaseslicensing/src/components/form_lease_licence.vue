@@ -247,6 +247,36 @@
         </div>
         <div class="col-sm-12 inline-details-text">
             <div class="col-sm-3 question-title">
+                <label for="key_milestones_text" class="control-label pull-left">Provide details regarding key milestones</label>
+            </div>
+            <div class="col-sm-8 question-title">
+                <RichText
+                :proposalData="proposal.key_milestones_text"
+                ref="key_milestones_text"
+                id="key_milestones_text"
+                :readonly="readonly" 
+                :can_view_richtext_src=true
+                v-bind:key="proposal.id"
+                />
+            </div>
+            <div class="col-sm-3 question-title">
+                <label for="key_milestones_documents">Attach any supporting documents</label>
+            </div>
+            <div class="col-sm-9 question-title">
+                <FileField 
+                    :readonly="readonly"
+                    ref="key_milestones_documents"
+                    name="key_milestones_documents"
+                    id="key_milestones_documents"
+                    :isRepeatable="true"
+                    :documentActionUrl="keyMilestonesDocumentsUrl"
+                    :replace_button_by_text="true"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-12 inline-details-text">
+            <div class="col-sm-3 question-title">
                 <label for="risk_factors_text" class="control-label pull-left">Identify specific risk factors and likely impacts to allow consideration of options.  Include how key risks will be avoided, reduced, managed or mitigated.  (Note the management of risk should inform the integrated profit and loss and cash flow projections).</label>
             </div>
             <div class="col-sm-8 question-title">

@@ -398,6 +398,7 @@ export default {
             payload.proposal.market_analysis_text = this.$refs.application_form.$refs.lease_licence.$refs.market_analysis_text.detailsText;
             payload.proposal.staffing_text = this.$refs.application_form.$refs.lease_licence.$refs.staffing_text.detailsText;
             payload.proposal.key_personnel_text = this.$refs.application_form.$refs.lease_licence.$refs.key_personnel_text.detailsText;
+            payload.proposal.key_milestones_text = this.$refs.application_form.$refs.lease_licence.$refs.key_milestones_text.detailsText;
             payload.proposal.risk_factors_text = this.$refs.application_form.$refs.lease_licence.$refs.risk_factors_text.detailsText;
             payload.proposal.legislative_requirements_text = this.$refs.application_form.$refs.lease_licence.$refs.legislative_requirements_text.detailsText;
         }
