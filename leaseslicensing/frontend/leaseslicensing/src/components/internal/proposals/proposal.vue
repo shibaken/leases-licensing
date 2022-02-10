@@ -309,8 +309,8 @@ export default {
     computed: {
         assessment_for_assessor_map: function(){
             try {
-                let answers = this.proposal.assessor_assessment.section_answers.map
-                return answers ? answers : []
+                let answers = this.proposal.assessor_assessment.section_answers.map // This may return undefined
+                return answers ? answers : []  // Check if it's undefined
             } catch (err) {
                 return []
             }
@@ -335,7 +335,7 @@ export default {
             try {
                 let assessments = []
                 for (let assessment of this.proposal.referral_assessments){
-                    if (assessment.section_answers.map){
+                    if (assessment.section_answers.map){  // Check if this is undefined
                         let my_assessment = {
                             'referral_fullname': assessment.referral.referral.fullname, 
                             'answers': assessment.section_answers.map
