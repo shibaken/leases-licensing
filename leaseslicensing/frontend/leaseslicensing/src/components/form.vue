@@ -7,31 +7,32 @@
 
         <div class="">
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
+                <li class="nav-item" role="presentation">
+                    <!--a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true"-->
+                    <button class="nav-link active" id="pills-applicant-tab" data-bs-toggle="pill" data-bs-target="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
                       Applicant
-                    </a>
+                    </button>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-map-tab" data-bs-toggle="pill" data-bs-target="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
                       Map
-                    </a>
+                    </button>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="pills-details-tab" data-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-details-tab" data-bs-toggle="pill" data-bs-target="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
                       Details
-                    </a>
+                    </button>
                 </li>
 
                 <!-- Related Items tab is shown on the internal proposal page -->
-                <template v-if="show_related_items_tab">
+                <!--template v-if="show_related_items_tab">
                     <li class="nav-item">
                         <a class="nav-link" id="pills-related-items-tab" data-toggle="pill" href="#pills-related-items" role="tab" aria-controls="pills-related-items" aria-selected="false">Related Items </a>
                     </li>
-                </template>
+                </template-->
             </ul>
             <div class="tab-content" id="pills-tabContent">
-              <div class="tab-pane fade" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
+              <div class="tab-pane fade show active" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
                   <div v-if="is_external">
                       <Profile
                       :isApplication="true"
@@ -351,31 +352,12 @@ import Confirmation from '@/components/common/confirmation.vue'
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
             },
+            /*
             set_tabs:function(){
                 let vm = this;
 
-                /* set Applicant tab Active */
                 $('#pills-tab a[href="#pills-applicant"]').tab('show');
-                /*
-                if (vm.proposal.fee_paid) {
-                    // Online Training tab
-                    $('#pills-online-training-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
-                    $('#li-training').attr('class', 'nav-item disabled');
-                    $('#pills-online-training-tab').attr("href", "")
-                }
-
-                if (!vm.proposal.training_completed) {
-                    // Payment tab  (this is enabled after online_training is completed - in online_training.vue)
-                    $('#pills-payment-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
-                    $('#li-payment').attr('class', 'nav-item disabled');
-                }
-
-                // Confirmation tab - Always Disabled
-                $('#pills-confirm-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
-                $('#li-confirm').attr('class', 'nav-item disabled');
-                */
             },
-            /*
             eventListener: function(){
               let vm=this;
               $('a[href="#pills-activities-land"]').on('shown.bs.tab', function (e) {
@@ -389,7 +371,7 @@ import Confirmation from '@/components/common/confirmation.vue'
 
         },
         mounted: function() {
-            this.set_tabs();
+            //this.set_tabs();
             this.form = document.forms.new_proposal;
             /*
             this.$nextTick(() => {

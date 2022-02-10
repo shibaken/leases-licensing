@@ -115,6 +115,7 @@ TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'leaseslicensing', 'templates
 TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'leaseslicensing','components','organisations', 'templates'))
 TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'leaseslicensing','components','emails', 'templates'))
 TEMPLATES[0]['OPTIONS']['context_processors'].append('leaseslicensing.context_processors.leaseslicensing_url')
+
 del BOOTSTRAP3['css_url']
 #BOOTSTRAP3 = {
 #    'jquery_url': '//static.dpaw.wa.gov.au/static/libs/jquery/2.2.1/jquery.min.js',
