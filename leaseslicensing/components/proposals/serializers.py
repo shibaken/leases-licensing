@@ -72,7 +72,6 @@ class ProposalTypeSerializer(serializers.ModelSerializer):
             'description',
         )
 
-
     def get_activities(self,obj):
         return obj.activities.names()
 
@@ -198,6 +197,7 @@ class ChecklistQuestionSerializer(serializers.ModelSerializer):
 class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
     checklist_question = ChecklistQuestionSerializer(read_only=True)
     accessing_user_can_answer = serializers.SerializerMethodField()
+    accessing_user_can_view = serializers.SerializerMethodField()
 
     class Meta:
         model = ProposalAssessmentAnswer
@@ -207,15 +207,44 @@ class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
             'answer_yes_no',
             'answer_text',
             'accessing_user_can_answer',
+            'accessing_user_can_view',
         )
 
-    def get_accessing_user_can_answer(self, obj):
-        accessing_user_can_answer = self.context.get('accessing_user_can_answer', False)
+    def get_accessing_user_can_answer(self, answer):
+        accessing_user_can_answer = self.context.get('assessment_answerable_by_accessing_user_now', False)
         return accessing_user_can_answer
+
+    def get_accessing_user_can_view(self, answer):
+        assessment_belongs_to_accessing_user = self.context.get('assessment_belongs_to_accessing_user', False)
+        if assessment_belongs_to_accessing_user:
+            # this assessment is for the accessing user. Therefore, the user should be able to see QAs anyway.
+            return True
+        else:
+            # this assessment is not for the accessing user. Show/Hide questions according to the configurations
+            if answer.shown_to_others:
+                return True
+            else:
+                return False
+
+
+class ReferralSimpleSerializer(serializers.ModelSerializer):
+    referral = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Referral
+        fields = (
+            'id',
+            'referral',
+        )
+
+    def get_referral(self, obj):
+        email_user = retrieve_email_user(obj.referral)
+        return EmailUserSerializer(email_user).data
 
 
 class ProposalAssessmentSerializer(serializers.ModelSerializer):
     section_answers = serializers.SerializerMethodField()
+    referral = ReferralSimpleSerializer()
 
     class Meta:
         model = ProposalAssessment
@@ -232,22 +261,34 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
         ret_dict = {}
         request = self.context.get('request')
 
-        accessing_user_can_answer = False
+        assessment_belongs_to_accessing_user = False
+        assessment_answerable_by_accessing_user_now = False
         if proposal_assessment.referral:
             # This assessment is for referrals
-            if proposal_assessment.referral.referral == request.user.id:
-                accessing_user_can_answer = True
+            if request.user.is_authenticated and proposal_assessment.referral.referral == request.user.id:
+                # This assessment is for the accessing user
+                assessment_belongs_to_accessing_user = True
+                if proposal_assessment.proposal.processing_status == Proposal.PROCESSING_STATUS_WITH_REFERRAL:
+                    # When the proposal is in 'with_referral' status, the user can answer
+                    assessment_answerable_by_accessing_user_now = True
         else:
             # This assessment is for assessors
             if request.user.is_authenticated and is_assessor(request.user.id):
-                accessing_user_can_answer = True
+                # This assessment is for the accessing user
+                assessment_belongs_to_accessing_user = True
+                if proposal_assessment.proposal.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR:
+                    # When the proposal is in 'with_assessor' status, the user can answer
+                    assessment_answerable_by_accessing_user_now = True
 
         # Retrieve all the SectionChecklist objects used for this ProposalAssessment
         section_checklists_used = SectionChecklist.objects.filter(id__in=(proposal_assessment.answers.values_list('checklist_question__section_checklist', flat=True).distinct()))
         for section_checklist in section_checklists_used:
             # Retrieve all the answers for this section_checklist
             answers = proposal_assessment.answers.filter(checklist_question__section_checklist=section_checklist).order_by('checklist_question__order')
-            ret_dict[section_checklist.section] = ProposalAssessmentAnswerSerializer(answers, context={'accessing_user_can_answer': accessing_user_can_answer}, many=True).data
+            ret_dict[section_checklist.section] = ProposalAssessmentAnswerSerializer(answers, context={
+                'assessment_answerable_by_accessing_user_now': assessment_answerable_by_accessing_user_now,
+                'assessment_belongs_to_accessing_user': assessment_belongs_to_accessing_user,
+            }, many=True).data
 
         return ret_dict
 
@@ -1038,12 +1079,13 @@ class ReferralProposalSerializer(InternalProposalSerializer):
             'assessor_box_view': obj.assessor_comments_view(user)
         }
 
+
 class ReferralSerializer(serializers.ModelSerializer):
     processing_status = serializers.CharField(source='get_processing_status_display')
     latest_referrals = ProposalReferralSerializer(many=True)
     can_be_completed = serializers.BooleanField()
     can_process=serializers.SerializerMethodField()
-    referral_assessment=ProposalAssessmentSerializer(read_only=True)
+    referral_assessment = ProposalAssessmentSerializer(read_only=True)
     application_type=serializers.CharField(read_only=True)
     allowed_assessors = EmailUserSerializer(many=True)
     current_assessor = serializers.SerializerMethodField()
