@@ -3163,7 +3163,7 @@ class ChecklistQuestion(RevisionedMixin):
     enabled = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=1)
     section_checklist = models.ForeignKey(SectionChecklist, blank=True, null=True, related_name='questions', on_delete=models.SET_NULL)
-    shown_to_others = models.BooleanField('Comment', default=False)  # When True, this QA is shown to other parties.  Of course not editable, though.
+    shown_to_others = models.BooleanField('Comment', default=False, help_text='When checked, question is shown to others')  # When True, this QA is shown to other parties.  Of course not editable, though.
 
     def __str__(self):
         return self.text
