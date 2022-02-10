@@ -3201,6 +3201,10 @@ class ProposalAssessmentAnswer(RevisionedMixin):
     def __str__(self):
         return self.checklist_question.text
 
+    @property
+    def shown_to_others(self):
+        return self.checklist_question.shown_to_others
+
     class Meta:
         app_label = 'leaseslicensing'
         verbose_name = "Assessment answer"

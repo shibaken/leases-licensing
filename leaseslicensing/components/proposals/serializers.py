@@ -198,6 +198,7 @@ class ChecklistQuestionSerializer(serializers.ModelSerializer):
 class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
     checklist_question = ChecklistQuestionSerializer(read_only=True)
     accessing_user_can_answer = serializers.SerializerMethodField()
+    accessing_user_can_view = serializers.SerializerMethodField()
 
     class Meta:
         model = ProposalAssessmentAnswer
@@ -207,11 +208,25 @@ class ProposalAssessmentAnswerSerializer(serializers.ModelSerializer):
             'answer_yes_no',
             'answer_text',
             'accessing_user_can_answer',
+            'accessing_user_can_view',
         )
 
-    def get_accessing_user_can_answer(self, obj):
+    def get_accessing_user_can_answer(self, answer):
         accessing_user_can_answer = self.context.get('accessing_user_can_answer', False)
         return accessing_user_can_answer
+
+    def get_accessing_user_can_view(self, answer):
+        accessing_user_can_answer = self.context.get('accessing_user_can_answer', False)
+        if accessing_user_can_answer:
+            # This QA is for the accessing user.  Of course, this QA is shown to the person.
+            return True
+        else:
+            # This QA is not for the accessing user.
+            if answer.shown_to_others:
+                return True
+            else:
+                return False
+
 
 
 class ProposalAssessmentSerializer(serializers.ModelSerializer):
