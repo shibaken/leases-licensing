@@ -2816,7 +2816,9 @@ class Referral(RevisionedMixin):
                     self.proposal.log_user_action(ProposalUserAction.ACTION_REFERRAL_UNASSIGN_ASSESSOR.format(self.id, self.proposal.id),request)
                     # Create a log entry for the organisation
                     applicant_field=getattr(self.proposal, self.proposal.applicant_field)
-                    applicant_field.log_user_action(ProposalUserAction.ACTION_REFERRAL_UNASSIGN_ASSESSOR.format(self.id, self.proposal.id),request)
+                    applicant_field = retrieve_email_user(applicant_field)
+                    # TODO: implement logging
+                    # applicant_field.log_user_action(ProposalUserAction.ACTION_REFERRAL_UNASSIGN_ASSESSOR.format(self.id, self.proposal.id),request)
             except:
                 raise
 
@@ -2830,21 +2832,42 @@ class Referral(RevisionedMixin):
             self.proposal.log_user_action(ProposalUserAction.RECALL_REFERRAL.format(self.id,self.proposal.id),request)
             # TODO log organisation action
             applicant_field=getattr(self.proposal, self.proposal.applicant_field)
-            applicant_field.log_user_action(ProposalUserAction.RECALL_REFERRAL.format(self.id,self.proposal.id),request)
+            applicant_field = retrieve_email_user(applicant_field)
+            # TODO: implement logging
+            # applicant_field.log_user_action(ProposalUserAction.RECALL_REFERRAL.format(self.id,self.proposal.id),request)
 
-    def remind(self,request):
+    @property
+    def referral_as_email_user(self):
+        return retrieve_email_user(self.referral)
+
+    def remind(self, request):
         with transaction.atomic():
             if not self.proposal.can_assess(request.user):
                 raise exceptions.ProposalNotAuthorized()
             # Create a log entry for the proposal
             #self.proposal.log_user_action(ProposalUserAction.ACTION_REMIND_REFERRAL.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-            self.proposal.log_user_action(ProposalUserAction.ACTION_REMIND_REFERRAL.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+            # self.proposal.log_user_action(ProposalUserAction.ACTION_REMIND_REFERRAL.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+            self.proposal.log_user_action(
+                ProposalUserAction.ACTION_REMIND_REFERRAL.format(
+                    self.id, self.proposal.id, '{}'.format(self.referral_as_email_user.get_full_name())
+                    ), request
+                )
             # Create a log entry for the organisation
             applicant_field=getattr(self.proposal, self.proposal.applicant_field)
-            applicant_field.log_user_action(ProposalUserAction.ACTION_REMIND_REFERRAL.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+            applicant_field = retrieve_email_user(applicant_field)
+            # applicant_field.log_user_action(ProposalUserAction.ACTION_REMIND_REFERRAL.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+
+            # TODO: logging applicant_field
+            # applicant_field.log_user_action(
+            #     ProposalUserAction.ACTION_REMIND_REFERRAL.format(
+            #         self.id, self.proposal.id, '{}'.format(self.referral_as_email_user.get_full_name())
+            #         ), request
+            #     )
+
             # send email
-            recipients = self.referral_group.members_list
-            send_referral_email_notification(self,recipients,request,reminder=True)
+            # recipients = self.referral_group.members_list
+            # send_referral_email_notification(self,recipients,request,reminder=True)
+            send_referral_email_notification(self, [self.referral_as_email_user.email,], request, reminder=True)
 
     def resend(self,request):
         with transaction.atomic():
@@ -2857,22 +2880,36 @@ class Referral(RevisionedMixin):
             self.save()
             # Create a log entry for the proposal
             #self.proposal.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-            self.proposal.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+            # self.proposal.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+            self.proposal.log_user_action(
+                ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(
+                    self.id, self.proposal.id, '{}'.format(self.referral_as_email_user.get_full_name())
+                    ), request
+                )
             # Create a log entry for the organisation
             #self.proposal.applicant.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
             applicant_field=getattr(self.proposal, self.proposal.applicant_field)
-            applicant_field.log_user_action(ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+            applicant_field = retrieve_email_user(applicant_field)
+
+            # TODO: logging applicant_field
+            # applicant_field.log_user_action(
+            #     ProposalUserAction.ACTION_RESEND_REFERRAL_TO.format(
+            #         self.id, self.proposal.id, '{}'.format(self.referral_as_email_user.get_full_name())
+            #         ), request
+            #     )
+
             # send email
-            recipients = self.referral_group.members_list
-            send_referral_email_notification(self,recipients,request)
+            # recipients = self.referral_group.members_list
+            # send_referral_email_notification(self,recipients,request)
+            send_referral_email_notification(self, [self.referral_as_email_user.email,], request)
 
     def complete(self,request):
         with transaction.atomic():
             try:
                 #if request.user != self.referral:
-                group =  ReferralRecipientGroup.objects.filter(id=self.referral_group.id)
+                group = ReferralRecipientGroup.objects.filter(id=self.referral_group.id)
                 #print u.referralrecipientgroup_set.all()
-                user=request.user
+                user = request.user
                 if group and group[0] not in user.referralrecipientgroup_set.all():
                     raise exceptions.ReferralNotAuthorized()
                 self.processing_status = 'completed'
@@ -2886,7 +2923,11 @@ class Referral(RevisionedMixin):
                 # TODO log organisation action
                 #self.proposal.applicant.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
                 applicant_field=getattr(self.proposal, self.proposal.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(request.user.get_full_name(), self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+                applicant_field = retrieve_email_user(applicant_field)
+
+                # TODO: logging applicant_field
+                # applicant_field.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(request.user.get_full_name(), self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+
                 send_referral_complete_email_notification(self,request)
             except:
                 raise
