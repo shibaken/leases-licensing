@@ -184,7 +184,8 @@ export default {
        eventListeners:function () {
             let vm = this;
             // Initialise Date Picker
-
+            /*
+            // update to bs5
             $(vm.$refs.surrender_date).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.surrender_date).on('dp.change', function(e){
                 if ($(vm.$refs.surrender_date).data('DateTimePicker').date()) {
@@ -194,6 +195,7 @@ export default {
                     vm.approval.surrender_date = "";
                 }
              });
+             */
 
 
        }

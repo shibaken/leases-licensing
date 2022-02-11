@@ -7,31 +7,32 @@
 
         <div class="">
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
+                <li class="nav-item" role="presentation">
+                    <!--a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true"-->
+                    <button class="nav-link active" id="pills-applicant-tab" data-bs-toggle="pill" data-bs-target="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
                       Applicant
-                    </a>
+                    </button>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-map-tab" data-bs-toggle="pill" data-bs-target="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
                       Map
-                    </a>
+                    </button>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="pills-details-tab" data-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-details-tab" data-bs-toggle="pill" data-bs-target="#pills-details" role="tab" aria-controls="pills-details" aria-selected="false">
                       Details
-                    </a>
+                    </button>
                 </li>
 
                 <!-- Related Items tab is shown on the internal proposal page -->
-                <template v-if="show_related_items_tab">
+                <!--template v-if="show_related_items_tab">
                     <li class="nav-item">
                         <a class="nav-link" id="pills-related-items-tab" data-toggle="pill" href="#pills-related-items" role="tab" aria-controls="pills-related-items" aria-selected="false">Related Items </a>
                     </li>
-                </template>
+                </template-->
             </ul>
             <div class="tab-content" id="pills-tabContent">
-              <div class="tab-pane fade" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
+              <div class="tab-pane fade show active" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
                   <div v-if="is_external">
                       <Profile
                       :isApplication="true"
@@ -117,7 +118,6 @@
                           <p>
                               <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.
                               Please note: electronic or digital signatures cannot be accepted.</br>
-                              Please click <a href="www.google.com">here</a> to download the deed poll.</br>
                               The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
                               </strong>
                           </p>
@@ -248,23 +248,12 @@ import Confirmation from '@/components/common/confirmation.vue'
             RegistrationOfInterest,
             LeaseLicence,
             Applicant,
-            /*
-            Confirmation,
-            Vessels,
-            Mooring,
-            CurrentVessels,
-            */
             Profile,
             FormSection,
             RichText,
             FileField,
             ComponentMap,
         },
-        /*
-        watch: {
-            showPaymentTab: function () {},
-        },
-        */
         computed:{
             debug: function(){
                 if (this.$route.query.debug){
@@ -288,22 +277,6 @@ import Confirmation from '@/components/common/confirmation.vue'
                     )
             },
 
-            /*
-            showPaymentTab: function() {
-                let show = false;
-                if (this.is_external && this.proposal) {
-                    if (!this.proposal.previous_application_id) {
-                        // new application
-                        show = true;
-                    } else if (this.proposal.max_vessel_length_with_no_payment &&
-                        this.proposal.max_vessel_length_with_no_payment <= this.vesselLength) {
-                        // vessel length is in higher category
-                        show = true;
-                    }
-                }
-                return show;
-            },
-            */
             profileVar: function() {
                 if (this.is_external) {
                     return this.profile;
@@ -318,13 +291,7 @@ import Confirmation from '@/components/common/confirmation.vue'
             },
             applicationTypeText: function(){
                 let text = '';
-                /*
-                if (this.proposal && this.proposal.proposal_type && this.proposal.proposal_type.code !== 'new') {
-                    text = this.proposal.proposal_type.description;
-                }
-                */
                 if (this.proposal) {
-                    //text = this.proposal.application_type_display;
                     text = this.proposal.application_type.name_display;
                 }
                 return text;
@@ -351,55 +318,8 @@ import Confirmation from '@/components/common/confirmation.vue'
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
             },
-            set_tabs:function(){
-                let vm = this;
-
-                /* set Applicant tab Active */
-                $('#pills-tab a[href="#pills-applicant"]').tab('show');
-                /*
-                if (vm.proposal.fee_paid) {
-                    // Online Training tab
-                    $('#pills-online-training-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
-                    $('#li-training').attr('class', 'nav-item disabled');
-                    $('#pills-online-training-tab').attr("href", "")
-                }
-
-                if (!vm.proposal.training_completed) {
-                    // Payment tab  (this is enabled after online_training is completed - in online_training.vue)
-                    $('#pills-payment-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
-                    $('#li-payment').attr('class', 'nav-item disabled');
-                }
-
-                // Confirmation tab - Always Disabled
-                $('#pills-confirm-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
-                $('#li-confirm').attr('class', 'nav-item disabled');
-                */
-            },
-            /*
-            eventListener: function(){
-              let vm=this;
-              $('a[href="#pills-activities-land"]').on('shown.bs.tab', function (e) {
-                vm.$refs.activities_land.$refs.vehicles_table.$refs.vehicle_datatable.vmDataTable.columns.adjust().responsive.recalc();
-              });
-              $('a[href="#pills-activities-marine"]').on('shown.bs.tab', function (e) {
-                vm.$refs.activities_marine.$refs.vessel_table.$refs.vessel_datatable.vmDataTable.columns.adjust().responsive.recalc();
-              });
-            },
-            */
-
         },
         mounted: function() {
-            this.set_tabs();
-            this.form = document.forms.new_proposal;
-            /*
-            this.$nextTick(() => {
-                this.$refs.component_map.initMap();
-            });
-            */
-            //vm.eventListener();
-            //window.addEventListener('beforeunload', vm.leaving);
-            //indow.addEventListener('onblur', vm.leaving);
-
         }
 
     }
@@ -410,7 +330,7 @@ import Confirmation from '@/components/common/confirmation.vue'
         padding-left: 15px;
     }
     .section-style{
-        padding-left: 30px;
+        padding-left: 15px;
         margin-bottom: 20px;
     }
     .list-inline-item{
@@ -428,7 +348,6 @@ import Confirmation from '@/components/common/confirmation.vue'
     }
 
     .nav-item {
-        background-color: rgb(200,200,200,0.8) !important;
         margin-bottom: 2px;
     }
 

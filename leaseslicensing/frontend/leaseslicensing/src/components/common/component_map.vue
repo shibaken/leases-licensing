@@ -290,7 +290,6 @@ export default {
                     center: [115.95, -31.95],
                     zoom: 7,
                     projection: 'EPSG:4326',
-                    //extent: [112.95, 120, -30.95, -33],
                     /*
                     maxZoom: 12,
                     minZoom: 3,
