@@ -1,6 +1,5 @@
 <template lang="html">
     <div class="container" >
-        <form :action="proposal_form_url" method="post" name="new_proposal" enctype="multipart/form-data">
             <div v-if="!proposal_readonly">
               <div v-if="hasAmendmentRequest" class="row" style="color:red;">
                   <div class="col-lg-12 pull-right">
@@ -94,7 +93,6 @@
                 </div>
             </div>
 
-        </form>
     </div>
 </template>
 <script>
@@ -111,7 +109,6 @@ export default {
     return {
       "proposal": null,
       "loading": [],
-      form: null,
       amendment_request: [],
       //isDataSaved: false,
       proposal_readonly: true,
@@ -595,13 +592,6 @@ export default {
   },
 
   mounted: function() {
-    let vm = this;
-    vm.form = document.forms.new_proposal;
-    //this.addEventListeners();
-      /* uncomment later - too annoying while making front end changes
-    window.addEventListener('beforeunload', vm.leaving);
-    window.addEventListener('onblur', vm.leaving);
-    */
   },
 
 

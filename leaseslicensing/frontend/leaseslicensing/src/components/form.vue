@@ -118,7 +118,6 @@
                           <p>
                               <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.
                               Please note: electronic or digital signatures cannot be accepted.</br>
-                              Please click <a href="www.google.com">here</a> to download the deed poll.</br>
                               The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
                               </strong>
                           </p>
@@ -249,23 +248,12 @@ import Confirmation from '@/components/common/confirmation.vue'
             RegistrationOfInterest,
             LeaseLicence,
             Applicant,
-            /*
-            Confirmation,
-            Vessels,
-            Mooring,
-            CurrentVessels,
-            */
             Profile,
             FormSection,
             RichText,
             FileField,
             ComponentMap,
         },
-        /*
-        watch: {
-            showPaymentTab: function () {},
-        },
-        */
         computed:{
             debug: function(){
                 if (this.$route.query.debug){
@@ -289,22 +277,6 @@ import Confirmation from '@/components/common/confirmation.vue'
                     )
             },
 
-            /*
-            showPaymentTab: function() {
-                let show = false;
-                if (this.is_external && this.proposal) {
-                    if (!this.proposal.previous_application_id) {
-                        // new application
-                        show = true;
-                    } else if (this.proposal.max_vessel_length_with_no_payment &&
-                        this.proposal.max_vessel_length_with_no_payment <= this.vesselLength) {
-                        // vessel length is in higher category
-                        show = true;
-                    }
-                }
-                return show;
-            },
-            */
             profileVar: function() {
                 if (this.is_external) {
                     return this.profile;
@@ -319,13 +291,7 @@ import Confirmation from '@/components/common/confirmation.vue'
             },
             applicationTypeText: function(){
                 let text = '';
-                /*
-                if (this.proposal && this.proposal.proposal_type && this.proposal.proposal_type.code !== 'new') {
-                    text = this.proposal.proposal_type.description;
-                }
-                */
                 if (this.proposal) {
-                    //text = this.proposal.application_type_display;
                     text = this.proposal.application_type.name_display;
                 }
                 return text;
@@ -352,36 +318,8 @@ import Confirmation from '@/components/common/confirmation.vue'
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
             },
-            /*
-            set_tabs:function(){
-                let vm = this;
-
-                $('#pills-tab a[href="#pills-applicant"]').tab('show');
-            },
-            eventListener: function(){
-              let vm=this;
-              $('a[href="#pills-activities-land"]').on('shown.bs.tab', function (e) {
-                vm.$refs.activities_land.$refs.vehicles_table.$refs.vehicle_datatable.vmDataTable.columns.adjust().responsive.recalc();
-              });
-              $('a[href="#pills-activities-marine"]').on('shown.bs.tab', function (e) {
-                vm.$refs.activities_marine.$refs.vessel_table.$refs.vessel_datatable.vmDataTable.columns.adjust().responsive.recalc();
-              });
-            },
-            */
-
         },
         mounted: function() {
-            //this.set_tabs();
-            this.form = document.forms.new_proposal;
-            /*
-            this.$nextTick(() => {
-                this.$refs.component_map.initMap();
-            });
-            */
-            //vm.eventListener();
-            //window.addEventListener('beforeunload', vm.leaving);
-            //indow.addEventListener('onblur', vm.leaving);
-
         }
 
     }
