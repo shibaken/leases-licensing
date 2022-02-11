@@ -330,7 +330,7 @@ import Confirmation from '@/components/common/confirmation.vue'
         padding-left: 15px;
     }
     .section-style{
-        padding-left: 30px;
+        padding-left: 15px;
         margin-bottom: 20px;
     }
     .list-inline-item{
