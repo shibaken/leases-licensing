@@ -75,71 +75,52 @@
                                 <template v-if="assessment_for_assessor_map.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
-                                <template v-for="(question, index) in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
-                                    <template v-if="question.accessing_user_can_view">
-                                        <div class="row form-group">
-                                            <div class="col-md-3">
-                                                <label for="">{{ question.checklist_question.text }}</label>
-                                            </div>
-                                            <div class="col-md-9">
-                                                <template v-if="question.checklist_question.answer_type=='free_text'">
-                                                    <textarea class="form-control free_text_area" :id="'free_text_' + question.id" v-model="question.answer_text" :disabled="!question.accessing_user_can_answer"/>
-                                                </template>
-                                                <template v-else>
-                                                    <div>
-                                                        <input type="radio" :id="'answer_yes_' + question.id" value="true" v-model="question.answer_yes_no" :disabled="!question.accessing_user_can_answer">
-                                                        <label :for="'answer_yes_' + question.id">Yes</label>
-                                                    </div>
-                                                    <div>
-                                                        <input type="radio" :id="'answer_no_' + question.id" value="false" v-model="question.answer_yes_no" :disabled="!question.accessing_user_can_answer">
-                                                        <label :for="'answer_no_' + question.id">No</label>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </template>
+                                <template v-for="question in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
                                 </template>
 
                                 <template v-for="assessment in assessments_for_referrals_map"> <!-- There can be multiple referral assessments -->
                                     <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
                                     <template v-for="question in assessment.answers"> <!-- per question -->
-                                        <template v-if="question.accessing_user_can_view">
-                                            <div class="row form-group">
-                                                <div class="col-md-3">
-                                                    <label for="">{{ question.checklist_question.text }}</label>
-                                                </div>
-                                                <div class="col-md-9">
-                                                    <template v-if="question.checklist_question.answer_type=='free_text'">
-                                                        <textarea class="form-control free_text_area" :id="'free_text_' + question.id" v-model="question.answer_text" :disabled="!question.accessing_user_can_answer"/>
-                                                    </template>
-                                                    <template v-else>
-                                                        <div>
-                                                            <input type="radio" :id="'answer_yes_' + question.id" value="true" v-model="question.answer_yes_no" :disabled="!question.accessing_user_can_answer">
-                                                            <label :for="'answer_yes_' + question.id">Yes</label>
-                                                        </div>
-                                                        <div>
-                                                            <input type="radio" :id="'answer_no_' + question.id" value="false" v-model="question.answer_yes_no" :disabled="!question.accessing_user_can_answer">
-                                                            <label :for="'answer_no_' + question.id">No</label>
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </div>
-                                        </template>
+                                        <ChecklistQuestion :question="question" />
                                     </template>
                                 </template>
-
                             </CollapsibleQuestions>
                         </template>
 
                         <template v-slot:slot_proposal_details_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_proposal_details_checklist_questions" @created="collapsible_proposal_details_checklist_questions_component_mounted">
-                                Questions proposal details here
+                                <template v-if="assessment_for_assessor_proposal_details.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_proposal_details">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_proposal_details"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
                         <template v-slot:slot_proposal_impact_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_proposal_impact_checklist_questions" @created="collapsible_proposal_impact_checklist_questions_component_mounted">
-                                Questions proposal impact here
+                                <template v-if="assessment_for_assessor_proposal_impact.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_proposal_impact">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_proposal_impact"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
@@ -220,6 +201,7 @@ import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import ApplicationForm from '@/components/form.vue';
 import FormSection from "@/components/forms/section_toggle.vue"
 import CollapsibleQuestions from '@/components/forms/collapsible_component.vue'
+import ChecklistQuestion from '@/components/common/component_checklist_question.vue'
 
 export default {
     name: 'InternalProposal',
@@ -314,6 +296,7 @@ export default {
         ApplicationForm,
         FormSection,
         CollapsibleQuestions,
+        ChecklistQuestion,
     },
     props: {
         proposalId: {
@@ -326,7 +309,24 @@ export default {
     computed: {
         assessment_for_assessor_map: function(){
             try {
-                return this.proposal.assessor_assessment.section_answers.map
+                let answers = this.proposal.assessor_assessment.section_answers.map // This may return undefined
+                return answers ? answers : []  // Check if it's undefined
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_proposal_details: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.proposal_details
+                return answers ? answers : []
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_proposal_impact: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.proposal_impact
+                return answers ? answers : []
             } catch (err) {
                 return []
             }
@@ -335,11 +335,47 @@ export default {
             try {
                 let assessments = []
                 for (let assessment of this.proposal.referral_assessments){
-                    let my_assessment = {
-                        'referral_fullname': assessment.referral.referral.fullname, 
-                        'answers': assessment.section_answers.map
+                    if (assessment.section_answers.map){  // Check if this is undefined
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.map
+                        }
+                        assessments.push(my_assessment)
                     }
-                    assessments.push(my_assessment)
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_proposal_details: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.proposal_details){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.proposal_details
+                        }
+                        assessments.push(my_assessment)
+                    }
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_proposal_impact: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.proposal_impact){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.proposal_impact
+                        }
+                        assessments.push(my_assessment)
+                    }
                 }
                 return assessments
             } catch (err) {
