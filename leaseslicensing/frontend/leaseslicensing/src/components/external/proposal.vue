@@ -1,6 +1,5 @@
 <template lang="html">
     <div class="container" >
-        <form :action="proposal_form_url" method="post" name="new_proposal" enctype="multipart/form-data">
             <div v-if="!proposal_readonly">
               <div v-if="hasAmendmentRequest" class="row" style="color:red;">
                   <div class="col-lg-12 pull-right">
@@ -49,44 +48,38 @@
                 <input type='hidden' name="proposal_id" :value="1" />
 
                 <div class="row" style="margin-bottom: 50px">
-                        <div  class="container">
-                          <div class="row" style="margin-bottom: 50px">
-                              <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
-                                  <div class="navbar-inner">
-                                    <div v-if="proposal && !proposal.readonly" class="container">
-                                        <p class="pull-right" style="margin-top:5px">
+                        <div class="row" style="margin-bottom: 50px">
+                            <div class="navbar fixed-bottom" style="background-color: #f5f5f5;">
+                                <div v-if="proposal && !proposal.readonly" class="container-fluid justify-content-end">
 
-                                            <button v-if="saveExitProposal" type="button" class="btn btn-primary" disabled>
-                                                Save and Exit&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                            </button>
-                                            <input v-else type="button" @click.prevent="save_exit" class="btn btn-primary" value="Save and Exit" :disabled="savingProposal || paySubmitting"/>
+                                    <button v-if="saveExitProposal" type="button" class="btn btn-primary" disabled>
+                                        Save and Exit&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                    </button>
+                                    <input v-else type="button" @click.prevent="save_exit" class="btn btn-primary" value="Save and Exit" :disabled="savingProposal || paySubmitting"/>
 
-                                            <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
-                                                Save and Continue&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                            </button>
-                                            <input v-else type="button" @click.prevent="save" class="btn btn-primary" value="Save and Continue" :disabled="saveExitProposal || paySubmitting"/>
+                                    <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
+                                        Save and Continue&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                    </button>
+                                    <input v-else type="button" @click.prevent="save" class="btn btn-primary" value="Save and Continue" :disabled="saveExitProposal || paySubmitting"/>
 
-                                            <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>
-                                                {{ submitText }}&nbsp; <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                            </button>
-                                            <input v-else 
-                                            type="button" 
-                                            @click.prevent="submit" 
-                                            class="btn btn-primary" 
-                                            :value="submitText" 
-                                            :disabled="saveExitProposal || savingProposal || disableSubmit"
-                                            id="submitButton"
-                                            :title="disabledSubmitText"
-                                            />
+                                    <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>
+                                        {{ submitText }}&nbsp; <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                    </button>
+                                    <input v-else 
+                                    type="button" 
+                                    @click.prevent="submit" 
+                                    class="btn btn-primary" 
+                                    :value="submitText" 
+                                    :disabled="saveExitProposal || savingProposal || disableSubmit"
+                                    id="submitButton"
+                                    :title="disabledSubmitText"
+                                    />
 
-                                            <input id="save_and_continue_btn" type="hidden" @click.prevent="save_wo_confirm" class="btn btn-primary" value="Save Without Confirmation"/>
-                                        </p>
-                                    </div>
-                                    <div v-else class="container">
-                                      <p class="pull-right" style="margin-top:5px;">
-                                        <router-link class="btn btn-primary" :to="{name: 'external-dashboard'}">Back to Dashboard</router-link>
-                                      </p>
-                                    </div>
+                                    <input id="save_and_continue_btn" type="hidden" @click.prevent="save_wo_confirm" class="btn btn-primary" value="Save Without Confirmation"/>
+                                </div>
+                                <div v-else>
+                                  <div class="container-fluid">
+                                    <router-link class="btn btn-primary" :to="{name: 'external-dashboard'}">Back to Dashboard</router-link>
                                   </div>
                                 </div>
                             </div>
@@ -94,7 +87,6 @@
                 </div>
             </div>
 
-        </form>
     </div>
 </template>
 <script>
@@ -111,7 +103,6 @@ export default {
     return {
       "proposal": null,
       "loading": [],
-      form: null,
       amendment_request: [],
       //isDataSaved: false,
       proposal_readonly: true,
@@ -336,19 +327,6 @@ export default {
       */
     },
 
-
-    set_formData: function(e) {
-      let vm = this;
-      //vm.form=document.forms.new_proposal;
-      let formData = new FormData(vm.form);
-      /*
-      formData.append('selected_parks_activities', JSON.stringify(vm.proposal.selected_parks_activities))
-      formData.append('selected_trails_activities', JSON.stringify(vm.proposal.selected_trails_activities))
-      formData.append('marine_parks_activities', JSON.stringify(vm.proposal.marine_parks_activities))
-      */
-
-      return formData;
-    },
     save: async function(withConfirm=true, url=this.proposal_form_url) {
         let vm = this;
         vm.savingProposal=true;
@@ -595,13 +573,6 @@ export default {
   },
 
   mounted: function() {
-    let vm = this;
-    vm.form = document.forms.new_proposal;
-    //this.addEventListeners();
-      /* uncomment later - too annoying while making front end changes
-    window.addEventListener('beforeunload', vm.leaving);
-    window.addEventListener('onblur', vm.leaving);
-    */
   },
 
 
@@ -648,4 +619,7 @@ export default {
 </script>
 
 <style lang="css" scoped>
+.btn-primary {
+    margin: 2px;
+}
 </style>

@@ -262,10 +262,10 @@ import $ from 'jquery'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import FormSection from '@/components/forms/section_toggle.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
-import 'eonasdan-bootstrap-datetimepicker';
+//import 'eonasdan-bootstrap-datetimepicker';
 //require("moment");
-require('eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css');
-require('eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
+//require('eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css');
+//require('eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
 
 export default {
     name: 'Profile',
