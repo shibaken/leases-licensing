@@ -579,7 +579,6 @@ from '@/utils/hooks'
     }
 
     .nav-item {
-        background-color: rgb(200,200,200,0.8) !important;
         margin-bottom: 2px;
     }
 
