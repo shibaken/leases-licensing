@@ -538,7 +538,8 @@ export default {
                 let id = $(this).attr('data-discard-proposal');
                 vm.discardProposal(id)
             });
-
+            /*
+            // update to bs5
             // Lodged From
             $(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
@@ -566,6 +567,7 @@ export default {
                     $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(false);
                 }
             });
+            */
 
             // Listener for thr row
             vm.$refs.application_datatable.vmDataTable.on('click', 'td', function(e) {

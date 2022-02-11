@@ -68,7 +68,7 @@ import { api_endpoints, helpers } from '@/utils/hooks'
 
 var select2 = require('select2');
 require("select2/dist/css/select2.min.css");
-require("select2-bootstrap-theme/dist/select2-bootstrap.min.css");
+require("select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.css");
 
 export default {
     name: 'DcvTablePage',

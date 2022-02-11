@@ -2,7 +2,7 @@
     <div>
         <div class="form-group">
             <!--label :id="id" for="label" class="inline" >{{ label }}</label-->
-	    <ckeditor v-model="detailsText" :config="editorConfig" :read-only="readonly" :name="name" :required="isRequired" ></ckeditor>
+            <ckeditor v-model="detailsText" :config="editorConfig" :read-only="readonly" :name="name" :required="isRequired" ></ckeditor>
         </div>
     </div>
 </template>

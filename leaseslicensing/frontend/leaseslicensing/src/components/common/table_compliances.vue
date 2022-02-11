@@ -429,7 +429,8 @@ export default {
         },
         addEventListeners: function(){
             let vm = this;
-
+            /*
+            // update to bs5
             // Lodged From
             $(vm.$refs.complianceDateFromPicker).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.complianceDateFromPicker).on('dp.change',function (e) {
@@ -457,6 +458,7 @@ export default {
                     $(vm.$refs.complianceDateFromPicker).data("DateTimePicker").maxDate(false);
                 }
             });
+            */
         }
     },
     created: function(){
