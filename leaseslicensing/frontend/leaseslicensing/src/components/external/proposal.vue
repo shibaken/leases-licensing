@@ -333,19 +333,6 @@ export default {
       */
     },
 
-
-    set_formData: function(e) {
-      let vm = this;
-      //vm.form=document.forms.new_proposal;
-      let formData = new FormData(vm.form);
-      /*
-      formData.append('selected_parks_activities', JSON.stringify(vm.proposal.selected_parks_activities))
-      formData.append('selected_trails_activities', JSON.stringify(vm.proposal.selected_trails_activities))
-      formData.append('marine_parks_activities', JSON.stringify(vm.proposal.marine_parks_activities))
-      */
-
-      return formData;
-    },
     save: async function(withConfirm=true, url=this.proposal_form_url) {
         let vm = this;
         vm.savingProposal=true;

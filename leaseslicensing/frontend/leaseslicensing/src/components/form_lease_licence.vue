@@ -4,40 +4,45 @@
     <FormSection label="Tourism Proposal Details" Index="tourism_proposal_details" v-if="proposal">
         <slot name="slot_proposal_details_checklist_questions"></slot>
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
-                <label for="profit_and_loss_text" class="control-label pull-left">Provide five-year integrated profit and loss, balance sheet and cash flow projections (preferably by month).  State clearly the underlying assumptions made in respect to design, construction, rental, operations and target markets</label>
+            <div class="row question-row">
+                <div class="col-sm-3">
+                    <label for="profit_and_loss_text" class="control-label pull-left">Provide five-year integrated profit and loss, balance sheet and cash flow projections (preferably by month).  State clearly the underlying assumptions made in respect to design, construction, rental, operations and target markets</label>
+                </div>
+                <div class="col-sm-8">
+                    <RichText
+                    :proposalData="proposal.profit_and_loss_text"
+                    ref="profit_and_loss_text"
+                    id="profit_and_loss_text"
+                    :readonly="readonly" 
+                    :can_view_richtext_src=true
+                    v-bind:key="proposal.id"
+                    />
+                </div>
             </div>
-            <div class="col-sm-8 question-title">
-                <RichText
-                :proposalData="proposal.profit_and_loss_text"
-                ref="profit_and_loss_text"
-                id="profit_and_loss_text"
-                :readonly="readonly" 
-                :can_view_richtext_src=true
-                v-bind:key="proposal.id"
-                />
-            </div>
-            <div class="col-sm-3 question-title">
-                <label for="profit_and_loss_documents">Attach any supporting documents</label>
-            </div>
-            <div class="col-sm-9 question-title">
-                <FileField 
-                    :readonly="readonly"
-                    ref="profit_and_loss_documents"
-                    name="profit_and_loss_documents"
-                    id="profit_and_loss_documents"
-                    :isRepeatable="true"
-                    :documentActionUrl="profitAndLossDocumentsUrl"
-                    :replace_button_by_text="true"
-                />
+            <div class="row question-row">
+                <div class="col-sm-3">
+                    <label for="profit_and_loss_documents">Attach any supporting documents</label>
+                </div>
+                <div class="col-sm-9">
+                    <FileField 
+                        :readonly="readonly"
+                        ref="profit_and_loss_documents"
+                        name="profit_and_loss_documents"
+                        id="profit_and_loss_documents"
+                        :isRepeatable="true"
+                        :documentActionUrl="profitAndLossDocumentsUrl"
+                        :replace_button_by_text="true"
+                    />
+                </div>
             </div>
         </div>
 
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="cash_flow_text" class="control-label pull-left">Provide cash flow projections to demonstrate time to amortize the capital investment</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.cash_flow_text"
                 ref="cash_flow_text"
@@ -47,10 +52,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="cash_flow_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="cash_flow_documents"
@@ -61,13 +68,15 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
 
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="capital_investment_text" class="control-label pull-left">Include proposed capital investment showing costing against each component of the built development and start-up costs</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.capital_investment_text"
                 ref="capital_investment_text"
@@ -77,10 +86,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="capital_investment_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="capital_investment_documents"
@@ -91,13 +102,15 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
 
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="financial_capacity_text" class="control-label pull-left">Demonstrate that you and/or the nominated operator have the financial capacity to build and operate the proposal.  Information/evidence from banks/financiers/accountants would assist in demonstrating this, for example, audited financial statements for the last 3 years or letter from a financier confirming access to the required finance</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.financial_capacity_text"
                 ref="financial_capacity_text"
@@ -107,10 +120,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="financial_capacity_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="financial_capacity_documents"
@@ -121,13 +136,15 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
 
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="available_activities_text" class="control-label pull-left">Specify the full range of recreational, educational, cultural and other activities that will be available to visitors through your proposal and what will be required/developed to undertake them.  Articulate the timeline for the introduction of each activity over a five-year period</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.available_activities_text"
                 ref="available_activities_text"
@@ -137,10 +154,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="available_activities_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="available_activities_documents"
@@ -151,13 +170,15 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
 
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="market_analysis_text" class="control-label pull-left">Outline a market analysis that identifies the target markets for the operation and how these will be accommodated as well as a competitor analysis.  (Note the market analysis should inform the integrated profit and loss and cash flow projections with realistic assumptions and estimations)</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.market_analysis_text"
                 ref="market_analysis_text"
@@ -167,10 +188,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="market_analysis_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="market_analysis_documents"
@@ -181,13 +204,15 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
 
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="staffing_text" class="control-label pull-left">Provide details of staffing, workforce management. (Note the market analysis should inform the integrated profit and loss and cash flow projections with realistic assumptions and estimations)</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.staffing_text"
                 ref="staffing_text"
@@ -197,10 +222,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="staffing_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="staffing_documents"
@@ -211,16 +238,18 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
 
 
     </FormSection>
     <FormSection label="General Proposal Details" Index="general_proposal_details" v-if="proposal">
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="key_personnel_text" class="control-label pull-left">Provide details of the key personnel and their qualifications and experience that is appropriate to developing and operating the venture under the proposed tourism lease.  Include bios of the proposed board and management team demonstrating capability in delivering and maintaining the proposal</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.key_personnel_text"
                 ref="key_personnel_text"
@@ -230,10 +259,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="key_personnel_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="key_personnel_documents"
@@ -244,12 +275,14 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="key_milestones_text" class="control-label pull-left">Provide details regarding key milestones</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.key_milestones_text"
                 ref="key_milestones_text"
@@ -259,10 +292,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="key_milestones_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="key_milestones_documents"
@@ -273,13 +308,15 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
 
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="risk_factors_text" class="control-label pull-left">Identify specific risk factors and likely impacts to allow consideration of options.  Include how key risks will be avoided, reduced, managed or mitigated.  (Note the management of risk should inform the integrated profit and loss and cash flow projections).</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.risk_factors_text"
                 ref="risk_factors_text"
@@ -289,10 +326,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="risk_factors_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="risk_factors_documents"
@@ -303,12 +342,14 @@
                     :replace_button_by_text="true"
                 />
             </div>
+            </div>
         </div>
         <div class="col-sm-12 inline-details-text">
-            <div class="col-sm-3 question-title">
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="legislative_requirements_text" class="control-label pull-left">If legislative or regulatory requirements apply to thie proposal, please provide details and upload any approvals already received</label>
             </div>
-            <div class="col-sm-8 question-title">
+            <div class="col-sm-8">
                 <RichText
                 :proposalData="proposal.legislative_requirements_text"
                 ref="legislative_requirements_text"
@@ -318,10 +359,12 @@
                 v-bind:key="proposal.id"
                 />
             </div>
-            <div class="col-sm-3 question-title">
+            </div>
+            <div class="row question-row">
+            <div class="col-sm-3">
                 <label for="legislative_requirements_documents">Attach any supporting documents</label>
             </div>
-            <div class="col-sm-9 question-title">
+            <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"
                     ref="legislative_requirements_documents"
@@ -331,6 +374,7 @@
                     :documentActionUrl="legislativeRequirementsDocumentsUrl"
                     :replace_button_by_text="true"
                 />
+            </div>
             </div>
         </div>
 
@@ -554,10 +598,11 @@ from '@/utils/hooks'
     .inline-details-text{
         margin-bottom: 20px;
     }
-    .details-text{
+    .question-row{
+        margin-bottom: 10px;
         padding-left: 15px;
     }
-    .question-title{
+    .details-text{
         padding-left: 15px;
     }
     .section-style{
