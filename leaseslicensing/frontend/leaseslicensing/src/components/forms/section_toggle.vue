@@ -1,13 +1,33 @@
 <template lang="html">
-    <div class="panel panel-default" >
-        <div v-if="!hideHeader" class="panel-heading">
-            <h3 class="panel-title">{{label}} <span class="subtitle">{{ subtitle }}</span>
-                <a :href="'#'+section_id" class="panelClicker" :id="custom_id" data-toggle="collapse" expanded="true" :aria-controls="section_id">
-                    <span v-if="!noChevron" :class="panel_chevron_class"></span>
-                </a>
-            </h3>
+    <!--div class="accordion" :id="custom_id">
+      <div class="accordion-item">
+        <div class="accordion-header" :id="section_header_id">
+          <h2 class="mb-0">
+            <button id="mybutton" class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#'+section_body_id" :aria-expanded="true" :aria-controls="section_body_id">
+                {{ label }}
+            </button>
+          </h2>
         </div>
-        <div :class="panel_collapse_class" :id="section_id">
+        <div :id="section_body_id" class="accordion-collapse collapse show" :aria-labelledby="section_header_id" :data-parent="'#'+custom_id">
+          <div class="accordion-body">
+              <slot></slot>
+          </div>
+        </div>
+      </div>
+    </div-->
+    <div class="card section-wrapper" :id="custom_id">
+        <div class="card-header fw-bold h4" style='padding:30px;'>
+            <div class='row'>
+                <div class='col-6'>
+                    {{ label }}
+                </div>
+                <div class='col-6 text-end'>
+                    <i class="bi fw-bold down-chevron-close chevron-toggle" :data-bs-target="'#' +section_body_id"></i>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" :id='section_body_id' >
+            <!--div id="ledger_ui_contact_details"></div-->
             <slot></slot>
         </div>
     </div>
@@ -26,29 +46,39 @@ export default {
         },
         Index: {}, 
         hideHeader: {},
+        /*
         noChevron: {
             default: false,
         },
+        */
     },
     data:function () {
         return {
+            custom_id: uuid(),
+            /*
             title:"Section title",
             panel_chevron_class: null,
-            custom_id: uuid(),
             chev_down_class_names: 'glyphicon glyphicon-chevron-down pull-right rotate_icon',
             chev_up_class_names:   'glyphicon glyphicon-chevron-down pull-right rotate_icon chev_rotated',
+            */
         }
     },
     computed:{
-        section_id: function () {
-            return "section_"+this.Index
+        section_header_id: function () {
+            return "section_header_"+this.Index;
         },
+        section_body_id: function () {
+            return "section_body_"+this.Index;
+        },
+        /*
         panel_collapse_class: function() {
             this.panel_chevron_class = this.chev_up_class_names
             return "panel-body collapse in";
         },
+        */
     },
     methods: {
+        /*
         switchPanelChevronClass: function() {
             if (this.panel_chevron_class == this.chev_down_class_names) {
                 this.panel_chevron_class = this.chev_up_class_names
@@ -56,34 +86,28 @@ export default {
                 this.panel_chevron_class = this.chev_down_class_names
             }
         },
+        */
     },
     mounted: function() {
+        console.log("mounted");
+        /*
         let vm = this;
         $('#' + vm.custom_id).on('click',function () {
             vm.switchPanelChevronClass();
         });
+        $('#mybutton').on('click', function(e) {
+            console.log(e);
+        });
+        */
+    },
+    created: function() {
     },
 }
 </script>
+<style scoped>
 
-<style lang="css">
-    h3.panel-title{
-        font-weight: bold;
-        font-size: 25px;
-        padding:20px;
-    }
-    .flex-container {
-        display: flex;
-        flex-direction: column;
-        min-height: 325px;
-    }
-    .subtitle {
-        font-size: 0.6em;
-    }
-    .rotate_icon {
-        transition: 0.5s;
-    }
-    .chev_rotated {
-        transform: rotate(180deg);
-    }
+.section-wrapper {
+    margin-bottom: 20px;
+}
+
 </style>

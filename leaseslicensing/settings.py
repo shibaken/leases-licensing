@@ -51,7 +51,8 @@ STATIC_URL = '/static/'
 
 INSTALLED_APPS += [
     #'reversion_compare',
-    'bootstrap3',
+    #'bootstrap3',
+    'webtemplate_dbca',
     'leaseslicensing',
     'leaseslicensing.components.main',
     'leaseslicensing.components.organisations',
@@ -114,6 +115,7 @@ TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'leaseslicensing', 'templates
 TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'leaseslicensing','components','organisations', 'templates'))
 TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'leaseslicensing','components','emails', 'templates'))
 TEMPLATES[0]['OPTIONS']['context_processors'].append('leaseslicensing.context_processors.leaseslicensing_url')
+
 del BOOTSTRAP3['css_url']
 #BOOTSTRAP3 = {
 #    'jquery_url': '//static.dpaw.wa.gov.au/static/libs/jquery/2.2.1/jquery.min.js',
@@ -242,5 +244,5 @@ KMI_SERVER_URL = env('KMI_SERVER_URL', 'https://kmi.dbca.wa.gov.au')
 GROUP_NAME_ASSESSOR = 'ProposalAssessorGroup'
 GROUP_NAME_APPROVER = 'ProposalApproverGroup'
 
-LEDGER_USER = env('LEDGER_USER', None)
-LEDGER_PASS = env('LEDGER_PASS')
+template_title = "Leases and Licensing"
+template_group = "parkswildlife"
