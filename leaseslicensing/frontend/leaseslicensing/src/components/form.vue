@@ -98,6 +98,7 @@
                       </template>
 
                   </RegistrationOfInterest>
+
                   <LeaseLicence
                   :proposal="proposal"
                   :readonly="readonly"
@@ -105,7 +106,6 @@
                   v-if="leaseLicence"
                   >
                   </LeaseLicence>
-
 
                   <FormSection label="Other" Index="other_section">
                       <slot name="slot_other_checklist_questions"></slot>

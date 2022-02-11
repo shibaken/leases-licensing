@@ -12,8 +12,7 @@ module.exports = {
     //ML_APPROVAL: 'ml',
 	APPLICATION_TYPE: {
 		REGISTRATION_OF_INTEREST: 'registration_of_interest',
-		LEASE: 'lease',
-		LICENCE: 'licence',
+		LEASE_LICENCE: 'lease_licence',
 	},
 	DRAFT: 'Draft',
 	WITH_ASSESSOR: 'With Assessor',
