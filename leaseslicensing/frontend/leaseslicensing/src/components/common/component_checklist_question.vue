@@ -46,4 +46,7 @@ export default {
 </script>
 
 <style scoped>
+.free_text_area {
+    resize: vertical;
+}
 </style>

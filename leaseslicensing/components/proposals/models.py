@@ -571,47 +571,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     APPLICANT_TYPE_PROXY = 'PRX'
     APPLICANT_TYPE_SUBMITTER = 'SUB'
 
-    #CUSTOMER_STATUS_TEMP = 'temp'
-    #CUSTOMER_STATUS_WITH_ASSESSOR = 'with_assessor'
-    #CUSTOMER_STATUS_AMENDMENT_REQUIRED = 'amendment_required'
-    #CUSTOMER_STATUS_APPROVED = 'approved'
-    #CUSTOMER_STATUS_DECLINED = 'declined'
-    #CUSTOMER_STATUS_DISCARDED = 'discarded'
-    #CUSTOMER_STATUS_PARTIALLY_APPROVED = 'partially_approved'
-    #CUSTOMER_STATUS_PARTIALLY_DECLINED = 'partially_declined'
-    #CUSTOMER_STATUS_AWAITING_PAYMENT = 'awaiting_payment'
-    #CUSTOMER_STATUS_CHOICES = ((CUSTOMER_STATUS_TEMP, 'Temporary'), ('draft', 'Draft'),
-    #                           (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
-    #                           (CUSTOMER_STATUS_AMENDMENT_REQUIRED, 'Amendment Required'),
-    #                           (CUSTOMER_STATUS_APPROVED, 'Approved'),
-    #                           (CUSTOMER_STATUS_DECLINED, 'Declined'),
-    #                           (CUSTOMER_STATUS_DISCARDED, 'Discarded'),
-    #                           (CUSTOMER_STATUS_PARTIALLY_APPROVED, 'Partially Approved'),
-    #                           (CUSTOMER_STATUS_PARTIALLY_DECLINED, 'Partially Declined'),
-    #                           (CUSTOMER_STATUS_AWAITING_PAYMENT, 'Awaiting Payment'),
-    #                           )
-
-    # List of statuses from above that allow a customer to edit an application.
-    CUSTOMER_EDITABLE_STATE = [
-        'temp',
-        'draft',
-        'amendment_required',
-    ]
-
-    # List of statuses from above that allow a customer to view an application (read-only)
-    CUSTOMER_VIEWABLE_STATE = [
-        'with_assessor',
-        'under_review',
-        'id_required',
-        'returns_required',
-        'awaiting_payment',
-        'approved',
-        'declined',
-        'partially_approved',
-        'partially_declined'
-    ]
-
     PROCESSING_STATUS_DRAFT = 'draft'
+    PROCESSING_STATUS_AMENDMENT_REQUIRED = 'amendment_required'
     PROCESSING_STATUS_WITH_ASSESSOR = 'with_assessor'
     PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS = 'with_assessor_conditions'
     PROCESSING_STATUS_WITH_APPROVER = 'with_approver'
@@ -637,6 +598,26 @@ class Proposal(DirtyFieldsMixin, models.Model):
         (PROCESSING_STATUS_DECLINED, 'Declined'),
         (PROCESSING_STATUS_DISCARDED, 'Discarded'),
     )
+
+    # List of statuses from above that allow a customer to edit an application.
+    CUSTOMER_EDITABLE_STATE = [
+        PROCESSING_STATUS_DRAFT,
+        PROCESSING_STATUS_AMENDMENT_REQUIRED,
+    ]
+
+    # List of statuses from above that allow a customer to view an application (read-only)
+    CUSTOMER_VIEWABLE_STATE = [
+        PROCESSING_STATUS_WITH_ASSESSOR,
+        PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS,
+        PROCESSING_STATUS_WITH_REFERRAL,
+        PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS,
+        PROCESSING_STATUS_WITH_APPROVER,
+        PROCESSING_STATUS_APPROVED_APPLICATION,
+        PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS,
+        PROCESSING_STATUS_APPROVED_EDITING_INVOICING,
+        PROCESSING_STATUS_APPROVED,
+        PROCESSING_STATUS_DECLINED,
+    ]
 
     ID_CHECK_STATUS_CHOICES = (('not_checked', 'Not Checked'), ('awaiting_update', 'Awaiting Update'),
                                ('updated', 'Updated'), ('accepted', 'Accepted'))
@@ -1056,7 +1037,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         """
         :return: True if the application is in one of the editable status.
         """
-        # return self.customer_status in self.CUSTOMER_EDITABLE_STATE
         return self.processing_status in self.CUSTOMER_EDITABLE_STATE
 
     @property
@@ -1064,7 +1044,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         """
         :return: True if the application is in one of the approved status.
         """
-        # return self.customer_status in self.CUSTOMER_VIEWABLE_STATE
         return self.processing_status in self.CUSTOMER_VIEWABLE_STATE
 
     @property
@@ -1147,13 +1126,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
         officer_view_state = ['draft','approved','declined','temp','discarded', 'with_referral', 'with_qa_officer', 'waiting_payment', 'partially_approved', 'partially_declined', 'with_district_assessor']
         return False if self.processing_status in officer_view_state else True
 
-    @property
-    def can_view_district_table(self):
-        officer_view_state = ['with_district_assessor','approved','declined','partially_approved','partially_declined', ]
-        if self.filming_approval_type=='lawful_authority' and self.processing_status in officer_view_state:
-            return True
-        else:
-            return False
+    # @property
+    # def can_view_district_table(self):
+    #     officer_view_state = ['with_district_assessor','approved','declined','partially_approved','partially_declined', ]
+    #     if self.filming_approval_type=='lawful_authority' and self.processing_status in officer_view_state:
+    #         return True
+    #     else:
+    #         return False
 
     @property
     def amendment_requests(self):
@@ -1239,7 +1218,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
             #return self.__approver_group() in user.proposalapprovergroup_set.all()
             return user.id in self.__assessor_group().get_system_group_member_ids()
 
-
     def can_assess(self,user):
         #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions':
         if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
@@ -1251,17 +1229,17 @@ class Proposal(DirtyFieldsMixin, models.Model):
         else:
             return False
 
-    #To allow/ prevent internal user to edit activities (Land and Marine) for T-class licence
-    #still need to check to assessor mode in on or not
-    def can_edit_activities(self,user):
-        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
-            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
-            return user.id in self.__assessor_group().get_system_group_member_ids()
-        elif self.processing_status == 'with_approver':
-            #return self.__approver_group() in user.proposalapprovergroup_set.all()
-            return user.id in self.__approver_group().get_system_group_member_ids()
-        else:
-            return False
+#    #To allow/ prevent internal user to edit activities (Land and Marine) for T-class licence
+#    #still need to check to assessor mode in on or not
+#    def can_edit_activities(self,user):
+#        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
+#            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+#            return user.id in self.__assessor_group().get_system_group_member_ids()
+#        elif self.processing_status == 'with_approver':
+#            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+#            return user.id in self.__approver_group().get_system_group_member_ids()
+#        else:
+#            return False
 
     def can_edit_period(self,user):
         if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
