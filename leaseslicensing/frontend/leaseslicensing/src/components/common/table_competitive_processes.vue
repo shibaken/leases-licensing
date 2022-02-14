@@ -1,10 +1,6 @@
 <template>
     <div>
         <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
-        <div id="testdatetime">
-            datetime picker
-            <input type="date" />
-        </div>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="">Status</label>
@@ -18,7 +14,8 @@
                 <div class="form-group">
                     <label for="">Created From</label>
                     <div class="input-group date" ref="proposalDateFromPicker">
-                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedFrom">
+                        <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedFrom" -->
+                        <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedFrom">
                         <span class="input-group-addon">
                             <span class="glyphicon glyphicon-calendar"></span>
                         </span>
@@ -29,7 +26,8 @@
                 <div class="form-group">
                     <label for="">Created To</label>
                     <div class="input-group date" ref="proposalDateToPicker">
-                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedTo">
+                        <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedTo" -->
+                        <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedTo">
                         <span class="input-group-addon">
                             <span class="glyphicon glyphicon-calendar"></span>
                         </span>
@@ -505,32 +503,32 @@ export default {
             });
 
             // Lodged From
-            $(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
-                if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
-                    // DateFrom has been picked
-                    vm.filterCompetitiveProcessCreatedFrom = e.date.format('DD/MM/YYYY');
-                    $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
-                }
-                else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
-                    vm.filterCompetitiveProcessCreatedFrom = "";
-                    $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(false);
-                }
-            });
+            //$(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
+            //$(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
+            //    if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
+            //        // DateFrom has been picked
+            //        vm.filterCompetitiveProcessCreatedFrom = e.date.format('DD/MM/YYYY');
+            //        $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
+            //    }
+            //    else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
+            //        vm.filterCompetitiveProcessCreatedFrom = "";
+            //        $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(false);
+            //    }
+            //});
 
             // Lodged To
-            $(vm.$refs.proposalDateToPicker).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.proposalDateToPicker).on('dp.change',function (e) {
-                if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
-                    // DateTo has been picked
-                    vm.filterCompetitiveProcessCreatedTo = e.date.format('DD/MM/YYYY');
-                    $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(e.date);
-                }
-                else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
-                    vm.filterCompetitiveProcessCreatedTo = "";
-                    $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(false);
-                }
-            });
+            //$(vm.$refs.proposalDateToPicker).datetimepicker(vm.datepickerOptions);
+            //$(vm.$refs.proposalDateToPicker).on('dp.change',function (e) {
+            //    if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
+            //        // DateTo has been picked
+            //        vm.filterCompetitiveProcessCreatedTo = e.date.format('DD/MM/YYYY');
+            //        $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(e.date);
+            //    }
+            //    else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
+            //        vm.filterCompetitiveProcessCreatedTo = "";
+            //        $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(false);
+            //    }
+            //});
 
             // Listener for thr row
             vm.$refs.application_datatable.vmDataTable.on('click', 'td', function(e) {
