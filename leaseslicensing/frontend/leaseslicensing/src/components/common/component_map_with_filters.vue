@@ -23,9 +23,9 @@
                     <div class="input-group date" ref="proposalDateFromPicker">
                         <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom" -->
                         <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
-                        <span class="input-group-addon">
+                        <!-- span class="input-group-addon">
                             <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                        </span -->
                     </div>
                 </div>
             </div>
@@ -35,9 +35,9 @@
                     <div class="input-group date" ref="proposalDateToPicker">
                         <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo" -->
                         <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
-                        <span class="input-group-addon">
+                        <!-- span class="input-group-addon">
                             <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                        </span -->
                     </div>
                 </div>
             </div>

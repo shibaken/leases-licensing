@@ -152,6 +152,7 @@ export default {
         vm.$http.get('/api/profile').then(res => {
             vm.accessing_user = res.body
         })
+        chevron_toggle.init();
     },
     created: function() {
 
