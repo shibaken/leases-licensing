@@ -1,6 +1,10 @@
 <template>
     <div>
         <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+        <div id="testdatetime">
+            datetime picker
+            <input type="date" />
+        </div>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="">Status</label>

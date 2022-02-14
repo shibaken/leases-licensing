@@ -6,7 +6,7 @@
                 <a
                     class="nav-link"
                     id="pills-applications-tab"
-                    data-toggle="pill"
+                    data-bs-toggle="pill"
                     href="#pills-applications"
                     role="tab"
                     aria-controls="pills-applications"
@@ -17,7 +17,7 @@
                 <a
                     class="nav-link"
                     id="pills-competitive-processes-tab"
-                    data-toggle="pill"
+                    data-bs-toggle="pill"
                     href="#pills-competitive-processes"
                     role="tab"
                     aria-controls="pills-competitive-processes"
@@ -28,7 +28,7 @@
                 <a
                     class="nav-link"
                     id="pills-map-tab"
-                    data-toggle="pill"
+                    data-bs-toggle="pill"
                     href="#pills-map"
                     role="tab"
                     aria-controls="pills-map"
@@ -39,7 +39,7 @@
         </ul>
 
         <div class="tab-content" id="pills-tabContent">
-            <div class="tab-pane fade" id="pills-applications" role="tabpanel" aria-labelledby="pills-applications-tab">
+            <div class="tab-pane active" id="pills-applications" role="tabpanel" aria-labelledby="pills-applications-tab">
                 <FormSection :formCollapse="false" label="Applications" Index="applications">
                     <ApplicationsTable
                         level="internal"
@@ -61,14 +61,14 @@
                     />
                 </FormSection>
             </div>
-            <div class="tab-pane fade" id="pills-competitive-processes" role="tabpanel" aria-labelledby="pills-competitive-processes-tab">
+            <div class="tab-pane" id="pills-competitive-processes" role="tabpanel" aria-labelledby="pills-competitive-processes-tab">
                 <FormSection :formCollapse="false" label="Competitive Processes" Index="competitive_processes">
                     <CompetitiveProcessesTable
                         level="internal"
                     />
                 </FormSection>
             </div>
-            <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
+            <div class="tab-pane" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                 <FormSection :formCollapse="false" label="Map" Index="map">
                     <MapComponent
                         ref="component_map_with_filters"
@@ -136,13 +136,19 @@ export default {
         mapTabClicked: function(){
             this.$refs.component_map_with_filters.forceToRefreshMap()
         },
-        set_tabs: function(){
-            let aho = $('#pills-tab a[href="#pills-applications"]').tab('show');
-        },
+        //set_tabs: function(){
+            //let aho = $('#pills-tab a[href="#pills-applications"]').tab('show');
+
+            //let elem = $('#pills-tab a[href="#pills-applications"]')
+            //let tab = bootstrap.Tab.getInstance(elem)
+            //if(!tab)
+            //    tab = new bootstrap.Tab(aho)
+            //tab.show()
+        //},
     },
     mounted: function () {
         let vm = this
-        vm.set_tabs();
+        //vm.set_tabs();
         vm.$http.get('/api/profile').then(res => {
             vm.accessing_user = res.body
         })
