@@ -23,6 +23,12 @@
         {% block extra_css %}
         {% endblock %}
         {% block custom_js %}
+            <script language="javascript">
+                    var env = {
+                        "kmi_server_url": "{{ KMI_SERVER_URL }}"
+                    }
+
+            </script>
             {% if not dev %}
                 <script type="text/javascript" src="{% static 'leaseslicensing_vue/js/manifest.js' %}?v={{build_tag}}"></script>
                 <script type="text/javascript" src="{% static 'leaseslicensing_vue/js/vendor.js' %}?v={{build_tag}}"></script>
@@ -35,11 +41,6 @@
                 <script type="text/javascript" src="{{ dev_url }}"></script>
             {% endif %}
       
-            <script language="javascript">
-                env = {
-                    "kmi_server_url": "{{ KMI_SERVER_URL }}"
-                }
-            </script>
 
         {% endblock %}
     </body>
