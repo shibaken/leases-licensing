@@ -1,11 +1,11 @@
 <template lang="html">
     <div>
         <div class="toggle_filters_wrapper">
-            <div data-toggle="collapse" :data-target="'#' + target_elem_id" :id="button_elem_id" class="toggle_filters_button collapsed" @click="toggle_filters_button_clicked">
-                <div class="toggle_filters_icon">
-                    <i :id="chevron_elem_id" class="rotate_icon fa fa-chevron-down"></i>
+            <div data-bs-toggle="collapse" :data-bs-target="'#' + target_elem_id" :id="button_elem_id" class="toggle_filters_button collapsed" @click="toggle_filters_button_clicked">
+                <div :id="chevron_elem_id" class="toggle_filters_icon rotate_icon">
+                    <i class="bi bi-chevron-down"></i>
                 </div>
-                <i :id="warning_icon_id" :title="warning_icon_title" class="fa fa-exclamation-circle fa-2x filter_warning_icon"></i>
+                <i :id="warning_icon_id" :title="warning_icon_title" class="bi bi-exclamation-circle bi-2x filter_warning_icon"></i>
             </div>
 
             <div class="collapse" :id="target_elem_id">
@@ -38,13 +38,14 @@ export default {
             warning_icon_id: 'warning_elem_' + uuid(),
             warning_icon_title: '',
             display_icon: false,
-            filters_expanded: false,
+            filters_expanded: null,
         }
     },
     methods: {
         toggle_filters_button_clicked: function(e){
             // Bootstrap add a 'collapsed' class name to the element
-            this.filters_expanded = $('#' + this.button_elem_id).hasClass('collapsed')
+            let filters_expanded_when_clicked = $('#' + this.button_elem_id).hasClass('collapsed')
+            this.filters_expanded = !filters_expanded_when_clicked
         },
         show_warning_icon: function(show){
             let warning_icon = $('#' + this.warning_icon_id)

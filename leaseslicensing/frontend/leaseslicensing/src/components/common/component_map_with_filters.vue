@@ -21,10 +21,11 @@
                 <div class="form-group">
                     <label for="">Lodged From</label>
                     <div class="input-group date" ref="proposalDateFromPicker">
-                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
-                        <span class="input-group-addon">
+                        <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom" -->
+                        <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
+                        <!-- span class="input-group-addon">
                             <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                        </span -->
                     </div>
                 </div>
             </div>
@@ -32,10 +33,11 @@
                 <div class="form-group">
                     <label for="">Lodged To</label>
                     <div class="input-group date" ref="proposalDateToPicker">
-                        <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
-                        <span class="input-group-addon">
+                        <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo" -->
+                        <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
+                        <!-- span class="input-group-addon">
                             <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                        </span -->
                     </div>
                 </div>
             </div>
@@ -741,32 +743,32 @@ export default {
             let vm = this
 
             // Lodged From
-            $(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
-                if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
-                    // DateFrom has been picked
-                    vm.filterProposalLodgedFrom = e.date.format('DD/MM/YYYY');
-                    $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
-                }
-                else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
-                    vm.filterProposalLodgedFrom = "";
-                    $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(false);
-                }
-            });
+            //$(vm.$refs.proposalDateFromPicker).datetimepicker(vm.datepickerOptions);
+            //$(vm.$refs.proposalDateFromPicker).on('dp.change',function (e) {
+            //    if ($(vm.$refs.proposalDateFromPicker).data('DateTimePicker').date()) {
+            //        // DateFrom has been picked
+            //        vm.filterProposalLodgedFrom = e.date.format('DD/MM/YYYY');
+            //        $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(e.date);
+            //    }
+            //    else if ($(vm.$refs.proposalDateFromPicker).data('date') === "") {
+            //        vm.filterProposalLodgedFrom = "";
+            //        $(vm.$refs.proposalDateToPicker).data("DateTimePicker").minDate(false);
+            //    }
+            //});
 
             // Lodged To
-            $(vm.$refs.proposalDateToPicker).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.proposalDateToPicker).on('dp.change',function (e) {
-                if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
-                    // DateTo has been picked
-                    vm.filterProposalLodgedTo = e.date.format('DD/MM/YYYY');
-                    $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(e.date);
-                }
-                else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
-                    vm.filterProposalLodgedTo = "";
-                    $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(false);
-                }
-            });
+            //$(vm.$refs.proposalDateToPicker).datetimepicker(vm.datepickerOptions);
+            //$(vm.$refs.proposalDateToPicker).on('dp.change',function (e) {
+            //    if ($(vm.$refs.proposalDateToPicker).data('DateTimePicker').date()) {
+            //        // DateTo has been picked
+            //        vm.filterProposalLodgedTo = e.date.format('DD/MM/YYYY');
+            //        $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(e.date);
+            //    }
+            //    else if ($(vm.$refs.proposalDateToPicker).data('date') === "") {
+            //        vm.filterProposalLodgedTo = "";
+            //        $(vm.$refs.proposalDateFromPicker).data("DateTimePicker").maxDate(false);
+            //    }
+            //});
         }
     },
     created: function(){
