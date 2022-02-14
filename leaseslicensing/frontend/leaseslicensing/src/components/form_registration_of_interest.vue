@@ -863,6 +863,12 @@ from '@/utils/hooks'
             FileField,
         },
         computed:{
+            debug: function(){
+                if (this.$route.query.debug){
+                    return this.$route.query.debug === 'true'
+                }
+                return false
+            },
             proposalId: function() {
                 return this.proposal ? this.proposal.id : null;
             },
@@ -964,12 +970,6 @@ from '@/utils/hooks'
             },
         },
         methods:{
-            debug: function(){
-                if (this.$route.query.debug){
-                    return this.$route.query.debug === 'true'
-                }
-                return false
-            },
         },
         mounted: function() {
         }

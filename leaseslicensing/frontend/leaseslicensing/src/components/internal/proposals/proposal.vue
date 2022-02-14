@@ -68,6 +68,8 @@
                         :submitterId="proposal.submitter.id"
                         :key="computedProposalId"
                         :show_related_items_tab="true"
+                        :registrationOfInterest="isRegistrationOfInterest"
+                        :leaseLicence="isLeaseLicence"
                     >
                         <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
                         <template v-slot:slot_map_checklist_questions>
@@ -307,6 +309,12 @@ export default {
 
     },
     computed: {
+        isRegistrationOfInterest: function(){
+            return this.proposal.application_type.name === constants.APPLICATION_TYPE.REGISTRATION_OF_INTEREST ? true : false
+        },
+        isLeaseLicence: function(){
+            return this.proposal.application_type.name === constants.APPLICATION_TYPE.LEASE_LICENCE ? true : false
+        },
         assessment_for_assessor_map: function(){
             try {
                 let answers = this.proposal.assessor_assessment.section_answers.map // This may return undefined
@@ -979,9 +987,6 @@ export default {
 }
 </script>
 <style scoped>
-.free_text_area {
-    resize: vertical;
-}
 .horizontal_rule {
     margin: 15px 0 10px 0;
     border-top: 2px solid #888;

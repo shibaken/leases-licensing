@@ -198,6 +198,7 @@ export default {
             }
         },
         column_id: function(){
+            let vm = this
             return {
                 // 1. ID
                 data: "id",
@@ -205,6 +206,9 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
+                    if(vm.debug){
+                        console.log(full)
+                    }
                     return full.id
                 }
             }
