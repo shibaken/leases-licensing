@@ -189,4 +189,10 @@ module.exports = {
         $('body').append(formElement);
         $(formElement).submit();
     },
+    enablePopovers: function(){
+        let popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        let popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            let popover = new bootstrap.Popover(popoverTriggerEl)
+        })
+    },
 };
