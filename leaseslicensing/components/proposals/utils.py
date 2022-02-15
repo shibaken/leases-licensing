@@ -337,7 +337,7 @@ def save_proponent_data_registration_of_interest(instance, request, viewset):
     )
     serializer.is_valid(raise_exception=True)
     instance = serializer.save()
-    if request.data.get('lease_licensing_geometry'):
+    if request.data.get('proposal_geometry'):
         save_geometry(instance, request, viewset)
     if viewset.action == 'submit':
         check_geometry(instance)
@@ -355,7 +355,7 @@ def save_proponent_data_lease_licence(instance, request, viewset):
     )
     serializer.is_valid(raise_exception=True)
     instance = serializer.save()
-    if request.data.get('lease_licensing_geometry'):
+    if request.data.get('proposal_geometry'):
         save_geometry(instance, request, viewset)
     if viewset.action == 'submit':
         check_geometry(instance)
@@ -383,13 +383,13 @@ def check_geometry(instance):
 
 def save_geometry(instance, request, viewset):
     # geometry
-    lease_licensing_geometry_str = request.data.get('lease_licensing_geometry')
+    proposal_geometry_str = request.data.get('proposal_geometry')
     #geometry_list = []
-    lease_licensing_geometry = json.loads(lease_licensing_geometry_str)
+    proposal_geometry = json.loads(proposal_geometry_str)
     lands_geos_data = get_dbca_lands_and_waters_geos()
     e4283 = SpatialReference('EPSG:4283') # EPSG string
     polygons_to_delete = list(instance.proposalgeometry.all())
-    for feature in lease_licensing_geometry.get("features"):
+    for feature in proposal_geometry.get("features"):
         polygon = None
         intersects = False
         if feature.get("geometry").get("type") == "Polygon":
@@ -401,7 +401,7 @@ def save_geometry(instance, request, viewset):
                     intersects = True
             linear_ring = LinearRing(feature_dict.get("coordinates")[0])
             polygon = Polygon(linear_ring)
-        if lease_licensing_geometry and feature.get("id"):
+        if proposal_geometry and feature.get("id"):
             proposalgeometry = ProposalGeometry.objects.get(id=feature.get("id"))
             polygons_to_delete.remove(proposalgeometry)
             serializer = ProposalGeometrySaveSerializer(
@@ -413,7 +413,7 @@ def save_geometry(instance, request, viewset):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-        elif lease_licensing_geometry:
+        elif proposal_geometry:
             print("new polygon")
             serializer = ProposalGeometrySaveSerializer(
                     data={"proposal_id": instance.id, "polygon":polygon, "intersects": intersects},
