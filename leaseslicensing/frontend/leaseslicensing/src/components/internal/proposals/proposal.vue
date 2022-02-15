@@ -7,12 +7,12 @@
             <h4>Application Type: {{ proposal.proposal_type.description }}</h4>
 
             <div class="col-md-3">
-                <CommsLogs
+                <!--CommsLogs
                     :comms_url="comms_url"
                     :logs_url="logs_url"
                     :comms_add_url="comms_add_url"
                     :disable_add_entry="false"
-                />
+                /-->
 
                 <Submission v-if="canSeeSubmission"
                     :submitter_first_name="proposal.submitter.first_name"
