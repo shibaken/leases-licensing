@@ -381,7 +381,7 @@ export default {
             payload.proposal.legislative_requirements_text = this.$refs.application_form.$refs.lease_licence.$refs.legislative_requirements_text.detailsText;
         }
         if (this.$refs.application_form.componentMapOn) {
-            payload.lease_licensing_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+            payload.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
         }
         const res = await vm.$http.post(url, payload);
         if (res.ok) {

@@ -4,7 +4,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <form class="form-horizontal" name="requirementForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <!--alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert-->
                         <div class="col-sm-12">
                             <div class="form-group">
                                 <label class="radio-inline control-label"><input type="radio" name="requirementType" :value="true" v-model="requirement.standard">Standard Requirement</label>
@@ -35,13 +35,14 @@
                                     <div class="col-sm-3">
                                         <label class="control-label pull-left"  for="Name">Due Date</label>
                                     </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group date" ref="due_date" style="width: 70%;">
+                                    <div class="col-sm-4">
+                                        <!--div class="input-group date" ref="due_date" style="width: 70%;">
                                             <input type="text" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="requirement.due_date">
                                             <span class="input-group-addon">
                                                 <span class="glyphicon glyphicon-calendar"></span>
                                             </span>
-                                        </div>
+                                        </div-->
+                                        <input type="date" id="due_date" ref="due_date" v-model="requirement.due_date" class="form-control">
                                     </div>
                                 </div>
                             </div>
@@ -160,6 +161,7 @@ export default {
         }
     },
     computed: {
+        /*
         showError: function() {
             var vm = this;
             return vm.errors;
@@ -175,13 +177,18 @@ export default {
                 }
             }
         }
+        */
     },
     watch: {
+        /*
+        still required??
         due_date: function(){
             this.validDate = moment(this.requirement.due_date,'DD/MM/YYYY').isValid();
         },
+        */
     },
     methods:{
+        /*
         initialiseRequirement: function(){
             this.requirement = {
                 due_date: '',
@@ -191,17 +198,23 @@ export default {
                 proposal: vm.proposal_id
             }
         },
+        */
         ok:function () {
+            this.sendData();
+            /*
             let vm =this;
             if($(vm.form).valid()){
                 vm.sendData();
             }
+            */
         },
         cancel:function () {
             this.close()
         },
         close:function () {
             this.isModalOpen = false;
+            /*
+            // TODO: still required??
             $(this.$refs.standard_req).val(null).trigger('change');
             this.requirement = {
                 standard: true,
@@ -212,9 +225,9 @@ export default {
             };
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.due_date).data('DateTimePicker').clear();
-            //$(this.$refs.due_date).clear();
+            //$(this.$refs.due_date).data('DateTimePicker').clear();
             this.validation_form.resetForm();
+            */
         },
         fetchContact: function(id){
             let vm = this;
@@ -226,7 +239,7 @@ export default {
         },
         sendData:function(){
             let vm = this;
-            vm.errors = false;
+            //vm.errors = false;
             let requirement = JSON.parse(JSON.stringify(vm.requirement));
             if (requirement.standard){
                 requirement.free_requirement = '';
@@ -270,6 +283,7 @@ export default {
                 
             }
         },
+        /*
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
@@ -322,8 +336,10 @@ export default {
                 }
             });
        },
+       */
        eventListeners:function () {
             let vm = this;
+            /*
             // Initialise Date Picker
             $(vm.$refs.due_date).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.due_date).on('dp.change', function(e){
@@ -334,6 +350,7 @@ export default {
                     vm.requirement.due_date = "";
                 }
              });
+             */
 
             // Intialise select2
             $(vm.$refs.standard_req).select2({
