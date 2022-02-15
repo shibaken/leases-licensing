@@ -67,31 +67,33 @@ export default {
                     {
                         data: "requirement",
                         //orderable: false,
-                        'render': function (value) {
+                        //'render': function (value) {
+                        mRender:function (data,type,full) {
                             var ellipsis = '...',
-                                truncated = _.truncate(value, {
+                                truncated = _.truncate(data, {
                                     length: 25,
                                     omission: ellipsis,
                                     separator: ' '
                                 }),
                                 result = '<span>' + truncated + '</span>',
-                                popTemplate = _.template('<a href="#" ' +
+                                popTemplate = _.template('<a tabindex="0" ' +
                                     'role="button" ' +
-                                    'data-toggle="popover" ' +
-                                    'data-trigger="click" ' +
-                                    'data-placement="top auto"' +
-                                    'data-html="true" ' +
-                                    'data-content="<%= text %>" ' +
-                                    '>more</a>');
+                                    'data-bs-toggle="popover" ' +
+                                    //'data-bs-container="body" ' +
+                                    'data-bs-trigger="focus" ' +
+                                    'data-bs-placement="top"' +
+                                    //'data-bs-html="true" ' +
+                                    'data-bs-content="<%= text %>" ' +
+                                    '>more</button>');
                             if (_.endsWith(truncated, ellipsis)) {
                                 result += popTemplate({
-                                    text: value
+                                    text: data
                                 });
                             }
 
                             return result;
                         },
-                        'createdCell': helpers.dtPopoverCellFn,
+                        //'createdCell': helpers.dtPopoverCellFn,
                     },
                     {
                         data: "due_date",
@@ -172,7 +174,11 @@ export default {
                  preDrawCallback: function (settings) {
                     vm.setApplicationWorkflowState(true)
                     //vm.$emit('refreshRequirements',true);
-                }
+                },
+                initComplete: function() {
+                    console.log("initComplete")
+                    vm.enablePopovers();
+                },
             }
         }
     },
@@ -312,8 +318,23 @@ export default {
             //vm.proposal.requirements_completed=bool;
             //console.log('child', bool);
             vm.$emit('refreshRequirements',bool);
-        }
+        },
+        enablePopovers: function() {
+            console.log("enablePopovers")
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+            console.log(popoverTriggerList)
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                let popover = new bootstrap.Popover(popoverTriggerEl)
+                console.log(popover)
+                //return popover;
 
+            })
+            /*
+            var popover = new bootstrap.Popover(document.querySelector('.popover-dismiss'), {
+                  trigger: 'focus'
+            })
+            */
+        },
     },
     mounted: function(){
         let vm = this;

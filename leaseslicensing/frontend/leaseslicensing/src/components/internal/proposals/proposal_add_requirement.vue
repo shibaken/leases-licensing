@@ -35,13 +35,14 @@
                                     <div class="col-sm-3">
                                         <label class="control-label pull-left"  for="Name">Due Date</label>
                                     </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group date" ref="due_date" style="width: 70%;">
+                                    <div class="col-sm-4">
+                                        <!--div class="input-group date" ref="due_date" style="width: 70%;">
                                             <input type="text" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="requirement.due_date">
                                             <span class="input-group-addon">
                                                 <span class="glyphicon glyphicon-calendar"></span>
                                             </span>
-                                        </div>
+                                        </div-->
+                                        <input type="date" id="due_date" ref="due_date" v-model="requirement.due_date" class="form-control">
                                     </div>
                                 </div>
                             </div>
@@ -161,9 +162,9 @@ export default {
     },
     computed: {
         showError: function() {
-            var vm = this;
-            return vm.errors;
+            return this.errors;
         },
+        /*
         due_date: {
             cache: false,
             get(){
@@ -175,13 +176,18 @@ export default {
                 }
             }
         }
+        */
     },
     watch: {
+        /*
+        still required??
         due_date: function(){
             this.validDate = moment(this.requirement.due_date,'DD/MM/YYYY').isValid();
         },
+        */
     },
     methods:{
+        /*
         initialiseRequirement: function(){
             this.requirement = {
                 due_date: '',
@@ -191,17 +197,23 @@ export default {
                 proposal: vm.proposal_id
             }
         },
+        */
         ok:function () {
+            this.sendData();
+            /*
             let vm =this;
             if($(vm.form).valid()){
                 vm.sendData();
             }
+            */
         },
         cancel:function () {
             this.close()
         },
         close:function () {
             this.isModalOpen = false;
+            /*
+            // TODO: still required??
             $(this.$refs.standard_req).val(null).trigger('change');
             this.requirement = {
                 standard: true,
@@ -212,9 +224,9 @@ export default {
             };
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.due_date).data('DateTimePicker').clear();
-            //$(this.$refs.due_date).clear();
+            //$(this.$refs.due_date).data('DateTimePicker').clear();
             this.validation_form.resetForm();
+            */
         },
         fetchContact: function(id){
             let vm = this;
@@ -224,9 +236,10 @@ export default {
                 console.log(error);
             } );
         },
+        /*
         sendData:function(){
             let vm = this;
-            vm.errors = false;
+            //vm.errors = false;
             let requirement = JSON.parse(JSON.stringify(vm.requirement));
             if (requirement.standard){
                 requirement.free_requirement = '';
@@ -267,7 +280,6 @@ export default {
                         vm.addingRequirement = false;
                         vm.errorString = helpers.apiVueResourceError(error);
                     });
-                
             }
         },
         addFormValidations: function() {
@@ -322,8 +334,56 @@ export default {
                 }
             });
        },
+       */
+        sendData:function(){
+            //let vm = this;
+            this.errors = false;
+            //let requirement = JSON.parse(JSON.stringify(vm.requirement));
+            if (this.requirement.standard){
+                this.requirement.free_requirement = '';
+            }
+            else{
+                this.requirement.standard_requirement = '';
+                $(this.$refs.standard_req).val(null).trigger('change');
+            }
+            if (!this.requirement.due_date){
+                this.requirement.due_date = null;
+                this.requirement.recurrence = false;
+                delete this.requirement.recurrence_pattern;
+                this.requirement.recurrence_schedule ? delete this.requirement.recurrence_schedule : '';
+            }
+            if (this.requirement.id){
+                this.updatingRequirement = true;
+                this.$http.put(helpers.add_endpoint_json(api_endpoints.proposal_requirements,requirement.id),this.requirement,{
+                        //emulateJSON:true,
+                    }).then((response)=>{
+                        this.updatingRequirement = false;
+                        this.$parent.updatedRequirements();
+                        this.close();
+                    },(error)=>{
+                        this.errors = true;
+                        this.errorString = helpers.apiVueResourceError(error);
+                        this.updatingRequirement = false;
+                    });
+            } else {
+                this.addingRequirement = true;
+                this.$http.post(api_endpoints.proposal_requirements,this.requirement,{
+                        //emulateJSON:true,
+                    }).then((response)=>{
+                        this.addingRequirement = false;
+                        this.close();
+                        this.$parent.updatedRequirements();
+                    },(error)=>{
+                        this.errors = true;
+                        this.addingRequirement = false;
+                        this.errorString = helpers.apiVueResourceError(error);
+                    });
+            }
+        },
+
        eventListeners:function () {
             let vm = this;
+            /*
             // Initialise Date Picker
             $(vm.$refs.due_date).datetimepicker(vm.datepickerOptions);
             $(vm.$refs.due_date).on('dp.change', function(e){
@@ -334,6 +394,7 @@ export default {
                     vm.requirement.due_date = "";
                 }
              });
+             */
 
             // Intialise select2
             $(vm.$refs.standard_req).select2({
@@ -360,7 +421,7 @@ export default {
    mounted:function () {
         let vm =this;
         vm.form = document.forms.requirementForm;
-        vm.addFormValidations();
+        //vm.addFormValidations();
         this.$nextTick(()=>{
             vm.eventListeners();
         });
