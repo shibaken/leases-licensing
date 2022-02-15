@@ -17,7 +17,7 @@
                 <div class="col-sm-12">
                     <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Condition</button>
                 </div>
-                <datatable ref="requirements_datatable" :id="'requirements-datatable-'+_uid" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
+                <datatable ref="requirements_datatable" :id="datatableId" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
             </form>
 
             <RequirementDetail
@@ -37,6 +37,7 @@ from '@/utils/hooks'
 import datatable from '@vue-utils/datatable.vue'
 import RequirementDetail from '@/components/internal/proposals/proposal_add_requirement.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
+import 'datatables.net-bs5'
 
 export default {
     name: 'InternalProposalRequirements',
@@ -145,6 +146,10 @@ export default {
                             if (vm.proposal.assessor_mode.has_assessor_mode){
                                 links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="fa fa-angle-up fa-2x"></i></a><br/>`;
                                 links +=  `<a class="dtMoveDown" data-id="${full.id}" href='#'><i class="fa fa-angle-down fa-2x"></i></a><br/>`;
+                                /*
+                                links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="down-chevron-close"></i></a><br/>`;
+                                //links +=  `<i class="bi fw-bold down-chevron-close chevron-toggle" :data-bs-target="'#' +section_body_id"></i>`;
+                                */
                             }
                             return links;
                         },
@@ -160,6 +165,7 @@ export default {
                     }
                 },
                 drawCallback: function (settings) {
+                    console.log("drawCallback")
                     $(vm.$refs.requirements_datatable.table).find('tr:last .dtMoveDown').remove();
                     $(vm.$refs.requirements_datatable.table).children('tbody').find('tr:first .dtMoveUp').remove();
 
@@ -176,8 +182,10 @@ export default {
                     //vm.$emit('refreshRequirements',true);
                 },
                 initComplete: function() {
-                    console.log("initComplete")
                     vm.enablePopovers();
+                    //console.log($(vm.$refs.requirements_datatable).DataTable())
+                    console.log($('#' + vm.datatableId).DataTable());
+                    //$('#' + vm.datatableId).DataTable().draw();
                 },
             }
         }
@@ -194,6 +202,9 @@ export default {
         FormSection,
     },
     computed:{
+        datatableId: function() {
+            return 'requirements-datatable-' + this._uid;
+        },
         hasAssessorMode(){
             return this.proposal.assessor_mode.has_assessor_mode;
         }
@@ -277,6 +288,7 @@ export default {
             })
         },
         moveUp(e) {
+            console.log("moveUp")
             // Move the row up
             let vm = this;
             e.preventDefault();
@@ -320,7 +332,6 @@ export default {
             vm.$emit('refreshRequirements',bool);
         },
         enablePopovers: function() {
-            console.log("enablePopovers")
             var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
             console.log(popoverTriggerList)
             var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
