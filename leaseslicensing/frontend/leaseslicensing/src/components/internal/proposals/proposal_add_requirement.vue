@@ -4,7 +4,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <form class="form-horizontal" name="requirementForm">
-                        <!--alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert-->
+                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="form-group">
                                 <label class="radio-inline control-label"><input type="radio" name="requirementType" :value="true" v-model="requirement.standard">Standard Requirement</label>
@@ -161,11 +161,10 @@ export default {
         }
     },
     computed: {
-        /*
         showError: function() {
-            var vm = this;
-            return vm.errors;
+            return this.errors;
         },
+        /*
         due_date: {
             cache: false,
             get(){
@@ -237,6 +236,7 @@ export default {
                 console.log(error);
             } );
         },
+        /*
         sendData:function(){
             let vm = this;
             //vm.errors = false;
@@ -280,10 +280,8 @@ export default {
                         vm.addingRequirement = false;
                         vm.errorString = helpers.apiVueResourceError(error);
                     });
-                
             }
         },
-        /*
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
@@ -337,6 +335,52 @@ export default {
             });
        },
        */
+        sendData:function(){
+            //let vm = this;
+            this.errors = false;
+            //let requirement = JSON.parse(JSON.stringify(vm.requirement));
+            if (this.requirement.standard){
+                this.requirement.free_requirement = '';
+            }
+            else{
+                this.requirement.standard_requirement = '';
+                $(this.$refs.standard_req).val(null).trigger('change');
+            }
+            if (!this.requirement.due_date){
+                this.requirement.due_date = null;
+                this.requirement.recurrence = false;
+                delete this.requirement.recurrence_pattern;
+                this.requirement.recurrence_schedule ? delete this.requirement.recurrence_schedule : '';
+            }
+            if (this.requirement.id){
+                this.updatingRequirement = true;
+                this.$http.put(helpers.add_endpoint_json(api_endpoints.proposal_requirements,requirement.id),this.requirement,{
+                        //emulateJSON:true,
+                    }).then((response)=>{
+                        this.updatingRequirement = false;
+                        this.$parent.updatedRequirements();
+                        this.close();
+                    },(error)=>{
+                        this.errors = true;
+                        this.errorString = helpers.apiVueResourceError(error);
+                        this.updatingRequirement = false;
+                    });
+            } else {
+                this.addingRequirement = true;
+                this.$http.post(api_endpoints.proposal_requirements,this.requirement,{
+                        //emulateJSON:true,
+                    }).then((response)=>{
+                        this.addingRequirement = false;
+                        this.close();
+                        this.$parent.updatedRequirements();
+                    },(error)=>{
+                        this.errors = true;
+                        this.addingRequirement = false;
+                        this.errorString = helpers.apiVueResourceError(error);
+                    });
+            }
+        },
+
        eventListeners:function () {
             let vm = this;
             /*
@@ -377,7 +421,7 @@ export default {
    mounted:function () {
         let vm =this;
         vm.form = document.forms.requirementForm;
-        vm.addFormValidations();
+        //vm.addFormValidations();
         this.$nextTick(()=>{
             vm.eventListeners();
         });
