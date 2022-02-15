@@ -18,12 +18,12 @@ from leaseslicensing.components.proposals.models import (
 from leaseslicensing.components.approvals.models import Approval
 from leaseslicensing.components.proposals.email import send_submit_email_notification, send_external_submit_email_notification
 from leaseslicensing.components.proposals.serializers import (
-        SaveProposalSerializer, 
-        SaveRegistrationOfInterestSerializer,
-        ProposalOtherDetailsSerializer, 
-        ProposalGeometrySaveSerializer,
-        SaveLeaseLicenceSerializer,
-        )
+    SaveProposalSerializer,
+    SaveRegistrationOfInterestSerializer,
+    ProposalOtherDetailsSerializer,
+    ProposalGeometrySaveSerializer,
+    SaveLeaseLicenceSerializer, ProposalAssessmentAnswerSerializer,
+)
 import traceback
 import os
 from copy import deepcopy
@@ -361,14 +361,58 @@ def save_proponent_data_lease_licence(instance, request, viewset):
         check_geometry(instance)
 
 
-def save_assessor_data_registration_of_interest(instance, request, viewset):
-    # TODO: implement
-    pass
+def _save_answer_dict(answer_dict):
+    answer_obj = ProposalAssessmentAnswer.objects.get(id=int(answer_dict['id']))
+    serializer = ProposalAssessmentAnswerSerializer(answer_obj, answer_dict)
+    serializer.is_valid(raise_exception=True)
+    answer_obj = serializer.save()
+    return answer_obj
 
 
-def save_assessor_data_lease_licence(instance, request, viewset):
-    # TODO: implement
-    pass
+def save_referral_data(proposal, request, referral_completed=False):
+    with transaction.atomic():
+        try:
+            proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
+
+            # Save checklist answers
+            for assessment in proposal_data['referral_assessments']:
+                # For each assessment
+                if assessment['referral']['referral']['id'] == request.user.id:
+                    # When this assessment is for the accessing user
+                    for section, answers in assessment['section_answers'].items():
+                        for answer_dict in answers:
+                            answer_obj = _save_answer_dict(answer_dict)
+                if referral_completed:
+                    assessment = ProposalAssessment.objects.get(id=int(assessment['id']))
+                    assessment.completed = True
+                    assessment.submitter = request.user.id
+                    assessment.save()
+                    assessment.referral.complete(request)
+
+            # Referrals are not allowed to edit geometry
+
+        except Exception as e:
+            raise
+
+
+def save_assessor_data(proposal, request, viewset):
+    with transaction.atomic():
+        try:
+            proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
+
+            # Save checklist answers
+            if proposal_data['assessor_assessment']['referral']['referral']['id'] == request.user.id:
+                # When this assessment is for the accessing user
+                for section, answers in proposal_data['assessor_assessment']['section_answers'].items():
+                    for answer_dict in answers:
+                        answer_obj = _save_answer_dict(answer_dict)
+
+            # Save geometry
+            if request.data.get('proposal_geometry'):  # To save geometry, it should be named 'proposal_geometry'
+                save_geometry(proposal, request, viewset)
+
+        except Exception as e:
+            raise
 
 
 def check_geometry(instance):
@@ -427,33 +471,6 @@ def save_geometry(instance, request, viewset):
     print(polygons_to_delete)
     # delete polygons not returned from the front end
     [poly.delete() for poly in polygons_to_delete]
-
-
-def save_assessor_data(instance,request,viewset):
-    with transaction.atomic():
-        try:
-            # lookable_fields = ['isTitleColumnForDashboard','isActivityColumnForDashboard','isRegionColumnForDashboard']
-            # extracted_fields,special_fields,assessor_data,comment_data = create_data_from_form(
-            #     instance.schema, request.POST, request.FILES,special_fields=lookable_fields,assessor_data=True)
-            # data = {
-            #     'data': extracted_fields,
-            #     'assessor_data': assessor_data,
-            #     'comment_data': comment_data,
-            # }
-            # if instance.application_type.name==ApplicationType.FILMING:
-            #     save_assessor_data_filming(instance,request,viewset)
-            # if instance.application_type.name==ApplicationType.TCLASS:
-            #     save_assessor_data_tclass(instance,request,viewset)
-            # if instance.application_type.name==ApplicationType.EVENT:
-            #     save_assessor_data_event(instance,request,viewset)
-            if instance.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
-                save_assessor_data_registration_of_interest(instance, request, viewset)
-            elif instance.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
-                save_assessor_data_lease_licence(instance, request, viewset)
-            else:
-                pass
-        except:
-            raise
 
 
 def proposal_submit(proposal,request):

@@ -13,7 +13,7 @@
                     <div class="col-sm-12">
                         <div class="separator"></div>
                     </div>
-                    <div v-if="!isFinalised" class="col-sm-12 top-buffer-s">
+                    <div v-if="!isFinalised" class="col-sm-12">
                         <strong>Currently assigned to</strong><br/>
                         <div class="form-group">
                             <template v-if="proposal.processing_status == 'With Approver'">
@@ -66,7 +66,7 @@
                         <div class="separator"></div>
                     </div>
                             <template v-if="proposal.processing_status == 'With Assessor' || proposal.processing_status == 'With Referral'">
-                                <div class="col-sm-12 top-buffer-s">
+                                <div class="col-sm-12">
                                     <strong>Referrals</strong><br/>
                                     <div class="form-group">
                                         <select :disabled="!canLimitedAction" ref="department_users" class="form-control">
@@ -170,97 +170,85 @@
                     </div>
 -->
 
-                    <div class="col-sm-12 top-buffer-s" v-if="display_actions">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <strong>Action</strong>
-                            </div>
+                    <div v-if="display_actions">
+                        <div class="d-flex justify-content-center">
+                            <strong>Action</strong>
                         </div>
 
-                        <div class="row" v-if="display_action_enter_conditions">
-                            <div class="col-sm-12">
-                                <button
-                                    class="btn btn-primary w-btn"
-                                    :disabled="can_user_edit"
-                                    @click.prevent="switchStatus('with_assessor_conditions')"
-                                >Enter Conditions</button><br/>
-                            </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_enter_conditions">
+                            <button
+                                class="btn btn-primary w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="switchStatus('with_assessor_conditions')"
+                            >Enter Conditions</button>
                         </div>
 
-                        <div class="row" v-if="display_action_request_amendment">
-                            <div class="col-sm-12">
-                                <button
-                                    class="btn btn-primary top-buffer-s w-btn"
-                                    :disabled="can_user_edit"
-                                    @click.prevent="amendmentRequest()"
-                                >Request Amendment</button><br/>
-                            </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_complete_referral">
+                            <button
+                                class="btn btn-primary w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="completeReferral()"
+                            >Complete Referral</button>
                         </div>
 
-                        <div class="row" v-if="display_action_propose_decline">
-                            <div class="col-sm-12">
-                                <button
-                                    class="btn btn-primary top-buffer-s w-btn"
-                                    :disabled="can_user_edit"
-                                    @click.prevent="proposedDecline()"
-                                >Propose Decline</button>
-                            </div>
-                        </div>
-                        <div class="row" v-if="display_action_back_to_application">
-                            <div class="col-sm-12">
-                                <button
-                                    class="btn btn-primary top-buffer-s w-btn"
-                                    :disabled="can_user_edit"
-                                    @click.prevent="switchStatus('with_assessor')"
-                                >Back To Application</button>
-                            </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_request_amendment">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="amendmentRequest()"
+                            >Request Amendment</button>
                         </div>
 
-                        <div class="row" v-if="display_action_propose_grant">
-                            <div class="col-sm-12">
-                                <button
-                                    class="btn btn-primary top-buffer-s w-btn"
-                                    :disabled="can_user_edit"
-                                    @click.prevent="proposedApproval()"
-                                >Propose Approve</button>
-                            </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_propose_decline">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="proposedDecline()"
+                            >Propose Decline</button>
                         </div>
-                        <div class="row" v-if="display_action_back_to_assessor">
-                            <div class="col-sm-12">
-                                <button
-                                    class="btn btn-primary top-buffer-s w-btn"
-                                    :disabled="can_user_edit"
-                                    @click.prevent="switchStatus('with_assessor')"
-                                ><!-- Back To Processing -->Back To Assessor</button>
-                            </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_back_to_application">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="switchStatus('with_assessor')"
+                            >Back To Application</button>
                         </div>
 
-                        <div class="row" v-if="display_action_back_to_assessor_requirements">
-                            <div class="col-sm-12">
-                                <button
-                                    class="btn btn-primary top-buffer-s w-btn"
-                                    :disabled="can_user_edit"
-                                    @click.prevent="switchStatus('with_assessor_conditions')"
-                                ><!-- Back To Requirements -->Back To Assessor</button><br/>
-                            </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_propose_grant">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="proposedApproval()"
+                            >Propose Approve</button>
+                        </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_back_to_assessor">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="switchStatus('with_assessor')"
+                            ><!-- Back To Processing -->Back To Assessor</button>
                         </div>
 
-                        <div class="row" v-if="display_action_grant">
-                            <div class="col-sm-12" >
-                                <button
-                                    class="btn btn-primary top-buffer-s w-btn"
-                                    @click.prevent="issueProposal()"
-                                >Grant</button><br/>
-                            </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_back_to_assessor_requirements">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="switchStatus('with_assessor_conditions')"
+                            ><!-- Back To Requirements -->Back To Assessor</button>
                         </div>
 
-                        <div class="row" v-if="display_action_decline">
-                            <div class="col-sm-12">
-                                <button
-                                    class="btn btn-primary top-buffer-s w-btn"
-                                    @click.prevent="declineProposal()"
-                                >Decline</button><br/>
-                            </div>
+                        <div class="d-flex justify-content-center" v-if="display_action_grant">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                @click.prevent="issueProposal()"
+                            >Grant</button>
+                        </div>
+
+                        <div class="d-flex justify-content-center" v-if="display_action_decline">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                @click.prevent="declineProposal()"
+                            >Decline</button>
                         </div>
                     </div>
                 </div>
@@ -354,6 +342,17 @@ export default {
             if (this.debug) return true
 
             return !this.isFinalised && this.canAction
+        },
+        display_action_complete_referral: function(){
+            if (this.debug) return true
+
+            let display = false
+            try {
+                if(this.proposal.processing_status === constants.WITH_REFERRAL){
+                    display = true
+                }
+            } catch(err) {}
+            return display
         },
         display_action_request_amendment: function(){
             if (this.debug) return true
@@ -730,6 +729,9 @@ export default {
         amendmentRequest: function(){
             this.$emit('amendmentRequest')
         },
+        completeReferral: function(){
+            this.$emit('completeReferral')
+        },
         proposedDecline: function(){
             this.$emit('proposedDecline')
         },
@@ -756,9 +758,6 @@ export default {
 </script>
 
 <style scoped>
-.top-buffer-s {
-    margin-top: 10px;
-}
 .actionBtn {
     cursor: pointer;
 }
@@ -767,9 +766,6 @@ export default {
     margin-top: 15px;
     margin-bottom: 10px;
     width: 100%;
-}
-.w-btn {
-    width: 80%;
 }
 .referral_comment_textarea {
     resize: vertical;
