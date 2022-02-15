@@ -969,9 +969,8 @@ class RequirementDocumentSerializer(serializers.ModelSerializer):
         #fields = '__all__'
 
 class ProposalRequirementSerializer(serializers.ModelSerializer):
-    due_date = serializers.DateField(input_formats=['%d/%m/%Y'],required=False,allow_null=True)
+    #due_date = serializers.DateField(input_formats=['%d/%m/%Y'],required=False,allow_null=True)
     can_referral_edit=serializers.SerializerMethodField()
-    can_district_assessor_edit=serializers.SerializerMethodField()
     requirement_documents = RequirementDocumentSerializer(many=True, read_only=True)
     class Meta:
         model = ProposalRequirement
@@ -980,7 +979,8 @@ class ProposalRequirementSerializer(serializers.ModelSerializer):
             'due_date',
             'free_requirement',
             'standard_requirement',
-            'standard','order',
+            'standard',
+            'order',
             'proposal',
             'recurrence',
             'recurrence_schedule',
@@ -990,10 +990,7 @@ class ProposalRequirementSerializer(serializers.ModelSerializer):
             'copied_from',
             'referral_group',
             'can_referral_edit',
-            'district_proposal',
-            'district',
             'requirement_documents',
-            'can_district_assessor_edit',
             'require_due_date',
             'copied_for_renewal',
             'notification_only',
@@ -1004,11 +1001,6 @@ class ProposalRequirementSerializer(serializers.ModelSerializer):
         request = self.context['request']
         user = request.user._wrapped if hasattr(request.user,'_wrapped') else request.user
         return obj.can_referral_edit(user)
-
-    def get_can_district_assessor_edit(self,obj):
-        request = self.context['request']
-        user = request.user._wrapped if hasattr(request.user,'_wrapped') else request.user
-        return obj.can_district_assessor_edit(user)
 
 class ProposalStandardRequirementSerializer(serializers.ModelSerializer):
     class Meta:

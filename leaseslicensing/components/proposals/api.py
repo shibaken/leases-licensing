@@ -1320,14 +1320,13 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @renderer_classes((JSONRenderer,))
     def submit(self, request, *args, **kwargs):
         try:
-            with transaction.atomic():
-                instance = self.get_object()
-                save_proponent_data(instance,request,self)
-                #return redirect(reverse('external'))
-                proposal_submit(instance, request)
-                instance.save()
-                serializer = self.get_serializer(instance)
-                return Response(serializer.data)
+            instance = self.get_object()
+            save_proponent_data(instance,request,self)
+            #return redirect(reverse('external'))
+            proposal_submit(instance, request)
+            instance.save()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -2135,10 +2134,12 @@ class ProposalRequirementViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=json.loads(request.data.get('data')))
+            #serializer = self.get_serializer(instance, data=json.loads(request.data.get('data')))
+            serializer = self.get_serializer(instance, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            instance.add_documents(request)
+            #TODO: requirements documents in LL?
+            #instance.add_documents(request)
             return Response(serializer.data)
         except Exception as e:
             print(traceback.print_exc())
@@ -2147,10 +2148,13 @@ class ProposalRequirementViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            serializer = self.get_serializer(data= json.loads(request.data.get('data')))
+            print(request.data)
+            #serializer = self.get_serializer(data= json.loads(request.data.get('data')))
+            serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception = True)
             instance = serializer.save()
-            instance.add_documents(request)
+            #TODO: requirements documents in LL?
+            #instance.add_documents(request)
             return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())

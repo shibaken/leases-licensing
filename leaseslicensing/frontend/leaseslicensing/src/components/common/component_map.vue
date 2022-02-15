@@ -42,8 +42,8 @@
                             </div>
                         </transition>
                     </div>
-                    <div class="optional-layers-button">
-                        <img v-if="selectedFeatureId" id="delete_feature" src="../../assets/trash.svg" @click="removeLeaselicenceFeature()" />
+                    <div v-if="selectedFeatureId" class="optional-layers-button">
+                        <img id="delete_feature" src="../../assets/trash.svg" @click="removeLeaselicenceFeature()" />
                     </div>
                 </div>
             </div>
@@ -803,7 +803,7 @@ export default {
     .optional-layers-wrapper {
         position: absolute;
         top: 70px;
-        left: 10px;
+        left: 20px;
     }
     .optional-layers-button {
         position: relative;
