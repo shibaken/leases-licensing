@@ -702,7 +702,14 @@ export default {
             let vm = this;
             vm.checkAssessorData();
             try {
-                const res = await vm.$http.post(vm.proposal_form_url, {'proposal': this.proposal})
+                let payload = {'proposal': this.proposal}
+                if (this.$refs.application_form.componentMapOn) {
+                    //this.proposal.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+                    payload['proposal_geometry'] = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+                }
+                const res = await vm.$http.post(vm.proposal_form_url, payload)
+                console.log('aho4')
+
                 if(res.ok){
                     swal({
                         title: 'Saved',
