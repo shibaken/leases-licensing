@@ -89,14 +89,12 @@
 
     </div>
 </template>
+
 <script>
 import ApplicationForm from '../form.vue';
 import Vue from 'vue'
-import {
-  api_endpoints,
-  helpers
-}
-from '@/utils/hooks'
+import { api_endpoints, helpers } from '@/utils/hooks'
+
 export default {
   name: 'ExternalProposal',
   data: function() {
