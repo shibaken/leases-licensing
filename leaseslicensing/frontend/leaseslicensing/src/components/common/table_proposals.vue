@@ -74,7 +74,6 @@ import datatable from '@/utils/vue/datatable.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
-require('@/../node_modules/font-awesome/css/font-awesome.min.css' )
 
 export default {
     name: 'TableApplications',
