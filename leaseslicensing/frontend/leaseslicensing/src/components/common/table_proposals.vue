@@ -24,10 +24,12 @@
                     <div class="form-group">
                         <label for="">Lodged From</label>
                         <div class="input-group date" ref="proposalDateFromPicker">
-                            <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
+                            <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
+                            <!--
                             <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
+                                <span class="fa fa-calendar"></span>
                             </span>
+                            -->
                         </div>
                     </div>
                 </div>
@@ -35,10 +37,12 @@
                     <div class="form-group">
                         <label for="">Lodged To</label>
                         <div class="input-group date" ref="proposalDateToPicker">
-                            <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
+                            <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
+                            <!--
                             <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
+                                <span class="fa fa-calendar"></span>
                             </span>
+                            -->
                         </div>
                     </div>
                 </div>
@@ -70,6 +74,7 @@ import datatable from '@/utils/vue/datatable.vue'
 import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
+require('@/../node_modules/font-awesome/css/font-awesome.min.css' )
 
 export default {
     name: 'TableApplications',
