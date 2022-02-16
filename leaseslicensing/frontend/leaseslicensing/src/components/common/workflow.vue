@@ -592,7 +592,8 @@ export default {
             vm.checkAssessorData();
             let formData = new FormData(vm.form);
             vm.sendingReferral = true;
-            vm.$http.post(vm.proposal_form_url,formData).then(
+            //vm.$http.post(vm.proposal_form_url, formData).then(
+            vm.$http.post(vm.proposal_form_url, {'proposal': this.proposal}).then(
                 res => {
                     let data = {'email':vm.selected_referral, 'text': vm.referral_text}
                     vm.sendingReferral = true;

@@ -38,7 +38,6 @@
                     @assignRequestUser="assignRequestUser"
                     @assignTo="assignTo"
                 />
-
             </div>
 
             <div class="col-md-9">
@@ -129,19 +128,55 @@
 
                         <template v-slot:slot_other_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_other_checklist_questions" @created="collapsible_other_checklist_questions_component_mounted">
-                                Questions other here
+                                <template v-if="assessment_for_assessor_other.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_other">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_other"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
                         <template v-slot:slot_deed_poll_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_deed_poll_checklist_questions" @created="collapsible_deed_poll_checklist_questions_component_mounted">
-                                Questions deed_poll here
+                                <template v-if="assessment_for_assessor_deed_poll.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_deed_poll">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_deed_poll"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
                         <template v-slot:slot_additional_documents_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_additional_documents_checklist_questions" @created="collapsible_additional_documents_checklist_questions_component_mounted">
-                                Questions additional_documents here
+                                <template v-if="assessment_for_assessor_additional_documents.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_additional_documents">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_additional_documents"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
@@ -364,6 +399,30 @@ export default {
                 return []
             }
         },
+        assessment_for_assessor_other: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.other
+                return answers ? answers : []
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_deed_poll: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.deed_poll
+                return answers ? answers : []
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_additional_documents: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.additional_documents
+                return answers ? answers : []
+            } catch (err) {
+                return []
+            }
+        },
         assessments_for_referrals_map: function(){
             try {
                 let assessments = []
@@ -406,6 +465,57 @@ export default {
                         let my_assessment = {
                             'referral_fullname': assessment.referral.referral.fullname, 
                             'answers': assessment.section_answers.proposal_impact
+                        }
+                        assessments.push(my_assessment)
+                    }
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_other: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.other){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.other
+                        }
+                        assessments.push(my_assessment)
+                    }
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_deed_poll: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.deed_poll){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.deed_poll
+                        }
+                        assessments.push(my_assessment)
+                    }
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_additional_documents: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.additional_documents){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.additional_documents
                         }
                         assessments.push(my_assessment)
                     }
@@ -592,7 +702,14 @@ export default {
             let vm = this;
             vm.checkAssessorData();
             try {
-                const res = await vm.$http.post(vm.proposal_form_url, {'proposal': this.proposal})
+                let payload = {'proposal': this.proposal}
+                if (this.$refs.application_form.componentMapOn) {
+                    //this.proposal.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+                    payload['proposal_geometry'] = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+                }
+                const res = await vm.$http.post(vm.proposal_form_url, payload)
+                console.log('aho4')
+
                 if(res.ok){
                     swal({
                         title: 'Saved',
