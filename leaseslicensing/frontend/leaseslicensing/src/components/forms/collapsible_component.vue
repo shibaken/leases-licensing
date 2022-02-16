@@ -2,10 +2,10 @@
     <div>
         <div class="toggle_filters_wrapper">
             <div data-bs-toggle="collapse" :data-bs-target="'#' + target_elem_id" :id="button_elem_id" class="toggle_filters_button collapsed" @click="toggle_filters_button_clicked">
-                <div :id="chevron_elem_id" class="toggle_filters_icon rotate_icon">
-                    <i class="bi bi-chevron-down"></i>
+                <div class="toggle_filters_icon">
+                    <i :id="chevron_elem_id" class="rotate_icon fa fa-chevron-down"></i>
                 </div>
-                <i :id="warning_icon_id" :title="warning_icon_title" class="bi bi-exclamation-circle bi-2x filter_warning_icon"></i>
+                <i :id="warning_icon_id" :title="warning_icon_title" class="fa fa-exclamation-circle fa-2x filter_warning_icon"></i>
             </div>
 
             <div class="collapse" :id="target_elem_id">
@@ -17,6 +17,7 @@
 
 <script>
 import uuid from 'uuid';
+require('@/../node_modules/font-awesome/css/font-awesome.min.css' )
 
 export default {
     name:"CollapsibleComponent",

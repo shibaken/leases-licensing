@@ -814,7 +814,8 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'can_edit_period',
                 'assessor_assessment',
                 'referral_assessments',
-                'requirements_completed'
+                'requirements_completed',
+                'proposalgeometry',
                 )
         read_only_fields = (
             'requirements',

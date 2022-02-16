@@ -1,43 +1,45 @@
 <template>
     <div>
         <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Type</label>
-                    <template v-show="select2AppliedToApplicationType">
-                        <select class="form-control" ref="filter_application_type" ></select>
-                    </template>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Status</label>
-                    <template v-show="select2AppliedToApplicationStatus">
-                        <select class="form-control" ref="filter_application_status" ></select>
-                    </template>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Lodged From</label>
-                    <div class="input-group date" ref="proposalDateFromPicker">
-                        <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom" -->
-                        <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
-                        <!-- span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Type</label>
+                        <template v-show="select2AppliedToApplicationType">
+                            <select class="form-control" ref="filter_application_type"></select>
+                        </template>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Lodged To</label>
-                    <div class="input-group date" ref="proposalDateToPicker">
-                        <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo" -->
-                        <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
-                        <!-- span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span -->
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Status</label>
+                        <template v-show="select2AppliedToApplicationStatus">
+                            <select class="form-control" ref="filter_application_status"></select>
+                        </template>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Lodged From</label>
+                        <div class="input-group date" ref="proposalDateFromPicker">
+                            <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom" -->
+                            <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedFrom">
+                            <!-- span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Lodged To</label>
+                        <div class="input-group date" ref="proposalDateToPicker">
+                            <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo" -->
+                            <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterProposalLodgedTo">
+                            <!-- span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span -->
+                        </div>
                     </div>
                 </div>
             </div>
