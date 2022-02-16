@@ -12,13 +12,13 @@
 {% is_payment_officer as is_payment_officer %}
 {% build_tag as build_tag %}
 
-<ul class="nav navbar-nav">
+<ul class="nav navbar-expand-lg navbar-light">
 {% if is_internal_login %}
-<li><a href="/internal/approvals">Approvals</a></li>
-<li><a href="/internal/compliances">Conditions</a></li>
-<li><a href="/internal/organisations/access">Organisation Access</a></li>
-<li><a href="">Invoices</a></li>
-<li><a href="/internal/search">Search</a></li>
+<li class="nav-item"><a class="nav-link" href="/internal/approvals">Approvals</a></li>
+<li class="nav-item"><a class="nav-link" href="/internal/compliances">Conditions</a></li>
+<li class="nav-item"><a class="nav-link" href="/internal/organisations/access">Organisation Access</a></li>
+<li class="nav-item"><a class="nav-link" href="">Invoices</a></li>
+<li class="nav-item"><a class="nav-link" href="/internal/search">Search</a></li>
 {% else %}
 {% endif %}
 </ul>

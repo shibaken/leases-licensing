@@ -2545,7 +2545,7 @@ class ProposalUserAction(UserAction):
     ACTION_ENTER_REQUIREMENTS = "Enter Requirements for application {}"
     ACTION_BACK_TO_PROCESSING = "Back to processing for application {}"
     RECALL_REFERRAL = "Referral {} for application {} has been recalled"
-    CONCLUDE_REFERRAL = "{}: Referral {} for application {} has been concluded by group {}"
+    CONCLUDE_REFERRAL = "{}: Referral {} for application {} has been concluded"
     ACTION_REFERRAL_DOCUMENT = "Assign Referral document {}"
     ACTION_REFERRAL_ASSIGN_TO_ASSESSOR = "Assign Referral  {} of application {} to {} as the assessor"
     ACTION_REFERRAL_UNASSIGN_ASSESSOR = "Unassign assessor from Referral {} of application {}"
@@ -2698,10 +2698,13 @@ class Referral(RevisionedMixin):
         (1, 'Sent From Assessor'),
         (2, 'Sent From Referral')
     )
+    PROCESSING_STATUS_WITH_REFERRAL = 'with_referral'
+    PROCESSING_STATUS_RECALLED = 'recalled'
+    PROCESSING_STATUS_COMPLETED = 'completed'
     PROCESSING_STATUS_CHOICES = (
-        ('with_referral', 'Awaiting'),
-        ('recalled', 'Recalled'),
-        ('completed', 'Completed'),
+        (PROCESSING_STATUS_WITH_REFERRAL, 'Awaiting'),
+        (PROCESSING_STATUS_RECALLED, 'Recalled'),
+        (PROCESSING_STATUS_COMPLETED, 'Completed'),
     )
     lodged_on = models.DateTimeField(auto_now_add=True)
     proposal = models.ForeignKey(Proposal,related_name='referrals', on_delete=models.CASCADE)
@@ -2744,7 +2747,7 @@ class Referral(RevisionedMixin):
     def can_be_completed(self):
         return True
         #Referral cannot be completed until second level referral sent by referral has been completed/recalled
-        qs=Referral.objects.filter(sent_by=self.referral, proposal=self.proposal, processing_status='with_referral')
+        qs=Referral.objects.filter(sent_by=self.referral, proposal=self.proposal, processing_status=Referral.PROCESSING_STATUS_WITH_REFERRAL)
         if qs:
             return False
         else:
@@ -2759,7 +2762,7 @@ class Referral(RevisionedMixin):
         return []  # TODO: correct this
 
     def can_process(self, user):
-        if self.processing_status=='with_referral':
+        if self.processing_status == Referral.PROCESSING_STATUS_WITH_REFERRAL:
             group =  ReferralRecipientGroup.objects.filter(id=self.referral_group.id)
             #user=request.user
             if group and group[0] in user.referralrecipientgroup_set.all():
@@ -2804,7 +2807,7 @@ class Referral(RevisionedMixin):
         with transaction.atomic():
             if not self.proposal.can_assess(request.user):
                 raise exceptions.ProposalNotAuthorized()
-            self.processing_status = 'recalled'
+            self.processing_status = Referral.PROCESSING_STATUS_RECALLED
             self.save()
             # TODO Log proposal action
             self.proposal.log_user_action(ProposalUserAction.RECALL_REFERRAL.format(self.id,self.proposal.id),request)
@@ -2851,8 +2854,8 @@ class Referral(RevisionedMixin):
         with transaction.atomic():
             if not self.proposal.can_assess(request.user):
                 raise exceptions.ProposalNotAuthorized()
-            self.processing_status = 'with_referral'
-            self.proposal.processing_status = 'with_referral'
+            self.processing_status = Referral.PROCESSING_STATUS_WITH_REFERRAL
+            self.proposal.processing_status = Proposal.PROCESSING_STATUS_WITH_REFERRAL
             self.proposal.save()
             self.sent_from = 1
             self.save()
@@ -2884,29 +2887,24 @@ class Referral(RevisionedMixin):
     def complete(self,request):
         with transaction.atomic():
             try:
-                #if request.user != self.referral:
-                group = ReferralRecipientGroup.objects.filter(id=self.referral_group.id)
-                #print u.referralrecipientgroup_set.all()
-                user = request.user
-                if group and group[0] not in user.referralrecipientgroup_set.all():
-                    raise exceptions.ReferralNotAuthorized()
-                self.processing_status = 'completed'
-                self.referral = request.user
-                self.referral_text = request.user.get_full_name() + ': ' + request.data.get('referral_comment')
+                self.processing_status = Referral.PROCESSING_STATUS_COMPLETED
+                self.referral = request.user.id
                 self.add_referral_document(request)
                 self.save()
+
                 # TODO Log proposal action
                 #self.proposal.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-                self.proposal.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(request.user.get_full_name(), self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
+                self.proposal.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(request.user.get_full_name(), self.id, self.proposal.id), request)
+
                 # TODO log organisation action
                 #self.proposal.applicant.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(self.id,self.proposal.id,'{}({})'.format(self.referral.get_full_name(),self.referral.email)),request)
-                applicant_field=getattr(self.proposal, self.proposal.applicant_field)
+                applicant_field = getattr(self.proposal, self.proposal.applicant_field)
                 applicant_field = retrieve_email_user(applicant_field)
 
                 # TODO: logging applicant_field
                 # applicant_field.log_user_action(ProposalUserAction.CONCLUDE_REFERRAL.format(request.user.get_full_name(), self.id,self.proposal.id,'{}'.format(self.referral_group.name)),request)
 
-                send_referral_complete_email_notification(self,request)
+                send_referral_complete_email_notification(self, request)
             except:
                 raise
 
@@ -2949,12 +2947,12 @@ class Referral(RevisionedMixin):
     def send_referral(self,request,referral_email,referral_text):
         with transaction.atomic():
             try:
-                if self.proposal.processing_status == 'with_referral':
+                if self.proposal.processing_status == Proposal.PROCESSING_STATUS_WITH_REFERRAL:
                     if request.user != self.referral:
                         raise exceptions.ReferralNotAuthorized()
                     if self.sent_from != 1:
                         raise exceptions.ReferralCanNotSend()
-                    self.proposal.processing_status = 'with_referral'
+                    self.proposal.processing_status = Proposal.PROCESSING_STATUS_WITH_REFERRAL
                     self.proposal.save()
                     referral = None
                     # Check if the user is in ledger

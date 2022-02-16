@@ -136,23 +136,24 @@ export default {
         mapTabClicked: function(){
             this.$refs.component_map_with_filters.forceToRefreshMap()
         },
-        //set_tabs: function(){
-            //let aho = $('#pills-tab a[href="#pills-applications"]').tab('show');
-
-            //let elem = $('#pills-tab a[href="#pills-applications"]')
-            //let tab = bootstrap.Tab.getInstance(elem)
-            //if(!tab)
-            //    tab = new bootstrap.Tab(aho)
-            //tab.show()
-        //},
+        set_active_tab: function(tab_href_name){
+            let elem = $('#pills-tab a[href="#' + tab_href_name + '"]')
+            let tab = bootstrap.Tab.getInstance(elem)
+            if(!tab)
+                tab = new bootstrap.Tab(elem)
+            tab.show()
+        },
     },
     mounted: function () {
         let vm = this
-        //vm.set_tabs();
+
         vm.$http.get('/api/profile').then(res => {
             vm.accessing_user = res.body
         })
-        chevron_toggle.init();
+        this.$nextTick(function(){
+            chevron_toggle.init();
+            vm.set_active_tab('pills-applications')
+        })
     },
     created: function() {
 

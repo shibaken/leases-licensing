@@ -13,6 +13,8 @@ from leaseslicensing.components.bookings.awaiting_payment_invoice_pdf import cre
 from datetime import datetime
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 
+from leaseslicensing.ledger_api_utils import retrieve_email_user
+
 logger = logging.getLogger(__name__)
 
 SYSTEM_NAME = settings.SYSTEM_NAME_SHORT + ' Automated Message'
@@ -133,6 +135,7 @@ class DistrictProposalApprovalSendNotificationEmail(TemplateEmailBase):
     #html_template = 'leaseslicensing/emails/proposals/send_district_decline_notification.html'
     txt_template = 'leaseslicensing/emails/proposals/send_district_approval_notification.txt'
 
+
 def send_qaofficer_email_notification(proposal, recipients, request, reminder=False):
     email = QAOfficerSendNotificationEmail()
     url = request.build_absolute_uri(reverse('internal-proposal-detail',kwargs={'proposal_pk': proposal.id}))
@@ -155,8 +158,8 @@ def send_qaofficer_email_notification(proposal, recipients, request, reminder=Fa
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_qaofficer_complete_email_notification(proposal, recipients, request, reminder=False):
@@ -182,8 +185,8 @@ def send_qaofficer_complete_email_notification(proposal, recipients, request, re
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_referral_email_notification(referral, recipients, request, reminder=False):
@@ -216,38 +219,36 @@ def send_referral_email_notification(referral, recipients, request, reminder=Fal
     if referral.proposal.org_applicant:
         _log_org_email(msg, referral.proposal.org_applicant, referral.referral, sender=sender)
     elif referral.proposal.ind_applicant:
-        # TODO: implement logging
-        pass
-        # _log_user_email(msg, referral.proposal.ind_applicant, referral.referral, sender=sender)
-    else:
-        pass
+        _log_user_email(msg, referral.proposal.ind_applicant, referral.referral, sender=sender)
 
 
-def send_referral_complete_email_notification(referral,request):
+def send_referral_complete_email_notification(referral, request):
+    sent_by = retrieve_email_user(referral.sent_by)
+
     email = ReferralCompleteNotificationEmail()
-    email.subject = referral.sent_by.email + ': ' + email.subject
+    email.subject = sent_by.email + ': ' + email.subject
     url = request.build_absolute_uri(reverse('internal-proposal-detail',kwargs={'proposal_pk': referral.proposal.id}))
 
     context = {
-        'completed_by': referral.referral,
+        'completed_by': retrieve_email_user(referral.referral),
         'proposal': referral.proposal,
         'url': url,
         'referral_comments': referral.referral_text
     }
-    attachments=[]
+    attachments = []
     if referral.document:
         file_name = referral.document._file.name
         #attachment = (file_name, doc._file.file.read(), 'image/*')
         attachment = (file_name, referral.document._file.file.read())
         attachments.append(attachment)
 
-    msg = email.send(referral.sent_by.email,attachments=attachments, context=context)
+    msg = email.send(sent_by.email, attachments=attachments, context=context)
     sender = request.user if request else settings.DEFAULT_FROM_EMAIL
     _log_proposal_referral_email(msg, referral, sender=sender)
     if referral.proposal.org_applicant:
         _log_org_email(msg, referral.proposal.org_applicant, referral.referral, sender=sender)
-    else:
-        _log_user_email(msg, referral.proposal.submitter, referral.referral, sender=sender)
+    elif referral.proposal.ind_applicant:
+        _log_user_email(msg, referral.proposal.ind_applicant, referral.referral, sender=sender)
 
 
 def send_amendment_email_notification(amendment_request, request, proposal):
@@ -280,8 +281,8 @@ def send_amendment_email_notification(amendment_request, request, proposal):
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_submit_email_notification(request, proposal):
@@ -350,8 +351,10 @@ def send_approver_decline_email_notification(reason, request, proposal):
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        # TODO: implement logging
+        # _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+        pass
 
 
 def send_approver_approve_email_notification(request, proposal):
@@ -370,8 +373,8 @@ def send_approver_approve_email_notification(request, proposal):
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_proposal_decline_email_notification(proposal,request,proposal_decline):
@@ -393,7 +396,7 @@ def send_proposal_decline_email_notification(proposal,request,proposal_decline):
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
+    elif proposal.ind_applicant:
         _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
 
 
@@ -418,8 +421,8 @@ def send_proposal_approver_sendback_email_notification(request, proposal):
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_proposal_approval_email_notification(proposal,request):
@@ -474,8 +477,8 @@ def send_proposal_approval_email_notification(proposal,request):
 
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_proposal_awaiting_payment_approval_email_notification(proposal, request):
@@ -510,8 +513,8 @@ def send_proposal_awaiting_payment_approval_email_notification(proposal, request
 
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_district_proposal_submit_email_notification(district_proposal, request):
@@ -535,8 +538,8 @@ def send_district_proposal_submit_email_notification(district_proposal, request)
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
     return msg
 
 
@@ -563,8 +566,8 @@ def send_district_proposal_approver_sendback_email_notification(request, distric
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 #send email when Proposal is 'proposed to decline' by assessor.
 def send_district_approver_decline_email_notification(reason, request, district_proposal):
@@ -584,8 +587,8 @@ def send_district_approver_decline_email_notification(reason, request, district_
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_district_approver_approve_email_notification(request, district_proposal):
@@ -605,8 +608,8 @@ def send_district_approver_approve_email_notification(request, district_proposal
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_district_proposal_decline_email_notification(district_proposal,request,proposal_decline):
@@ -630,8 +633,8 @@ def send_district_proposal_decline_email_notification(district_proposal,request,
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_district_proposal_approval_email_notification(district_proposal,approval, request,):
@@ -681,8 +684,8 @@ def send_district_proposal_approval_email_notification(district_proposal,approva
 
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def send_district_proposal_approval_email_notification_orig(district_proposal,approval,request):
@@ -731,8 +734,8 @@ def send_district_proposal_approval_email_notification_orig(district_proposal,ap
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
         _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
-    else:
-        _log_user_email(msg, proposal.submitter, proposal.submitter, sender=sender)
+    elif proposal.ind_applicant:
+        _log_user_email(msg, proposal.ind_applicant, proposal.submitter, sender=sender)
 
 
 def _log_proposal_referral_email(email_message, referral, sender=None):
@@ -881,49 +884,53 @@ def _log_org_email(email_message, organisation, customer ,sender=None):
 
     return email_entry
 
-#def _log_user_email(email_message, emailuser, customer ,sender=None):
-#    from ledger.accounts.models import EmailUserLogEntry
-#    if isinstance(email_message, (EmailMultiAlternatives, EmailMessage,)):
-#        # TODO this will log the plain text body, should we log the html instead
-#        text = email_message.body
-#        subject = email_message.subject
-#        fromm = smart_text(sender) if sender else smart_text(email_message.from_email)
-#        # the to email is normally a list
-#        if isinstance(email_message.to, list):
-#            to = ','.join(email_message.to)
-#        else:
-#            to = smart_text(email_message.to)
-#        # we log the cc and bcc in the same cc field of the log entry as a ',' comma separated string
-#        all_ccs = []
-#        if email_message.cc:
-#            all_ccs += list(email_message.cc)
-#        if email_message.bcc:
-#            all_ccs += list(email_message.bcc)
-#        all_ccs = ','.join(all_ccs)
-#
-#    else:
-#        text = smart_text(email_message)
-#        subject = ''
-#        to = customer
-#        fromm = smart_text(sender) if sender else SYSTEM_NAME
-#        all_ccs = ''
-#
-#    customer = customer
-#
-#    staff = sender
-#
-#    kwargs = {
-#        'subject': subject,
-#        'text': text,
-#        'emailuser': emailuser,
-#        'customer': customer,
-#        'staff': staff,
-#        'to': to,
-#        'fromm': fromm,
-#        'cc': all_ccs
-#    }
-#
-#    email_entry = EmailUserLogEntry.objects.create(**kwargs)
-#
-#    return email_entry
+
+def _log_user_email(email_message, emailuser, customer ,sender=None):
+    return
+    # TODO: implement this
+
+    from ledger.accounts.models import EmailUserLogEntry
+    if isinstance(email_message, (EmailMultiAlternatives, EmailMessage,)):
+        # TODO this will log the plain text body, should we log the html instead
+        text = email_message.body
+        subject = email_message.subject
+        fromm = smart_text(sender) if sender else smart_text(email_message.from_email)
+        # the to email is normally a list
+        if isinstance(email_message.to, list):
+            to = ','.join(email_message.to)
+        else:
+            to = smart_text(email_message.to)
+        # we log the cc and bcc in the same cc field of the log entry as a ',' comma separated string
+        all_ccs = []
+        if email_message.cc:
+            all_ccs += list(email_message.cc)
+        if email_message.bcc:
+            all_ccs += list(email_message.bcc)
+        all_ccs = ','.join(all_ccs)
+
+    else:
+        text = smart_text(email_message)
+        subject = ''
+        to = customer
+        fromm = smart_text(sender) if sender else SYSTEM_NAME
+        all_ccs = ''
+
+    customer = customer
+
+    staff = sender
+
+    kwargs = {
+        'subject': subject,
+        'text': text,
+        'emailuser': emailuser,
+        'customer': customer,
+        'staff': staff,
+        'to': to,
+        'fromm': fromm,
+        'cc': all_ccs
+    }
+
+    email_entry = EmailUserLogEntry.objects.create(**kwargs)
+
+    return email_entry
 

@@ -1,36 +1,38 @@
 <template>
     <div>
         <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Status</label>
-                    <select class="form-control" v-model="filterApplicationStatus">
-                        <option value="all">All</option>
-                        <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Created From</label>
-                    <div class="input-group date" ref="proposalDateFromPicker">
-                        <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedFrom" -->
-                        <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedFrom">
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Status</label>
+                        <select class="form-control" v-model="filterApplicationStatus">
+                            <option value="all">All</option>
+                            <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="">Created To</label>
-                    <div class="input-group date" ref="proposalDateToPicker">
-                        <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedTo" -->
-                        <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedTo">
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Created From</label>
+                        <div class="input-group date" ref="proposalDateFromPicker">
+                            <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedFrom" -->
+                            <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedFrom">
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Created To</label>
+                        <div class="input-group date" ref="proposalDateToPicker">
+                            <!-- input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedTo" -->
+                            <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="filterCompetitiveProcessCreatedTo">
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

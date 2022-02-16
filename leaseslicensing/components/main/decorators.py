@@ -12,6 +12,7 @@ import logging
 
 logger = logging.getLogger()
 
+
 def basic_exception_handler(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -22,12 +23,13 @@ def basic_exception_handler(func):
             print(traceback.print_exc())
             raise
         except ValidationError as e:
-            from mooringlicensing.components.main.utils import handle_validation_error
+            from leaseslicensing.components.main.utils import handle_validation_error
             handle_validation_error(e)
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
     return wrapper
+
 
 def timeit(method):
     def timed(*args, **kw):
