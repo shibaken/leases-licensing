@@ -37,6 +37,7 @@ from leaseslicensing.components.main.utils import get_dbca_lands_and_waters_geos
 
 import logging
 
+from leaseslicensing.helpers import is_assessor
 from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
 
 logger = logging.getLogger(__name__)
@@ -401,7 +402,7 @@ def save_assessor_data(proposal, request, viewset):
             proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
 
             # Save checklist answers
-            if proposal_data['assessor_assessment']['referral']['referral']['id'] == request.user.id:
+            if is_assessor(request.user.id):
                 # When this assessment is for the accessing user
                 for section, answers in proposal_data['assessor_assessment']['section_answers'].items():
                     for answer_dict in answers:
