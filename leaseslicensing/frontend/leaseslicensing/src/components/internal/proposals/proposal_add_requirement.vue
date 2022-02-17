@@ -398,7 +398,7 @@ export default {
 
             // Intialise select2
             $(vm.$refs.standard_req).select2({
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 minimumInputLength: 2,
                 placeholder:"Select Requirement"
