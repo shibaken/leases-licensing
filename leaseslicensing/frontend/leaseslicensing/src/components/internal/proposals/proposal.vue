@@ -29,6 +29,7 @@
                     @toggleProposal="toggleProposal"
                     @toggleRequirements="toggleRequirements"
                     @switchStatus="switchStatus"
+                    @completeReferral="completeReferral"
                     @amendmentRequest="amendmentRequest"
                     @proposedDecline="proposedDecline"
                     @proposedApproval="proposedApproval"
@@ -37,7 +38,6 @@
                     @assignRequestUser="assignRequestUser"
                     @assignTo="assignTo"
                 />
-
             </div>
 
             <div class="col-md-9">
@@ -128,19 +128,55 @@
 
                         <template v-slot:slot_other_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_other_checklist_questions" @created="collapsible_other_checklist_questions_component_mounted">
-                                Questions other here
+                                <template v-if="assessment_for_assessor_other.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_other">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_other"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
                         <template v-slot:slot_deed_poll_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_deed_poll_checklist_questions" @created="collapsible_deed_poll_checklist_questions_component_mounted">
-                                Questions deed_poll here
+                                <template v-if="assessment_for_assessor_deed_poll.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_deed_poll">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_deed_poll"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
                         <template v-slot:slot_additional_documents_checklist_questions>
                             <CollapsibleQuestions ref="collapsible_additional_documents_checklist_questions" @created="collapsible_additional_documents_checklist_questions_component_mounted">
-                                Questions additional_documents here
+                                <template v-if="assessment_for_assessor_additional_documents.length > 0">
+                                    <div class="assessment_title">Assessor</div>
+                                </template>
+                                <template v-for="question in assessment_for_assessor_additional_documents">  <!-- There is only one assessor assessment -->
+                                    <ChecklistQuestion :question="question" />
+                                </template>
+
+                                <template v-for="assessment in assessments_for_referrals_additional_documents"> <!-- There can be multiple referral assessments -->
+                                    <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
+                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                        <ChecklistQuestion :question="question" />
+                                    </template>
+                                </template>
                             </CollapsibleQuestions>
                         </template>
 
@@ -181,6 +217,17 @@
             :proposal="proposal"
             @refreshFromResponse="refreshFromResponse"
         />
+        <!--
+        <input type="hidden" name="csrfmiddlewaretoken" :value="csrf_token"/>
+        <input type='hidden' name="schema" :value="JSON.stringify(proposal)" />
+        <input type='hidden' name="proposal_id" :value="1" />
+        -->
+        <div class="fixed-bottom" v-if="hasAssessorMode">
+            <div class="bottom_items_wrapper text-end">
+                <button class="btn btn-primary" @click.prevent="save_and_continue()">Save and Continue</button>
+                <button class="btn btn-primary" @click.prevent="save_and_exit()">Save and Exit</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -309,6 +356,19 @@ export default {
 
     },
     computed: {
+        proposal_form_url: function() {
+            if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
+                return `/api/proposal/${this.proposal.id}/assessor_save.json`
+            } else if ([constants.WITH_REFERRAL, constants.WITH_REFERRAL_CONDITIONS].includes(this.proposal.processing_status)){
+                return `/api/proposal/${this.proposal.id}/referral_save.json`
+            } else {
+                // Should not reach here
+                return ''
+            }
+        },
+        complete_referral_url: function(){
+            return `/api/proposal/${this.proposal.id}/complete_referral.json`
+        },
         isRegistrationOfInterest: function(){
             return this.proposal.application_type.name === constants.APPLICATION_TYPE.REGISTRATION_OF_INTEREST ? true : false
         },
@@ -334,6 +394,30 @@ export default {
         assessment_for_assessor_proposal_impact: function(){
             try {
                 let answers = this.proposal.assessor_assessment.section_answers.proposal_impact
+                return answers ? answers : []
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_other: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.other
+                return answers ? answers : []
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_deed_poll: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.deed_poll
+                return answers ? answers : []
+            } catch (err) {
+                return []
+            }
+        },
+        assessment_for_assessor_additional_documents: function(){
+            try {
+                let answers = this.proposal.assessor_assessment.section_answers.additional_documents
                 return answers ? answers : []
             } catch (err) {
                 return []
@@ -381,6 +465,57 @@ export default {
                         let my_assessment = {
                             'referral_fullname': assessment.referral.referral.fullname, 
                             'answers': assessment.section_answers.proposal_impact
+                        }
+                        assessments.push(my_assessment)
+                    }
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_other: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.other){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.other
+                        }
+                        assessments.push(my_assessment)
+                    }
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_deed_poll: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.deed_poll){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.deed_poll
+                        }
+                        assessments.push(my_assessment)
+                    }
+                }
+                return assessments
+            } catch (err) {
+                return []
+            }
+        },
+        assessments_for_referrals_additional_documents: function(){
+            try {
+                let assessments = []
+                for (let assessment of this.proposal.referral_assessments){
+                    if(assessment.section_answers.additional_documents){
+                        let my_assessment = {
+                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'answers': assessment.section_answers.additional_documents
                         }
                         assessments.push(my_assessment)
                     }
@@ -528,6 +663,69 @@ export default {
         },
         locationUpdated: function(){
             console.log('in locationUpdated()');
+        },
+        save_and_continue: function(){
+            this.save()
+        },
+        save_and_exit: function(){
+            this.save()
+            this.$router.push({ name: 'internal-dashboard' })
+        },
+        completeReferral: function(){
+            let vm = this;
+            vm.checkAssessorData();
+            try {
+                swal({
+                    title: "Complete Referral",
+                    text: "Are you sure you want to complete this referral?",
+                    type: "question",
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit'
+                }).then(
+                    async(res) => {
+                        const response = await vm.$http.post(vm.complete_referral_url, {'proposal': this.proposal})
+                        if(response.ok){
+
+                        } else {
+
+                        }
+                    },
+                    err => {
+
+                    },
+                )
+            } catch (err) {
+                console.error(err)
+            }
+        },
+        save: async function() {
+            let vm = this;
+            vm.checkAssessorData();
+            try {
+                let payload = {'proposal': this.proposal}
+                if (this.$refs.application_form.componentMapOn) {
+                    //this.proposal.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+                    payload['proposal_geometry'] = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+                }
+                const res = await vm.$http.post(vm.proposal_form_url, payload)
+                console.log('aho4')
+
+                if(res.ok){
+                    swal({
+                        title: 'Saved',
+                        text: 'Your proposal has been saved',
+                        type: 'success',
+                    })
+                } else {
+                    swal({
+                        title: "Please fix following errors before saving",
+                        text: err.bodyText,
+                        type:'error',
+                    })
+                }
+            } catch (err){
+                console.error(err)
+            }
         },
         checkAssessorData: function(){
             //check assessor boxes and clear value of hidden assessor boxes so it won't get printed on approval pdf.
@@ -757,16 +955,16 @@ export default {
                 });
             }
         },
-        switchStatus: function(status){
+        switchStatus: function(new_status){
             console.log('in switchStatus')
             console.log(this.proposal.processing_status)
-            console.log(status)
+            console.log(new_status)
 
             let vm = this;
-            if(vm.proposal.processing_status == 'With Assessor' && status == 'with_assessor_requirements'){
+            if(vm.proposal.processing_status == 'With Assessor' && new_status == 'with_assessor_requirements'){
                 vm.checkAssessorData();
                 let formData = new FormData(vm.form);
-                let data = {'status': status, 'approver_comment': vm.approver_comment}
+                let data = {'status': new_status, 'approver_comment': vm.approver_comment}
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), JSON.stringify(data),{
                     emulateJSON:true,
                 })
@@ -793,8 +991,8 @@ export default {
             }
 
             //if approver is pushing back proposal to Assessor then navigate the approver back to dashboard page
-            else if(vm.proposal.processing_status == 'With Approver' && (status == 'with_assessor_requirements' || status=='with_assessor')) {
-                let data = {'status': status, 'approver_comment': vm.approver_comment}
+            else if(vm.proposal.processing_status == 'With Approver' && (new_status == 'with_assessor_requirements' || new_status=='with_assessor')) {
+                let data = {'status': new_status, 'approver_comment': vm.approver_comment}
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')),JSON.stringify(data),{
                     emulateJSON:true,
                 })
@@ -818,7 +1016,7 @@ export default {
                     )
                 });
             } else {
-                let data = {'status': status, 'approver_comment': vm.approver_comment}
+                let data = {'status': new_status, 'approver_comment': vm.approver_comment}
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), JSON.stringify(data),{
                     emulateJSON:true,
                 })
@@ -996,5 +1194,8 @@ export default {
     border-bottom: 1px solid #888;
     font-weight: bold;
     font-size: 1.3em;
+}
+.bottom_items_wrapper {
+    background-color: #f5f5f5;
 }
 </style>

@@ -115,7 +115,7 @@ export default {
 
                             return result;
                         },
-                        'createdCell': helpers.dtPopoverCellFn,
+                        //'createdCell': helpers.dtPopoverCellFn,
                     }
                 ]
             },
@@ -263,8 +263,8 @@ export default {
         },
     },
     mounted(){
-        this.initialiseTable();
-        
+        //this.initialiseTable();
+        helpers.enablePopovers()
     }
 }
 </script>

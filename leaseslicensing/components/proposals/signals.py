@@ -32,8 +32,8 @@ class ReferralListener(object):
         original_instance = getattr(instance, "_original_instance") if hasattr(instance, "_original_instance") else None
         if original_instance:
             # Check if the proposal attached to the referral outstanding referrals
-            outstanding  = instance.proposal.referrals.filter(processing_status='with_referral')
+            outstanding = instance.proposal.referrals.filter(processing_status=Referral.PROCESSING_STATUS_WITH_REFERRAL)
             if len(outstanding) == 0:
-                instance.proposal.processing_status = 'with_assessor'
+                instance.proposal.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
                 instance.proposal.save()
 

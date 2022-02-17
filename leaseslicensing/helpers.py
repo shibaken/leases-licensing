@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, EmailUserRO
 from ledger_api_client.managed_models import SystemGroup
 from django.conf import settings
 from django.core.cache import cache
@@ -43,11 +43,17 @@ def is_leaseslicensing_admin(request):
 
 
 def is_assessor(user_id):
+    if isinstance(user_id, EmailUserRO):
+        # In case user_id is EmailUserRO type by mistake, retrieve its id
+        user_id = user_id.id
     assessor_group = SystemGroup.objects.get(name=GROUP_NAME_ASSESSOR)
     return True if user_id in assessor_group.get_system_group_member_ids() else False
 
 
 def is_approver(user_id):
+    if isinstance(user_id, EmailUserRO):
+        # In case user_id is EmailUserRO type by mistake, retrieve its id
+        user_id = user_id.id
     assessor_group = SystemGroup.objects.get(name=GROUP_NAME_APPROVER)
     return True if user_id in assessor_group.get_system_group_member_ids() else False
 
