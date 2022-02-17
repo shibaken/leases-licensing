@@ -168,12 +168,8 @@ export default {
 
         return {
             // selected values for filtering
-            filterApplicationTypes: sessionStorage.getItem('filterApplicationTypesForMap') ?
-                JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) :
-                [],
-            filterApplicationStatuses: sessionStorage.getItem('filterApplicationStatusesForMap') ? 
-                JSON.parse(sessionStorage.getItem('filterApplicationStatusesForMap')) : 
-                [],
+            filterApplicationTypes: sessionStorage.getItem('filterApplicationTypesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) : [],
+            filterApplicationStatuses: sessionStorage.getItem('filterApplicationStatusesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationStatusesForMap')) : [],
             filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFromForMap') ? sessionStorage.getItem('filterProposalLodgedFromForMap') : '',
             filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedToForMap') ? sessionStorage.getItem('filterProposalLodgedToForMap') : '',
 
@@ -387,7 +383,7 @@ export default {
             let vm = this
             if (!vm.select2AppliedToApplicationType){
                 $(vm.$refs.filter_application_type).select2({
-                    "theme": "bootstrap",
+                    "theme": "bootstrap-5",
                     allowClear: false,
                     placeholder:"Select Type",
                     multiple:true,
@@ -413,7 +409,7 @@ export default {
             let vm = this
             if (!vm.select2AppliedToApplicationStatus){
                 $(vm.$refs.filter_application_status).select2({
-                    "theme": "bootstrap",
+                    "theme": "bootstrap-5",
                     allowClear: false,
                     placeholder:"Select Status",
                     multiple:true,
