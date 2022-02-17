@@ -39,12 +39,12 @@ import uuid from 'uuid';
 export default {
     name:"FormSection",
     props: {
-        label: {}, 
+        label: {},
         subtitle: {
             type: String,
             default: '',
         },
-        Index: {}, 
+        Index: {},
         hideHeader: {},
         /*
         noChevron: {
@@ -108,6 +108,7 @@ export default {
 
 .section-wrapper {
     margin-bottom: 20px;
+    padding: 0;
 }
 
 </style>

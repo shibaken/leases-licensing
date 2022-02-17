@@ -504,7 +504,7 @@ export default {
         initialiseSelects: function(){
             let vm = this;
             $(vm.$refs.department_users).select2({
-                "theme": "bootstrap",
+                "theme": "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Referral"
             }).
@@ -525,7 +525,7 @@ export default {
             }
             // Assigned officer select
             $(vm.$refs.assigned_officer).select2({
-                "theme": "bootstrap",
+                "theme": "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Officer"
             }).
