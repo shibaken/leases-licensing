@@ -166,6 +166,76 @@ export default {
             'discarded',
         ]
 
+        class ProposalStatus {
+            constructor(id, text){
+                this.id = id
+                this.text = text
+                this.show = true
+                this.shown = false
+                this.loaded = false
+                this.features = []
+                this.ajax_obj = null
+            }
+            map_already_updated(){
+                return this.show === this.shown ? true : false
+            }
+        }
+        const statuses = [ // This array is used to construct styles instructions
+            {
+                'id': 'draft',
+                'text': 'Draft',
+            },
+            {
+                'id': 'with_assessor',
+                'text': 'With Assessor',
+            },
+            {
+                'id': 'with_assessor_conditions',
+                'text': 'With Assessor (Conditions)',
+            },
+            {
+                'id': 'with_approver',
+                'text': 'With Approver',
+            },
+            {
+                'id': 'with_referral',
+                'text': 'With Referral',
+            },
+            {
+                'id': 'with_referral_conditions',
+                'text': 'With Referral (Conditions)',
+            },
+            {
+                'id': 'approved_application',
+                'text': 'Approved (Application)',
+            },
+            {
+                'id': 'approved_competitive_process',
+                'text': 'Approved (Competitive Process)',
+            },
+            {
+                'id': 'approved_editing_invoicing',
+                'text': 'Approved (Editing Invoicing)',
+            },
+            {
+                'id': 'approved',
+                'text': 'Approved',
+            },
+            {
+                'id': 'declined',
+                'text': 'Declined',
+            },
+            {
+                'id': 'discarded',
+                'text': 'Discarded',
+            },
+        ]
+        const styles = [
+            'registration_of_interest',
+            'lease_licence',
+        ]
+
+
         return {
             // selected values for filtering
             filterApplicationTypes: sessionStorage.getItem('filterApplicationTypesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) : [],
@@ -316,7 +386,19 @@ export default {
                     'features': [],
                     'ajax_obj': null,
                 },
-            ]
+            ],
+            instructions: (function(){
+                let instructions = {} 
+                styles.forEach(myStyle => {
+                    let instruction = []
+                    statuses.forEach(myStatus => {
+                        let proposal_status = new ProposalStatus(myStatus.id, myStatus.text)
+                        instruction.push(proposal_status)
+                    })
+                    instructions[myStyle] = instruction
+                })
+                return instructions
+            })()
         }
     },
     computed: {
@@ -361,6 +443,7 @@ export default {
         updateInstructions: function(){
             let vm = this
 
+            // Configurations for statuses
             if (vm.filterApplicationStatuses.length === 0){
                 // Nothing selected means show all
                 for (let site_status of vm.show_hide_instructions){
@@ -378,6 +461,8 @@ export default {
                     }
                 }
             }
+
+            // Configurations for types
         },
         applySelect2ToApplicationTypes: function(application_types){
             let vm = this
