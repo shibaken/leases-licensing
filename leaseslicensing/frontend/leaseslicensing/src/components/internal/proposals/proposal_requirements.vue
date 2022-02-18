@@ -24,6 +24,7 @@
                 ref="requirement_detail"
                 :proposal_id="proposal.id"
                 :requirements="requirements"
+                @updateRequirements="updatedRequirements"
             />
         </FormSection>
     </div>
@@ -37,7 +38,6 @@ from '@/utils/hooks'
 import datatable from '@vue-utils/datatable.vue'
 import RequirementDetail from '@/components/internal/proposals/proposal_add_requirement.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
-import 'datatables.net-bs5'
 
 export default {
     name: 'InternalProposalRequirements',

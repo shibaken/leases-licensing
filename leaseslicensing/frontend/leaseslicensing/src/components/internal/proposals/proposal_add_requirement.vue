@@ -372,7 +372,7 @@ export default {
                     }).then((response)=>{
                         this.addingRequirement = false;
                         this.close();
-                        this.$parent.updatedRequirements();
+                        this.$emit("updateRequirements");
                     },(error)=>{
                         this.errors = true;
                         this.addingRequirement = false;
