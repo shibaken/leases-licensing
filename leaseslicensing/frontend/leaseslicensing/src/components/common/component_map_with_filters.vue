@@ -499,7 +499,7 @@ export default {
                 }
             }
 
-            // Configurations for types
+            // Introducing classes
             for(let type_name in vm.show_hide_instructions_2){
                 console.log('--- ' + type_name + ' ---')
                 let type_instruction = vm.show_hide_instructions_2[type_name]
@@ -874,6 +874,19 @@ export default {
                 }
                 site_status.shown = site_status.show
             } // END: loop for show_hide_instructions
+
+            // Introducing classes
+            for (let type_name in vm.show_hide_instructions_2){
+                let type_instruction = vm.show_hide_instructions_2[type_name]
+
+                for (let site_status of type_instruction){
+                    if (site_status.map_already_updated()){
+                        continue  // All the polygons have been already updated on the map.  Go to the next status
+                    }
+
+                    // TODO: implement from here
+                }
+            }
         },
         fetchFilterLists: function(){
             let vm = this;
