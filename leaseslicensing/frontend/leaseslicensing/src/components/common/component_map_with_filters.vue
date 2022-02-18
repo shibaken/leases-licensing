@@ -166,21 +166,8 @@ export default {
             'discarded',
         ]
 
-        class ProposalStatus {
-            constructor(id, text){
-                this.id = id
-                this.text = text
-                this.show = true
-                this.shown = false
-                this.loaded = false
-                this.features = []
-                this.ajax_obj = null
-            }
-            map_already_updated(){
-                return this.show === this.shown ? true : false
-            }
-        }
-        const statuses = [ // This array is used to construct styles instructions
+        // Introducing classes
+        const conf_statuses = [ // This array is used to construct styles instructions
             {
                 'id': 'draft',
                 'text': 'Draft',
@@ -230,10 +217,60 @@ export default {
                 'text': 'Discarded',
             },
         ]
-        const styles = [
+        const conf_styles = [
             'registration_of_interest',
             'lease_licence',
         ]
+        class ProposalStatus {
+            constructor(id, text){
+                this._id = id
+                this._text = text
+                this._show = true
+                this._shown = false
+                this._loaded = false
+                this._features = []
+                this._ajax_obj = null
+            }
+            map_already_updated(){
+                return this.show === this.shown ? true : false
+            }
+            // Setters
+            set show(value){
+                this._show = value
+            }
+            set shown(value){
+                this._shown = value
+            }
+            set loaded(value){
+                this._loaded = value
+            }
+            set features(value){
+                this._features = value
+            }
+            set ajax_obj(value){
+                this._ajax_obj = value
+            }
+            // Getters
+            get id(){
+                return this._id
+            }
+            get text(){
+                return this._text
+            }
+            get show(){
+                return this._show
+            }
+            get loaded(){
+                return this._loaded
+            }
+            get features(){
+                return this._features
+            }
+            get ajax_obj(){
+                return this._ajax_obj
+            }
+        }
+        // END: Introducing classes
 
 
         return {
@@ -387,11 +424,11 @@ export default {
                     'ajax_obj': null,
                 },
             ],
-            instructions: (function(){
+            show_hide_instructions_2: (function(){
                 let instructions = {} 
-                styles.forEach(myStyle => {
+                conf_styles.forEach(myStyle => {
                     let instruction = []
-                    statuses.forEach(myStatus => {
+                    conf_statuses.forEach(myStatus => {
                         let proposal_status = new ProposalStatus(myStatus.id, myStatus.text)
                         instruction.push(proposal_status)
                     })
@@ -403,7 +440,7 @@ export default {
     },
     computed: {
         filterApplied: function(){
-            console.log('in filterApplied')
+            //console.log('in filterApplied')
             let filter_applied = true
             if(this.filterApplicationStatuses.length == 0 && this.filterApplicationTypes.length == 0 && 
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
@@ -447,22 +484,53 @@ export default {
             if (vm.filterApplicationStatuses.length === 0){
                 // Nothing selected means show all
                 for (let site_status of vm.show_hide_instructions){
-                    console.log('Show: ' + site_status.id)
+                    //console.log('Show: ' + site_status.id)
                     site_status.show = true
                 }
             } else {
                 for (let site_status of vm.show_hide_instructions){
                     if (vm.filterApplicationStatuses.includes(site_status.id)){
-                        console.log('Show: ' + site_status.id)
+                        //console.log('Show: ' + site_status.id)
                         site_status.show = true
                     } else {
-                        console.log('Hide: ' + site_status.id)
+                        //console.log('Hide: ' + site_status.id)
                         site_status.show = false
                     }
                 }
             }
 
             // Configurations for types
+            for(let type_name in vm.show_hide_instructions_2){
+                console.log('--- ' + type_name + ' ---')
+                let type_instruction = vm.show_hide_instructions_2[type_name]
+
+                if (vm.filterApplicationTypes.length === 0 || vm.filterApplicationTypes.includes(type_name)){
+                    // Show this type
+                    if (vm.filterApplicationStatuses.length === 0){
+                        // Show all statuses
+                        for (let site_status of type_instruction){
+                            console.log('Show: ' + site_status.id)
+                            site_status.show = true
+                        }
+                    } else {
+                        for (let site_status of type_instruction){
+                            if (vm.filterApplicationStatuses.includes(site_status.id)){
+                                console.log('Show: ' + site_status.id)
+                                site_status.show = true
+                            } else {
+                                console.log('Hide: ' + site_status.id)
+                                site_status.show = false
+                            }
+                        }
+                    }
+                } else {
+                    // Hide this type
+                    for (let site_status of type_instruction){
+                        console.log('Hide: ' + site_status.id)
+                        site_status.show = false
+                    }
+                }
+            }
         },
         applySelect2ToApplicationTypes: function(application_types){
             let vm = this
@@ -749,13 +817,13 @@ export default {
 
             for (let site_status of vm.show_hide_instructions){
                 if (site_status.show == site_status.shown){
-                    console.log('skip: ' + site_status.id)
+                    //console.log('skip: ' + site_status.id)
                     continue  // All the polygons have been already updated on the map.  Go to the next status
                 }
 
                 if (site_status.show){
                     // Show
-                    console.log('show: ' + site_status.id)
+                    //console.log('show: ' + site_status.id)
                     if (site_status.loaded){
                         for (let feature of site_status.features){
                             vm.proposalQuerySource.addFeature(feature);
@@ -778,20 +846,20 @@ export default {
                                             vm.proposalQuerySource.addFeatures(features)
                                             site_status.features.push(...features)
                                         } catch (err) {
-                                            console.log(err)
+                                            //console.log(err)
                                         }
                                     }
                                 }
                                 site_status.loaded = true
                             },
                             error: function (jqXhr, textStatus, errorMessage) { // error callback 
-                                console.log(errorMessage)
+                                //console.log(errorMessage)
                             }
                         })
                     }
                 } else {
                     // Hide
-                    console.log('hide: ' + site_status.id)
+                    //console.log('hide: ' + site_status.id)
                     for (let feature of site_status.features){
                         // Remove the apiary_site from the map.  There are no functions to show/hide a feature unlike the layer.
                         if (vm.proposalQuerySource.hasFeature(feature)){
@@ -799,7 +867,7 @@ export default {
                                 // Remove the feature from the map
                                 vm.proposalQuerySource.removeFeature(feature)
                             } catch (err){
-                                console.log(err)
+                                //console.log(err)
                             }
                         }
                     }
@@ -855,11 +923,11 @@ export default {
         }
     },
     created: function(){
-        console.log('created()')
+        //console.log('created()')
         this.fetchFilterLists()
     },
     mounted: function(){
-        console.log('mounted()')
+        //console.log('mounted()')
         let vm = this;
 
         this.$nextTick(() => {
