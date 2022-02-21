@@ -234,14 +234,33 @@ export default {
             map_already_updated(){
                 return this._show === this._shown ? true : false
             }
+            show_features_to_map(features){
+                let features_to_be_added = features.filter(feature => {
+                    let lodgement_date = feature.get('lodgement_date')
+
+                    if(vm.filterProposalLodgedFromMoment){
+                        if(vm.filterProposalLodgedFromMoment.isAfter(lodgement_date, 'date')){
+                            return false
+                        }
+                    }
+
+                    if(vm.filterProposalLodgedToMoment){
+                        if(vm.filterProposalLodgedToMoment.isBefore(lodgement_date, 'date')){
+                            return false
+                        }
+                    }
+
+                    return true
+                })
+
+                vm.proposalQuerySource.addFeatures(features_to_be_added);
+            }
             show_features(type_name){
                 let me = this
 
                 if(me._loaded){
                     // Data has been already loaded
-                    for (let feature of me._features){
-                        vm.proposalQuerySource.addFeature(feature);
-                    }
+                    me.show_features_to_map(me._features)
                 } else {
                     // Data has not been loaded yet.  Retrieve data form the server.
                     if (me._ajax_obj != null) {
@@ -253,11 +272,13 @@ export default {
                         dataType: 'json',
                         success: function(re, status, xhr){
                             for (let proposal of re){
+                                let lodgement_date = proposal.lodgement_date ? moment(proposal.lodgement_date) : null
                                 if (proposal.proposalgeometry){
                                     try {
                                         let features = (new GeoJSON()).readFeatures(proposal.proposalgeometry)
-                                        vm.proposalQuerySource.addFeatures(features)
+                                        features.forEach(feature => feature.set('lodgement_date', lodgement_date))
                                         me._features.push(...features)
+                                        me.show_features_to_map(features)
                                     } catch (err) {
                                         //console.log(err)
                                     }
@@ -372,6 +393,12 @@ export default {
             }
             console.log('filterApplied in computed: ' + filter_applied)
             return filter_applied
+        },
+        filterProposalLodgedFromMoment: function(){
+            return this.filterProposalLodgedFrom ? moment(this.filterProposalLodgedFrom) : null
+        },
+        filterProposalLodgedToMoment: function(){
+            return this.filterProposalLodgedTo ? moment(this.filterProposalLodgedTo) : null
         },
     },
     components:{
