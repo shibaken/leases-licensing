@@ -167,7 +167,6 @@ export default {
             if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterCompetitiveProcessCreatedFrom.toLowerCase() === '' && this.filterCompetitiveProcessCreatedTo.toLowerCase() === ''){
                 filter_applied = false
             }
-            console.log('in filterApplied: ' + filter_applied)
             return filter_applied
         },
         debug: function(){

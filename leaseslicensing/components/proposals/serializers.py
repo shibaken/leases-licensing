@@ -418,6 +418,7 @@ class ListProposalMinimalSerializer(BaseProposalSerializer):
             'processing_status',
             'proposalgeometry',
             'application_type',
+            'lodgement_date',
         )
 
 

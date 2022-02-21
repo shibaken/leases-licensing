@@ -232,42 +232,73 @@ export default {
                 this._ajax_obj = null
             }
             map_already_updated(){
-                return this.show === this.shown ? true : false
+                return this._show === this._shown ? true : false
             }
+            show_features(type_name){
+                let me = this
+
+                if(me._loaded){
+                    // Data has been already loaded
+                    for (let feature of me._features){
+                        vm.proposalQuerySource.addFeature(feature);
+                    }
+                } else {
+                    // Data has not been loaded yet.  Retrieve data form the server.
+                    if (me._ajax_obj != null) {
+                        // Cancel all the previous requests for this site status
+                        me._ajax_obj.abort();
+                        me._ajax_obj = null;
+                    }
+                    me._ajax_obj = $.ajax('/api/proposal/?type=' + type_name + '&status=' + me._id, {
+                        dataType: 'json',
+                        success: function(re, status, xhr){
+                            for (let proposal of re){
+                                if (proposal.proposalgeometry){
+                                    try {
+                                        let features = (new GeoJSON()).readFeatures(proposal.proposalgeometry)
+                                        vm.proposalQuerySource.addFeatures(features)
+                                        me._features.push(...features)
+                                    } catch (err) {
+                                        //console.log(err)
+                                    }
+                                }
+                            }
+                            me._loaded = true
+                        },
+                        error: function (jqXhr, textStatus, errorMessage) { // error callback 
+                            //console.log(errorMessage)
+                        }
+                    })
+                }
+                me._shown = true
+            }
+            hide_features(){
+                let me = this
+                for (let feature of me._features){
+                    // Remove the apiary_site from the map.  There are no functions to show/hide a feature unlike the layer.
+                    if (vm.proposalQuerySource.hasFeature(feature)){
+                        try{
+                            // Remove the feature from the map
+                            vm.proposalQuerySource.removeFeature(feature)
+                        } catch (err){
+                            console.log(err)
+                        }
+                    }
+                }
+                me._shown = false
+            }
+
             // Setters
             set show(value){
                 this._show = value
             }
-            set shown(value){
-                this._shown = value
-            }
-            set loaded(value){
-                this._loaded = value
-            }
-            set features(value){
-                this._features = value
-            }
-            set ajax_obj(value){
-                this._ajax_obj = value
-            }
+
             // Getters
             get id(){
                 return this._id
             }
-            get text(){
-                return this._text
-            }
             get show(){
                 return this._show
-            }
-            get loaded(){
-                return this._loaded
-            }
-            get features(){
-                return this._features
-            }
-            get ajax_obj(){
-                return this._ajax_obj
             }
         }
         // END: Introducing classes
@@ -275,10 +306,10 @@ export default {
 
         return {
             // selected values for filtering
-            filterApplicationTypes: sessionStorage.getItem('filterApplicationTypesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) : [],
-            filterApplicationStatuses: sessionStorage.getItem('filterApplicationStatusesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationStatusesForMap')) : [],
-            filterProposalLodgedFrom: sessionStorage.getItem('filterProposalLodgedFromForMap') ? sessionStorage.getItem('filterProposalLodgedFromForMap') : '',
-            filterProposalLodgedTo: sessionStorage.getItem('filterProposalLodgedToForMap') ? sessionStorage.getItem('filterProposalLodgedToForMap') : '',
+            filterApplicationTypes: [],
+            filterApplicationStatuses: [],
+            filterProposalLodgedFrom: '',
+            filterProposalLodgedTo: '',
 
             // filtering options
             application_types: null,
@@ -314,116 +345,6 @@ export default {
             proposalQuerySource: null,
             proposalQueryLayer: null,
 
-            show_hide_instructions: [ // This array is used as instructions when showing/hiding the apiary sites on the map
-                {
-                    'id': 'draft',
-                    'text': 'Draft',
-                    'show': default_show_statuses.includes('draft'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'with_assessor',
-                    'text': 'With Assessor',
-                    'show': default_show_statuses.includes('with_assessor'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'with_assessor_conditions',
-                    'text': 'With Assessor (Conditions)',
-                    'show': default_show_statuses.includes('with_assessor_conditions'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'with_approver',
-                    'text': 'With Approver',
-                    'show': default_show_statuses.includes('with_approver'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'with_referral',
-                    'text': 'With Referral',
-                    'show': default_show_statuses.includes('with_referral'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'with_referral_conditions',
-                    'text': 'With Referral (Conditions)',
-                    'show': default_show_statuses.includes('with_referral_conditions'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'approved_application',
-                    'text': 'Approved (Application)',
-                    'show': default_show_statuses.includes('approved_application'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'approved_competitive_process',
-                    'text': 'Approved (Competitive Process)',
-                    'show': default_show_statuses.includes('approved_competitive_process'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'approved_editing_invoicing',
-                    'text': 'Approved (Editing Invoicing)',
-                    'show': default_show_statuses.includes('approved_editing_invoicing'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'approved',
-                    'text': 'Approved',
-                    'show': default_show_statuses.includes('approved'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'declined',
-                    'text': 'Declined',
-                    'show': default_show_statuses.includes('declined'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-                {
-                    'id': 'discarded',
-                    'text': 'Discarded',
-                    'show': default_show_statuses.includes('discarded'),
-                    'shown': false,
-                    'loaded': false,
-                    'features': [],
-                    'ajax_obj': null,
-                },
-            ],
             show_hide_instructions_2: (function(){
                 let instructions = {} 
                 conf_styles.forEach(myStyle => {
@@ -440,12 +361,16 @@ export default {
     },
     computed: {
         filterApplied: function(){
-            //console.log('in filterApplied')
             let filter_applied = true
-            if(this.filterApplicationStatuses.length == 0 && this.filterApplicationTypes.length == 0 && 
-                this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
+            if(
+                this.filterApplicationStatuses.length == 0 && 
+                this.filterApplicationTypes.length == 0 && 
+                this.filterProposalLodgedFrom.toLowerCase() === '' && 
+                this.filterProposalLodgedTo.toLowerCase() === ''
+            ){
                 filter_applied = false
             }
+            console.log('filterApplied in computed: ' + filter_applied)
             return filter_applied
         },
     },
@@ -455,18 +380,27 @@ export default {
     watch: {
         filterProposalLodgedFrom: function() {
             sessionStorage.setItem('filterProposalLodgedFromForMap', this.filterProposalLodgedFrom);
+            console.log('in filterProposalLodgedFrom')
         },
         filterProposalLodgedTo: function() {
             sessionStorage.setItem('filterProposalLodgedToForMap', this.filterProposalLodgedTo);
+            console.log('in filterProposalLodgedTo')
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
                 // Collapsible component exists
                 this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
             }
+            console.log('filterApplied in watch: ' + this.filterApplied)
         }
     },
     methods: {
+        updateVariablesFromSession: function(){
+            this.filterApplicationTypes = sessionStorage.getItem('filterApplicationTypesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) : this.filterApplicationTypes
+            this.filterApplicationStatuses = sessionStorage.getItem('filterApplicationStatusesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationStatusesForMap')) : this.filterApplicationStatuses
+            this.filterProposalLodgedFrom = sessionStorage.getItem('filterProposalLodgedFromForMap') ? sessionStorage.getItem('filterProposalLodgedFromForMap') : this.filterProposalLodgedFrom
+            this.filterProposalLodgedTo = sessionStorage.getItem('filterProposalLodgedToForMap') ? sessionStorage.getItem('filterProposalLodgedToForMap') : this.filterProposalLodgedTo
+        },
         updateApplicationTypeFilterCache: function(){
             let vm = this
             vm.filterApplicationTypes = $(vm.$refs.filter_application_type).select2('data').map(x => { return x.id })
@@ -480,28 +414,8 @@ export default {
         updateInstructions: function(){
             let vm = this
 
-            // Configurations for statuses
-            if (vm.filterApplicationStatuses.length === 0){
-                // Nothing selected means show all
-                for (let site_status of vm.show_hide_instructions){
-                    //console.log('Show: ' + site_status.id)
-                    site_status.show = true
-                }
-            } else {
-                for (let site_status of vm.show_hide_instructions){
-                    if (vm.filterApplicationStatuses.includes(site_status.id)){
-                        //console.log('Show: ' + site_status.id)
-                        site_status.show = true
-                    } else {
-                        //console.log('Hide: ' + site_status.id)
-                        site_status.show = false
-                    }
-                }
-            }
-
             // Introducing classes
             for(let type_name in vm.show_hide_instructions_2){
-                console.log('--- ' + type_name + ' ---')
                 let type_instruction = vm.show_hide_instructions_2[type_name]
 
                 if (vm.filterApplicationTypes.length === 0 || vm.filterApplicationTypes.includes(type_name)){
@@ -509,16 +423,13 @@ export default {
                     if (vm.filterApplicationStatuses.length === 0){
                         // Show all statuses
                         for (let site_status of type_instruction){
-                            console.log('Show: ' + site_status.id)
                             site_status.show = true
                         }
                     } else {
                         for (let site_status of type_instruction){
                             if (vm.filterApplicationStatuses.includes(site_status.id)){
-                                console.log('Show: ' + site_status.id)
                                 site_status.show = true
                             } else {
-                                console.log('Hide: ' + site_status.id)
                                 site_status.show = false
                             }
                         }
@@ -526,7 +437,6 @@ export default {
                 } else {
                     // Hide this type
                     for (let site_status of type_instruction){
-                        console.log('Hide: ' + site_status.id)
                         site_status.show = false
                     }
                 }
@@ -815,67 +725,6 @@ export default {
         showHideProposals: function(){
             let vm = this;
 
-            for (let site_status of vm.show_hide_instructions){
-                if (site_status.show == site_status.shown){
-                    //console.log('skip: ' + site_status.id)
-                    continue  // All the polygons have been already updated on the map.  Go to the next status
-                }
-
-                if (site_status.show){
-                    // Show
-                    //console.log('show: ' + site_status.id)
-                    if (site_status.loaded){
-                        for (let feature of site_status.features){
-                            vm.proposalQuerySource.addFeature(feature);
-                        }
-                    } else {
-                        // Polygon data not loaded yet
-                        if (site_status.ajax_obj != null) {
-                            // Cancel all the previous requests for this site status
-                            site_status.ajax_obj.abort();
-                            site_status.ajax_obj = null;
-                        }
-
-                        site_status.ajax_obj = $.ajax('/api/proposal/?status=' + site_status.id, {
-                            dataType: 'json',
-                            success: function(re, status, xhr){
-                                for (let proposal of re){
-                                    if (proposal.proposalgeometry){
-                                        try {
-                                            let features = (new GeoJSON()).readFeatures(proposal.proposalgeometry)
-                                            vm.proposalQuerySource.addFeatures(features)
-                                            site_status.features.push(...features)
-                                        } catch (err) {
-                                            //console.log(err)
-                                        }
-                                    }
-                                }
-                                site_status.loaded = true
-                            },
-                            error: function (jqXhr, textStatus, errorMessage) { // error callback 
-                                //console.log(errorMessage)
-                            }
-                        })
-                    }
-                } else {
-                    // Hide
-                    //console.log('hide: ' + site_status.id)
-                    for (let feature of site_status.features){
-                        // Remove the apiary_site from the map.  There are no functions to show/hide a feature unlike the layer.
-                        if (vm.proposalQuerySource.hasFeature(feature)){
-                            try{
-                                // Remove the feature from the map
-                                vm.proposalQuerySource.removeFeature(feature)
-                            } catch (err){
-                                //console.log(err)
-                            }
-                        }
-                    }
-                }
-                site_status.shown = site_status.show
-            } // END: loop for show_hide_instructions
-
-            // Introducing classes
             for (let type_name in vm.show_hide_instructions_2){
                 let type_instruction = vm.show_hide_instructions_2[type_name]
 
@@ -884,7 +733,11 @@ export default {
                         continue  // All the polygons have been already updated on the map.  Go to the next status
                     }
 
-                    // TODO: implement from here
+                    if (site_status.show){
+                        site_status.show_features(type_name)
+                    } else {
+                        site_status.hide_features(type_name)
+                    }
                 }
             }
         },
@@ -936,11 +789,11 @@ export default {
         }
     },
     created: function(){
-        //console.log('created()')
+        console.log('created()')
         this.fetchFilterLists()
     },
     mounted: function(){
-        //console.log('mounted()')
+        console.log('mounted()')
         let vm = this;
 
         this.$nextTick(() => {
@@ -948,6 +801,8 @@ export default {
             vm.initMap()
             vm.setBaseLayer('osm')
             vm.addOptionalLayers()
+            vm.updateVariablesFromSession()
+            vm.updateInstructions()
             vm.showHideProposals()
         });
     }
