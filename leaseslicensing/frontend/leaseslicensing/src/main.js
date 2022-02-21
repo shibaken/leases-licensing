@@ -9,8 +9,10 @@ import hooks from './packages'
 import api_endpoints from './api'
 //import("./scss/custom.scss");
 //require('../node_modules/font-awesome/css/font-awesome.min.css' )
-require('@/../node_modules/@fortawesome/fontawesome-free/css/all.min.css' )
-require('@/../node_modules/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.css' )
+require('@/../node_modules/@fortawesome/fontawesome-free/css/all.min.css')
+require('@/../node_modules/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.css')
+require('@/../node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css')
+//require('@/../node_modules/datatables.net-bs/css/dataTables.bootstrap.min.css')
 
 Vue.config.devtools = true;
 Vue.config.productionTip = false
