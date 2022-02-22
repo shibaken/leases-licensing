@@ -1,19 +1,22 @@
 module.exports = {
-    //WL_PROPOSAL: 'wla',
-    //AA_PROPOSAL: 'aaa',
-    //AU_PROPOSAL: 'aua',
-    //ML_PROPOSAL: 'mla',
-    //DCV_PERMIT_PROPOSAL: 'dcvp',
-    //DCV_ADMISSION_PROPOSAL: 'dcv',
-
-    //WL_APPROVAL: 'wla',
-    //AA_APPROVAL: 'aap',
-    //AU_APPROVAL: 'aup',
-    //ML_APPROVAL: 'ml',
 	APPLICATION_TYPE: {
 		REGISTRATION_OF_INTEREST: 'registration_of_interest',
 		LEASE_LICENCE: 'lease_licence',
 	},
+    PROPOSAL_STATUS: {
+        DRAFT: {ID: 'draft', TEXT: 'Draft'},
+        WITH_ASSESSOR: {ID: 'with_assessor', TEXT: 'With Assessor'},
+        WITH_ASSESSOR_CONDITIONS: {ID: 'with_assessor_conditions', TEXT: 'With Assessor (Conditions)'},
+        WITH_APPROVER: {ID: 'with_approver', TEXT: 'With Approver'},
+        WITH_REFERRAL: {ID: 'with_referral', TEXT: 'With Referral'},
+        WITH_REFERRAL_CONDITIONS: {ID: 'with_referral_conditions', TEXT: 'With Referral (Conditions)'},
+        APPROVED_APPLICATION: {ID: 'approved_application', TEXT: 'Approved (Application)'},
+        APPROVED_COMPETITIVE_PROCESS: {ID: 'approved_competitive_process', TEXT: 'Approved (Competitive Process)'},
+        APPROVED_EDITING_INVOICING: {ID: 'approved_editing_invoicing', TEXT: 'Approved (Editing Invoicing)'},
+        APPROVED: {ID: 'approved', TEXT: 'Approved'},
+        DECLINED: {ID: 'declined', TEXT: 'Declined'},
+        DISCARDED: {ID: 'discarded', TEXT: 'Discarded'},
+    },
 	DRAFT: 'Draft',
 	WITH_ASSESSOR: 'With Assessor',
 	WITH_ASSESSOR_CONDITIONS: 'With Assessor (Conditions)',
@@ -26,4 +29,4 @@ module.exports = {
 	APPROVED: 'Approved',
 	DECLINED: 'Declined',
 	DISCARDED: 'Discarded',
-};
+}
