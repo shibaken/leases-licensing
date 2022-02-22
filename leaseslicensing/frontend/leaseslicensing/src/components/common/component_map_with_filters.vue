@@ -225,8 +225,7 @@ export default {
             }
             perform_show_hide(){
                 let me = this
-                let show_this_status = (vm.filterApplicationStatuses.length === 0 || vm.filterApplicationStatuses.includes(me._id))
-                if (show_this_status){
+                if (vm.filterApplicationStatuses.length === 0 || vm.filterApplicationStatuses.includes(me._id)){
                     me.show_me()
                 } else {
                     me.hide_me()
