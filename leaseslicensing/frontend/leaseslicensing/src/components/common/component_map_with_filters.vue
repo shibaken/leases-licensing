@@ -406,12 +406,16 @@ export default {
     },
     watch: {
         filterProposalLodgedFrom: function() {
-            sessionStorage.setItem('filterProposalLodgedFromForMap', this.filterProposalLodgedFrom);
             console.log('in filterProposalLodgedFrom')
+            sessionStorage.setItem('filterProposalLodgedFromForMap', this.filterProposalLodgedFrom);
+            this.updateInstructions()
+            this.showHideProposals()
         },
         filterProposalLodgedTo: function() {
-            sessionStorage.setItem('filterProposalLodgedToForMap', this.filterProposalLodgedTo);
             console.log('in filterProposalLodgedTo')
+            sessionStorage.setItem('filterProposalLodgedToForMap', this.filterProposalLodgedTo);
+            this.updateInstructions()
+            this.showHideProposals()
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
@@ -750,6 +754,7 @@ export default {
             this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
         },
         showHideProposals: function(){
+            console.log('in showHideProposals')
             let vm = this;
 
             for (let type_name in vm.show_hide_instructions_2){
