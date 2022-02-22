@@ -95,7 +95,7 @@
 <script>
 import Vue from 'vue'
 import uuid from 'uuid'
-import { api_endpoints, helpers } from '@/utils/hooks'
+import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 
 import 'ol/ol.css';
@@ -141,126 +141,105 @@ export default {
                 return options.indexOf(val) != -1 ? true: false;
             }
         },
-        /*
-        target_email_user_id: {
-            type: Number,
-            required: false,
-            default: 0,
-        }
-        */
     },
     data() {
         let vm = this;
-        let default_show_statuses = [
-            'draft', 
-            'with_assessor', 
-            'with_assessor_conditions', 
-            'with_approver', 
-            'with_referral', 
-            'with_referral_conditions',
-            'approved_application',
-            'approved_competitive_process',
-            'approved_editing_invoicing',
-            'approved',
-            'declined',
-            'discarded',
-        ]
 
         // Introducing classes
         const conf_statuses = [ // This array is used to construct styles instructions
-            {
-                'id': 'draft',
-                'text': 'Draft',
-            },
-            {
-                'id': 'with_assessor',
-                'text': 'With Assessor',
-            },
-            {
-                'id': 'with_assessor_conditions',
-                'text': 'With Assessor (Conditions)',
-            },
-            {
-                'id': 'with_approver',
-                'text': 'With Approver',
-            },
-            {
-                'id': 'with_referral',
-                'text': 'With Referral',
-            },
-            {
-                'id': 'with_referral_conditions',
-                'text': 'With Referral (Conditions)',
-            },
-            {
-                'id': 'approved_application',
-                'text': 'Approved (Application)',
-            },
-            {
-                'id': 'approved_competitive_process',
-                'text': 'Approved (Competitive Process)',
-            },
-            {
-                'id': 'approved_editing_invoicing',
-                'text': 'Approved (Editing Invoicing)',
-            },
-            {
-                'id': 'approved',
-                'text': 'Approved',
-            },
-            {
-                'id': 'declined',
-                'text': 'Declined',
-            },
-            {
-                'id': 'discarded',
-                'text': 'Discarded',
-            },
+            constants.PROPOSAL_STATUS.DRAFT,
+            constants.PROPOSAL_STATUS.WITH_ASSESSOR,
+            constants.PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS,
+            constants.PROPOSAL_STATUS.WITH_APPROVER,
+            constants.PROPOSAL_STATUS.WITH_REFERRAL,
+            constants.PROPOSAL_STATUS.WITH_REFERRAL_CONDITIONS,
+            constants.PROPOSAL_STATUS.APPROVED_APPLICATION,
+            constants.PROPOSAL_STATUS.APPROVED_COMPETITIVE_PROCESS,
+            constants.PROPOSAL_STATUS.APPROVED_EDITING_INVOICING,
+            constants.PROPOSAL_STATUS.APPROVED,
+            constants.PROPOSAL_STATUS.DECLINED,
+            constants.PROPOSAL_STATUS.DISCARDED,
         ]
-        const conf_styles = [
-            'registration_of_interest',
-            'lease_licence',
+        const conf_types = [
+            constants.APPLICATION_TYPE.REGISTRATION_OF_INTEREST,
+            constants.APPLICATION_TYPE.LEASE_LICENCE,
         ]
-        class ProposalStatus {
-            constructor(id, text){
-                this._id = id
-                this._text = text
-                this._show = true
-                this._shown = false
-                this._loaded = false
-                this._features = []
-                this._ajax_obj = null
+        class MainManager {
+            constructor(){
+                this._types = (function(){
+                    let types = []
+                    conf_types.forEach(myType => {
+                        types.push(new TypeFilterManager(myType))
+                    })
+                    return types
+                })()
             }
-            map_already_updated(){
-                return this._show === this._shown ? true : false
-            }
-            show_features_to_map(features){
-                let features_to_be_added = features.filter(feature => {
-                    let lodgement_date = feature.get('lodgement_date')
-
-                    if(vm.filterProposalLodgedFromMoment){
-                        if(vm.filterProposalLodgedFromMoment.isAfter(lodgement_date, 'date')){
-                            return false
-                        }
-                    }
-
-                    if(vm.filterProposalLodgedToMoment){
-                        if(vm.filterProposalLodgedToMoment.isBefore(lodgement_date, 'date')){
-                            return false
-                        }
-                    }
-
-                    return true
+            perform_show_hide(){
+                let me = this
+                me._types.forEach(type => {
+                    type.perform_show_hide()
                 })
-
-                vm.proposalQuerySource.addFeatures(features_to_be_added);
             }
-            show_features(type_name){
+        }
+        class TypeFilterManager {
+            constructor(id){
                 let me = this
 
+                me._id = id
+                me._site_statuses = (function(){
+                    let statuses = []
+                    conf_statuses.forEach(myStatus => {
+                        statuses.push(new StatusFilterManager(myStatus.ID, myStatus.TEXT, me))
+                    })
+                    return statuses
+                })()
+            }
+            perform_show_hide(){
+                let me = this
+                if (vm.filterApplicationTypes.length === 0 || vm.filterApplicationTypes.includes(me._id)){
+                    me.show_me()
+                } else {
+                    me.hide_me()
+                }
+            }
+            show_me(){
+                let me = this
+                me._site_statuses.forEach(my_status => {
+                    my_status.perform_show_hide()
+                })
+            }
+            hide_me(){
+                let me = this
+                me._site_statuses.forEach(my_status => {
+                    my_status.hide_me()
+                })
+            }
+        }
+        class StatusFilterManager {
+            constructor(id, text, parent_obj){
+                this._id = id
+                this._text = text
+                this._loaded = false
+                this._ajax_obj = null
+                this._proposals = []
+                this._parent = parent_obj
+            }
+            perform_show_hide(){
+                let me = this
+                let show_this_status = (vm.filterApplicationStatuses.length === 0 || vm.filterApplicationStatuses.includes(me._id))
+                if (show_this_status){
+                    me.show_me()
+                } else {
+                    me.hide_me()
+                }
+            }
+            show_me(){
+                let me = this
                 if(me._loaded){
                     // Data has been already loaded
-                    me.show_features_to_map(me._features)
+                    me._proposals.forEach(proposal_obj => {
+                        proposal_obj.perform_show_hide()
+                    })
                 } else {
                     // Data has not been loaded yet.  Retrieve data form the server.
                     if (me._ajax_obj != null) {
@@ -268,7 +247,7 @@ export default {
                         me._ajax_obj.abort();
                         me._ajax_obj = null;
                     }
-                    me._ajax_obj = $.ajax('/api/proposal/?type=' + type_name + '&status=' + me._id, {
+                    me._ajax_obj = $.ajax('/api/proposal/?type=' + me._parent._id + '&status=' + me._id, {
                         dataType: 'json',
                         success: function(re, status, xhr){
                             for (let proposal of re){
@@ -276,9 +255,9 @@ export default {
                                 if (proposal.proposalgeometry){
                                     try {
                                         let features = (new GeoJSON()).readFeatures(proposal.proposalgeometry)
-                                        features.forEach(feature => feature.set('lodgement_date', lodgement_date))
-                                        me._features.push(...features)
-                                        me.show_features_to_map(features)
+                                        let proposal_obj = new ProposalManager(proposal.id, features, lodgement_date, me)
+                                        me._proposals.push(proposal_obj)
+                                        proposal_obj.perform_show_hide()
                                     } catch (err) {
                                         //console.log(err)
                                     }
@@ -291,12 +270,55 @@ export default {
                         }
                     })
                 }
-                me._shown = true
             }
-            hide_features(){
+            hide_me(){
+                let me = this
+                me._proposals.forEach(proposal_obj => {
+                    proposal_obj.hide_me()
+                })
+            }
+        }
+        class ProposalManager {
+            constructor(id, features, lodgement_date, parent_obj){
+                this._id = id
+                this._show = true
+                this._shown = false
+                this._features = features
+                this._lodgement_date = lodgement_date
+                this._parent = parent_obj
+            }
+            inside_lodgement_date_filter_range(){
+                let me = this
+                if(vm.filterProposalLodgedFromMoment){
+                    if(vm.filterProposalLodgedFromMoment.isAfter(me._lodgement_date, 'date')){
+                        return false
+                    }
+                }
+                if(vm.filterProposalLodgedToMoment){
+                    if(vm.filterProposalLodgedToMoment.isBefore(me._lodgement_date, 'date')){
+                        return false
+                    }
+                }
+                return true
+            }
+            perform_show_hide(){
+                let me = this
+                if (me.inside_lodgement_date_filter_range()){
+                    me.show_me()
+                } else {
+                    me.hide_me()
+                }
+            }
+            show_me(){
+                let me = this
+                if(!me._shown){
+                    vm.proposalQuerySource.addFeatures(me._features);
+                    me._shown = true
+                }
+            }
+            hide_me(){
                 let me = this
                 for (let feature of me._features){
-                    // Remove the apiary_site from the map.  There are no functions to show/hide a feature unlike the layer.
                     if (vm.proposalQuerySource.hasFeature(feature)){
                         try{
                             // Remove the feature from the map
@@ -308,22 +330,8 @@ export default {
                 }
                 me._shown = false
             }
-
-            // Setters
-            set show(value){
-                this._show = value
-            }
-
-            // Getters
-            get id(){
-                return this._id
-            }
-            get show(){
-                return this._show
-            }
         }
         // END: Introducing classes
-
 
         return {
             // selected values for filtering
@@ -366,18 +374,10 @@ export default {
             proposalQuerySource: null,
             proposalQueryLayer: null,
 
-            show_hide_instructions_2: (function(){
-                let instructions = {} 
-                conf_styles.forEach(myStyle => {
-                    let instruction = []
-                    conf_statuses.forEach(myStatus => {
-                        let proposal_status = new ProposalStatus(myStatus.id, myStatus.text)
-                        instruction.push(proposal_status)
-                    })
-                    instructions[myStyle] = instruction
-                })
-                return instructions
+            main_manager: (function(){
+                return new MainManager()
             })()
+
         }
     },
     computed: {
@@ -391,7 +391,6 @@ export default {
             ){
                 filter_applied = false
             }
-            console.log('filterApplied in computed: ' + filter_applied)
             return filter_applied
         },
         filterProposalLodgedFromMoment: function(){
@@ -406,23 +405,18 @@ export default {
     },
     watch: {
         filterProposalLodgedFrom: function() {
-            console.log('in filterProposalLodgedFrom')
             sessionStorage.setItem('filterProposalLodgedFromForMap', this.filterProposalLodgedFrom);
-            this.updateInstructions()
-            this.showHideProposals()
+            this.main_manager.perform_show_hide()
         },
         filterProposalLodgedTo: function() {
-            console.log('in filterProposalLodgedTo')
             sessionStorage.setItem('filterProposalLodgedToForMap', this.filterProposalLodgedTo);
-            this.updateInstructions()
-            this.showHideProposals()
+            this.main_manager.perform_show_hide()
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
                 // Collapsible component exists
                 this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
             }
-            console.log('filterApplied in watch: ' + this.filterApplied)
         }
     },
     methods: {
@@ -442,37 +436,6 @@ export default {
             vm.filterApplicationStatuses = $(vm.$refs.filter_application_status).select2('data').map(x => { return x.id })
             sessionStorage.setItem('filterApplicationStatusesForMap', JSON.stringify(vm.filterApplicationStatuses));
         },
-        updateInstructions: function(){
-            let vm = this
-
-            // Introducing classes
-            for(let type_name in vm.show_hide_instructions_2){
-                let type_instruction = vm.show_hide_instructions_2[type_name]
-
-                if (vm.filterApplicationTypes.length === 0 || vm.filterApplicationTypes.includes(type_name)){
-                    // Show this type
-                    if (vm.filterApplicationStatuses.length === 0){
-                        // Show all statuses
-                        for (let site_status of type_instruction){
-                            site_status.show = true
-                        }
-                    } else {
-                        for (let site_status of type_instruction){
-                            if (vm.filterApplicationStatuses.includes(site_status.id)){
-                                site_status.show = true
-                            } else {
-                                site_status.show = false
-                            }
-                        }
-                    }
-                } else {
-                    // Hide this type
-                    for (let site_status of type_instruction){
-                        site_status.show = false
-                    }
-                }
-            }
-        },
         applySelect2ToApplicationTypes: function(application_types){
             let vm = this
             if (!vm.select2AppliedToApplicationType){
@@ -485,21 +448,17 @@ export default {
                 }).
                 on('select2:select', function(e){
                     vm.updateApplicationTypeFilterCache()
-                    vm.updateInstructions()
-                    vm.showHideProposals()
+                    vm.main_manager.perform_show_hide()
                 }).
                 on('select2:unselect', function(e){
                     vm.updateApplicationTypeFilterCache()
-                    vm.updateInstructions()
-                    vm.showHideProposals()
+                    vm.main_manager.perform_show_hide()
                 })
             }
             vm.select2AppliedToApplicationType = true
             $(vm.$refs.filter_application_type).val(vm.filterApplicationTypes).trigger('change')
         },
         applySelect2ToApplicationStatuses: function(application_statuses){
-            console.log('in applySelect2ToApplicationStatuses')
-            console.log(application_statuses)
             let vm = this
             if (!vm.select2AppliedToApplicationStatus){
                 $(vm.$refs.filter_application_status).select2({
@@ -511,20 +470,17 @@ export default {
                 }).
                 on('select2:select', function(e){
                     vm.updateApplicationStatusFilterCache()
-                    vm.updateInstructions()
-                    vm.showHideProposals()
+                    vm.main_manager.perform_show_hide()
                 }).
                 on('select2:unselect', function(e){
                     vm.updateApplicationStatusFilterCache()
-                    vm.updateInstructions()
-                    vm.showHideProposals()
+                    vm.main_manager.perform_show_hide()
                 })
             }
             vm.select2AppliedToApplicationStatus = true
             $(vm.$refs.filter_application_status).val(vm.filterApplicationStatuses).trigger('change')
         },
         geoJsonButtonClicked: function(){
-            console.log('geoJsonButtonClicked')
             // TODO: export all the polygons shown as geojson file
         },
         setBaseLayer: function(selected_layer_name){
@@ -561,10 +517,8 @@ export default {
             })
         },
         forceToRefreshMap() {
-            console.log('forceToRefreshMap()')
             let vm = this
             setTimeout(function(){
-                console.log('updateSize()')
                 vm.map.updateSize();
             }, 700)
         },
@@ -663,7 +617,6 @@ export default {
             })
         },
         initMap: function(){
-            console.log('initMap()')
             let vm = this;
 
             let satelliteTileWms = new TileWMS({
@@ -753,26 +706,6 @@ export default {
         collapsible_component_mounted: function(){
             this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
         },
-        showHideProposals: function(){
-            console.log('in showHideProposals')
-            let vm = this;
-
-            for (let type_name in vm.show_hide_instructions_2){
-                let type_instruction = vm.show_hide_instructions_2[type_name]
-
-                for (let site_status of type_instruction){
-                    if (site_status.map_already_updated()){
-                        continue  // All the polygons have been already updated on the map.  Go to the next status
-                    }
-
-                    if (site_status.show){
-                        site_status.show_features(type_name)
-                    } else {
-                        site_status.hide_features(type_name)
-                    }
-                }
-            }
-        },
         fetchFilterLists: function(){
             let vm = this;
 
@@ -834,8 +767,7 @@ export default {
             vm.setBaseLayer('osm')
             vm.addOptionalLayers()
             vm.updateVariablesFromSession()
-            vm.updateInstructions()
-            vm.showHideProposals()
+            vm.main_manager.perform_show_hide()
         });
     }
 }
