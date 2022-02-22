@@ -1,6 +1,6 @@
 <template>
     <div>
-        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
             <div class="row">
                 <div class="col-md-3">
                     <div class="form-group">
@@ -45,8 +45,8 @@
             </div>
         </CollapsibleFilters>
 
-        <div class="text-right">
-            <button type="button" class="btn btn-secondary" @click="geoJsonButtonClicked">GeoJson</button>
+        <div class="text-end mb-2">
+            <button type="button" class="btn btn-secondary" @click="geoJsonButtonClicked">Get GeoJSON</button>
         </div>
 
         <div :id="map_container_id">
@@ -255,7 +255,7 @@ export default {
                             }
                             me._loaded = true
                         },
-                        error: function (jqXhr, textStatus, errorMessage) { // error callback 
+                        error: function (jqXhr, textStatus, errorMessage) { // error callback
                             //console.log(errorMessage)
                         }
                     })
@@ -385,9 +385,9 @@ export default {
         filterApplied: function(){
             let filter_applied = true
             if(
-                this.filterApplicationStatuses.length == 0 && 
-                this.filterApplicationTypes.length == 0 && 
-                this.filterProposalLodgedFrom.toLowerCase() === '' && 
+                this.filterApplicationStatuses.length == 0 &&
+                this.filterApplicationTypes.length == 0 &&
+                this.filterProposalLodgedFrom.toLowerCase() === '' &&
                 this.filterProposalLodgedTo.toLowerCase() === ''
             ){
                 filter_applied = false
@@ -647,7 +647,7 @@ export default {
 
             vm.map = new Map({
                 layers: [
-                    vm.tileLayerOsm, 
+                    vm.tileLayerOsm,
                     vm.tileLayerSat,
                 ],
                 //target: 'map',
