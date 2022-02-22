@@ -197,7 +197,7 @@ export default {
                 //const featuresJson = (new GeoJSON).readFeatures(this.proposal.proposalgeometry)
                 for (let poly of this.proposal.proposalgeometry.features) {
                     const feature = (new GeoJSON).readFeature(poly);
-                    console.log(feature)
+                    //console.log(feature)
                     if (!feature.getProperties().intersects) {
                         feature.setStyle(nonIntersectingStyle);
                     }
@@ -224,6 +224,13 @@ export default {
             } else {
                 this.showSatIcon = false;
             }
+        },
+        fitToLayer: function() {
+            this.map.getView().fit(this.leaselicenceQuerySource.getExtent());
+            this.unlistenFitToLayer();
+        },
+        unlistenFitToLayer: function() {
+            this.map.un('rendercomplete', this.fitToLayer);
         },
         initMap: async function() {
             let vm = this;
@@ -312,16 +319,12 @@ export default {
             });
             vm.leaselicenceQueryLayer = new VectorLayer({
                 source: vm.leaselicenceQuerySource,
-                /*
-                style: function(feature, resolution){
-                    //let status = getStatusForColour(feature, false, vm.display_at_time_of_submitted)
-                    return getLeaselicenceFeatureStyle(status, feature.get('checked'))
-                },
-                */
             });
             //console.log(vm.drawForLeaselicence);
             vm.map.addInteraction(vm.drawForLeaselicence);
             vm.map.addLayer(vm.leaselicenceQueryLayer);
+            // update map extent when new features added
+            vm.map.on('rendercomplete', vm.fitToLayer);
 
             // Set zIndex to some layers to be rendered over the other layers
             vm.leaselicenceQueryLayer.setZIndex(10);
@@ -453,7 +456,6 @@ export default {
                     }
                 }
             });
-
         },
         removeLeaselicenceFeature: function() {
             //const feature = this.leaselicenceQuerySource.getFeatureById(this.selectedFeatureId);
@@ -725,26 +727,21 @@ export default {
 
     },
     created() {
+        /*
         this.$nextTick(() => {
             this.loadLeaseLicenceGeometry();
             //this.displayAllFeatures();
         });
+        */
     },
     mounted() {
-        console.log("mounted")
         this.initMap();
         //vm.setBaseLayer('osm')
         this.setMode('layer')
         this.addOptionalLayers()
-        //this.map.setSize([690, 400]);
-        //this.map.setSize([window.innerWidth, window.innerHeight]);
-        /*
-        console.log(this.map.getView().getCenter());
-        this.map.getView().setCenter([115.95, -31.95]);
-        */
-        //this.forceMapRefresh();
-        //this.map.renderSync();
-        //sessionStorage.clear();
+        this.$nextTick(() => {
+            this.loadLeaseLicenceGeometry();
+        });
     },
 }
 </script>
