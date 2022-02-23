@@ -82,15 +82,18 @@ export default {
         },
         callFinalDecline: function() {
             let callFinalDecline = false
-            if (this.processing_status === constants.WITH_APPROVER){
+            //if (this.processing_status === constants.WITH_APPROVER){
+            if (this.proposal && this.proposal.processing_status_id === 'with_approver'){
                 callFinalDecline = true
             }
+            /*
             if ([constants.WL_PROPOSAL, constants.AA_PROPOSAL].includes(this.proposal.application_type_dict.code)){
                 if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.processing_status)){
                     // For the WLA or AAA, assessor can final decline
                     callFinalDecline = true
                 }
             }
+            */
             return callFinalDecline
         },
     },
@@ -108,8 +111,10 @@ export default {
             this.isModalOpen = false;
             this.decline = {};
             this.errors = false;
+            /*
             $('.has-error').removeClass('has-error');
             this.validation_form.resetForm();
+            */
         },
 
         check_status: function (){
@@ -154,6 +159,7 @@ export default {
                     });
             }
         },
+        /*
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
@@ -189,11 +195,12 @@ export default {
        eventListerners:function () {
            let vm = this;
        }
+       */
    },
    mounted:function () {
        let vm =this;
        vm.form = document.forms.declineForm;
-       vm.addFormValidations();
+       //vm.addFormValidations();
    }
 }
 </script>

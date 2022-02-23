@@ -1650,7 +1650,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 reason = details.get('reason')
                 ProposalDeclinedDetails.objects.update_or_create(
                     proposal = self,
-                    defaults={'officer': request.user, 'reason': reason, 'cc_email': details.get('cc_email',None)}
+                    defaults={'officer': request.user.id, 'reason': reason, 'cc_email': details.get('cc_email',None)}
                 )
                 self.proposed_decline_status = True
                 approver_comment = ''
@@ -1658,8 +1658,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 # Log proposal action
                 self.log_user_action(ProposalUserAction.ACTION_PROPOSED_DECLINE.format(self.id),request)
                 # Log entry for organisation
-                applicant_field=getattr(self, self.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_PROPOSED_DECLINE.format(self.id),request)
+                #TODO: ledger must create EmailUser logs
+                #applicant_field=getattr(self, self.applicant_field)
+                #applicant_field.log_user_action(ProposalUserAction.ACTION_PROPOSED_DECLINE.format(self.id),request)
 
                 send_approver_decline_email_notification(reason, request, self)
             except:
@@ -1675,7 +1676,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                 proposal_decline, success = ProposalDeclinedDetails.objects.update_or_create(
                     proposal = self,
-                    defaults={'officer':request.user,'reason':details.get('reason'),'cc_email':details.get('cc_email',None)}
+                    defaults={'officer':request.user.id,'reason':details.get('reason'),'cc_email':details.get('cc_email',None)}
                 )
                 self.proposed_decline_status = True
                 self.processing_status = 'declined'
@@ -1684,8 +1685,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 # Log proposal action
                 self.log_user_action(ProposalUserAction.ACTION_DECLINE.format(self.id),request)
                 # Log entry for organisation
-                applicant_field=getattr(self, self.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_DECLINE.format(self.id),request)
+                #TODO: ledger must create EmailUser logs
+                #applicant_field=getattr(self, self.applicant_field)
+                #applicant_field.log_user_action(ProposalUserAction.ACTION_DECLINE.format(self.id),request)
                 send_proposal_decline_email_notification(self,request, proposal_decline)
             except:
                 raise
@@ -1804,7 +1806,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
             try:
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
-                if not (self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR) or (self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS):
+                if not ((self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR) or (self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS)):
                     raise ValidationError('You cannot propose for approval')
                 self.proposed_issuance_approval = {
                     # 'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
