@@ -79,7 +79,9 @@
                               @featureGeometryUpdated="featureGeometryUpdated"
                               @popupClosed="popupClosed"
                               :proposal="proposal"
+                              :readonly="readonly"
                           />
+
                       </FormSection>
                   </div>
               </div>

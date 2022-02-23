@@ -7,7 +7,8 @@
                 <div>
                     File: <a :href="v.file" target="_blank">{{v.name}}</a> &nbsp;
                     <span v-if="!readonly">
-                        <a @click="delete_document(v)" class="fa fa-trash-o" title="Remove file" :filename="v.name" style="cursor: pointer; color:red;"></a>
+                        <!--a @click="delete_document(v)" class="fa-solid fa-trash" title="Remove file" :filename="v.name" style="cursor: pointer; color:red;"></a-->
+                        <a @click="delete_document(v)" class="bi bi-trash3" title="Remove file" :filename="v.name" style="cursor: pointer; color:red;"></a>
                     </span>
                 </div>
             </div>

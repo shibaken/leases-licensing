@@ -25,6 +25,7 @@
                 :proposal_id="proposal.id"
                 :requirements="requirements"
                 @updateRequirements="updatedRequirements"
+                :key="uuid"
             />
         </FormSection>
     </div>
@@ -47,6 +48,7 @@ export default {
     data: function() {
         let vm = this;
         return {
+            uuid: 0,
             panelBody: "proposal-requirements-"+vm._uid,
             requirements: [],
             requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
@@ -211,7 +213,10 @@ export default {
     },
     methods:{
         addRequirement(){
-            this.$refs.requirement_detail.isModalOpen = true;
+            this.uuid++;
+            this.$nextTick(() => {
+                this.$refs.requirement_detail.isModalOpen = true;
+            });
         },
         removeRequirement(_id){
             let vm = this;
