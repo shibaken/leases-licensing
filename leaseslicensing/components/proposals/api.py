@@ -1530,6 +1530,8 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['POST',], detail=True)
     def proposed_approval(self, request, *args, **kwargs):
         try:
+            print("proposed_approval")
+            print(request.data)
             instance = self.get_object()
             serializer = ProposedApprovalSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)

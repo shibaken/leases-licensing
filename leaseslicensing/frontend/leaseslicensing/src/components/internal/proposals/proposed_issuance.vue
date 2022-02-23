@@ -201,12 +201,14 @@ export default {
             this.isModalOpen = false;
             this.approval = {};
             this.errors = false;
+            /*
             this.toDateError = false;
             this.startDateError = false;
             $('.has-error').removeClass('has-error');
             $(this.$refs.due_date).data('DateTimePicker').clear();
             $(this.$refs.start_date).data('DateTimePicker').clear();
             this.validation_form.resetForm();
+            */
         },
         fetchContact: function(id){
             let vm = this;
@@ -217,41 +219,42 @@ export default {
             } );
         },
         sendData:function(){
-            let vm = this;
-            vm.errors = false;
-            let approval = JSON.parse(JSON.stringify(vm.approval));
-            
-            vm.issuingApproval = true;
-            if (vm.state == 'proposed_approval'){
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,vm.proposal_id+'/proposed_approval'),JSON.stringify(approval),{
-                        emulateJSON:true,
-                    }).then((response)=>{
-                        vm.issuingApproval = false;
-                        vm.close();
-                        vm.$emit('refreshFromResponse',response);
-                        vm.$router.push({ path: '/internal' }); //Navigate to dashboard page after Propose issue.
+            this.errors = false;
+            //let approval = JSON.parse(JSON.stringify(vm.approval));
+            this.approval.details = this.$refs.approval_details.detailsText;
+            this.issuingApproval = true;
+            this.$nextTick(() => {
+                if (this.state == 'proposed_approval'){
+                    this.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/proposed_approval'),this.approval,{
+                            //emulateJSON:true,
+                        }).then((response)=>{
+                            this.issuingApproval = false;
+                            this.close();
+                            this.$emit('refreshFromResponse',response);
+                            this.$router.push({ path: '/internal' }); //Navigate to dashboard page after Propose issue.
 
-                    },(error)=>{
-                        vm.errors = true;
-                        vm.issuingApproval = false;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                    });
-            }
-            else if (vm.state == 'final_approval'){
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,vm.proposal_id+'/final_approval'),JSON.stringify(approval),{
-                        emulateJSON:true,
-                    }).then((response)=>{
-                        vm.issuingApproval = false;
-                        vm.close();
-                        vm.$emit('refreshFromResponse',response);
-                    },(error)=>{
-                        vm.errors = true;
-                        vm.issuingApproval = false;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                    });
-            }
-           
+                        },(error)=>{
+                            this.errors = true;
+                            this.issuingApproval = false;
+                            this.errorString = helpers.apiVueResourceError(error);
+                        });
+                }
+                else if (this.state == 'final_approval'){
+                    this.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/final_approval'),this.approval,{
+                            //emulateJSON:true,
+                        }).then((response)=>{
+                            this.issuingApproval = false;
+                            this.close();
+                            this.$emit('refreshFromResponse',response);
+                        },(error)=>{
+                            this.errors = true;
+                            this.issuingApproval = false;
+                            this.errorString = helpers.apiVueResourceError(error);
+                        });
+                }
+            });
         },
+        /*
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
@@ -282,11 +285,12 @@ export default {
                 }
             });
        },
+       */
    },
    mounted:function () {
         let vm =this;
         vm.form = document.forms.approvalForm;
-        vm.addFormValidations();
+        //vm.addFormValidations();
         this.$nextTick(()=>{
         });
    }

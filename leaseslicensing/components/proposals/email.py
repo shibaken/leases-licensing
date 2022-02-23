@@ -298,7 +298,7 @@ def send_submit_email_notification(request, proposal):
     }
 
     msg = email.send(proposal.assessor_recipients, context=context)
-    sender = request.user.id if request else settings.DEFAULT_FROM_EMAIL
+    sender = request.user if request else settings.DEFAULT_FROM_EMAIL
     _log_proposal_email(msg, proposal, sender=sender)
     #if proposal.org_applicant:
     #    _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
@@ -328,7 +328,7 @@ def send_external_submit_email_notification(request, proposal):
     #        all_ccs = [cc_list]
 
     msg = email.send(EmailUser.objects.get(id=proposal.submitter).email,cc=all_ccs, context=context)
-    sender = request.user.id if request else settings.DEFAULT_FROM_EMAIL
+    sender = request.user if request else settings.DEFAULT_FROM_EMAIL
     _log_proposal_email(msg, proposal, sender=sender)
     #if proposal.org_applicant:
     #    _log_org_email(msg, proposal.org_applicant, proposal.submitter, sender=sender)
@@ -391,7 +391,8 @@ def send_proposal_decline_email_notification(proposal,request,proposal_decline):
     if proposal.org_applicant and proposal.org_applicant.email:
         all_ccs.append(proposal.org_applicant.email)
 
-    msg = email.send(proposal.submitter.email, bcc= all_ccs, context=context)
+    #msg = email.send(proposal.submitter.email, bcc= all_ccs, context=context)
+    msg = email.send(retrieve_email_user(proposal.submitter).email, bcc=all_ccs, context=context)
     sender = request.user if request else settings.DEFAULT_FROM_EMAIL
     _log_proposal_email(msg, proposal, sender=sender)
     if proposal.org_applicant:
