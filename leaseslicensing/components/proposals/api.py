@@ -30,7 +30,8 @@ from datetime import datetime, timedelta, date
 from leaseslicensing.components.proposals.utils import save_proponent_data, save_assessor_data, proposal_submit, \
     save_referral_data
 from leaseslicensing.components.proposals.models import searchKeyWords, search_reference, ProposalUserAction
-from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
+from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE, \
+    APPLICATION_TYPES
 from leaseslicensing.components.main.utils import check_db_connection
 from leaseslicensing.components.main.decorators import basic_exception_handler
 
@@ -256,10 +257,10 @@ class ProposalFilterBackend(DatatablesFilterBackend):
 
         if queryset.model is Proposal:
             if filter_lodged_from:
-                filter_lodged_from = datetime.strptime(filter_lodged_from, '%d/%m/%Y')
+                filter_lodged_from = datetime.strptime(filter_lodged_from, '%Y-%m-%d')
                 queryset = queryset.filter(lodgement_date__gte=filter_lodged_from)
             if filter_lodged_to:
-                filter_lodged_to = datetime.strptime(filter_lodged_to, '%d/%m/%Y')
+                filter_lodged_to = datetime.strptime(filter_lodged_to, '%Y-%m-%d')
                 queryset = queryset.filter(lodgement_date__lte=filter_lodged_to)
             if filter_application_type:
                 application_type = ApplicationType.get_application_type_by_name(filter_application_type)
@@ -1097,10 +1098,12 @@ class ProposalViewSet(viewsets.ModelViewSet):
         proposals = self.get_queryset()
 
         statuses = list(map(lambda x: x[0], Proposal.PROCESSING_STATUS_CHOICES))
+        types = list(map(lambda x: x[0], APPLICATION_TYPES))
+        type = request.query_params.get('type', '')
         status = request.query_params.get('status', '')
-        if status in statuses:
-            # status passed as a parameter exists as a stataus
-            proposals = proposals.filter(Q(processing_status=status))
+        if status in statuses and type in types:
+            # both status and type exists
+            proposals = proposals.filter(Q(processing_status=status) & Q(application_type__name=type))
         serializer = ListProposalMinimalSerializer(proposals, context={'request': request}, many=True)
         return Response(serializer.data)
 
