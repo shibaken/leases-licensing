@@ -1,6 +1,6 @@
 <template>
     <div>
-        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
@@ -61,10 +61,10 @@
 
         <div class="row">
             <div class="col-lg-12">
-                <datatable 
-                    ref="compliances_datatable" 
-                    :id="datatable_id" 
-                    :dtOptions="compliancesOptions" 
+                <datatable
+                    ref="compliances_datatable"
+                    :id="datatable_id"
+                    :dtOptions="compliancesOptions"
                     :dtHeaders="compliancesHeaders"
                 />
             </div>
@@ -155,7 +155,7 @@ export default {
     },
     computed: {
         filterApplied: function(){
-            if(this.filterComplianceStatus.toLowerCase() === 'all' && this.filterComplianceType.toLowerCase() === 'all' && 
+            if(this.filterComplianceStatus.toLowerCase() === 'all' && this.filterComplianceType.toLowerCase() === 'all' &&
                 this.filterComplianceDueDateFrom.toLowerCase() === '' && this.filterComplianceDueDateTo.toLowerCase() === ''){
                 return false
             } else {

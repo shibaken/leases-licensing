@@ -1,6 +1,6 @@
 <template>
     <div>
-        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="">Type</label>
@@ -57,7 +57,7 @@
         <ApprovalSuspension ref="approval_suspension"  @refreshFromResponse="refreshFromResponseApprovalModify"></ApprovalSuspension>
         <ApprovalSurrender ref="approval_surrender"  @refreshFromResponse="refreshFromResponseApprovalModify"></ApprovalSurrender>
         <div v-if="approvalHistoryId">
-            <ApprovalHistory 
+            <ApprovalHistory
                 ref="approval_history"
                 :key="approvalHistoryId"
                 :approvalId="approvalHistoryId"
@@ -179,7 +179,7 @@ export default {
     computed: {
         filterApplied: function(){
             let filter_applied = true
-            if(this.filterApprovalStatus.toLowerCase() === 'all' && this.filterApprovalType.toLowerCase() === 'all' && 
+            if(this.filterApprovalStatus.toLowerCase() === 'all' && this.filterApprovalType.toLowerCase() === 'all' &&
                 this.filterApprovalExpiryDateFrom.toLowerCase() === '' && this.filterApprovalExpiryDateTo.toLowerCase() === ''){
                 filter_applied = false
             }

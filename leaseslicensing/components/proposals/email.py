@@ -814,7 +814,7 @@ def _log_proposal_email(email_message, proposal, sender=None, file_bytes=None, f
         all_ccs = ''
     customer = proposal.submitter
 
-    staff = sender
+    staff = sender.id
 
     kwargs = {
         'subject': subject,
