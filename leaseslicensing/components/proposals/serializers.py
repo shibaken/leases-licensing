@@ -751,6 +751,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     applicant = serializers.CharField(read_only=True)
     org_applicant = OrganisationSerializer()
     processing_status = serializers.SerializerMethodField(read_only=True)
+    processing_status_id = serializers.SerializerMethodField()
     review_status = serializers.SerializerMethodField(read_only=True)
     submitter = serializers.SerializerMethodField(read_only=True)
     proposaldeclineddetails = ProposalDeclinedDetailsSerializer()
@@ -817,10 +818,14 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'referral_assessments',
                 'requirements_completed',
                 'proposalgeometry',
+                'processing_status_id',
                 )
         read_only_fields = (
             'requirements',
             )
+
+    def get_processing_status_id(self, obj):
+        return obj.processing_status
 
     def get_submitter(self, obj):
         if obj.submitter:
