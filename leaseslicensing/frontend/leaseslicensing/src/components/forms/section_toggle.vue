@@ -89,7 +89,6 @@ export default {
         */
     },
     mounted: function() {
-        console.log("mounted");
         /*
         let vm = this;
         $('#' + vm.custom_id).on('click',function () {
