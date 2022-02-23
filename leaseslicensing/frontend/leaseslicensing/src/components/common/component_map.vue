@@ -77,7 +77,7 @@
             </div>
             <div class="col-sm-9">
                 <FileField
-                    :readonly="readonly"
+                    :readonly="false"
                     ref="shapefile_document"
                     name="shapefile_document"
                     id="shapefile_document_document"
@@ -199,11 +199,13 @@ export default {
                 )
         },
         valid_button_disabled: function(){
-            //if(this.is_external && this.proposal && !this.proposal.readonly){
-            if(this.proposal && !this.proposal.readonly){
+            return false;
+            /*
+            if(this.is_external && this.proposal && !this.proposal.readonly){
                 return false;
             }
             return true;
+            */
         },
 
     },
