@@ -55,6 +55,9 @@ from django.contrib.gis.db.models.fields import PointField, PolygonField
 
 
 import logging
+
+from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
+
 logger = logging.getLogger(__name__)
 
 
@@ -1758,24 +1761,24 @@ class Proposal(DirtyFieldsMixin, models.Model):
             try:
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
-                if self.processing_status != 'with_assessor_conditions':
-                    raise ValidationError('You cannot propose for approval if it is not with assessor for requirements')
+                if not (self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR) or (self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS):
+                    raise ValidationError('You cannot propose for approval')
                 self.proposed_issuance_approval = {
-                    'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
-                    'expiry_date' : details.get('expiry_date').strftime('%d/%m/%Y'),
+                    # 'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
+                    # 'expiry_date' : details.get('expiry_date').strftime('%d/%m/%Y'),
                     'details': details.get('details'),
                     'cc_email':details.get('cc_email')
                 }
                 self.proposed_decline_status = False
                 approver_comment = ''
-                self.move_to_status(request,'with_approver', approver_comment)
+                self.move_to_status(request, Proposal.PROCESSING_STATUS_WITH_APPROVER, approver_comment)
                 self.assigned_officer = None
                 self.save()
                 # Log proposal action
-                self.log_user_action(ProposalUserAction.ACTION_PROPOSED_APPROVAL.format(self.id),request)
+                self.log_user_action(ProposalUserAction.ACTION_PROPOSED_APPROVAL.format(self.id), request)
                 # Log entry for organisation
-                applicant_field=getattr(self, self.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_PROPOSED_APPROVAL.format(self.id),request)
+                applicant_field = getattr(self, self.applicant_field)
+                # applicant_field.log_user_action(ProposalUserAction.ACTION_PROPOSED_APPROVAL.format(self.id),request)
 
                 send_approver_approve_email_notification(request, self)
             except:
