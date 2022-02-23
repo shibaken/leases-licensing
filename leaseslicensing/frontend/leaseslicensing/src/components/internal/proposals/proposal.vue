@@ -766,11 +766,6 @@ export default {
             this.$refs.proposed_decline.isModalOpen = true;
         },
         proposedApproval: function(){
-            console.log('proposedApproval')
-            /*
-            if(this.proposal.proposed_issuance_approval == null){
-            }
-            */
             this.uuid++;
             this.$nextTick(() => {
                 this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? helpers.copyObject(this.proposal.proposed_issuance_approval) : {};

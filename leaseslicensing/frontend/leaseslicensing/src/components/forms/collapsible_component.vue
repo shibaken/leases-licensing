@@ -70,7 +70,6 @@ export default {
 .toggle_filters_wrapper {
     background: #efefee;
     padding: 0.5em;
-    margin: 0 0 0.5em 0;
     display: grid;
 }
 .toggle_filters_button {
