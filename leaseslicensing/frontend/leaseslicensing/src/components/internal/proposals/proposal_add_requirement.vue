@@ -21,7 +21,7 @@
                                         <!--div style="width:70% !important"-->
                                         <div>
                                             <select class="form-control" ref="standard_req" name="standard_requirement" v-model="requirement.standard_requirement" style="width:70%">
-                                                <option v-for="r in requirements" :value="r.id">{{r.code}} {{r.text}}</option>
+                                                <option v-for="r in requirements" :value="r.id" v-model="requirement.standard_requirement">{{r.code}} {{r.text}}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -384,17 +384,6 @@ export default {
        eventListeners:function () {
             let vm = this;
             /*
-            // Initialise Date Picker
-            $(vm.$refs.due_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.due_date).on('dp.change', function(e){
-                if ($(vm.$refs.due_date).data('DateTimePicker').date()) {
-                    vm.requirement.due_date =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.due_date).data('date') === "") {
-                    vm.requirement.due_date = "";
-                }
-             });
-             */
 
             // Intialise select2
             $(vm.$refs.standard_req).select2({
@@ -416,6 +405,7 @@ export default {
                 // move focus to select2 field
                 searchField[0].focus();
             });
+            */
        }
    },
    mounted:function () {

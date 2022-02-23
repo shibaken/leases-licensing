@@ -71,6 +71,38 @@
             </a>
             <div :id="popup_content_id"></div>
         </div-->
+        <div class="row">
+            <div class="col-sm-3">
+                <label for="shapefile_document">Upload shapefile</label>
+            </div>
+            <div class="col-sm-9">
+                <FileField
+                    :readonly="false"
+                    ref="shapefile_document"
+                    name="shapefile_document"
+                    id="shapefile_document_document"
+                    :isRepeatable="true"
+                    :documentActionUrl="shapefileDocumentUrl"
+                    :replace_button_by_text="true"
+                    fileTypes=".dbf,.prj,.shp,.shx,"
+                />
+            </div>
+        </div>
+        <VueAlert :show.sync="showError" type="danger" style="color: red"><strong>{{errorString}}</strong></VueAlert>
+        <div>
+            <div class="row">
+                <div class="col-sm-2 pull-right">
+                    <input
+                        :disabled="valid_button_disabled"
+                        @click="validate_map_docs"
+                        type="button"
+                        value="Validate"
+                        class="btn btn-primary w-100"
+                    />
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </template>
@@ -95,32 +127,19 @@ import VectorSource from 'ol/source/Vector';
 import MeasureStyles, { formatLength } from '@/components/common/measure.js'
 import { LineString, Point } from 'ol/geom';
 import { Circle as CircleStyle, Fill, Stroke, Style, Text, RegularShape } from 'ol/style';
+import FileField from '@/components/forms/filefield_immediate.vue'
+import VueAlert from '@vue-utils/alert.vue'
+import {
+  api_endpoints,
+  helpers
+}
+from '@/utils/hooks'
 //import { getDisplayNameFromStatus, getDisplayNameOfCategory, getStatusForColour, getApiaryFeatureStyle } from '@/components/common/site_colours.js'
 
 export default {
     name: 'ComponentMap',
     data: function() {
         return {
-            /*
-            elem_id: uuid(),
-            popup_id: uuid(),
-            popup_closer_id: uuid(),
-            popup_content_id: uuid(),
-            overlay: null,
-            content_element: null,
-            modifyInProgressList: [],
-            optionalLayers: [],
-            mode: 'normal',
-            map: null,
-            tileLayerOsm: null,
-            tileLayerSat: null,
-            showSatIcon: true,
-            drawForMeasure: null,
-            style: MeasureStyles.defaultStyle,
-            segmentStyle: MeasureStyles.segmentStyle,
-            labelStyle: MeasureStyles.labelStyle,
-            segmentStyles: null,
-            */
             showSatIcon: true,
             map: null,
             elem_id: uuid(),
@@ -146,12 +165,18 @@ export default {
             leaselicenseQueryLayer: null,
             selectedFeatureId: null,
             newFeatureId: 1,
+            errorString: '',
+            showError:false,
         }
     },
     props: {
         proposal:{
             type: Object,
             required:true
+        },
+        readonly:{
+            type: Boolean,
+            default: true,
         },
         /*
         lease_licensing_geojson_array: {
@@ -162,26 +187,61 @@ export default {
         },
         */
     },
+    components: {
+        FileField,
+        VueAlert,
+    },
     computed: {
+        shapefileDocumentUrl: function() {
+            return helpers.add_endpoint_join(
+                api_endpoints.proposal,
+                this.proposal.id + '/process_shapefile_document/'
+                )
+        },
+        valid_button_disabled: function(){
+            return false;
+            /*
+            if(this.is_external && this.proposal && !this.proposal.readonly){
+                return false;
+            }
+            return true;
+            */
+        },
+
     },
     methods: {
-        /*
-        loadLeaseLicenceGeometry: function(){
-            if (this.proposal.proposalgeometry) {
-                const featureJson = (new GeoJSON).readFeature(this.proposal.proposalgeometry)
-                featureJson.getGeometry().getPolygons().forEach((polygon) => {
-                    console.log(polygon)
-                    const feature = new Feature({
-                        geometry: polygon,
-                        parent: featureJson,
-                    });
-                    feature.setId(this.newFeatureId);
-                    this.leaselicenceQuerySource.addFeature(feature);
-                    this.newFeatureId++;
+        updateShape: function() {
+            let vm = this
+            vm.shapeVectorSource=null;
+            vm.shapeVectorLayer=null;
+            if(vm.shapefile_json && Object.keys(vm.shapefile_json).lenght>0){
+                console.log(vm.shapefile_json);
+                vm.shapeVectorSource = new VectorSource({
+                    features: new GeoJSON().readFeatures(vm.shapefile_json),
                 });
+                vm.shapeVectorLayer= new VectorLayer({
+                    source: vm.shapeVectorSource,
+                })
+                vm.map.addLayer(vm.shapeVectorLayer);
+                vm.displayAllFeaturesShape();
             }
         },
-        */
+        validate_map_docs: function(){
+            let vm = this;
+            vm.showError=false;
+            vm.errorString='';
+            vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,vm.proposal.id+'/validate_map_files')).then(res=>{
+                //vm.proposal = res.body;
+                //vm.refreshFromResponse(res);
+                vm.$emit('refreshFromResponse',res);
+                },err=>{
+                console.log(err);
+                vm.showError=true;
+                vm.errorString=helpers.apiVueResourceError(err);
+                });
+            vm.updateShape();
+        },
+
         loadLeaseLicenceGeometry: function(){
             const nonIntersectingStyle = new Style({
                 fill: new Fill({
