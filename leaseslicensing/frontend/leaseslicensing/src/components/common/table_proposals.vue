@@ -1,6 +1,6 @@
 <template>
     <div>
-        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
             <div class="row">
                 <div class="col-md-3">
                     <div class="form-group">
@@ -177,7 +177,7 @@ export default {
         },
         filterApplied: function(){
             let filter_applied = true
-            if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' && 
+            if(this.filterApplicationStatus.toLowerCase() === 'all' && this.filterApplicationType.toLowerCase() === 'all' &&
                 this.filterProposalLodgedFrom.toLowerCase() === '' && this.filterProposalLodgedTo.toLowerCase() === ''){
                 filter_applied = false
             }

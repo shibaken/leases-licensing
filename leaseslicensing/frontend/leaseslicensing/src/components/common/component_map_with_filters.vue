@@ -1,6 +1,6 @@
 <template>
     <div>
-        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted">
+        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
             <div class="row">
                 <div class="col-md-3">
                     <div class="form-group">
@@ -45,8 +45,8 @@
             </div>
         </CollapsibleFilters>
 
-        <div class="text-right">
-            <button type="button" class="btn btn-secondary" @click="geoJsonButtonClicked">GeoJson</button>
+        <div class="text-end mb-2">
+            <button type="button" class="btn btn-secondary" @click="geoJsonButtonClicked">Get GeoJSON</button>
         </div>
 
         <div :id="map_container_id">
@@ -174,7 +174,7 @@ export default {
                     return types
                 })()
             }
-            perform_show_hide(){
+            show_me(){
                 let me = this
                 me._types.forEach(type => {
                     type.perform_show_hide()
@@ -189,7 +189,7 @@ export default {
                 me._site_statuses = (function(){
                     let statuses = []
                     conf_statuses.forEach(myStatus => {
-                        statuses.push(new StatusFilterManager(myStatus.ID, myStatus.TEXT, me))
+                        statuses.push(new StatusFilterManager(myStatus.ID, me))
                     })
                     return statuses
                 })()
@@ -216,9 +216,8 @@ export default {
             }
         }
         class StatusFilterManager {
-            constructor(id, text, parent_obj){
+            constructor(id, parent_obj){
                 this._id = id
-                this._text = text
                 this._loaded = false
                 this._ajax_obj = null
                 this._proposals = []
@@ -226,8 +225,7 @@ export default {
             }
             perform_show_hide(){
                 let me = this
-                let show_this_status = (vm.filterApplicationStatuses.length === 0 || vm.filterApplicationStatuses.includes(me._id))
-                if (show_this_status){
+                if (vm.filterApplicationStatuses.length === 0 || vm.filterApplicationStatuses.includes(me._id)){
                     me.show_me()
                 } else {
                     me.hide_me()
@@ -251,21 +249,13 @@ export default {
                         dataType: 'json',
                         success: function(re, status, xhr){
                             for (let proposal of re){
-                                let lodgement_date = proposal.lodgement_date ? moment(proposal.lodgement_date) : null
-                                if (proposal.proposalgeometry){
-                                    try {
-                                        let features = (new GeoJSON()).readFeatures(proposal.proposalgeometry)
-                                        let proposal_obj = new ProposalManager(proposal.id, features, lodgement_date, me)
-                                        me._proposals.push(proposal_obj)
-                                        proposal_obj.perform_show_hide()
-                                    } catch (err) {
-                                        //console.log(err)
-                                    }
-                                }
+                                let proposal_obj = new ProposalManager(proposal, me)
+                                me._proposals.push(proposal_obj)
+                                proposal_obj.perform_show_hide()
                             }
                             me._loaded = true
                         },
-                        error: function (jqXhr, textStatus, errorMessage) { // error callback 
+                        error: function (jqXhr, textStatus, errorMessage) { // error callback
                             //console.log(errorMessage)
                         }
                     })
@@ -279,15 +269,26 @@ export default {
             }
         }
         class ProposalManager {
-            constructor(id, features, lodgement_date, parent_obj){
-                this._id = id
+            constructor(proposal, parent_obj){
+                this._id = proposal.id
                 this._show = true
                 this._shown = false
-                this._features = features
-                this._lodgement_date = lodgement_date
+                this._lodgement_date = proposal.lodgement_date ? moment(proposal.lodgement_date) : null
                 this._parent = parent_obj
+                this._features = (function(){
+                    if (proposal.proposalgeometry){
+                        try {
+                            return (new GeoJSON()).readFeatures(proposal.proposalgeometry)
+                        } catch (err){
+                            console.error(err)
+                            return null
+                        }
+                    } else {
+                        return null
+                    }
+                })()
             }
-            inside_lodgement_date_filter_range(){
+            inside_filter_date_range(){
                 let me = this
                 if(vm.filterProposalLodgedFromMoment){
                     if(vm.filterProposalLodgedFromMoment.isAfter(me._lodgement_date, 'date')){
@@ -303,7 +304,7 @@ export default {
             }
             perform_show_hide(){
                 let me = this
-                if (me.inside_lodgement_date_filter_range()){
+                if (me.inside_filter_date_range()){
                     me.show_me()
                 } else {
                     me.hide_me()
@@ -384,9 +385,9 @@ export default {
         filterApplied: function(){
             let filter_applied = true
             if(
-                this.filterApplicationStatuses.length == 0 && 
-                this.filterApplicationTypes.length == 0 && 
-                this.filterProposalLodgedFrom.toLowerCase() === '' && 
+                this.filterApplicationStatuses.length == 0 &&
+                this.filterApplicationTypes.length == 0 &&
+                this.filterProposalLodgedFrom.toLowerCase() === '' &&
                 this.filterProposalLodgedTo.toLowerCase() === ''
             ){
                 filter_applied = false
@@ -406,11 +407,11 @@ export default {
     watch: {
         filterProposalLodgedFrom: function() {
             sessionStorage.setItem('filterProposalLodgedFromForMap', this.filterProposalLodgedFrom);
-            this.main_manager.perform_show_hide()
+            this.main_manager.show_me()
         },
         filterProposalLodgedTo: function() {
             sessionStorage.setItem('filterProposalLodgedToForMap', this.filterProposalLodgedTo);
-            this.main_manager.perform_show_hide()
+            this.main_manager.show_me()
         },
         filterApplied: function(){
             if (this.$refs.collapsible_filters){
@@ -448,11 +449,11 @@ export default {
                 }).
                 on('select2:select', function(e){
                     vm.updateApplicationTypeFilterCache()
-                    vm.main_manager.perform_show_hide()
+                    vm.main_manager.show_me()
                 }).
                 on('select2:unselect', function(e){
                     vm.updateApplicationTypeFilterCache()
-                    vm.main_manager.perform_show_hide()
+                    vm.main_manager.show_me()
                 })
             }
             vm.select2AppliedToApplicationType = true
@@ -470,11 +471,11 @@ export default {
                 }).
                 on('select2:select', function(e){
                     vm.updateApplicationStatusFilterCache()
-                    vm.main_manager.perform_show_hide()
+                    vm.main_manager.show_me()
                 }).
                 on('select2:unselect', function(e){
                     vm.updateApplicationStatusFilterCache()
-                    vm.main_manager.perform_show_hide()
+                    vm.main_manager.show_me()
                 })
             }
             vm.select2AppliedToApplicationStatus = true
@@ -646,7 +647,7 @@ export default {
 
             vm.map = new Map({
                 layers: [
-                    vm.tileLayerOsm, 
+                    vm.tileLayerOsm,
                     vm.tileLayerSat,
                 ],
                 //target: 'map',
@@ -767,7 +768,7 @@ export default {
             vm.setBaseLayer('osm')
             vm.addOptionalLayers()
             vm.updateVariablesFromSession()
-            vm.main_manager.perform_show_hide()
+            vm.main_manager.show_me()
         });
     }
 }

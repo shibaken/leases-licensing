@@ -206,6 +206,23 @@
                                 @click.prevent="proposedDecline()"
                             >Propose Decline</button>
                         </div>
+
+                        <div class="d-flex justify-content-center" v-if="display_action_require_das">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="requireDas()"
+                            >Require DAS</button>
+                        </div>
+
+                        <div class="d-flex justify-content-center" v-if="display_action_complete_editing">
+                            <button
+                                class="btn btn-primary  w-75 my-1"
+                                :disabled="can_user_edit"
+                                @click.prevent="completeEditing()"
+                            >Complete Editing</button>
+                        </div>
+
                         <div class="d-flex justify-content-center" v-if="display_action_back_to_application">
                             <button
                                 class="btn btn-primary  w-75 my-1"
@@ -214,34 +231,27 @@
                             >Back To Application</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_propose_grant">
+                        <div class="d-flex justify-content-center" v-if="display_action_propose_approve">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
                                 @click.prevent="proposedApproval()"
                             >Propose Approve</button>
                         </div>
+
                         <div class="d-flex justify-content-center" v-if="display_action_back_to_assessor">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
                                 @click.prevent="switchStatus('with_assessor')"
-                            ><!-- Back To Processing -->Back To Assessor</button>
+                            >Back To Assessor</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_back_to_assessor_requirements">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="switchStatus('with_assessor_conditions')"
-                            ><!-- Back To Requirements -->Back To Assessor</button>
-                        </div>
-
-                        <div class="d-flex justify-content-center" v-if="display_action_grant">
+                        <div class="d-flex justify-content-center" v-if="display_action_approve">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 @click.prevent="issueProposal()"
-                            >Grant</button>
+                            >Approve</button>
                         </div>
 
                         <div class="d-flex justify-content-center" v-if="display_action_decline">
@@ -265,6 +275,95 @@ export default {
     name: 'Workflow',
     data: function() {
         let vm = this;
+        
+        let PS = constants.PROPOSAL_STATUS
+        let conf_buttons = [ // List the statuses for which the button is to be displayed
+            {
+                'enter_conditions': {
+                    'registration_of_interest': [],  // No conditions for registration_of_interest
+                    'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
+                },
+                'complete_referral': {
+                    'registration_of_interest': [PS.WITH_REFERRAL,],
+                    'lease_licence': [PS.WITH_REFERRAL,],
+                },
+                'request_amendment': {
+                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'lease_licence': [PS.WITH_ASSESSOR,],
+                },
+                'propose_decline': {
+                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'lease_licence': [PS.WITH_ASSESSOR,],
+                },
+                'back_to_application': {
+                    'registration_of_interest': [],  // No conditions for the registration_of_interest
+                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
+                },
+                'propose_approve': {
+                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
+                },
+                'back_to_assessor': {
+                    'registration_of_interest': [PS.WITH_APPROVER,],
+                    'lease_licence': [PS.WITH_APPROVER,],
+                },
+                'approve': {
+                    'registration_of_interest': [PS.WITH_APPROVER,],
+                    'lease_licence': [PS.WITH_APPROVER,],
+                },
+                'decline': {
+                    'registration_of_interest': [PS.WITH_APPROVER],
+                    'lease_licence': [PS.WITH_APPROVER,],
+                },
+                'require_das': {
+                    'registration_of_interest': [],
+                    'lease_licence': [PS.WITH_ASSESSOR],
+                },
+                'complete_editing': {
+                    'registration_of_interest': [],
+                    'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
+                },
+            },
+        ]
+
+        class Button{
+            constructor(id, condition){
+                this._id = id
+                this._condition = condition
+            }
+
+            displayable(application_type, processing_status_id){
+                let me = this
+                if (vm.debug)
+                    return true
+
+                // Absorb type difference
+                console.log(me._condition[application_type])
+                let displayable_statuses = me._condition[application_type].map(a_status => {
+                    if (a_status.hasOwnProperty('ID'))
+                        return a_status.ID
+                    else if (a_status.hasOwnProperty('id'))
+                        return a_status.id
+                    else if (a_status.hasOwnProperty('Id'))
+                        return a_status.Id
+                    else
+                        return a_status
+                })
+                processing_status_id = (function(){
+                    if(processing_status_id.hasOwnProperty('ID'))
+                        return processing_status_id.ID
+                    else if(processing_status_id.hasOwnProperty('id'))
+                        return processing_status_id.id
+                    else if(processing_status_id.hasOwnProperty('Id'))
+                        return processing_status_id.Id
+                    else
+                        return processing_status_id
+                })()
+
+                return displayable_statuses.includes(processing_status_id)
+            }
+        }
+
         return {
             showingProposal: false,
             showingRequirements: false,
@@ -275,6 +374,15 @@ export default {
             selected_referral: [],
             referral_text: '',
             sendingReferral: false,
+            buttons: (function(){
+                let button_array = {} 
+                conf_buttons.forEach(dict => {
+                    for (let [key, value] of Object.entries(dict)) {
+                        button_array[key] = new Button(key, value)
+                    }
+                })
+                return button_array
+            })()
         }
     },
     props: {
@@ -344,133 +452,37 @@ export default {
             return !this.isFinalised && this.canAction
         },
         display_action_complete_referral: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if(this.proposal.processing_status === constants.WITH_REFERRAL){
-                    display = true
-                }
-            } catch(err) {}
-            return display
+            return this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
         display_action_request_amendment: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if(this.proposal.processing_status === constants.WITH_ASSESSOR){
-                    display = true
-                }
-            } catch(err) {}
-            return display
+            return this.buttons['request_amendment'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
         display_action_enter_conditions: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if(this.proposal.processing_status === constants.WITH_ASSESSOR){
-                    display = true
-                }
-            } catch(err) {}
-            return display
+            return this.buttons['enter_conditions'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
         display_action_propose_decline: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if([constants.AU_PROPOSAL, constants.ML_PROPOSAL].includes(this.proposal.application_type_dict.code)){
-                    if(this.proposal.processing_status === constants.WITH_ASSESSOR){
-                        display = true
-                    }
-                }
-            } catch(err) {}
-            return display
+            return this.buttons['propose_decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
         display_action_back_to_application: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if(this.proposal.processing_status === constants.WITH_ASSESSOR_CONDITIONS){
-                    display = true
-                }
-            } catch(err) {}
-            return display
+            return this.buttons['back_to_application'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
-        display_action_propose_grant: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                //if([constants.AU_PROPOSAL, constants.ML_PROPOSAL].includes(this.proposal.application_type_dict.code)){
-                    //if(this.proposal.requirements_completed){
-                    //    display = true
-                    //}
-                    if(this.proposal.processing_status === constants.WITH_ASSESSOR_CONDITIONS){
-                        display = true
-                    }
-                //}
-            } catch(err) {}
-            return display
+        display_action_propose_approve: function(){
+            return this.buttons['propose_approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+        },
+        display_action_require_das: function(){
+            return this.buttons['require_das'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+        },
+        display_action_complete_editing: function(){
+            return this.buttons['complete_editing'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
         display_action_back_to_assessor: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if(this.proposal.processing_status === constants.WITH_APPROVER && this.proposal.proposed_decline_status){
-                    display = true
-                }
-            } catch(err) {}
-            console.log('display_action_back_to_assessor: ' + display)
-            return display
+            return this.buttons['back_to_assessor'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
-        display_action_back_to_assessor_requirements: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if(this.proposal.processing_status === constants.WITH_APPROVER && !this.proposal.proposed_decline_status){
-                    display = true
-                }
-            } catch(err) {}
-            console.log('display_action_back_to_assessor_requirements: ' + display)
-            return display
-        },
-        display_action_grant: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if(this.proposal.processing_status === constants.WITH_APPROVER){
-                    display = true
-                }
-                if([constants.WL_PROPOSAL, constants.AA_PROPOSAL].includes(this.proposal.application_type_dict.code)){
-                    if(this.proposal.processing_status === constants.WITH_ASSESSOR_CONDITIONS){
-                        display = true
-                    }
-                }
-            } catch(err) {}
-            return display
+        display_action_approve: function(){
+            return this.buttons['approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
         display_action_decline: function(){
-            if (this.debug) return true
-
-            let display = false
-            try {
-                if(this.proposal.processing_status === constants.WITH_APPROVER){
-                    display = true
-                }
-                if(this.proposal.processing_status === constants.WITH_ASSESSOR){
-                    if([constants.WL_PROPOSAL, constants.AA_PROPOSAL].includes(this.proposal.application_type_dict.code)){
-                        display = true
-                    }
-                }
-            } catch(err) {}
-            return display
+            return this.buttons['decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
         },
     },
     filters: {
@@ -479,6 +491,12 @@ export default {
         }
     },
     methods: {
+        completeEditing: function(){
+            console.log('completeEditing() clicked')
+        },
+        requireDas: function(){
+            console.log('requireDas() clicked')
+        },
         checkAssessorData: function(){
             //check assessor boxes and clear value of hidden assessor boxes so it won't get printed on approval pdf.
 
