@@ -128,6 +128,23 @@ class DefaultDocument(Document):
         logger.info('Cannot delete existing document object after Application has been submitted (including document submitted before Application pushback to status Draft): {}'.format(self.name))
 
 
+class ShapefileDocument(Document):
+    proposal = models.ForeignKey('Proposal',related_name='shapefile_documents', on_delete=models.CASCADE)
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=500)
+    input_name = models.CharField(max_length=255,null=True,blank=True)
+    can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
+    can_hide= models.BooleanField(default=False) # after initial submit, document cannot be deleted but can be hidden
+    hidden=models.BooleanField(default=False) # after initial submit prevent document from being deleted
+
+    def delete(self):
+        if self.can_delete:
+            return super(ShapefileDocument, self).delete()
+        logger.info('Cannot delete existing document object after Proposal has been submitted (including document submitted before Proposal pushback to status Draft): {}'.format(self.name))
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+
 class DeedPollDocument(Document):
     proposal = models.ForeignKey('Proposal',related_name='deed_poll_documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
@@ -749,6 +766,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     key_milestones_text = models.TextField(blank=True)
     risk_factors_text = models.TextField(blank=True)
     legislative_requirements_text = models.TextField(blank=True)
+    shapefile_json = JSONField(blank=True, null=True)
 
     class Meta:
         app_label = 'leaseslicensing'
@@ -1288,6 +1306,31 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def log_user_action(self, action, request):
         return ProposalUserAction.log_action(self, action, request.user.id)
+
+    # From DAS
+    def validate_map_files(self, request):
+        import geopandas as gpd
+        try:
+            shp_file_qs=self.map_documents.filter(name__endswith='.shp')
+            #TODO : validate shapefile and all the other related filese are present
+            if shp_file_qs:
+                shp_file_obj= shp_file_qs[0]
+                shp= gpd.read_file(shp_file_obj.path)
+                shp_transform=shp.to_crs(crs=4326)
+                shp_json=shp_transform.to_json()
+                import json
+                if type(shp_json)==str:
+                    self.shapefile_json=json.loads(shp_json)
+                else:
+                    self.shapefile_json=shp_json
+                self.save(version_comment='New Shapefile JSON saved.')
+                # else:
+                #     raise ValidationError('Please upload a valid shapefile')
+            else:
+                raise ValidationError('Please upload a valid shapefile') 
+        except:
+            raise ValidationError('Please upload a valid shapefile')
+
     
     # proposal.utils.proposal_submit appears to be used instead
     #def submit(self, request, viewset):

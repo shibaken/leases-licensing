@@ -96,6 +96,8 @@ def process_generic_document(request, instance, document_type=None, *args, **kwa
                 documents_qs = instance.risk_factors_documents
             elif document_type == 'legislative_requirements_document':
                 documents_qs = instance.legislative_requirements_documents
+            elif document_type == 'shapefile_document':
+                documents_qs = instance.shapefile_documents
 
             returned_file_data = [dict(file=d._file.url, id=d.id, name=d.name,) for d in documents_qs.filter(input_name=input_name) if d._file]
             return { 'filedata': returned_file_data }
@@ -168,6 +170,8 @@ def delete_document(request, instance, comms_instance, document_type, input_name
             document = instance.risk_factors_documents.get(id=document_id)
         elif document_type == 'legislative_requirements_document':
             document = instance.legislative_requirements_documents.get(id=document_id)
+        elif document_type == 'shapefile_document':
+            document = instance.shapefile_documents.get(id=document_id)
 
 
     # comms_log doc store delete
@@ -205,17 +209,17 @@ def cancel_document(request, instance, comms_instance, document_type, input_name
                 'native_title_consultation_document',
                 'mining_tenement_document',
                 ## additional form fields for lease_licence
-                'profit_and_loss_text',
-                'cash_flow_text',
-                'capital_investment_text',
-                'financial_capacity_text',
-                'available_activities_text',
-                'market_analysis_text',
-                'staffing_text',
-                'key_personnel_text',
-                'key_milestones_text',
-                'risk_factors_text',
-                'legislative_requirements_text',
+                'profit_and_loss_document',
+                'cash_flow_document',
+                'capital_investment_document',
+                'financial_capacity_document',
+                'available_activities_document',
+                'market_analysis_document',
+                'staffing_document',
+                'key_personnel_document',
+                'key_milestones_document',
+                'risk_factors_document',
+                'legislative_requirements_document',
 
                 ]:
             document_id = request.data.get('document_id')
@@ -320,6 +324,9 @@ def save_document(request, instance, comms_instance, document_type, input_name=N
         elif document_type == 'legislative_requirements_document':
             document = instance.legislative_requirements_documents.get_or_create(input_name=input_name, name=filename)[0]
             path_format_string = '{}/proposals/{}/legislative_requirements_documents/{}'
+        elif document_type == 'shapefile_document':
+            document = instance.shapefile_documents.get_or_create(input_name=input_name, name=filename)[0]
+            path_format_string = '{}/proposals/{}/shapefile_documents/{}'
 
         path = default_storage.save(path_format_string.format(settings.MEDIA_APP_DIR, instance.id, filename), ContentFile(_file.read()))
         document._file = path
