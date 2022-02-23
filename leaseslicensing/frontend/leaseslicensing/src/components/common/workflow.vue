@@ -251,7 +251,7 @@
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 @click.prevent="issueProposal()"
-                            >Grant</button>
+                            >Approve</button>
                         </div>
 
                         <div class="d-flex justify-content-center" v-if="display_action_decline">
@@ -277,53 +277,51 @@ export default {
         let vm = this;
         
         let PS = constants.PROPOSAL_STATUS
-        let RI = constants.APPLICATION_TYPE.REGISTRATION_OF_INTEREST
-        let LL = constants.APPLICATION_TYPE.LEASE_LICENCE
         let conf_buttons = [ // List the statuses for which the button is to be displayed
             {
                 'enter_conditions': {
-                    RI: [],  // No conditions for registration_of_interest
-                    LL: [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
+                    'registration_of_interest': [],  // No conditions for registration_of_interest
+                    'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
                 },
                 'complete_referral': {
-                    RI: [PS.WITH_REFERRAL,],
-                    LL: [PS.WITH_REFERRAL,],
+                    'registration_of_interest': [PS.WITH_REFERRAL,],
+                    'lease_licence': [PS.WITH_REFERRAL,],
                 },
                 'request_amendment': {
-                    RI: [PS.WITH_ASSESSOR,],
-                    LL: [PS.WITH_ASSESSOR,],
+                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'lease_licence': [PS.WITH_ASSESSOR,],
                 },
                 'propose_decline': {
-                    RI: [PS.WITH_ASSESSOR,],
-                    LL: [PS.WITH_ASSESSOR,],
+                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'lease_licence': [PS.WITH_ASSESSOR,],
                 },
                 'back_to_application': {
-                    RI: [],  // No conditions for the registration_of_interest
-                    LL: [PS.WITH_ASSESSOR_CONDITIONS,],
+                    'registration_of_interest': [],  // No conditions for the registration_of_interest
+                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
                 },
                 'propose_approve': {
-                    RI: [PS.WITH_ASSESSOR,],
-                    LL: [PS.WITH_ASSESSOR_CONDITIONS,],
+                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
                 },
                 'back_to_assessor': {
-                    RI: [PS.WITH_APPROVER,],
-                    LL: [PS.WITH_APPROVER,],
+                    'registration_of_interest': [PS.WITH_APPROVER,],
+                    'lease_licence': [PS.WITH_APPROVER,],
                 },
                 'approve': {
-                    RI: [PS.WITH_APPROVER,],
-                    LL: [PS.WITH_APPROVER,],
+                    'registration_of_interest': [PS.WITH_APPROVER,],
+                    'lease_licence': [PS.WITH_APPROVER,],
                 },
                 'decline': {
-                    RI: [PS.WITH_APPROVER],
-                    LL: [PS.WITH_APPROVER,],
+                    'registration_of_interest': [PS.WITH_APPROVER],
+                    'lease_licence': [PS.WITH_APPROVER,],
                 },
                 'require_das': {
-                    RI: [],
-                    LL: [PS.WITH_ASSESSOR],
+                    'registration_of_interest': [],
+                    'lease_licence': [PS.WITH_ASSESSOR],
                 },
                 'complete_editing': {
-                    RI: [],
-                    LL: [PS.APPROVED_EDITING_INVOICING,],
+                    'registration_of_interest': [],
+                    'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
                 },
             },
         ]
@@ -335,11 +333,13 @@ export default {
             }
 
             displayable(application_type, processing_status_id){
+                let me = this
                 if (vm.debug)
                     return true
 
                 // Absorb type difference
-                let displayable_statuses = this._condition[application_type].map(a_status => {
+                console.log(me._condition[application_type])
+                let displayable_statuses = me._condition[application_type].map(a_status => {
                     if (a_status.hasOwnProperty('ID'))
                         return a_status.ID
                     else if (a_status.hasOwnProperty('id'))
