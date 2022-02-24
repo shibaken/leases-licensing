@@ -46,7 +46,7 @@
         </CollapsibleFilters>
 
         <div class="text-end mb-2">
-            <button type="button" class="btn btn-secondary" @click="geoJsonButtonClicked">Get GeoJSON</button>
+            <button type="button" class="btn btn-primary" @click="geoJsonButtonClicked">Get GeoJSON</button>
         </div>
 
         <div :id="map_container_id">

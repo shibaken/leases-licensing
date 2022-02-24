@@ -15,8 +15,8 @@
                 /-->
 
                 <Submission v-if="canSeeSubmission"
-                    :submitter_first_name="proposal.submitter.first_name"
-                    :submitter_last_name="proposal.submitter.last_name"
+                    :submitter_first_name="submitter_first_name"
+                    :submitter_last_name="submitter_last_name"
                     :lodgement_date="proposal.lodgement_date"
                 />
 
@@ -65,7 +65,7 @@
                         :is_internal="true"
                         ref="application_form"
                         :readonly="readonly"
-                        :submitterId="proposal.submitter.id"
+                        :submitterId="submitter_id"
                         :key="computedProposalId"
                         :show_related_items_tab="true"
                         :registrationOfInterest="isRegistrationOfInterest"
@@ -201,7 +201,7 @@
             :proposal_id="proposal.id"
             :proposal_type='proposal.proposal_type.code'
             :isApprovalLevelDocument="isApprovalLevelDocument"
-            :submitter_email="proposal.submitter.email"
+            :submitter_email="submitter_email"
             :applicant_email="applicant_email"
             @refreshFromResponse="refreshFromResponse"
             :key="proposedApprovalKey"
@@ -356,6 +356,34 @@ export default {
 
     },
     computed: {
+        submitter_first_name: function(){
+            if (this.proposal.submitter){
+                return this.proposal.submitter.first_name
+            } else {
+                return ''
+            }
+        },
+        submitter_last_name: function(){
+            if (this.proposal.submitter){
+                return this.proposal.submitter.last_name
+            } else {
+                return ''
+            }
+        },
+        submitter_id: function(){
+            if (this.proposal.submitter){
+                return this.proposal.submitter.id
+            } else {
+                return this.proposal.applicant_obj.id
+            }
+        },
+        submitter_email: function(){
+            if (this.proposal.submitter){
+                return this.proposal.submitter.email
+            } else {
+                return this.proposal.applicant_obj.email 
+            }
+        },
         proposal_form_url: function() {
             if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
                 return `/api/proposal/${this.proposal.id}/assessor_save.json`
