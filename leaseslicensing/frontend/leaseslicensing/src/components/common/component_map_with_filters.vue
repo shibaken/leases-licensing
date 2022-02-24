@@ -438,6 +438,7 @@ export default {
             sessionStorage.setItem('filterApplicationStatusesForMap', JSON.stringify(vm.filterApplicationStatuses));
         },
         applySelect2ToApplicationTypes: function(application_types){
+            console.log(application_types)
             let vm = this
             if (!vm.select2AppliedToApplicationType){
                 $(vm.$refs.filter_application_type).select2({
