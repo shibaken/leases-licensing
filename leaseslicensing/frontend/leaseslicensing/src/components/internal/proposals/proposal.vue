@@ -7,17 +7,18 @@
             <h4>Application Type: {{ proposal.proposal_type.description }}</h4>
 
             <div class="col-md-3">
-                <!--CommsLogs
+                <CommsLogs
                     :comms_url="comms_url"
                     :logs_url="logs_url"
                     :comms_add_url="comms_add_url"
                     :disable_add_entry="false"
-                /-->
+                />
 
                 <Submission v-if="canSeeSubmission"
                     :submitter_first_name="submitter_first_name"
                     :submitter_last_name="submitter_last_name"
                     :lodgement_date="proposal.lodgement_date"
+                    class="mt-2"
                 />
 
                 <Workflow
@@ -37,6 +38,7 @@
                     @declineProposal="declineProposal"
                     @assignRequestUser="assignRequestUser"
                     @assignTo="assignTo"
+                    class="mt-2"
                 />
             </div>
 
@@ -68,6 +70,7 @@
                         :submitterId="submitter_id"
                         :key="computedProposalId"
                         :show_related_items_tab="true"
+                        :show_additional_documents_tab="true"
                         :registrationOfInterest="isRegistrationOfInterest"
                         :leaseLicence="isLeaseLicence"
                     >
@@ -178,6 +181,13 @@
                                     </template>
                                 </template>
                             </CollapsibleQuestions>
+
+                            <strong>Select one or more documents that need to be provided by the applicant:</strong>
+                            <template v-show="select2Applied">
+                                <select class="form-control" ref="selectAdditionalDocumentTypes">
+                                    <option v-for="type in additional_document_types">{{ type.name }}</option>
+                                </select>
+                            </template>
                         </template>
 
                         <!-- Inserted into the slot on the form.vue: Related Items -->
@@ -253,6 +263,7 @@ import ApplicationForm from '@/components/form.vue';
 import FormSection from "@/components/forms/section_toggle.vue"
 import CollapsibleQuestions from '@/components/forms/collapsible_component.vue'
 import ChecklistQuestion from '@/components/common/component_checklist_question.vue'
+require("select2/dist/css/select2.min.css");
 
 export default {
     name: 'InternalProposal',
@@ -327,6 +338,8 @@ export default {
             panelClickersInitialised: false,
             //sendingReferral: false,
             uuid: 0,
+            additional_document_types: [],
+            select2Applied: false,
         }
     },
     components: {
@@ -383,7 +396,7 @@ export default {
             if (this.proposal.submitter){
                 return this.proposal.submitter.email
             } else {
-                return this.proposal.applicant_obj.email 
+                return this.proposal.applicant_obj.email
             }
         },
         proposal_form_url: function() {
@@ -459,7 +472,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if (assessment.section_answers.map){  // Check if this is undefined
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.map
                         }
                         assessments.push(my_assessment)
@@ -476,7 +489,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.proposal_details){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.proposal_details
                         }
                         assessments.push(my_assessment)
@@ -493,7 +506,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.proposal_impact){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.proposal_impact
                         }
                         assessments.push(my_assessment)
@@ -510,7 +523,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.other){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.other
                         }
                         assessments.push(my_assessment)
@@ -527,7 +540,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.deed_poll){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.deed_poll
                         }
                         assessments.push(my_assessment)
@@ -544,7 +557,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.additional_documents){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.additional_documents
                         }
                         assessments.push(my_assessment)
@@ -673,6 +686,25 @@ export default {
         },
     },
     methods: {
+        addEventListeners: function(){
+
+        },
+        applySelect2ToAdditionalDocumentType: function(option_data){
+            let vm = this
+            vm.additional_document_types = option_data
+
+            // TODO: Make select2 work...  Somehow the code below doesn't work...
+
+            $(vm.$refs.selectAdditionalDocumentTypes).select2({
+                "theme": "bootstrap-5",
+                allowClear: true,
+                placeholder: "Select Document Type(s)",
+                multiple: true,
+                minimumResultsForSearch: -1,  // This hide the search box below selections
+            //    data: option_data,
+            })
+            vm.select2Applied = true
+        },
         collapsible_map_checklist_questions_component_mounted: function(){
             this.$refs.collapsible_map_checklist_questions.show_warning_icon(false)
         },
@@ -697,8 +729,8 @@ export default {
         save_and_continue: function(){
             this.save()
         },
-        save_and_exit: function(){
-            this.save()
+        save_and_exit: async function(){
+            await this.save()
             this.$router.push({ name: 'internal-dashboard' })
         },
         completeReferral: function(){
@@ -1143,11 +1175,17 @@ export default {
                 vm.initialisedSelects = true;
             }
         },
+        fetchAdditionalDocumentTypesDict: async function(){
+            console.log('fetch')
+            const response = await this.$http.get('/api/additional_document_types_dict')
+            this.applySelect2ToAdditionalDocumentType(response.body)
+        },
     },
     mounted: function() {
-        let vm = this;
-        //vm.fetchDeparmentUsers();
-
+        let vm = this
+        this.$nextTick(() => {
+            vm.addEventListeners()
+        })
     },
     updated: function(){
         let vm = this;
@@ -1171,8 +1209,6 @@ export default {
     },
     created: function() {
         Vue.http.get(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`).then(res => {
-            console.log('res.body: ')
-            console.log(res.body)
             this.proposal = res.body;
             this.original_proposal = Object.assign({}, res.body);
             //this.proposal.applicant.address = this.proposal.applicant.address != null ? this.proposal.applicant.address : {};
@@ -1181,6 +1217,7 @@ export default {
         err => {
           console.log(err);
         });
+        this.fetchAdditionalDocumentTypesDict()
     },
     /*
     beforeRouteEnter: function(to, from, next) {

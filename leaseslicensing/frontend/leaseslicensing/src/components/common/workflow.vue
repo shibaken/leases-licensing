@@ -1,10 +1,10 @@
 <template>
-    <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+    <div class="">
+        <div class="card card-default">
+            <div class="card-header">
                 Workflow
             </div>
-            <div class="panel-body panel-collapse">
+            <div class="card-body card-collapse">
                 <div class="row">
                     <div class="col-sm-12">
                         <strong>Status</strong><br/>
@@ -118,64 +118,13 @@
                                 </div>
                             </template>
 
-<!--
-                    <div class="col-sm-12 top-buffer-s" v-if="display_referrals">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <strong>Referrals</strong>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <select class="form-control" ref="select_referrals_control" ></select>
-                        </div>
-
-                        <template v-if='!sending_referral'>
-                            <template v-if="selected_referral.length">
-                                <label class="control-label pull-left"  for="Name">Comments</label>
-                                <textarea class="form-control referral_comment_textarea" name="name" v-model="referral_text"></textarea>
-                                <a v-if="canLimitedAction" @click.prevent="sendReferral()" class="actionBtn pull-right">Send</a>
-                            </template>
-                        </template>
-                        <template v-else>
-                            <span v-if="canLimitedAction" @click.prevent="sendReferral()" disabled class="actionBtn text-primary pull-right">
-                                Sending Referral&nbsp;
-                                <i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                            </span>
-                        </template>
-                    </div>
-
-                    <div class="col-sm-12">
-                        <table class="table small-table">
-                            <tr>
-                                <th>Referral</th>
-                                <th>Status/Action</th>
-                            </tr>
-                            <tr v-for="r in proposal.latest_referrals">
-                                <td>
-                                    <small><strong>{{r.apiary_referral.referral_group.name}}</strong></small><br/>
-                                    <small><strong>{{r.lodged_on | formatDate}}</strong></small>
-                                </td>
-                                <td>
-                                    <small><strong>{{r.processing_status}}</strong></small><br/>
-                                    <template v-if="r.processing_status == 'Awaiting'">
-                                        <small v-if="canLimitedAction"><a @click.prevent="remindReferral(r)" href="#">Remind</a> / <a @click.prevent="recallReferral(r)"href="#">Recall</a></small>
-                                    </template>
-                                    <template v-else>
-                                        <small v-if="canLimitedAction"><a @click.prevent="resendReferral(r)" href="#">Resend</a></small>
-                                    </template>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
--->
 
                     <div v-if="display_actions">
-                        <div class="d-flex justify-content-center">
+                        <div>
                             <strong>Action</strong>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_enter_conditions">
+                        <div class="" v-if="display_action_enter_conditions">
                             <button
                                 class="btn btn-primary w-75 my-1"
                                 :disabled="can_user_edit"
@@ -183,7 +132,7 @@
                             >Enter Conditions</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_complete_referral">
+                        <div class="" v-if="display_action_complete_referral">
                             <button
                                 class="btn btn-primary w-75 my-1"
                                 :disabled="can_user_edit"
@@ -191,7 +140,7 @@
                             >Complete Referral</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_request_amendment">
+                        <div class="" v-if="display_action_request_amendment">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -199,7 +148,7 @@
                             >Request Amendment</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_propose_decline">
+                        <div class="" v-if="display_action_propose_decline">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -207,7 +156,7 @@
                             >Propose Decline</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_require_das">
+                        <div class="" v-if="display_action_require_das">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -215,7 +164,7 @@
                             >Require DAS</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_complete_editing">
+                        <div class="" v-if="display_action_complete_editing">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -223,7 +172,7 @@
                             >Complete Editing</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_back_to_application">
+                        <div class="" v-if="display_action_back_to_application">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -231,7 +180,7 @@
                             >Back To Application</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_propose_approve">
+                        <div class="" v-if="display_action_propose_approve">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -239,7 +188,7 @@
                             >Propose Approve</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_back_to_assessor">
+                        <div class="" v-if="display_action_back_to_assessor">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -247,14 +196,14 @@
                             >Back To Assessor</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_approve">
+                        <div class="" v-if="display_action_approve">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 @click.prevent="issueProposal()"
                             >Approve</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_decline">
+                        <div class="" v-if="display_action_decline">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 @click.prevent="declineProposal()"
@@ -338,7 +287,6 @@ export default {
                     return true
 
                 // Absorb type difference
-                console.log(me._condition[application_type])
                 let displayable_statuses = me._condition[application_type].map(a_status => {
                     if (a_status.hasOwnProperty('ID'))
                         return a_status.ID
@@ -419,7 +367,6 @@ export default {
             return (this.proposal) ? `/api/proposal/${this.proposal.id}/assessor_save.json` : '';
         },
         referralListURL: function(){
-            console.log(api_endpoints.referrals)
             return this.proposal!= null ? helpers.add_endpoint_json(api_endpoints.referrals,'datatable_list')+'?proposal='+this.proposal.id : '';
         },
         canLimitedAction:function(){
@@ -492,16 +439,13 @@ export default {
     },
     methods: {
         completeEditing: function(){
-            console.log('completeEditing() clicked')
         },
         requireDas: function(){
-            console.log('requireDas() clicked')
         },
         checkAssessorData: function(){
             //check assessor boxes and clear value of hidden assessor boxes so it won't get printed on approval pdf.
 
             //select all fields including hidden fields
-            //console.log("here");
             var all_fields = $('input[type=text]:required, textarea:required, input[type=checkbox]:required, input[type=radio]:required, input[type=file]:required, select:required')
 
             all_fields.each(function() {
@@ -512,7 +456,6 @@ export default {
                     var visiblity=$("[name="+this.name+"-Assessor]").is(':visible')
                     if(!visiblity){
                         if(ele[0].value!=''){
-                            //console.log(visiblity, ele[0].name, ele[0].value)
                             ele[0].value=''
                         }
                     }
@@ -597,7 +540,6 @@ export default {
             let vm = this;
             vm.loading.push('Loading Department Users');
             vm.$http.get(api_endpoints.department_users).then((response) => {
-                console.log(response.body)
                 vm.department_users = response.body
                 vm.loading.splice('Loading Department Users',1);
             },(error) => {
@@ -618,9 +560,6 @@ export default {
 
                     vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), JSON.stringify(data), { emulateJSON:true }).then(
                         response => {
-                            console.log('1')
-                            console.log(response)
-                            console.log('2')
 
                             vm.sendingReferral = false;
                             vm.original_proposal = helpers.copyObject(response.body);
@@ -653,9 +592,6 @@ export default {
         },
         remindReferral:function(r){
             let vm = this;
-
-            console.log('1')
-            console.log(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/remind'))
 
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/remind')).then(response => {
                 vm.original_proposal = helpers.copyObject(response.body);

@@ -103,6 +103,7 @@ urlpatterns = [
     url(r'^proposal/$', proposal_views.ProposalView.as_view(), name='proposal'),
     url(r'^api/application_types$', proposal_api.GetApplicationTypeDescriptions.as_view(), name='get-application-type-descriptions'),
     url(r'^api/application_types_dict$', proposal_api.GetApplicationTypeDict.as_view(), name='get-application-type-dict'),
+    url(r'^api/additional_document_types_dict$', proposal_api.GetAdditionalDocumentTypeDict.as_view(), name='get-additional-document-types-dict'),
     url(r'^api/application_statuses_dict$', proposal_api.GetApplicationStatusesDict.as_view(), name='get-application-statuses-dict'),
     # Approval type should point to Approval.current_proposal.application_type
     #url(r'^api/approval_types_dict$', approval_api.GetApprovalTypeDict.as_view(), name='get-approval-type-dict'),
