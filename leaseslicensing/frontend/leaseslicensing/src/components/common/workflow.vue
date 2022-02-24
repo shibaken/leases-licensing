@@ -1,10 +1,10 @@
 <template>
-    <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+    <div class="">
+        <div class="card card-default">
+            <div class="card-header">
                 Workflow
             </div>
-            <div class="panel-body panel-collapse">
+            <div class="card-body card-collapse">
                 <div class="row">
                     <div class="col-sm-12">
                         <strong>Status</strong><br/>
@@ -118,57 +118,6 @@
                                 </div>
                             </template>
 
-<!--
-                    <div class="col-sm-12 top-buffer-s" v-if="display_referrals">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <strong>Referrals</strong>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <select class="form-control" ref="select_referrals_control" ></select>
-                        </div>
-
-                        <template v-if='!sending_referral'>
-                            <template v-if="selected_referral.length">
-                                <label class="control-label pull-left"  for="Name">Comments</label>
-                                <textarea class="form-control referral_comment_textarea" name="name" v-model="referral_text"></textarea>
-                                <a v-if="canLimitedAction" @click.prevent="sendReferral()" class="actionBtn pull-right">Send</a>
-                            </template>
-                        </template>
-                        <template v-else>
-                            <span v-if="canLimitedAction" @click.prevent="sendReferral()" disabled class="actionBtn text-primary pull-right">
-                                Sending Referral&nbsp;
-                                <i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                            </span>
-                        </template>
-                    </div>
-
-                    <div class="col-sm-12">
-                        <table class="table small-table">
-                            <tr>
-                                <th>Referral</th>
-                                <th>Status/Action</th>
-                            </tr>
-                            <tr v-for="r in proposal.latest_referrals">
-                                <td>
-                                    <small><strong>{{r.apiary_referral.referral_group.name}}</strong></small><br/>
-                                    <small><strong>{{r.lodged_on | formatDate}}</strong></small>
-                                </td>
-                                <td>
-                                    <small><strong>{{r.processing_status}}</strong></small><br/>
-                                    <template v-if="r.processing_status == 'Awaiting'">
-                                        <small v-if="canLimitedAction"><a @click.prevent="remindReferral(r)" href="#">Remind</a> / <a @click.prevent="recallReferral(r)"href="#">Recall</a></small>
-                                    </template>
-                                    <template v-else>
-                                        <small v-if="canLimitedAction"><a @click.prevent="resendReferral(r)" href="#">Resend</a></small>
-                                    </template>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
--->
 
                     <div v-if="display_actions">
                         <div class="d-flex justify-content-center">
