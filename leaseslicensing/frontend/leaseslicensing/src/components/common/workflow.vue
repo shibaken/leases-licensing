@@ -120,11 +120,11 @@
 
 
                     <div v-if="display_actions">
-                        <div class="d-flex justify-content-center">
+                        <div>
                             <strong>Action</strong>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_enter_conditions">
+                        <div class="" v-if="display_action_enter_conditions">
                             <button
                                 class="btn btn-primary w-75 my-1"
                                 :disabled="can_user_edit"
@@ -132,7 +132,7 @@
                             >Enter Conditions</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_complete_referral">
+                        <div class="" v-if="display_action_complete_referral">
                             <button
                                 class="btn btn-primary w-75 my-1"
                                 :disabled="can_user_edit"
@@ -140,7 +140,7 @@
                             >Complete Referral</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_request_amendment">
+                        <div class="" v-if="display_action_request_amendment">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -148,7 +148,7 @@
                             >Request Amendment</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_propose_decline">
+                        <div class="" v-if="display_action_propose_decline">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -156,7 +156,7 @@
                             >Propose Decline</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_require_das">
+                        <div class="" v-if="display_action_require_das">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -164,7 +164,7 @@
                             >Require DAS</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_complete_editing">
+                        <div class="" v-if="display_action_complete_editing">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -172,7 +172,7 @@
                             >Complete Editing</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_back_to_application">
+                        <div class="" v-if="display_action_back_to_application">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -180,7 +180,7 @@
                             >Back To Application</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_propose_approve">
+                        <div class="" v-if="display_action_propose_approve">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -188,7 +188,7 @@
                             >Propose Approve</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_back_to_assessor">
+                        <div class="" v-if="display_action_back_to_assessor">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 :disabled="can_user_edit"
@@ -196,14 +196,14 @@
                             >Back To Assessor</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_approve">
+                        <div class="" v-if="display_action_approve">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 @click.prevent="issueProposal()"
                             >Approve</button>
                         </div>
 
-                        <div class="d-flex justify-content-center" v-if="display_action_decline">
+                        <div class="" v-if="display_action_decline">
                             <button
                                 class="btn btn-primary  w-75 my-1"
                                 @click.prevent="declineProposal()"
