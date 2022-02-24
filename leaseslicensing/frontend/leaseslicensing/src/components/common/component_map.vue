@@ -286,7 +286,10 @@ export default {
             }
         },
         fitToLayer: function() {
-            this.map.getView().fit(this.leaselicenceQuerySource.getExtent());
+            const extent = this.leaselicenceQuerySource.getExtent();
+            if (!(extent[0] === Infinity)) {
+                this.map.getView().fit(this.leaselicenceQuerySource.getExtent());
+            }
             this.unlistenFitToLayer();
         },
         unlistenFitToLayer: function() {

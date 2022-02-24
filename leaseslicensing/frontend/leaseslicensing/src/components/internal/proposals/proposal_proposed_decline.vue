@@ -4,22 +4,33 @@
             <div class="container-fluid">
                 <div class="row">
                     <form class="form-horizontal" name="declineForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <VueAlert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></VueAlert>
                         <div class="col-sm-12">
                             <div class="form-group">
                                 <div class="row">
-                                    <div class="col-sm-12">
+                                    <div class="col-sm-3">
                                         <label v-if=check_status() class="control-label"  for="Name">Details</label>
                                         <label v-else class="control-label"  for="Name">Provide Reason for the proposed decline </label>
-                                        <textarea style="width: 70%;"class="form-control" name="reason" v-model="decline.reason"></textarea>
+                                        <!--textarea style="width: 70%;"class="form-control" name="reason" v-model="decline.reason"></textarea-->
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <RichText
+                                        :proposalData="decline.reason"
+                                        ref="decline_reason"
+                                        id="decline_reason"
+                                        :can_view_richtext_src=true
+                                        :key="proposedApprovalKey"
+                                        />
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="row">
-                                    <div class="col-sm-12">
+                                    <div class="col-sm-3">
                                         <label v-if=check_status() class="control-label"  for="Name">CC email</label>
                                         <label v-else class="control-label"  for="Name">Proposed CC email</label>
+                                    </div>
+                                    <div class="col-sm-9">
                                         <input type="text" style="width: 70%;"class="form-control" name="cc_email" v-model="decline.cc_email"/>
                                     </div>
                                 </div>
@@ -40,13 +51,15 @@
 <script>
 //import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
-import alert from '@vue-utils/alert.vue'
+import VueAlert from '@vue-utils/alert.vue'
+import RichText from '@/components/forms/richtext.vue'
 import { helpers, api_endpoints, constants } from "@/utils/hooks.js"
 export default {
     name:'Decline-Proposal',
     components:{
         modal,
-        alert
+        VueAlert,
+        RichText
     },
     props:{
         proposal: {
@@ -56,6 +69,14 @@ export default {
         processing_status:{
             type:String,
             required: true
+        },
+        proposedApprovalKey: {
+            type: String,
+            //default: ''
+        },
+        proposal: {
+            type: Object,
+            required: true,
         },
     },
     data:function () {
@@ -73,6 +94,11 @@ export default {
         }
     },
     computed: {
+        proposalId: function() {
+            if (this.proposal) {
+                return this.proposal.id;
+            }
+        },
         showError: function() {
             var vm = this;
             return vm.errors;
@@ -100,9 +126,12 @@ export default {
     methods:{
         ok:function () {
             let vm =this;
+            vm.sendData();
+            /*
             if($(vm.form).valid()){
                 vm.sendData();
             }
+            */
         },
         cancel:function () {
             this.close();
@@ -129,35 +158,38 @@ export default {
             console.log('in sendData')
             let vm = this;
             vm.errors = false;
+            this.decline.reason = this.$refs.decline_reason.detailsText;
             let decline = JSON.parse(JSON.stringify(vm.decline));
             vm.decliningProposal = true;
-            //if (vm.processing_status != 'With Approver'){
-            if (vm.callFinalDecline){
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id + '/final_decline'), JSON.stringify(decline), {
-                        emulateJSON:true,
-                    }).then((response)=>{
-                        vm.decliningProposal = false;
-                        vm.close();
-                        vm.$emit('refreshFromResponse',response);
-                    },(error)=>{
-                        vm.errors = true;
-                        vm.decliningProposal = false;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                    });
-            } else {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id + '/proposed_decline'), JSON.stringify(decline), {
-                        emulateJSON:true,
-                    }).then((response)=>{
-                        vm.decliningProposal = false;
-                        vm.close();
-                        vm.$emit('refreshFromResponse',response);
-                        vm.$router.push({ path: '/internal' }); //Navigate to dashboard after propose decline.
-                    },(error)=>{
-                        vm.errors = true;
-                        vm.decliningProposal = false;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                    });
-            }
+            this.$nextTick(() => {
+                //if (vm.processing_status != 'With Approver'){
+                if (vm.callFinalDecline){
+                    vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id + '/final_decline'), JSON.stringify(decline), {
+                            emulateJSON:true,
+                        }).then((response)=>{
+                            vm.decliningProposal = false;
+                            vm.close();
+                            vm.$emit('refreshFromResponse',response);
+                        },(error)=>{
+                            vm.errors = true;
+                            vm.decliningProposal = false;
+                            vm.errorString = helpers.apiVueResourceError(error);
+                        });
+                } else {
+                    vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id + '/proposed_decline'), JSON.stringify(decline), {
+                            emulateJSON:true,
+                        }).then((response)=>{
+                            vm.decliningProposal = false;
+                            vm.close();
+                            vm.$emit('refreshFromResponse',response);
+                            vm.$router.push({ path: '/internal' }); //Navigate to dashboard after propose decline.
+                        },(error)=>{
+                            vm.errors = true;
+                            vm.decliningProposal = false;
+                            vm.errorString = helpers.apiVueResourceError(error);
+                        });
+                }
+            });
         },
         /*
         addFormValidations: function() {
@@ -197,10 +229,11 @@ export default {
        }
        */
    },
-   mounted:function () {
+   created:function () {
        let vm =this;
        vm.form = document.forms.declineForm;
        //vm.addFormValidations();
+       this.decline = Object.assign({}, this.proposal.proposaldeclineddetails);
    }
 }
 </script>
