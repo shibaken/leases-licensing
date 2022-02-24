@@ -338,7 +338,6 @@ export default {
                     return true
 
                 // Absorb type difference
-                console.log(me._condition[application_type])
                 let displayable_statuses = me._condition[application_type].map(a_status => {
                     if (a_status.hasOwnProperty('ID'))
                         return a_status.ID
@@ -419,7 +418,6 @@ export default {
             return (this.proposal) ? `/api/proposal/${this.proposal.id}/assessor_save.json` : '';
         },
         referralListURL: function(){
-            console.log(api_endpoints.referrals)
             return this.proposal!= null ? helpers.add_endpoint_json(api_endpoints.referrals,'datatable_list')+'?proposal='+this.proposal.id : '';
         },
         canLimitedAction:function(){
@@ -492,16 +490,13 @@ export default {
     },
     methods: {
         completeEditing: function(){
-            console.log('completeEditing() clicked')
         },
         requireDas: function(){
-            console.log('requireDas() clicked')
         },
         checkAssessorData: function(){
             //check assessor boxes and clear value of hidden assessor boxes so it won't get printed on approval pdf.
 
             //select all fields including hidden fields
-            //console.log("here");
             var all_fields = $('input[type=text]:required, textarea:required, input[type=checkbox]:required, input[type=radio]:required, input[type=file]:required, select:required')
 
             all_fields.each(function() {
@@ -512,7 +507,6 @@ export default {
                     var visiblity=$("[name="+this.name+"-Assessor]").is(':visible')
                     if(!visiblity){
                         if(ele[0].value!=''){
-                            //console.log(visiblity, ele[0].name, ele[0].value)
                             ele[0].value=''
                         }
                     }
@@ -597,7 +591,6 @@ export default {
             let vm = this;
             vm.loading.push('Loading Department Users');
             vm.$http.get(api_endpoints.department_users).then((response) => {
-                console.log(response.body)
                 vm.department_users = response.body
                 vm.loading.splice('Loading Department Users',1);
             },(error) => {
@@ -618,9 +611,6 @@ export default {
 
                     vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), JSON.stringify(data), { emulateJSON:true }).then(
                         response => {
-                            console.log('1')
-                            console.log(response)
-                            console.log('2')
 
                             vm.sendingReferral = false;
                             vm.original_proposal = helpers.copyObject(response.body);
@@ -653,9 +643,6 @@ export default {
         },
         remindReferral:function(r){
             let vm = this;
-
-            console.log('1')
-            console.log(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/remind'))
 
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/remind')).then(response => {
                 vm.original_proposal = helpers.copyObject(response.body);
