@@ -23,13 +23,13 @@
                       Details
                     </button>
                 </li>
-
-                <!-- Related Items tab is shown on the internal proposal page -->
-                <!--template v-if="show_related_items_tab">
-                    <li class="nav-item">
-                        <a class="nav-link" id="pills-related-items-tab" data-toggle="pill" href="#pills-related-items" role="tab" aria-controls="pills-related-items" aria-selected="false">Related Items </a>
+                <template v-if="show_related_items_tab">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-related-items-tab" data-bs-toggle="pill" data-bs-target="#pills-related-items" role="tab" aria-controls="pills-related-items" aria-selected="false">
+                          Related Items
+                        </button>
                     </li>
-                </template-->
+                </template>
             </ul>
             <div class="tab-content" id="pills-tabContent">
               <div class="tab-pane fade show active" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
@@ -148,7 +148,6 @@
                       <slot name="slot_section_related_items"></slot>
                   </div>
               </template>
-
             </div>
         </div>
     </div>

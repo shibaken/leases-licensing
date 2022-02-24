@@ -73,7 +73,7 @@
                     >
                         <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
                         <template v-slot:slot_map_checklist_questions>
-                            <CollapsibleQuestions ref="collapsible_map_checklist_questions" @created="collapsible_map_checklist_questions_component_mounted">
+                            <CollapsibleQuestions ref="collapsible_map_checklist_questions" @created="collapsible_map_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_map.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
@@ -91,7 +91,7 @@
                         </template>
 
                         <template v-slot:slot_proposal_details_checklist_questions>
-                            <CollapsibleQuestions ref="collapsible_proposal_details_checklist_questions" @created="collapsible_proposal_details_checklist_questions_component_mounted">
+                            <CollapsibleQuestions ref="collapsible_proposal_details_checklist_questions" @created="collapsible_proposal_details_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_proposal_details.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
@@ -109,7 +109,7 @@
                         </template>
 
                         <template v-slot:slot_proposal_impact_checklist_questions>
-                            <CollapsibleQuestions ref="collapsible_proposal_impact_checklist_questions" @created="collapsible_proposal_impact_checklist_questions_component_mounted">
+                            <CollapsibleQuestions ref="collapsible_proposal_impact_checklist_questions" @created="collapsible_proposal_impact_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_proposal_impact.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
@@ -127,7 +127,7 @@
                         </template>
 
                         <template v-slot:slot_other_checklist_questions>
-                            <CollapsibleQuestions ref="collapsible_other_checklist_questions" @created="collapsible_other_checklist_questions_component_mounted">
+                            <CollapsibleQuestions ref="collapsible_other_checklist_questions" @created="collapsible_other_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_other.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
@@ -145,7 +145,7 @@
                         </template>
 
                         <template v-slot:slot_deed_poll_checklist_questions>
-                            <CollapsibleQuestions ref="collapsible_deed_poll_checklist_questions" @created="collapsible_deed_poll_checklist_questions_component_mounted">
+                            <CollapsibleQuestions ref="collapsible_deed_poll_checklist_questions" @created="collapsible_deed_poll_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_deed_poll.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
@@ -163,7 +163,7 @@
                         </template>
 
                         <template v-slot:slot_additional_documents_checklist_questions>
-                            <CollapsibleQuestions ref="collapsible_additional_documents_checklist_questions" @created="collapsible_additional_documents_checklist_questions_component_mounted">
+                            <CollapsibleQuestions ref="collapsible_additional_documents_checklist_questions" @created="collapsible_additional_documents_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_additional_documents.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
