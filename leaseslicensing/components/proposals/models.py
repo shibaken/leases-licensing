@@ -1804,6 +1804,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def proposed_approval(self,request,details):
         with transaction.atomic():
             try:
+                print(details)
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
                 if not ((self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR) or (self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS)):
@@ -1812,7 +1813,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     # 'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
                     # 'expiry_date' : details.get('expiry_date').strftime('%d/%m/%Y'),
                     'details': details.get('details'),
-                    'cc_email':details.get('cc_email')
+                    'cc_email':details.get('cc_email'),
+                    'decision':details.get('decision')
                 }
                 self.proposed_decline_status = False
                 approver_comment = ''
