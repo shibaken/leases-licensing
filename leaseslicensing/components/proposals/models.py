@@ -1894,8 +1894,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     if self.processing_status != 'with_approver':
                         raise ValidationError('You cannot issue the approval if it is not with an approver')
                     #if not self.applicant.organisation.postal_address:
-                    if not self.applicant_address:
-                        raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
+                    #TODO: add this check after ledger forms are available
+                    #if not self.applicant_address:
+                     #   raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
 
                     self.proposed_issuance_approval = {
                         #'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
@@ -1904,18 +1905,18 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         'details': details.get('details'),
                         'cc_email':details.get('cc_email')
                     }
-
-                    if is_departmentUser(request):
+                    # TODO: req for LL?
+                    #if is_departmentUser(request):
                         # needed because external users come through this workflow following 'awaiting_payment; status
-                        self.approved_by = request.user
+                        #self.approved_by = request.user
 
                 self.processing_status = 'approved'
                 # self.customer_status = 'approved'
                 # Log proposal action
                 self.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
                 # Log entry for organisation
-                applicant_field=getattr(self, self.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
+                #applicant_field=getattr(self, self.applicant_field)
+                #applicant_field.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
 
                 if self.processing_status == self.PROCESSING_STATUS_APPROVED:
                     # TODO if it is an ammendment proposal then check appropriately
@@ -1927,11 +1928,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                 current_proposal = checking_proposal,
                                 defaults = {
                                     'issue_date' : timezone.now(),
-                                    'expiry_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('expiry_date'), '%d/%m/%Y').date(),
-                                    'start_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('start_date'), '%d/%m/%Y').date(),
+                                    #'expiry_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('expiry_date'), '%d/%m/%Y').date(),
+                                    #'start_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('start_date'), '%d/%m/%Y').date(),
+                                    'expiry_date': timezone.now().date() + relativedelta(years=1),
+                                    'start_date': timezone.now().date(),
                                     'submitter': self.submitter,
-                                    #'org_applicant' : self.applicant if isinstance(self.applicant, Organisation) else None,
-                                    #'proxy_applicant' : self.applicant if isinstance(self.applicant, EmailUser) else None,
                                     'org_applicant' : self.org_applicant,
                                     'proxy_applicant' : self.proxy_applicant,
                                     'lodgement_number': previous_approval.lodgement_number
@@ -1950,11 +1951,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                 current_proposal = checking_proposal,
                                 defaults = {
                                     'issue_date' : timezone.now(),
-                                    'expiry_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('expiry_date'), '%d/%m/%Y').date(),
-                                    'start_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('start_date'), '%d/%m/%Y').date(),
+                                    'expiry_date': timezone.now().date() + relativedelta(years=1),
+                                    'start_date': timezone.now().date(),
                                     'submitter': self.submitter,
-                                    #'org_applicant' : self.applicant if isinstance(self.applicant, Organisation) else None,
-                                    #'proxy_applicant' : self.applicant if isinstance(self.applicant, EmailUser) else None,
                                     'org_applicant' : self.org_applicant,
                                     'proxy_applicant' : self.proxy_applicant,
                                     'lodgement_number': previous_approval.lodgement_number
@@ -1968,17 +1967,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
                             current_proposal = checking_proposal,
                             defaults = {
                                 'issue_date' : timezone.now(),
-                                'expiry_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('expiry_date'), '%d/%m/%Y').date(),
-                                'start_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('start_date'), '%d/%m/%Y').date(),
+                                'expiry_date': timezone.now().date() + relativedelta(years=1),
+                                'start_date': timezone.now().date(),
                                 'submitter': self.submitter,
-                                #'org_applicant' : self.applicant if isinstance(self.applicant, Organisation) else None,
-                                #'proxy_applicant' : self.applicant if isinstance(self.applicant, EmailUser) else None,
                                 'org_applicant' : self.org_applicant,
                                 'proxy_applicant' : self.proxy_applicant,
-                                #'extracted_fields' = JSONField(blank=True, null=True)
                             }
                         )
-                        self.reset_licence_discount(request.user)
                     # Generate compliances
                     from leaseslicensing.components.compliances.models import Compliance, ComplianceUserAction
                     if created:
@@ -1989,12 +1984,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                     c.delete()
                         # Log creation
                         # Generate the document
-                        approval.generate_doc(request.user)
+                        #TODO: generate doc
+                        #approval.generate_doc(request.user)
                         self.generate_compliances(approval, request)
                         # send the doc and log in approval and org
                     else:
                         # Generate the document
-                        approval.generate_doc(request.user)
+                        #TODO: generate doc
+                        #approval.generate_doc(request.user)
                         #Delete the future compliances if Approval is reissued and generate the compliances again.
                         approval_compliances = Compliance.objects.filter(approval= approval, proposal = self, processing_status='future')
                         if approval_compliances:
@@ -2009,8 +2006,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     self.approval = approval
 
                     #send Proposal approval email with attachment
-                    send_proposal_approval_email_notification(self,request)
-                    self.save(version_comment='Final Approval: {}'.format(self.approval.lodgement_number))
+                    #TODO: generate doc, then email
+                    #send_proposal_approval_email_notification(self,request)
+                    #TODO: add reversion
+                    #self.save(version_comment='Final Approval: {}'.format(self.approval.lodgement_number))
+                    self.save()
                     self.approval.documents.all().update(can_delete=False)
 
             except:
