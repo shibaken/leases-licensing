@@ -37,6 +37,7 @@
                     @declineProposal="declineProposal"
                     @assignRequestUser="assignRequestUser"
                     @assignTo="assignTo"
+                    class="mt-2"
                 />
             </div>
 
@@ -394,7 +395,7 @@ export default {
             if (this.proposal.submitter){
                 return this.proposal.submitter.email
             } else {
-                return this.proposal.applicant_obj.email 
+                return this.proposal.applicant_obj.email
             }
         },
         proposal_form_url: function() {
@@ -470,7 +471,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if (assessment.section_answers.map){  // Check if this is undefined
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.map
                         }
                         assessments.push(my_assessment)
@@ -487,7 +488,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.proposal_details){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.proposal_details
                         }
                         assessments.push(my_assessment)
@@ -504,7 +505,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.proposal_impact){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.proposal_impact
                         }
                         assessments.push(my_assessment)
@@ -521,7 +522,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.other){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.other
                         }
                         assessments.push(my_assessment)
@@ -538,7 +539,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.deed_poll){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.deed_poll
                         }
                         assessments.push(my_assessment)
@@ -555,7 +556,7 @@ export default {
                 for (let assessment of this.proposal.referral_assessments){
                     if(assessment.section_answers.additional_documents){
                         let my_assessment = {
-                            'referral_fullname': assessment.referral.referral.fullname, 
+                            'referral_fullname': assessment.referral.referral.fullname,
                             'answers': assessment.section_answers.additional_documents
                         }
                         assessments.push(my_assessment)
