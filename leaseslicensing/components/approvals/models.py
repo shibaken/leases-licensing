@@ -97,7 +97,7 @@ class Approval(RevisionedMixin):
     submitter = models.IntegerField() #EmailUserRo
     org_applicant = models.ForeignKey(Organisation,on_delete=models.PROTECT, blank=True, null=True, related_name='org_approvals')
     #proxy_applicant = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True, related_name='proxy_approvals')
-    proxy_applicant = models.IntegerField() #EmailUserRO
+    proxy_applicant = models.IntegerField(null=True) #EmailUserRO
     extracted_fields = JSONField(blank=True, null=True)
     cancellation_details = models.TextField(blank=True)
     extend_details = models.TextField(blank=True)
