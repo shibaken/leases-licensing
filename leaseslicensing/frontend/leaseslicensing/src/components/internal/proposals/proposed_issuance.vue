@@ -10,7 +10,38 @@
                         <VueAlert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></VueAlert>
                         <div class="col-sm-12">
                             <div class="form-group">
-                                <div class="row">
+                                <div class="row modal-input-row">
+                                    <div class="col-sm-2">
+                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Decision</label>
+                                        <label v-else class="control-label pull-left"  for="Name">Proposed Decision</label>
+                                    </div>
+                                    <div class="form-check col-sm-5">
+                                        <input 
+                                        type="radio" 
+                                        class="form-check-input"
+                                        name="approve_lease_licence" 
+                                        id="approve_lease_licence" 
+                                        value="approve_lease_licence" 
+                                        v-model="selectedDecision"
+                                        />
+                                        <label class="form-check-label" for="approve_lease_licence" style="font-weight:normal">Invite applicant to apply for a lease or licence</label>
+                                    </div>
+                                    <div class="form-check col-sm-5">
+                                        <input 
+                                        type="radio" 
+                                        class="form-check-input"
+                                        name="approve_competitive_process" 
+                                        id="approve_competitive_process" 
+                                        value="approve_competitive_process" 
+                                        v-model="selectedDecision"
+                                        />
+                                        <label class="form-check-label" for="approve_competitive_process" style="font-weight:normal">Start Competitive process</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="row modal-input-row">
                                     <div class="col-sm-3">
                                         <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Details</label>
                                         <label v-else class="control-label pull-left"  for="Name">Proposed Details</label>
@@ -22,14 +53,14 @@
                                         ref="approval_details"
                                         id="approval_details"
                                         :can_view_richtext_src=true
-                                        v-bind:key="proposal_id"
+                                        :key="proposedApprovalKey"
                                         />
 
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <div class="row">
+                                <div class="row modal-input-row">
                                     <div class="col-sm-3">
                                         <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">BCC email</label>
                                         <label v-else class="control-label pull-left"  for="Name">Proposed BCC email</label>
@@ -40,7 +71,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <div class="row">
+                                <div class="row modal-input-row">
                                     <div class="col-sm-12">
                                         <label v-if="submitter_email && applicant_email" class="control-label pull-left"  for="Name">After approving this proposal, approval will be emailed to {{submitter_email}} and {{applicant_email}}.</label>
                                         <label v-else class="control-label pull-left"  for="Name">After approving this proposal, approval will be emailed to {{submitter_email}}.</label>
@@ -101,10 +132,19 @@ export default {
             type: String,
             //default: ''
         },
+        proposedApprovalKey: {
+            type: String,
+            //default: ''
+        },
+        proposal: {
+            type: Object,
+            required: true,
+        },
     },
     data:function () {
         let vm = this;
         return {
+            selectedDecision: null,
             isModalOpen:false,
             form:null,
             approval: {},
@@ -127,6 +167,7 @@ export default {
                 allowInputToggle:true
             },
             warningString: 'Please attach Level of Approval document before issuing Approval',
+            uuid: 0,
             //is_local: helpers.is_local(),
         }
     },
@@ -222,6 +263,7 @@ export default {
             this.errors = false;
             //let approval = JSON.parse(JSON.stringify(vm.approval));
             this.approval.details = this.$refs.approval_details.detailsText;
+            this.approval.decision = this.selectedDecision;
             this.issuingApproval = true;
             this.$nextTick(() => {
                 if (this.state == 'proposed_approval'){
@@ -287,15 +329,23 @@ export default {
        },
        */
    },
-   mounted:function () {
+   created:function () {
         let vm =this;
         vm.form = document.forms.approvalForm;
+        this.approval = Object.assign({}, this.proposal.proposed_issuance_approval);
         //vm.addFormValidations();
         this.$nextTick(()=>{
+            if (this.approval.decision) {
+                this.selectedDecision = this.approval.decision;
+            }
         });
+        console.log(this.approval)
    }
 }
 </script>
 
 <style lang="css">
+.modal-input-row {
+    margin-bottom: 20px;
+}
 </style>
