@@ -38,6 +38,12 @@ class ProposalDocumentInline(admin.TabularInline):
 class AmendmentReasonAdmin(admin.ModelAdmin):
     list_display = ['reason']
 
+
+@admin.register(models.AdditionalDocumentType)
+class AdditionalDocumentTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'enabled',]
+    list_filter = ('enabled',)
+
 @admin.register(models.Proposal)
 #class ProposalAdmin(VersionAdmin):
 class ProposalAdmin(admin.ModelAdmin):
