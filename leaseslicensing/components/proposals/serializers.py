@@ -770,6 +770,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     # fee_invoice_url = serializers.SerializerMethodField()
 
     requirements_completed=serializers.SerializerMethodField()
+    applicant_obj = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -782,6 +783,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'processing_status',
                 'review_status',
                 'applicant',
+                'applicant_obj',
                 'org_applicant',
                 'proxy_applicant',
                 'submitter',
@@ -823,6 +825,12 @@ class InternalProposalSerializer(BaseProposalSerializer):
         read_only_fields = (
             'requirements',
             )
+
+    def get_applicant_obj(self, obj):
+        try:
+            return EmailUserSerializer(obj.applicant).data
+        except:
+            return OrganisationSerializer(obj.applicant).data
 
     def get_processing_status_id(self, obj):
         return obj.processing_status

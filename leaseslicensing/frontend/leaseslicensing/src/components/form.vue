@@ -55,7 +55,7 @@
                         :proposalId="proposal.id"
                     / -->
                       <Applicant
-                          :email_user="proposal.submitter"
+                          :email_user="email_user_applicant"
                           :applicantType="proposal.applicant_type"
                           id="proposalStartApplicant"
                           :readonly="readonly"
@@ -256,6 +256,9 @@ import Confirmation from '@/components/common/confirmation.vue'
             ComponentMap,
         },
         computed:{
+            email_user_applicant: function(){
+                return this.proposal.applicant_obj
+            },
             debug: function(){
                 if (this.$route.query.debug){
                     return this.$route.query.debug === 'true'
