@@ -697,8 +697,8 @@ export default {
         save_and_continue: function(){
             this.save()
         },
-        save_and_exit: function(){
-            this.save()
+        save_and_exit: async function(){
+            await this.save()
             this.$router.push({ name: 'internal-dashboard' })
         },
         completeReferral: function(){
