@@ -20,7 +20,7 @@ from leaseslicensing.components.proposals.models import (
     ProposalAssessmentAnswer,
     ProposalAssessment,
     RequirementDocument,
-    ProposalGeometry, SectionChecklist,
+    ProposalGeometry, SectionChecklist, AdditionalDocumentType,
 )
 from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer, ApplicationTypeSerializer
 from leaseslicensing.components.organisations.serializers import OrganisationSerializer
@@ -1133,3 +1133,11 @@ class ReferralSerializer(serializers.ModelSerializer):
         request = self.context['request']
         user = request.user._wrapped if hasattr(request.user,'_wrapped') else request.user
         return obj.can_process(user)
+
+
+class AdditionalDocumentTypeSerializer(serializers.ModelSerializer):
+    text = serializers.CharField(source='name')
+
+    class Meta:
+        model = AdditionalDocumentType
+        fields = '__all__'

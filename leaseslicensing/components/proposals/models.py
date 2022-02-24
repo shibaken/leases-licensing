@@ -113,6 +113,14 @@ def application_type_choicelist():
 #        unique_together = ('name', 'version')
 
 
+class AdditionalDocumentType(RevisionedMixin):
+    name = models.CharField(max_length=255, null=True, blank=True)
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+
 class DefaultDocument(Document):
     input_name = models.CharField(max_length=255,null=True,blank=True)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
@@ -156,6 +164,7 @@ class DeedPollDocument(Document):
     class Meta:
         app_label = 'leaseslicensing'
         verbose_name = "Deed Poll Document"
+
 
 class LegislativeRequirementsDocument(Document):
     proposal = models.ForeignKey('Proposal',related_name='legislative_requirements_documents', on_delete=models.CASCADE)

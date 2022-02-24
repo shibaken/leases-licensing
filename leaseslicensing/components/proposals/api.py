@@ -29,7 +29,8 @@ from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from leaseslicensing.components.proposals.utils import save_proponent_data, save_assessor_data, proposal_submit, \
     save_referral_data
-from leaseslicensing.components.proposals.models import searchKeyWords, search_reference, ProposalUserAction
+from leaseslicensing.components.proposals.models import searchKeyWords, search_reference, ProposalUserAction, \
+    AdditionalDocumentType
 from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE, \
     APPLICATION_TYPES
 from leaseslicensing.components.main.utils import check_db_connection
@@ -85,7 +86,7 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalParkSerializer,
     ChecklistQuestionSerializer,
     ProposalAssessmentSerializer,
-    ProposalAssessmentAnswerSerializer, ListProposalMinimalSerializer,
+    ProposalAssessmentAnswerSerializer, ListProposalMinimalSerializer, AdditionalDocumentTypeSerializer,
 )
 from leaseslicensing.components.main.process_document import (
         process_generic_document, 
@@ -131,6 +132,17 @@ logger = logging.getLogger(__name__)
 #            cache.set('application_type_dict',Proposal.application_types_dict(apply_page=apply_page), settings.LOV_CACHE_TIMEOUT)
 #            data = cache.get('application_type_dict')
 #        return Response(data)
+
+class GetAdditionalDocumentTypeDict(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request,):
+        types = AdditionalDocumentType.objects.filter(enabled=True)
+        if types:
+            serializers = AdditionalDocumentTypeSerializer(types, many=True)
+            return Response(serializers.data)
+        else:
+            return Response({})
 
 
 class GetApplicationTypeDict(views.APIView):
