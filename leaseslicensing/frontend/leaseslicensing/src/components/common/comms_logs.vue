@@ -1,10 +1,10 @@
 <template id="comms_logs">
-    <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+    <div class="">
+        <div class="card card-default">
+            <div class="card-header">
                 Logs
             </div>
-            <div class="panel-body panel-collapse">
+            <div class="card-body card-collapse">
                 <div class="row">
                     <div class="col-sm-12">
                         <strong>Communications</strong><br/>
@@ -15,7 +15,7 @@
                             <template v-if="!disable_add_entry">
                                 <div class="col-sm-1">
                                     <span>|</span>
-                                </div> 
+                                </div>
                                 <div class="col-sm-5">
                                     <a ref="addCommsBtn" @click="addComm()" class="actionBtn pull-right">Add Entry</a>
                                 </div>
@@ -69,7 +69,7 @@ export default {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: true,
-                deferRender: true, 
+                deferRender: true,
                 autowidth: true,
                 order: [[3, 'desc']], // order the non-formatted date as a hidden column
                 dom:
@@ -78,7 +78,7 @@ export default {
                     "<'row'<'col-sm-5'i><'col-sm-7'p>>",
                 processing:true,
                 ajax: {
-                    "url": vm.logs_url, 
+                    "url": vm.logs_url,
                     "dataSrc": '',
                 },
                 order: [],
@@ -111,12 +111,12 @@ export default {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: true,
-                deferRender: true, 
+                deferRender: true,
                 autowidth: true,
                 order: [[8, 'desc']], // order the non-formatted date as a hidden column
                 processing:true,
                 ajax: {
-                    "url": vm.comms_url, 
+                    "url": vm.comms_url,
                     "dataSrc": '',
                 },
                 columns:[
@@ -313,7 +313,7 @@ export default {
                 ]
             },
             commsTable : null,
-            
+
         }
     },
     components:{
@@ -330,7 +330,7 @@ export default {
             let popover_name = 'popover-'+ vm._uid+'-comms';
             $(ref).popover({
                 content: function() {
-                    return ` 
+                    return `
                     <table id="${commsLogId}" class="hover table table-striped table-bordered dt-responsive " cellspacing="0" width="100%">
                     </table>`
                 },
@@ -352,7 +352,7 @@ export default {
                         // the next line prevents from scrolling up to the top after clicking on the popover.
                         $($tablePopover).on('click', function (e) {
                             e.preventDefault();
-                            return true;   
+                            return true;
                         });
                     }
                 });
@@ -365,7 +365,7 @@ export default {
 
                 var el_bounding_top = parseInt($(el)[0].getBoundingClientRect().top);
                 var el_bounding_bottom = parseInt($(el)[0].getBoundingClientRect().top);
-                
+
                 var diff = el_bounding_top - popover_bounding_top;
 
                 var position = parseInt($('.'+popover_name).position().top);
@@ -382,7 +382,7 @@ export default {
             let popover_name = 'popover-'+ vm._uid+'-logs';
             $(ref).popover({
                 content: function() {
-                    return ` 
+                    return `
                     <table id="${actionLogId}" class="hover table table-striped table-bordered dt-responsive" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -413,7 +413,7 @@ export default {
 
                 var el_bounding_top = parseInt($(el)[0].getBoundingClientRect().top);
                 var el_bounding_bottom = parseInt($(el)[0].getBoundingClientRect().top);
-                
+
                 var diff = el_bounding_top - popover_bounding_top;
 
                 var position = parseInt($('.'+popover_name).position().top);
