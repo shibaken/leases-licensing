@@ -1875,8 +1875,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
             try:
                 self.proposed_decline_status = False
 
-                if (self.processing_status==Proposal.PROCESSING_STATUS_AWAITING_PAYMENT and self.fee_paid) or (self.proposal_type=='amendment'):
-                    # for 'Awaiting Payment' approval. External/Internal user fires this method after full payment via Make/Record Payment
+                #if (self.processing_status==Proposal.PROCESSING_STATUS_AWAITING_PAYMENT and self.fee_paid) or (self.proposal_type=='amendment'):
+                if (self.proposal_type=='amendment'):
+                #    # for 'Awaiting Payment' approval. External/Internal user fires this method after full payment via Make/Record Payment
                     pass
                 else:
                     if not self.can_assess(request.user):
@@ -1888,8 +1889,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
 
                     self.proposed_issuance_approval = {
-                        'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
-                        'expiry_date' : details.get('expiry_date').strftime('%d/%m/%Y'),
+                        #'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
+                        #'expiry_date' : details.get('expiry_date').strftime('%d/%m/%Y'),
+                        'decision': details.get('decision'),
                         'details': details.get('details'),
                         'cc_email':details.get('cc_email')
                     }
@@ -1898,40 +1900,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         # needed because external users come through this workflow following 'awaiting_payment; status
                         self.approved_by = request.user
 
-                if (self.application_type.name == ApplicationType.FILMING and self.filming_approval_type == self.LICENCE and \
-                        self.processing_status in [Proposal.PROCESSING_STATUS_WITH_APPROVER]) and \
-                        not self.proposal_type=='amendment' and \
-                        not self.fee_paid:
-
-                    self.processing_status = self.PROCESSING_STATUS_AWAITING_PAYMENT
-                    # self.customer_status = self.CUSTOMER_STATUS_AWAITING_PAYMENT
-                    self.approved_by = request.user
-                    invoice = self.__create_filming_fee_invoice(request)
-                    #confirmation = self.__create_filming_fee_confirmation(request)
-                    #
-                    #if confirmation:
-                    if invoice:
-                        # send Proposal awaiting payment approval email & Log proposal action
-                        send_proposal_awaiting_payment_approval_email_notification(self, request)
-                        self.log_user_action(ProposalUserAction.ACTION_AWAITING_PAYMENT_APPROVAL_.format(self.id),request)
-
-                        # Log entry for organisation
-                        applicant_field=getattr(self, self.applicant_field)
-                        applicant_field.log_user_action(ProposalUserAction.ACTION_AWAITING_PAYMENT_APPROVAL_.format(self.id),request)
-                        self.save(version_comment='Final Approval - Awaiting Payment, Proposal: {}'.format(self.lodgement_number))
-
-                    else:
-                        logger.info('Cannot create Filming awaiting payment confirmation: {}'.format(self.name))
-                        raise
-
-                else:
-                    self.processing_status = 'approved'
-                    # self.customer_status = 'approved'
-                    # Log proposal action
-                    self.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
-                    # Log entry for organisation
-                    applicant_field=getattr(self, self.applicant_field)
-                    applicant_field.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
+                self.processing_status = 'approved'
+                # self.customer_status = 'approved'
+                # Log proposal action
+                self.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
+                # Log entry for organisation
+                applicant_field=getattr(self, self.applicant_field)
+                applicant_field.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
 
                 if self.processing_status == self.PROCESSING_STATUS_APPROVED:
                     # TODO if it is an ammendment proposal then check appropriately
