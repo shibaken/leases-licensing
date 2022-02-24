@@ -205,12 +205,14 @@
             :applicant_email="applicant_email"
             @refreshFromResponse="refreshFromResponse"
             :key="proposedApprovalKey"
+            :proposedApprovalKey="proposedApprovalKey"
         />
         <ProposedDecline
             ref="proposed_decline"
             :processing_status="proposal.processing_status"
             :proposal="proposal"
             @refreshFromResponse="refreshFromResponse"
+            :proposedApprovalKey="proposedApprovalKey"
         />
         <AmendmentRequest
             ref="amendment_request"
@@ -762,13 +764,16 @@ export default {
         },
         proposedDecline: function(){
             console.log('in proposedDecline')
-            this.$refs.proposed_decline.decline = this.proposal.proposaldeclineddetails != null ? helpers.copyObject(this.proposal.proposaldeclineddetails): {};
-            this.$refs.proposed_decline.isModalOpen = true;
+            this.uuid++;
+            //this.$refs.proposed_decline.decline = this.proposal.proposaldeclineddetails != null ? Object.assign({}, this.proposal.proposaldeclineddetails): {};
+            this.$nextTick(() => {
+                this.$refs.proposed_decline.isModalOpen = true;
+            });
         },
         proposedApproval: function(){
             this.uuid++;
             this.$nextTick(() => {
-                this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? helpers.copyObject(this.proposal.proposed_issuance_approval) : {};
+                //this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? Object.assign({}, this.proposal.proposed_issuance_approval) : {};
                 this.$refs.proposed_approval.isModalOpen = true;
             });
         },
@@ -1141,7 +1146,7 @@ export default {
             console.log('res.body: ')
             console.log(res.body)
             this.proposal = res.body;
-            this.original_proposal = helpers.copyObject(res.body);
+            this.original_proposal = Object.assign({}, res.body);
             //this.proposal.applicant.address = this.proposal.applicant.address != null ? this.proposal.applicant.address : {};
             this.hasAmendmentRequest=this.proposal.hasAmendmentRequest;
         },
@@ -1163,7 +1168,6 @@ export default {
               console.log(err);
             });
     },
-    */
     beforeRouteUpdate: function(to, from, next) {
         console.log("beforeRouteUpdate")
           Vue.http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
@@ -1177,6 +1181,7 @@ export default {
               console.log(err);
             });
     }
+    */
 }
 </script>
 <style scoped>
