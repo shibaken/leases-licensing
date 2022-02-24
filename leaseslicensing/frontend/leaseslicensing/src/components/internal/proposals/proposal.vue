@@ -68,6 +68,7 @@
                         :submitterId="submitter_id"
                         :key="computedProposalId"
                         :show_related_items_tab="true"
+                        :show_additional_documents_tab="true"
                         :registrationOfInterest="isRegistrationOfInterest"
                         :leaseLicence="isLeaseLicence"
                     >

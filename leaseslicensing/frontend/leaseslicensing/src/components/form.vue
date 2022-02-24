@@ -137,9 +137,11 @@
                       </div>
                   </FormSection>
 
-                  <FormSection label="Additional Documents" Index="additional_documents">
-                      <slot name="slot_additional_documents_checklist_questions"></slot>
-                  </FormSection>
+                  <template v-if="show_additional_documents_tab">
+                      <FormSection label="Additional Documents" Index="additional_documents">
+                          <slot name="slot_additional_documents_checklist_questions"></slot>
+                      </FormSection>
+                  </template>
               </div>
 
               <!-- Related Items tab is shown on the internal proposal page -->
@@ -174,6 +176,10 @@ import Confirmation from '@/components/common/confirmation.vue'
         name: 'ApplicationForm',
         props:{
             show_related_items_tab: {
+                type: Boolean,
+                default: false,
+            },
+            show_additional_documents_tab: {
                 type: Boolean,
                 default: false,
             },
