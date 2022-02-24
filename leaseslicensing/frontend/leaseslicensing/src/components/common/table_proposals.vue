@@ -51,7 +51,9 @@
 
         <div v-if="is_external" class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-primary pull-right" @click="new_application_button_clicked">New Application</button>
+                <div class="text-end">
+                    <button type="button" class="btn btn-primary" @click="new_application_button_clicked">New Application</button>
+                </div>
             </div>
         </div>
 
