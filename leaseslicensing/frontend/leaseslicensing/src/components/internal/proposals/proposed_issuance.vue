@@ -332,12 +332,13 @@ export default {
    created:function () {
         let vm =this;
         vm.form = document.forms.approvalForm;
-       this.approval = Object.assign({}, this.proposal.proposed_issuance_approval);
-       /*
+        this.approval = Object.assign({}, this.proposal.proposed_issuance_approval);
         //vm.addFormValidations();
         this.$nextTick(()=>{
+            if (this.approval.decision) {
+                this.selectedDecision = this.approval.decision;
+            }
         });
-        */
         console.log(this.approval)
    }
 }

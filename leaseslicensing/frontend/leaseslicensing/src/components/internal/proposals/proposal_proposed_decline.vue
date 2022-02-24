@@ -126,9 +126,12 @@ export default {
     methods:{
         ok:function () {
             let vm =this;
+            vm.sendData();
+            /*
             if($(vm.form).valid()){
                 vm.sendData();
             }
+            */
         },
         cancel:function () {
             this.close();
@@ -226,10 +229,11 @@ export default {
        }
        */
    },
-   mounted:function () {
+   created:function () {
        let vm =this;
        vm.form = document.forms.declineForm;
        //vm.addFormValidations();
+       this.decline = Object.assign({}, this.proposal.proposaldeclineddetails);
    }
 }
 </script>
