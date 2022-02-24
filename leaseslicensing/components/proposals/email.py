@@ -427,12 +427,7 @@ def send_proposal_approver_sendback_email_notification(request, proposal):
 
 
 def send_proposal_approval_email_notification(proposal,request):
-    if proposal.is_filming_licence:
-        email = ProposalFilmingApprovalSendNotificationEmail()
-    elif proposal.is_event_application:
-        email= ProposalEventApprovalSendNotificationEmail()
-    else:
-        email = ProposalApprovalSendNotificationEmail()
+    email = ProposalApprovalSendNotificationEmail()
 
     cc_list = proposal.proposed_issuance_approval['cc_email']
     all_ccs = []
@@ -458,15 +453,9 @@ def send_proposal_approval_email_notification(proposal,request):
     if "-internal" in url:
         # remove '-internal'. This email is for external submitters
         url = ''.join(url.split('-internal'))
-    if proposal.is_filming_licence:
-        handbook_url= settings.COLS_FILMING_HANDBOOK_URL
-    else:
-        handbook_url= settings.COLS_HANDBOOK_URL
     context = {
         'proposal': proposal,
-        'num_requirement_docs': len(attachments) - 1,
         'url': url,
-        'handbook_url': handbook_url
     }
 
     msg = email.send(proposal.submitter.email, bcc= all_ccs, attachments=attachments, context=context)
