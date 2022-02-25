@@ -82,7 +82,7 @@
                                     />
                                     <label :for="layer.ol_uid" class="layer_option">{{ layer.get('title') }}</label>
                                     <RangeSlider
-                                        @valueChanged='valueChanged'
+                                        @valueChanged='valueChanged($event, layer)'
                                     />
                                 </div>
                             </div>
@@ -426,8 +426,9 @@ export default {
         }
     },
     methods: {
-        valueChanged: function(value){
+        valueChanged: function(value, value2){
             console.log(value)
+            console.log(value2)
         },
         updateVariablesFromSession: function(){
             this.filterApplicationTypes = sessionStorage.getItem('filterApplicationTypesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) : this.filterApplicationTypes
