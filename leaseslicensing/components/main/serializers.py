@@ -108,6 +108,7 @@ class MapLayerSerializer(serializers.ModelSerializer):
             'layer_name',
             'display_all_columns',
             'columns',
+            'transparency',
         )
         read_only_fields=('id',)
 
