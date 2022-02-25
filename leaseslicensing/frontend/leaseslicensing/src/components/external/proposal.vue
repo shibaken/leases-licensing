@@ -3,15 +3,15 @@
             <div v-if="!proposal_readonly">
               <div v-if="hasAmendmentRequest" class="row" style="color:red;">
                   <div class="col-lg-12 pull-right">
-                    <div class="panel panel-default">
-                      <div class="panel-heading">
-                        <h3 class="panel-title" style="color:red;">An amendment has been requested for this Application
+                    <div class="card card-default">
+                      <div class="card-heading">
+                        <h3 class="card-title" style="color:red;">An amendment has been requested for this Application
                           <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
                                 <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                           </a>
                         </h3>
                       </div>
-                      <div class="panel-body collapse in" :id="pBody">
+                      <div class="card-body collapse in" :id="pBody">
                         <div v-for="a in amendment_request">
                           <p>Reason: {{a.reason}}</p>
                           <p>Details: <p v-for="t in splitText(a.text)">{{t}}</p></p>
@@ -65,11 +65,11 @@
                                     <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>
                                         {{ submitText }}&nbsp; <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
                                     </button>
-                                    <input v-else 
-                                    type="button" 
-                                    @click.prevent="submit" 
-                                    class="btn btn-primary" 
-                                    :value="submitText" 
+                                    <input v-else
+                                    type="button"
+                                    @click.prevent="submit"
+                                    class="btn btn-primary"
+                                    :value="submitText"
                                     :disabled="saveExitProposal || savingProposal || disableSubmit"
                                     id="submitButton"
                                     :title="disabledSubmitText"
@@ -242,7 +242,7 @@ export default {
       },
       amendmentOrRenewal: function(){
           let amendRenew=false;
-          //if (this.proposal && ['amendment', 'renewal'].includes(this.proposal.proposal_type.code)) 
+          //if (this.proposal && ['amendment', 'renewal'].includes(this.proposal.proposal_type.code))
           if(this.proposal && this.proposal.proposal_type && this.proposal.proposal_type.code !== 'new'){
               amendRenew=true;
           }

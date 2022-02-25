@@ -1,15 +1,15 @@
 <template id="proposal_requirements">
     <div>
 <!--
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Conditions
+    <div class="card card-default">
+        <div class="card-heading">
+            <h3 class="card-title">Conditions
                 <a class="panelClicker" :href="'#'+panelBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="panelBody">
                     <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                 </a>
             </h3>
         </div>
-        <div class="panel-body panel-collapse collapse in" :id="panelBody">
+        <div class="card-body card-collapse collapse in" :id="panelBody">
         </div>
 -->
         <FormSection :formCollapse="false" label="Conditions" Index="conditions">

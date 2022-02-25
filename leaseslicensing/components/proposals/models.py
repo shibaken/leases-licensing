@@ -1258,8 +1258,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
             #return self.__assessor_group() in user.proposalassessorgroup_set.all()
             return user.id in self.__assessor_group().get_system_group_member_ids()
-        elif self.processing_status == 'with_approver':
-            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+        elif self.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER:
             return user.id in self.__approver_group().get_system_group_member_ids()
         else:
             return False

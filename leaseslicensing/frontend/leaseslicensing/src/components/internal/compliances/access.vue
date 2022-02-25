@@ -5,11 +5,11 @@
         <div class="col-md-3">
         <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                       Submission 
+                <div class="card card-default">
+                    <div class="card-heading">
+                       Submission
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body card-collapse">
                         <div class="row">
                             <div class="col-sm-12">
                                 <strong>Submitted by</strong><br/>
@@ -33,11 +33,11 @@
                 </div>
             </div>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Workflow 
+                <div class="card card-default">
+                    <div class="card-heading">
+                        Workflow
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body card-collapse">
                         <div class="row">
                             <div class="col-sm-12">
                                 <strong>Status</strong><br/>
@@ -69,11 +69,11 @@
         <div class="col-md-1"></div>
         <div class="col-md-8">
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3>Compliance with Requirements</h3> 
+                <div class="card card-default">
+                    <div class="card-heading">
+                        <h3>Compliance with Requirements</h3>
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body card-collapse">
                         <div class="row">
                             <div class="col-sm-12">
                                 <form class="form-horizontal" name="compliance_form">
@@ -82,13 +82,13 @@
                                         <div class="col-sm-6">
                                             {{compliance.requirement}}
                                         </div>
-                                    </div>   
+                                    </div>
                                     <div class="form-group">
                                         <label for="" class="col-sm-3 control-label">Details</label>
                                         <div class="col-sm-6">
                                             <textarea disabled class="form-control" name="details" placeholder="" v-model="compliance.text"></textarea>
                                         </div>
-                                    </div>   
+                                    </div>
                                     <div class="form-group">
                                         <label for="" class="col-sm-3 control-label">Documents</label>
                                         <div class="col-sm-6">
@@ -96,7 +96,7 @@
                                                     <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]}}</a>
                                             </div>
                                         </div>
-                                    </div>                               
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -136,7 +136,7 @@ export default {
         logs_url: helpers.add_endpoint_json(api_endpoints.compliances,vm.$route.params.compliance_id+'/action_log'),
         comms_url: helpers.add_endpoint_json(api_endpoints.compliances,vm.$route.params.compliance_id+'/comms_log'),
         comms_add_url: helpers.add_endpoint_json(api_endpoints.compliances,vm.$route.params.compliance_id+'/add_comms_log'),
-      
+
     }
   },
   watch: {},
@@ -171,11 +171,11 @@ export default {
     commaToNewline(s){
         return s.replace(/[,;]/g, '\n');
     },
-  
+
     assignMyself: function(){
         let vm = this;
         vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_request_user')))
-        .then((response) => {            
+        .then((response) => {
             vm.compliance = response.body;
         }, (error) => {
             console.log(error);
@@ -187,12 +187,12 @@ export default {
             let data = {'user_id': vm.compliance.assigned_to};
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_to')),JSON.stringify(data),{
                 emulateJSON:true
-            }).then((response) => {                
+            }).then((response) => {
                 vm.compliance = response.body;
             }, (error) => {
                 console.log(error);
             });
-            
+
         }
         else{
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/unassign')))
@@ -225,25 +225,25 @@ export default {
         });
 
     },
-    amendmentRequest: function(){   
-            this.$refs.amendment_request.amendment.compliance = this.compliance.id;                     
+    amendmentRequest: function(){
+            this.$refs.amendment_request.amendment.compliance = this.compliance.id;
             this.$refs.amendment_request.isModalOpen = true;
     },
     fetchProfile: function(){
         let vm = this;
         Vue.http.get(api_endpoints.profile).then((response) => {
             vm.profile = response.body
-                              
+
          },(error) => {
             console.log(error);
-                
+
         })
         },
 
     check_assessor: function(){
         let vm = this;
         //vm.members = vm.compliance.allowed_assessors
-        
+
         var assessor = vm.members.filter(function(elem){
                     return(elem.id==vm.profile.id);
                 });
@@ -255,9 +255,9 @@ export default {
   },
   mounted: function () {
     let vm = this;
-    
+
     this.fetchProfile();
-    
+
   }
 }
 </script>
