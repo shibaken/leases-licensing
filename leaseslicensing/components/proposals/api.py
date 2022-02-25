@@ -110,7 +110,7 @@ from rest_framework.filters import BaseFilterBackend
 #from reversion.models import Version
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('leaseslicensing')
 
 
 #class GetApplicantsDict(views.APIView):
