@@ -3,15 +3,15 @@
         <div class="col-sm-12">
             <div class="col-md-12">
                         <div class="row">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">{{ customerLabel }}
+                            <div class="card card-default">
+                                <div class="card-heading">
+                                    <h3 class="card-title">{{ customerLabel }}
                                         <a class="panelClicker" :href="'#'+detailsBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="detailsBody">
                                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
                                         </a>
-                                    </h3> 
+                                    </h3>
                                 </div>
-                                <!--div v-if="applicantType == 'ORG'" class="panel-body panel-collapse collapse in" :id="detailsBody">
+                                <!--div v-if="applicantType == 'ORG'" class="card-body card-collapse collapse in" :id="detailsBody">
                                       <form class="form-horizontal">
                                           <div class="form-group">
                                             <label for="" class="col-sm-3 control-label">Name</label>
@@ -34,7 +34,7 @@
 
                                       </form>
                                 </div-->
-                                <div v-if="applicantType == 'SUB'" class="panel-body panel-collapse collapse in" :id="detailsBody">
+                                <div v-if="applicantType == 'SUB'" class="card-body card-collapse collapse in" :id="detailsBody">
                                       <form class="form-horizontal">
                                           <div class="form-group">
                                             <label for="" class="col-sm-3 control-label">Given Name(s)</label>
@@ -55,15 +55,15 @@
                     </div>
                     <div class="col-md-12">
                         <div class="row">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">Address Details
+                            <div class="card card-default">
+                                <div class="card-heading">
+                                    <h3 class="card-title">Address Details
                                         <a class="panelClicker" :href="'#'+addressBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="addressBody">
                                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                                         </a>
-                                    </h3> 
+                                    </h3>
                                 </div>
-                                <!--div v-if="applicantType == 'ORG' && proposal.org_applicant.address" class="panel-body panel-collapse collapse" :id="addressBody">
+                                <!--div v-if="applicantType == 'ORG' && proposal.org_applicant.address" class="card-body card-collapse collapse" :id="addressBody">
                                       <form class="form-horizontal">
                                           <div class="form-group">
                                             <label for="" class="col-sm-3 control-label">Street</label>
@@ -246,7 +246,7 @@
                                         <div class="col-sm-8">
                                             <input :disabled="readonly" type="radio" id="electoral_roll_yes" :value="false" v-model="silentElector"/>
                                             <label for="electoral_roll_yes">
-                                                Yes, I am on the 
+                                                Yes, I am on the
                                                 <a href="/" @click.prevent="uploadProofElectoralRoll">WA state electoral roll</a>
                                             </label>
                                         </div>
@@ -454,12 +454,12 @@ from '@/utils/hooks'
                 window.setTimeout(function () {
                     $(chev).toggleClass("glyphicon-chevron-down glyphicon-chevron-up");
                 },100);
-            }); 
+            });
             vm.panelClickersInitialised = true;
             }
             this.$nextTick(() => {
                 vm.initialiseOrgContactTable();
-                
+
             });
             this.silentElector = this.storedSilentElector;
         }

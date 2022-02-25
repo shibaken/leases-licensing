@@ -3,15 +3,15 @@
         <div class="col-sm-12">
         <div class="row">
             <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Organisation Details <small> - View and update the organisation's details</small>
+                <div class="card card-default">
+                  <div class="card-heading">
+                    <h3 class="card-title">Organisation Details <small> - View and update the organisation's details</small>
                         <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
                         </a>
                     </h3>
                   </div>
-                  <div class="panel-body collapse in" :id="pBody">
+                  <div class="card-body collapse in" :id="pBody">
                       <form class="form-horizontal" name="personal_form" method="post">
                         <div v-if="org">
                           <div class="form-group">
@@ -53,15 +53,15 @@
         </div>
         <div class="row">
             <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Address Details <small> - View and update the organisation's address details</small>
+                <div class="card card-default">
+                  <div class="card-heading">
+                    <h3 class="card-title">Address Details <small> - View and update the organisation's address details</small>
                         <a class="panelClicker" :href="'#'+adBody" data-toggle="collapse" expanded="false"  data-parent="#userInfo" :aria-controls="adBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                         </a>
                     </h3>
                   </div>
-                  <div v-if="loading.length == 0" class="panel-body collapse" :id="adBody">
+                  <div v-if="loading.length == 0" class="card-body collapse" :id="adBody">
                       <form class="form-horizontal" action="index.html" method="post">
                         <div v-if="org">
                           <div class="form-group">
@@ -108,15 +108,15 @@
         </div>
         <div v-if="!isApplication" class="row">
             <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Contact Details <small> - View and update the organisation's contact details</small>
+                <div class="card card-default">
+                  <div class="card-heading">
+                    <h3 class="card-title">Contact Details <small> - View and update the organisation's contact details</small>
                         <a class="panelClicker" :href="'#'+cBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="cBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                         </a>
                     </h3>
                   </div>
-                  <div class="panel-body collapse" :id="cBody">
+                  <div class="card-body collapse" :id="cBody">
                         <form class="form-horizontal" action="index.html" method="post">
                             <div class="col-sm-12">
                                 <button @click.prevent="addContact()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Contact</button>
@@ -130,15 +130,15 @@
         <div v-if="!isApplication" class="row">
             <div class="col-sm-12">
 
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Linked User Accounts<small> Manage the user accounts linked to the organisation</small>
+                <div class="card card-default">
+                    <div class="card-heading">
+                        <h3 class="card-title">Linked User Accounts<small> Manage the user accounts linked to the organisation</small>
                             <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
                                 <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                             </a>
                         </h3>
                     </div>
-                    <div class="panel-body collapse" :id="oBody">
+                    <div class="card-body collapse" :id="oBody">
                         <div class="col-sm-12 row">
                             Use the Organisation Administrator pin codes if you want the new user to be linked as organisation administrator.<br> Use the Organisation User pin codes if you want the new user to be linked as organisation user.
                         </div>
@@ -252,7 +252,7 @@ export default {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: true,
-                deferRender: true, 
+                deferRender: true,
                 autowidth: true,
                 order: [[2, 'desc']],
                 dom:
@@ -284,7 +284,7 @@ export default {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: true,
-                deferRender: true, 
+                deferRender: true,
                 autowidth: true,
                 order: [[0, 'desc']],
                 processing:true,
@@ -473,13 +473,13 @@ export default {
                                 } else if(full.user_status == 'Declined'){
                                     links +=  `<a data-email='${full.email}'  data-firstname='${full.first_name}' data-lastname='${full.last_name}' data-id='${full.id}' data-mobile='${full.mobile_number}' data-phone='${full.phone_number}' class="accept_declined_contact">Accept (Previously Declined)</a><br/>`;
                                 }
-                            }        
+                            }
                             return links;
                         }
                     }
                   ],
                   processing: true,
-                                  
+
             }
 
         }
@@ -506,7 +506,7 @@ export default {
                 vm.myorgperms = data[2];
                 vm.org.address = vm.org.address != null ? vm.org.address : {};
                 vm.org.pins = vm.org.pins != null ? vm.org.pins : {};
-               
+
             });
         });
     },
@@ -521,7 +521,7 @@ export default {
                 vm.myorgperms = data[1];
                 vm.org.address = vm.org.address != null ? vm.org.address : {};
                 vm.org.pins = vm.org.pins != null ? vm.org.pins : {};
-             
+
             });
         });
     },
@@ -532,7 +532,7 @@ export default {
         eventListeners: function(){
           let vm = this;
           if (typeof vm.$refs.contacts_datatable !== 'undefined') {
-            
+
             vm.$refs.contacts_datatable.vmDataTable.on('click','.remove-contact',(e) => {
                 e.preventDefault();
 
@@ -560,11 +560,11 @@ export default {
                 let id = $(e.target).data('id');
                 let mobile = $(e.target).data('mobile');
                 let phone = $(e.target).data('phone');
-                vm.contact_user.first_name= firstname 
+                vm.contact_user.first_name= firstname
                 vm.contact_user.last_name= lastname
-                vm.contact_user.email= email 
-                vm.contact_user.mobile_number= mobile 
-                vm.contact_user.phone_number= phone 
+                vm.contact_user.email= email
+                vm.contact_user.mobile_number= mobile
+                vm.contact_user.phone_number= phone
                 swal({
                     title: "Contact Accept",
                     text: "Are you sure you want to accept contact request " + name + " (" + email + ")?",
@@ -640,11 +640,11 @@ export default {
                 let id = $(e.target).data('id');
                 let mobile = $(e.target).data('mobile');
                 let phone = $(e.target).data('phone');
-                vm.contact_user.first_name= firstname 
+                vm.contact_user.first_name= firstname
                 vm.contact_user.last_name= lastname
-                vm.contact_user.email= email 
-                vm.contact_user.mobile_number= mobile 
-                vm.contact_user.phone_number= phone 
+                vm.contact_user.email= email
+                vm.contact_user.mobile_number= mobile
+                vm.contact_user.phone_number= phone
                 // console.log(vm.contact_user)
                 swal({
                     title: "Contact Decline",
@@ -681,11 +681,11 @@ export default {
                 let id = $(e.target).data('id');
                 let mobile = $(e.target).data('mobile');
                 let phone = $(e.target).data('phone');
-                vm.contact_user.first_name= firstname 
+                vm.contact_user.first_name= firstname
                 vm.contact_user.last_name= lastname
-                vm.contact_user.email= email 
-                vm.contact_user.mobile_number= mobile 
-                vm.contact_user.phone_number= phone 
+                vm.contact_user.email= email
+                vm.contact_user.mobile_number= mobile
+                vm.contact_user.phone_number= phone
                 swal({
                     title: "Unlink",
                     text: "Are you sure you want to unlink " + name + " (" + email + ")?",
@@ -726,11 +726,11 @@ export default {
                 let id = $(e.target).data('id');
                 let mobile = $(e.target).data('mobile');
                 let phone = $(e.target).data('phone');
-                vm.contact_user.first_name= firstname 
+                vm.contact_user.first_name= firstname
                 vm.contact_user.last_name= lastname
-                vm.contact_user.email= email 
-                vm.contact_user.mobile_number= mobile 
-                vm.contact_user.phone_number= phone 
+                vm.contact_user.email= email
+                vm.contact_user.mobile_number= mobile
+                vm.contact_user.phone_number= phone
                 swal({
                     title: "Organisation Admin",
                     text: "Are you sure you want to make " + name + " (" + email + ") an Organisation Admin?",
@@ -766,11 +766,11 @@ export default {
                 let id = $(e.target).data('id');
                 let mobile = $(e.target).data('mobile');
                 let phone = $(e.target).data('phone');
-                vm.contact_user.first_name= firstname 
+                vm.contact_user.first_name= firstname
                 vm.contact_user.last_name= lastname
-                vm.contact_user.email= email 
-                vm.contact_user.mobile_number= mobile 
-                vm.contact_user.phone_number= phone 
+                vm.contact_user.email= email
+                vm.contact_user.mobile_number= mobile
+                vm.contact_user.phone_number= phone
                 swal({
                     title: "Organisation User",
                     text: "Are you sure you want to make " + name + " (" + email + ") an Organisation User?",
@@ -809,11 +809,11 @@ export default {
                 let id = $(e.target).data('id');
                 let mobile = $(e.target).data('mobile');
                 let phone = $(e.target).data('phone');
-                vm.contact_user.first_name= firstname 
+                vm.contact_user.first_name= firstname
                 vm.contact_user.last_name= lastname
-                vm.contact_user.email= email 
-                vm.contact_user.mobile_number= mobile 
-                vm.contact_user.phone_number= phone 
+                vm.contact_user.email= email
+                vm.contact_user.mobile_number= mobile
+                vm.contact_user.phone_number= phone
                 swal({
                     title: "Suspend User",
                     text: "Are you sure you want to Suspend  " + name + " (" + email + ")?",
@@ -849,11 +849,11 @@ export default {
                 let id = $(e.target).data('id');
                 let mobile = $(e.target).data('mobile');
                 let phone = $(e.target).data('phone');
-                vm.contact_user.first_name= firstname 
+                vm.contact_user.first_name= firstname
                 vm.contact_user.last_name= lastname
-                vm.contact_user.email= email 
-                vm.contact_user.mobile_number= mobile 
-                vm.contact_user.phone_number= phone 
+                vm.contact_user.email= email
+                vm.contact_user.mobile_number= mobile
+                vm.contact_user.phone_number= phone
                 swal({
                     title: "Reinstate User",
                     text: "Are you sure you want to Reinstate  " + name + " (" + email + ")?",
@@ -955,7 +955,7 @@ export default {
                     }
                 }
                 swal(
-                    'Error', 
+                    'Error',
                     'Organisation details cannot be saved because of the following error: '+text,
                     'error'
                 )
@@ -973,12 +973,12 @@ export default {
         },
         deleteContact: function(id){
             let vm = this;
-            
+
             vm.$http.delete(helpers.add_endpoint_json(api.organisation_contacts,id),{
                 emulateJSON:true
             }).then((response) => {
                 swal(
-                    'Contact Deleted', 
+                    'Contact Deleted',
                     'The contact was successfully deleted',
                     'success'
                 )
@@ -986,7 +986,7 @@ export default {
             }, (error) => {
                 console.log(error);
                 swal(
-                    'Contact Deleted', 
+                    'Contact Deleted',
                     'The contact could not be deleted because of the following error '+error,
                     'error'
                 )
@@ -1043,7 +1043,7 @@ export default {
                     )
                 });
             },(error) => {
-            }); 
+            });
         }
     },
     mounted: function(){
@@ -1061,7 +1061,7 @@ export default {
                 vm.myorgperms = data[2];
                 vm.org.address = vm.org.address != null ? vm.org.address : {};
                 vm.org.pins = vm.org.pins != null ? vm.org.pins : {};
-            
+
         });
 
     },
@@ -1072,12 +1072,12 @@ export default {
             window.setTimeout(function () {
                 $(chev).toggleClass("glyphicon-chevron-down glyphicon-chevron-up");
             },100);
-        }); 
+        });
         this.$nextTick(() => {
             this.eventListeners();
         });
     }
-  
+
 }
 </script>
 
