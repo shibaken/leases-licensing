@@ -11,7 +11,7 @@
                         <div class="col-sm-12">
                             <div class="form-group">
                                 <div class="row modal-input-row">
-                                    <div class="col-sm-2">
+                                    <div class="col-sm-3">
                                         <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Decision</label>
                                         <label v-else class="control-label pull-left"  for="Name">Proposed Decision</label>
                                     </div>
@@ -26,7 +26,7 @@
                                         />
                                         <label class="form-check-label" for="approve_lease_licence" style="font-weight:normal">Invite applicant to apply for a lease or licence</label>
                                     </div>
-                                    <div class="form-check col-sm-5">
+                                    <div class="form-check col-sm-4">
                                         <input 
                                         type="radio" 
                                         class="form-check-input"
@@ -86,9 +86,9 @@
             <p v-if="can_preview">Click <a href="#" @click.prevent="preview">here</a> to preview the approval letter.</p>
 
             <div slot="footer">
-                <button type="button" v-if="issuingApproval" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-default" @click="ok">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" v-if="issuingApproval" disabled class="btn btn-primary" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                <button type="button" v-else class="btn btn-primary" @click="ok">Ok</button>
+                <button type="button" class="btn btn-primary" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>

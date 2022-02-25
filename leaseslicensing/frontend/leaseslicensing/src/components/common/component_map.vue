@@ -43,7 +43,7 @@
                         </transition>
                     </div>
                     <div v-if="selectedFeatureId" class="optional-layers-button">
-                        <img id="delete_feature" src="../../assets/trash.svg" @click="removeLeaselicenceFeature()" />
+                        <i id="delete_feature" class="bi bi-trash3 ll-trash" @click="removeLeaselicenceFeature()" />
                     </div>
                 </div>
             </div>
@@ -810,6 +810,10 @@ export default {
 </script>
 
 <style lang="css" scoped>
+    .ll-trash {
+        color: #53c2cf;
+        margin-left: 4px;
+    }
     .pencil {
         width: 10%;
         height: 10%;
@@ -823,7 +827,7 @@ export default {
         color: transparent;
     }
     .map{
-        height: 400px;
+        height: 800px;
         width: 100%;
     }
     .map-wrapper {
