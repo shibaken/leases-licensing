@@ -1254,9 +1254,12 @@ class Proposal(DirtyFieldsMixin, models.Model):
         logger.info("user")
         logger.info(type(user))
         logger.info(user)
+        logger.info(user.id)
         #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions':
         if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
             #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+            logger.info("self.__assessor_group().get_system_group_member_ids()")
+            logger.info(self.__assessor_group().get_system_group_member_ids())
             return user.id in self.__assessor_group().get_system_group_member_ids()
         elif self.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER:
             return user.id in self.__approver_group().get_system_group_member_ids()
