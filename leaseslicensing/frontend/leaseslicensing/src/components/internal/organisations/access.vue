@@ -5,11 +5,11 @@
         <div class="col-md-3">
             <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                       Submission 
+                <div class="card card-default">
+                    <div class="card-heading">
+                       Submission
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body card-collapse">
                         <div class="row">
                             <div class="col-sm-12">
                                 <strong>Submitted by</strong><br/>
@@ -33,11 +33,11 @@
                 </div>
             </div>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Workflow 
+                <div class="card card-default">
+                    <div class="card-heading">
+                        Workflow
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body card-collapse">
                         <div class="row">
                             <div class="col-sm-12">
                                 <strong>Status</strong><br/>
@@ -69,11 +69,11 @@
         <div class="col-md-1"></div>
         <div class="col-md-8">
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3>Organisation Access Request</h3> 
+                <div class="card card-default">
+                    <div class="card-heading">
+                        <h3>Organisation Access Request</h3>
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body card-collapse">
                         <div class="row">
                             <div class="col-sm-12">
                                 <form class="form-horizontal" name="access_form">
@@ -82,37 +82,37 @@
                                         <div class="col-sm-6">
                                             <input type="text" disabled class="form-control" name="name" placeholder="" v-model="access.name">
                                         </div>
-                                    </div>   
+                                    </div>
                                     <div class="form-group">
                                         <label for="" class="col-sm-3 control-label">ABN</label>
                                         <div class="col-sm-6">
                                             <input type="text" disabled class="form-control" name="abn" placeholder="" v-model="access.abn">
                                         </div>
-                                    </div>   
+                                    </div>
                                     <div class="form-group">
                                         <label for="" class="col-sm-3 control-label">Letter</label>
                                         <div class="col-sm-6">
                                             <a target="_blank" :href="access.identification"><i class="fa fa-file-pdf-o"></i>&nbsp;Letter</a>
                                         </div>
-                                    </div>   
+                                    </div>
                                     <div class="form-group" style="margin-top:50px;">
                                         <label for="" class="col-sm-3 control-label">Phone</label>
                                         <div class="col-sm-6">
                                             <input type="text" disabled class="form-control" name="phone" placeholder="" v-model="access.requester.phone_number">
                                         </div>
-                                    </div>   
+                                    </div>
                                     <div class="form-group">
                                         <label for="" class="col-sm-3 control-label">Mobile</label>
                                         <div class="col-sm-6">
                                             <input type="text" disabled class="form-control" name="mobile" placeholder="" v-model="access.requester.mobile_number">
                                         </div>
-                                    </div>   
+                                    </div>
                                     <div class="form-group">
                                         <label for="" class="col-sm-3 control-label">Email</label>
                                         <div class="col-sm-6">
                                             <input type="text" disabled class="form-control" name="email" placeholder="" v-model="access.requester.email">
                                         </div>
-                                    </div>   
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -155,7 +155,7 @@ export default {
                 processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
             },
             responsive: true,
-            deferRender: true, 
+            deferRender: true,
             autowidth: true,
             order: [[2, 'desc']],
             dom:
@@ -189,7 +189,7 @@ export default {
                 processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
             },
             responsive: true,
-            deferRender: true, 
+            deferRender: true,
             autowidth: true,
             order: [[0, 'desc']],
             processing:true,
@@ -399,7 +399,7 @@ export default {
                     }
                 }
                 swal(
-                    'Error', 
+                    'Error',
                     'Organisation request cannot be accepted because of the following error: '+text,
                     'error'
                 )
@@ -435,16 +435,16 @@ export default {
         let vm = this;
         Vue.http.get(api_endpoints.profile).then((response) => {
             vm.profile = response.body
-                              
+
          },(error) => {
             console.log(error);
-                
+
         })
         },
 
     check_assessor: function(){
         let vm = this;
-        
+
         var assessor = vm.members.filter(function(elem){
                     return(elem.name==vm.profile.full_name);
                 });
@@ -458,7 +458,7 @@ export default {
     let vm = this;
     this.fetchAccessGroupMembers();
     this.fetchProfile();
-    
+
   }
 }
 </script>

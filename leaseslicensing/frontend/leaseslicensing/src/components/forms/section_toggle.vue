@@ -73,7 +73,7 @@ export default {
         /*
         panel_collapse_class: function() {
             this.panel_chevron_class = this.chev_up_class_names
-            return "panel-body collapse in";
+            return "card-body collapse in";
         },
         */
     },

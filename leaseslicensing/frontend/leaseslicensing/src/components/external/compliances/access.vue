@@ -7,18 +7,18 @@
         <div v-if="!isFinalised">
             <div v-if="hasAmendmentRequest" class="row" style="color:red;">
                 <div class="col-lg-12 pull-right">
-                  <div class="panel panel-default">
-                      <div class="panel-heading">
-                        <h3 class="panel-title" style="color:red;">An amendment has been requested for this Compliance with Requirements
+                  <div class="card card-default">
+                      <div class="card-heading">
+                        <h3 class="card-title" style="color:red;">An amendment has been requested for this Compliance with Requirements
                             <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
                                 <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                             </a>
                         </h3>
                       </div>
-                      <div class="panel-body collapse in" :id="oBody">
-                        <div v-for="a in amendment_request">                      
+                      <div class="card-body collapse in" :id="oBody">
+                        <div v-for="a in amendment_request">
                           <p>Reason: {{a.reason}}</p>
-                          <p>Details: {{a.text}}</p>                        
+                          <p>Details: {{a.text}}</p>
                         </div>
                       </div>
                   </div>
@@ -30,8 +30,8 @@
 
         <div class="col-md-12">
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
+                <div class="card card-default">
+                    <div class="card-heading">
                         <h3 class="panel-title">Compliance with Requirements
                                         <a class="panelClicker" :href="'#'+pdBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pdBody">
                                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
@@ -40,7 +40,7 @@
                     </div>
                     <div class="panel-body panel-collapse in" :id="pdBody">
                         <div class="row">
-                           <div class="col-md-12"> 
+                           <div class="col-md-12">
                             <form class="form-horizontal" name="complianceForm" method="post">
                                 <alert :show.sync="showError" type="danger">
                                     <strong>{{errorString}}</strong>
@@ -66,9 +66,9 @@
                                 <div class="row">
                                     <!--<div v-if="isFinalised && hasDocuments" class="form-group"> -->
                                     <div v-if="hasDocuments" class="form-group">
-                                        <div class="col-sm-3 control-label pull-left" >  
+                                        <div class="col-sm-3 control-label pull-left" >
                                             <label  for="Name">Documents:</label>
-                                        </div> 
+                                        </div>
                                         <div class="col-sm-6">
                                             <div class="row" v-for="d in compliance.documents">
                                                 <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]   }}</a>
@@ -84,7 +84,7 @@
                                 </div>
 
                                 <div class="row">
-                                    <div v-if="!isFinalised" class="form-group"> 
+                                    <div v-if="!isFinalised" class="form-group">
                                         <label class="col-sm-3 control-label pull-left"  for="Name">Attachments:</label>
                                     <div class="col-sm-6">
                                         <template v-for="(f,i) in files">
@@ -121,7 +121,7 @@
                             </form>
                            </div>
                         </div>
-                    </div> 
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,7 +145,7 @@ export default {
     let vm = this;
     return {
         form:null,
-        loading: [],        
+        loading: [],
         compliance: {},
         original_compliance: {},
         amendment_request: [],
@@ -165,15 +165,15 @@ export default {
                     'name': ''
                 }
             ]
-     
+
     }
   },
   watch: {
-    
-    isFinalised: function(){             
+
+    isFinalised: function(){
         return this.compliance && (this.compliance.customer_status == "Under Review" || this.compliance.customer_status == "Approved");
     },
-    hasDocuments: function(){             
+    hasDocuments: function(){
         return this.compliance && this.compliance.documents;
    }
   },
@@ -182,7 +182,7 @@ export default {
         return moment(data).format('DD/MM/YYYY HH:mm:ss');
     }
   },
- 
+
   components: {
     datatable,
     CommsLogs
@@ -195,10 +195,10 @@ export default {
     isLoading: function () {
       return this.loading.length > 0;
     },
-    isDiscarded: function(){         
+    isDiscarded: function(){
         return this.compliance && (this.compliance.customer_status == "Discarded");
     },
-    
+
   },
   methods: {
     uploadFile(target,file_obj){
@@ -207,7 +207,7 @@ export default {
             var input = $('.'+target)[0];
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
-                reader.readAsDataURL(input.files[0]); 
+                reader.readAsDataURL(input.files[0]);
                 reader.onload = function(e) {
                     _file = e.target.result;
                 };
@@ -234,12 +234,12 @@ export default {
             let vm =this;
             if($(vm.form).valid()){
                 vm.sendData();
-            }                
+            }
                 //vm.sendData();
     },
 
     close:function () {
-            let vm = this;           
+            let vm = this;
             this.compliance = {};
             this.errors = false;
             $('.has-error').removeClass('has-error');
@@ -260,12 +260,12 @@ export default {
             vm.validation_form = $(vm.form).validate({
                 rules: {
                     detail: "required"
-                    
-                     
+
+
                 },
-                messages: {              
+                messages: {
                     detail: "field is required",
-                                         
+
                 },
                 showErrors: function(errorMap, errorList) {
                     $.each(this.validElements(), function(index, element) {
@@ -291,9 +291,9 @@ export default {
 
     setAmendmentData: function(amendment_request){
       this.amendment_request = amendment_request;
-      
+
       if (amendment_request.length > 0)
-        this.hasAmendmentRequest = true;    
+        this.hasAmendmentRequest = true;
     },
 
     delete_document: function(doc){
@@ -304,12 +304,12 @@ export default {
           vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/delete_document'),JSON.stringify(data),{
                 emulateJSON:true
                 }).then((response)=>{
-                    vm.refreshFromResponse(response);                   
-                    vm.compliance = response.body;       
+                    vm.refreshFromResponse(response);
+                    vm.compliance = response.body;
                 },(error)=>{
                     vm.errors = true;
                     vm.errorString = helpers.apiVueResourceError(error);
-                });              
+                });
         }
     },
 
@@ -318,12 +318,12 @@ export default {
             let vm = this;
             vm.errors = false;
             let data = new FormData(vm.form);
-            vm.addingComms = true;            
+            vm.addingComms = true;
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/submit'),data,{
                 emulateJSON:true
                 }).then((response)=>{
                     vm.addingCompliance = false;
-                    vm.refreshFromResponse(response);                   
+                    vm.refreshFromResponse(response);
                     /*swal(
                      'Submit',
                      'Your Compliance with Requirement has been submitted',
@@ -332,14 +332,14 @@ export default {
                     vm.compliance = response.body;
                     vm.$router.push({
                     name: 'submit_compliance',
-                    params: { compliance: vm.compliance} 
+                    params: { compliance: vm.compliance}
                 });
-                        
+
                 },(error)=>{
                     vm.errors = true;
                     vm.addingCompliance = false;
                     vm.errorString = helpers.apiVueResourceError(error);
-                });     
+                });
     },
 
     refreshFromResponse:function(response){
@@ -348,24 +348,24 @@ export default {
             vm.compliance = helpers.copyObject(response.body);
             if ( vm.compliance.customer_status == "Under Review" || vm.compliance.customer_status == "Approved" ) { vm.isFinalised = true }
             if (vm.compliance && vm.compliance.documents){ vm.hasDocuments = true}
-           
-    },  
+
+    },
   },
   mounted: function () {
     let vm = this;
     vm.form = document.forms.complianceForm;
-    vm.addFormValidations();     
+    vm.addFormValidations();
   },
 
  beforeRouteEnter: function(to, from, next){
     Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id)).then((response) => {
         next(vm => {
-            vm.compliance = response.body 
+            vm.compliance = response.body
             if ( vm.compliance.customer_status == "Under Review" || vm.compliance.customer_status == "Approved" ) { vm.isFinalised = true }
             if (vm.compliance && vm.compliance.documents){ vm.hasDocuments = true}
 
-            Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/amendment_request')).then((res) => {                     
-                      vm.setAmendmentData(res.body);                  
+            Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/amendment_request')).then((res) => {
+                      vm.setAmendmentData(res.body);
                 },
               err => {
                         console.log(err);

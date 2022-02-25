@@ -5,11 +5,11 @@
         <div class="col-md-3">
             <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
+                <div class="card card-default">
+                    <div class="card-heading">
                        Submission
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body card-collapse">
                         <div class="row">
 
                             <div class="col-sm-12 top-buffer-s">
@@ -30,11 +30,11 @@
                 </div>
             </div>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
+                <div class="card card-default">
+                    <div class="card-heading">
                         Workflow
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body card-collapse">
                         <div class="row">
                             <div class="col-sm-12">
                                 <strong>Status</strong><br/>
@@ -50,8 +50,8 @@
             <div class="row">
                 <div v-if="approval && approval.submitter">
                     <Applicant
-                        :email_user="approval.submitter" 
-                        applicantType="SUB" 
+                        :email_user="approval.submitter"
+                        applicantType="SUB"
                         id="approvalSubmitterDetails"
                         :readonly="true"
                         customerType="holder"
@@ -61,15 +61,15 @@
 
             <div class="row">
 
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                      <h3 class="panel-title">{{ approvalLabel }}
+                <div class="card card-default">
+                  <div class="card-heading">
+                      <h3 class="card-title">{{ approvalLabel }}
                         <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse" expanded="true"  data-parent="#userInfo" :aria-controls="oBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                         </a>
                     </h3>
                   </div>
-                  <div v-if="loading.length == 0" class="panel-body collapse" :id="oBody">
+                  <div v-if="loading.length == 0" class="card-body collapse" :id="oBody">
                       <form class="form-horizontal" action="index.html" method="post">
                           <div v-if="mooringLicence" class="form-group">
                             <label for="" class="col-sm-3 control-label">Mooring</label>
