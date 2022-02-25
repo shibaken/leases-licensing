@@ -426,9 +426,10 @@ export default {
         }
     },
     methods: {
-        valueChanged: function(value, value2){
+        valueChanged: function(value, tileLayer){
             console.log(value)
-            console.log(value2)
+            console.log(tileLayer)
+            tileLayer.setOpacity((100 - value)/100)
         },
         updateVariablesFromSession: function(){
             this.filterApplicationTypes = sessionStorage.getItem('filterApplicationTypesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) : this.filterApplicationTypes
