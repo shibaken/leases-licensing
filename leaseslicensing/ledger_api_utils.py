@@ -7,7 +7,5 @@ logger = logging.getLogger('leaseslicensing')
 
 @basic_exception_handler
 def retrieve_email_user(email_user_id):
-    logger.info("retrieve_email_user")
-    logger.info(email_user_id)
     return EmailUser.objects.get(id=email_user_id)
 
