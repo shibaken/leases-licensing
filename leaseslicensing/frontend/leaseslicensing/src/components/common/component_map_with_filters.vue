@@ -46,7 +46,7 @@
         </CollapsibleFilters>
 
         <div class="text-end mb-2">
-            <button type="button" class="btn btn-primary" @click="geoJsonButtonClicked">Get GeoJSON</button>
+            <button type="button" class="btn btn-primary" @click="geoJsonButtonClicked"><i class="fa-solid fa-download"></i> Get GeoJSON</button>
         </div>
 
         <div :id="map_container_id">
@@ -81,6 +81,7 @@
                                         class="layer_option"
                                     />
                                     <label :for="layer.ol_uid" class="layer_option">{{ layer.get('title') }}</label>
+                                    <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
                                 </div>
                             </div>
                         </transition>
