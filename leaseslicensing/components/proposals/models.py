@@ -58,7 +58,8 @@ import logging
 
 from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
+logger = logging.getLogger('leaseslicensing')
 
 
 def update_proposal_doc_filename(instance, filename):
@@ -1249,11 +1250,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
             return user.id in self.__assessor_group().get_system_group_member_ids()
 
     def can_assess(self,user):
-        if self.processing_status in [
-            Proposal.PROCESSING_STATUS_WITH_ASSESSOR,
-            Proposal.PROCESSING_STATUS_WITH_REFERRAL,
-            Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS,
-            Proposal.PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS,]:
+        logger.info("can assess")
+        logger.info("user")
+        logger.info(type(user))
+        logger.info(user)
+        #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions':
+        if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
+            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
             return user.id in self.__assessor_group().get_system_group_member_ids()
         elif self.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER:
             return user.id in self.__approver_group().get_system_group_member_ids()
@@ -1838,8 +1841,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 # applicant_field.log_user_action(ProposalUserAction.ACTION_PROPOSED_APPROVAL.format(self.id),request)
 
                 send_approver_approve_email_notification(request, self)
-            except:
-                raise
+            except Exception as e:
+                logger.error(e)
+                raise e
 
     def preview_approval(self,request,details):
         from leaseslicensing.components.approvals.models import PreviewTempApproval
