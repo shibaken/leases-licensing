@@ -10,7 +10,7 @@ from rest_framework import serializers
 from rest_framework.request import Request
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger('leaseslicensing')
 
 
 def basic_exception_handler(func):
@@ -21,12 +21,14 @@ def basic_exception_handler(func):
 
         except serializers.ValidationError:
             print(traceback.print_exc())
+            logger.error(traceback.print_exc())
             raise
         except ValidationError as e:
             from leaseslicensing.components.main.utils import handle_validation_error
             handle_validation_error(e)
         except Exception as e:
             print(traceback.print_exc())
+            logger.error(traceback.print_exc())
             raise serializers.ValidationError(str(e))
     return wrapper
 
