@@ -199,11 +199,13 @@ export default {
 
                             return result;
                         },
+                        /*
                         'createdCell': function (cell) {
                             //TODO why this is not working?
                             // the call to popover is done in the 'draw' event
                             $(cell).popover();
                         }
+                        */
                     },
                     {
                         title: 'From',
@@ -237,11 +239,13 @@ export default {
 
                             return result;
                         },
+                        /*
                         'createdCell': function (cell) {
                             //TODO why this is not working?
                             // the call to popover is done in the 'draw' event
                             $(cell).popover();
                         }
+                        */
                     },
                     {
                         title: 'Text',
@@ -270,11 +274,13 @@ export default {
 
                             return result;
                         },
+                        /*
                         'createdCell': function (cell) {
                             //TODO why this is not working?
                             // the call to popover is done in the 'draw' event
                             $(cell).popover();
                         }
+                        */
                     },
                     {
                         title: 'Documents',
@@ -437,7 +443,7 @@ export default {
     mounted: function(){
         let vm = this;
         this.$nextTick(() => {
-            vm.initialisePopovers();
+            //vm.initialisePopovers();
         });
     }
 }
