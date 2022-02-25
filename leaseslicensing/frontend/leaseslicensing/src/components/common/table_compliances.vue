@@ -388,7 +388,10 @@ export default {
                         d.filter_compliance_status = vm.filterComplianceStatus;
                     }
                 },
-                dom: 'lBfrtip',
+                //dom: 'lBfrtip',
+                dom: "<'d-flex'<'me-auto'l>fB>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'d-flex'<'me-auto'i>p>",
                 buttons: buttons,
                 /*
 

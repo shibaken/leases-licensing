@@ -399,7 +399,10 @@ export default {
                         d.level = vm.level
                     }
                 },
-                dom: 'lBfrtip',
+                //dom: 'lBfrtip',
+                dom: "<'d-flex'<'me-auto'l>fB>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'d-flex'<'me-auto'i>p>",
                 //buttons:[ ],
                 buttons: buttons,
 
