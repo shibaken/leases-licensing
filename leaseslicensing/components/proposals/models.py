@@ -1251,6 +1251,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def can_assess(self,user):
         print("can assess")
         print("user")
+        print(type(user))
         print(user)
         #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions':
         if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
