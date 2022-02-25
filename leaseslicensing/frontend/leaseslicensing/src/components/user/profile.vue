@@ -19,17 +19,17 @@
         </div>
         <div class="row">
             <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
+                <div class="card card-default">
+                  <div class="card-heading">
                     <i v-if="showCompletion && profile.personal_details" class="fa fa-check fa-2x pull-left" style="color:green"></i>
                     <i v-else-if="showCompletion && !profile.personal_details" class="fa fa-times fa-2x pull-left" style="color:red"></i>
-                    <h3 class="panel-title">Personal Details <small>Provide your personal details</small>
+                    <h3 class="card-title">Personal Details <small>Provide your personal details</small>
                         <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
                         </a>
                     </h3>
                   </div>
-                  <div class="panel-body collapse in" :id="pBody">
+                  <div class="card-body collapse in" :id="pBody">
                       <form class="form-horizontal" name="personal_form" method="post">
                         <alert v-if="showPersonalError" type="danger" style="color:red"><div v-for="item in errorListPersonal"><strong>{{item}}</strong></div></alert>
                           <div class="form-group">
@@ -67,17 +67,17 @@
 
         <div class="row">
             <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
+                <div class="card card-default">
+                  <div class="card-heading">
                     <i v-if="showCompletion && profile.address_details" class="fa fa-check fa-2x pull-left" style="color:green"></i>
                     <i v-else-if="showCompletion && !profile.address_details" class="fa fa-times fa-2x pull-left" style="color:red"></i>
-                    <h3 class="panel-title">Address Details <small>Provide your address details</small>
+                    <h3 class="card-title">Address Details <small>Provide your address details</small>
                         <a class="panelClicker" :href="'#'+adBody" data-toggle="collapse" expanded="false"  data-parent="#userInfo" :aria-controls="adBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                         </a>
                     </h3>
                   </div>
-                  <div v-if="loading.length == 0" class="panel-body collapse" :id="adBody">
+                  <div v-if="loading.length == 0" class="card-body collapse" :id="adBody">
                       <form class="form-horizontal" action="index.html" method="post">
                         <alert v-if="showAddressError" type="danger" style="color:red"><div v-for="item in errorListAddress"><strong>{{item}}</strong></div></alert>
                       <div class="address-box">
@@ -170,23 +170,23 @@
         </div>
         <div class="row">
             <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
+                <div class="card card-default">
+                  <div class="card-heading">
                     <i v-if="showCompletion && profile.contact_details" class="fa fa-check fa-2x pull-left" style="color:green"></i>
                     <i v-else-if="showCompletion && !profile.contact_details" class="fa fa-times fa-2x pull-left" style="color:red"></i>
-                    <h3 class="panel-title">Contact Details <small>Provide your contact details</small>
+                    <h3 class="card-title">Contact Details <small>Provide your contact details</small>
                         <a class="panelClicker" :href="'#'+cBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="cBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                         </a>
                     </h3>
                   </div>
-                  <div class="panel-body collapse" :id="cBody">
+                  <div class="card-body collapse" :id="cBody">
                       <form class="form-horizontal" action="index.html" method="post">
                         <alert v-if="showContactError" type="danger" style="color:red"><div v-for="item in errorListContact"><strong>{{item}}</strong></div></alert>
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label">Phone (work)</label>
                             <div v-if="profile.is_department_user" class="col-sm-6">
-                               <input :readonly="phoneNumberReadonly || readonly" type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">           
+                               <input :readonly="phoneNumberReadonly || readonly" type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">
                             </div>
                             <div v-else class="col-sm-6">
                                 <input type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">
@@ -228,7 +228,7 @@
                 <div class="col-sm-8">
                     <input :disabled="readonly" type="radio" id="electoral_roll_yes" :value="false" v-model="silentElector"/>
                     <label for="electoral_roll_yes">
-                        Yes, I am on the 
+                        Yes, I am on the
                         <a href="/" @click.prevent="uploadProofElectoralRoll">WA state electoral roll</a>
                     </label>
                 </div>
@@ -479,7 +479,7 @@ export default {
             var input = $(vm.$refs.uploadedFile)[0];
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
-                reader.readAsDataURL(input.files[0]); 
+                reader.readAsDataURL(input.files[0]);
                 reader.onload = function(e) {
                     _file = e.target.result;
                 };
@@ -555,7 +555,7 @@ export default {
             });
           }
         },
-        
+
         uploadID: function() {
             let vm = this;
             console.log('uploading id');
@@ -598,7 +598,7 @@ export default {
                 });
             }
         },
-        
+
         updateContact: function() {
             let vm = this;
             vm.missing_fields = [];
@@ -726,8 +726,8 @@ export default {
         fetchOrgRequestList: function() { //Fetch all the Organisation requests submitted by user which are pending for approval.
             let vm = this;
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.organisation_requests,'get_pending_requests')).then((response) => {
-                
-                vm.orgRequest_list=response.body; 
+
+                vm.orgRequest_list=response.body;
             }, (error) => {
                 console.log(error);
             });
@@ -762,7 +762,7 @@ export default {
                 }else {
                     swal(
                         'Validate Pins',
-                        'The pins you entered were incorrect', 
+                        'The pins you entered were incorrect',
                         'error'
                     )
                 }
@@ -936,7 +936,7 @@ export default {
                     )
                 });
             },(error) => {
-            }); 
+            });
         },
         fetchProfile: async function(){
             let response = null;

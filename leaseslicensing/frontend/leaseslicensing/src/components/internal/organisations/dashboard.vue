@@ -2,10 +2,10 @@
 <div class="container" id="internalOrgAccessDash">
 <div class="row">
         <div class="col-sm-12">
-            <div class="panel panel-default">
+            <div class="card card-default">
 
-                <div class="panel-heading">
-                    <h3 class="panel-title">Organisation Access Requests
+                <div class="card-heading">
+                    <h3 class="card-title">Organisation Access Requests
                         <a :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
                         </a>
@@ -13,7 +13,7 @@
                 </div>
 
 
-<div class="panel-body collapse in" :id="pBody">
+<div class="card-body collapse in" :id="pBody">
     <div class="row">
         <div class="col-md-3">
             <div class="form-group">
@@ -132,7 +132,7 @@ export default {
                             else{
                                 if(vm.is_assessor)
                                 {
-                                   var column = "<a href='/internal/organisations/access/\__ID__\'> Process </a>"; 
+                                   var column = "<a href='/internal/organisations/access/\__ID__\'> Process </a>";
                                 }
                                 else{
                                     var column = "<a href='/internal/organisations/access/\__ID__\' >View </a>";
@@ -247,14 +247,14 @@ export default {
         let vm = this;
         Vue.http.get(api_endpoints.profile).then((response) => {
             vm.profile = response.body
-                              
+
          },(error) => {
             console.log(error);
-                
+
         })
         },
         check_assessor: function(){
-            let vm = this;            
+            let vm = this;
             var assessor = vm.members.filter(function(elem){
                         return(elem.name==vm.profile.full_name);
                     });

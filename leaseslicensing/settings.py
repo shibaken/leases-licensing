@@ -225,7 +225,7 @@ LOGGING['handlers']['file_leaseslicensing'] = {
 }
 
 LOGGING['loggers']['leaseslicensing'] = {
-            'handlers': ['file'],
+            'handlers': ['file_leaseslicensing'],
             'level': 'INFO'
         }
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'

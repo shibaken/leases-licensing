@@ -18,15 +18,15 @@
                     <div :id="dTab" class="tab-pane fade in active">
                         <div class="row">
                             <div class="col-sm-12">
-                                <div class="panel panel-default">
-                                  <div class="panel-heading">
-                                    <h3 class="panel-title">Organisation Details
+                                <div class="card card-default">
+                                  <div class="card-heading">
+                                    <h3 class="card-title">Organisation Details
                                         <a class="panelClicker" :href="'#'+pdBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pdBody">
                                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
                                         </a>
                                     </h3>
                                   </div>
-                                  <div class="panel-body collapse in" :id="pdBody">
+                                  <div class="card-body collapse in" :id="pdBody">
                                       <form class="form-horizontal" name="personal_form" method="post">
                                           <div class="form-group">
                                             <label for="" class="col-sm-3 control-label">Organisation Name</label>
@@ -73,7 +73,7 @@
                                                             <label class="control-label pull-left"  for="Name">Waiver</label>
                                                         </div>
                                                         <div class="col-sm-6 input-group">
-                                                            <label class="input-group-addon" for="number">$</label> 
+                                                            <label class="input-group-addon" for="number">$</label>
                                                             <input type="number" class="form-control" min="0" name="application_discount" v-model.number="org.application_discount" @input="handleApplicationCurrencyInput">
                                                         </div>
                                                         <div v-show="!validateApplicationDiscount()">
@@ -106,7 +106,7 @@
                                                             <label class="control-label pull-left"  for="Name">Waiver</label>
                                                         </div>
                                                         <div class="col-sm-6 input-group">
-                                                            <label class="input-group-addon" for="number">$</label> 
+                                                            <label class="input-group-addon" for="number">$</label>
                                                             <input type="number" class="form-control" min="0" name="licence_discount" v-model.number="org.licence_discount" @input="handleLicenceCurrencyInput">
                                                         </div>
                                                         <div v-show="!validateLicenceDiscount()">
@@ -132,15 +132,15 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
-                                <div class="panel panel-default">
-                                  <div class="panel-heading">
-                                    <h3 class="panel-title">Address Details
+                                <div class="card card-default">
+                                  <div class="card-heading">
+                                    <h3 class="card-title">Address Details
                                         <a class="panelClicker" :href="'#'+adBody" data-toggle="collapse" expanded="false"  data-parent="#userInfo" :aria-controls="adBody">
                                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                                         </a>
                                     </h3>
                                   </div>
-                                  <div v-if="loading.length == 0" class="panel-body collapse" :id="adBody">
+                                  <div v-if="loading.length == 0" class="card-body collapse" :id="adBody">
                                       <form class="form-horizontal" action="index.html" method="post">
                                           <div class="form-group">
                                             <label for="" class="col-sm-3 control-label">Street</label>
@@ -185,15 +185,15 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
-                                <div class="panel panel-default">
-                                  <div class="panel-heading">
-                                    <h3 class="panel-title">Contact Details
+                                <div class="card card-default">
+                                  <div class="card-heading">
+                                    <h3 class="card-title">Contact Details
                                         <a class="panelClicker" :href="'#'+cdBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="cdBody">
                                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                                         </a>
                                     </h3>
                                   </div>
-                                  <div class="panel-body collapse" :id="cdBody">
+                                  <div class="card-body collapse" :id="cdBody">
                                         <form class="form-horizontal" action="index.html" method="post">
                                             <div class="col-sm-12">
                                                 <button @click.prevent="addContact()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Contact</button>
@@ -206,7 +206,7 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
-                                <div class="panel panel-default">
+                                <div class="card panel-default">
                                   <div class="panel-heading">
                                     <h3 class="panel-title">Linked User Accounts<small> - Manage the user accounts linked to the organisation</small>
                                         <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
@@ -230,8 +230,8 @@
                                                 <div class="col-sm-12 top-buffer-s">
                                                     <strong>Persons linked to the organisation are controlled by the organisation. The Department cannot manage this list of people.</strong>
                                                 </div>
-                                            </div> 
-                                        </div><!-- 
+                                            </div>
+                                        </div><!--
                                         <div class="col-sm-4" v-if="org.pins">
                                           <form class="form-horizontal" action="index.html" method="post">
                                               <div class="form-group">
@@ -287,7 +287,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div> 
+                    </div>
                     <!--div :id="oTab" class="tab-pane fade">
                         <ProposalDashTable ref="proposals_table" level='internal' :url='proposals_url'/>
                         <ApprovalDashTable ref="approvals_table" level='internal' :url='approvals_url'/>
@@ -535,7 +535,7 @@ export default {
                     }
                 }
                 swal(
-                    'Error', 
+                    'Error',
                     'Organisation details have cannot be saved because of the following error: '+text,
                     'error'
                 )
@@ -553,12 +553,12 @@ export default {
         },
         deleteContact: function(id){
             let vm = this;
-            
+
             vm.$http.delete(helpers.add_endpoint_json(api_endpoints.organisation_contacts,id),{
                 emulateJSON:true
             }).then((response) => {
                 swal(
-                    'Contact Deleted', 
+                    'Contact Deleted',
                     'The contact was successfully deleted',
                     'success'
                 )
@@ -566,7 +566,7 @@ export default {
             }, (error) => {
                 console.log(error);
                 swal(
-                    'Contact Deleted', 
+                    'Contact Deleted',
                     'The contact could not be deleted because of the following error '+error,
                     'error'
                 )
