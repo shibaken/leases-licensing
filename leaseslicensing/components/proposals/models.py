@@ -1209,9 +1209,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def assessor_recipients(self):
+        logger.info("assessor_recipients")
         recipients = []
         group_ids = self.__assessor_group().get_system_group_member_ids()
         for id in group_ids:
+            logger.info(id)
             recipients.append(EmailUser.objects.get(id=id).email)
         #try:
             #recipients = ProposalAssessorGroup.objects.get(region=self.region).members_email
@@ -1225,9 +1227,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def approver_recipients(self):
+        logger.info("assessor_recipients")
         recipients = []
         group_ids = self.__approver_group().get_system_group_member_ids()
         for id in group_ids:
+            logger.info(id)
             recipients.append(EmailUser.objects.get(id=id).email)
         #try:
             #recipients = ProposalApproverGroup.objects.get(region=self.region).members_email
