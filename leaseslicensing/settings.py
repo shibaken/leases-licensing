@@ -215,6 +215,14 @@ LOGGING['loggers']['payment_checkout'] = {
             'handlers': ['payment_checkout'],
             'level': 'INFO'
         }
+# Add a handler
+LOGGING['handlers']['file_leaseslicensing'] = {
+    'level': 'INFO',
+    'class': 'logging.handlers.RotatingFileHandler',
+    'filename': os.path.join(BASE_DIR, 'logs', 'leaseslicensing.log'),
+    'formatter': 'verbose',
+    'maxBytes': 5242880
+}
 
 LOGGING['loggers']['leaseslicensing'] = {
             'handlers': ['file'],
