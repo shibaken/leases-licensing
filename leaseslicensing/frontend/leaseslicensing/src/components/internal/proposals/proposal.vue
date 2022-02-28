@@ -234,10 +234,12 @@
         <input type='hidden' name="schema" :value="JSON.stringify(proposal)" />
         <input type='hidden' name="proposal_id" :value="1" />
         -->
-        <div class="fixed-bottom" v-if="hasAssessorMode">
-            <div class="bottom_items_wrapper text-end">
-                <button class="btn btn-primary" @click.prevent="save_and_continue()">Save and Continue</button>
-                <button class="btn btn-primary" @click.prevent="save_and_exit()">Save and Exit</button>
+        <div class="navbar fixed-bottom" style="background-color: #f5f5f5;">
+            <div class="container">
+                <div class="col-md-12 text-end">
+                    <button class="btn btn-primary" @click.prevent="save_and_continue()">Save and Continue</button>
+                    <button class="btn btn-primary" @click.prevent="save_and_exit()">Save and Exit</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1259,8 +1261,5 @@ export default {
     border-bottom: 1px solid #888;
     font-weight: bold;
     font-size: 1.3em;
-}
-.bottom_items_wrapper {
-    background-color: #f5f5f5;
 }
 </style>
