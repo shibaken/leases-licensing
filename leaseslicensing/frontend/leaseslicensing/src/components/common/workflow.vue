@@ -53,9 +53,9 @@
                     </template>
                     <template v-if="show_toggle_requirements">
                         <div class="col-sm-12">
-                            <strong>Requirements</strong><br/>
-                            <a class="actionBtn" v-if="!showingRequirements" @click.prevent="toggleRequirements()">Show Requirements</a>
-                            <a class="actionBtn" v-else @click.prevent="toggleRequirements()">Hide Requirements</a>
+                            <strong>Conditions</strong><br/>
+                            <a class="actionBtn" v-if="!showingRequirements" @click.prevent="toggleRequirements()">Show Conditions</a>
+                            <a class="actionBtn" v-else @click.prevent="toggleRequirements()">Hide Conditions</a>
                         </div>
                         <div class="col-sm-12">
                             <div class="separator"></div>
@@ -224,7 +224,7 @@ export default {
     name: 'Workflow',
     data: function() {
         let vm = this;
-        
+
         let PS = constants.PROPOSAL_STATUS
         let conf_buttons = [ // List the statuses for which the button is to be displayed
             {
@@ -323,7 +323,7 @@ export default {
             referral_text: '',
             sendingReferral: false,
             buttons: (function(){
-                let button_array = {} 
+                let button_array = {}
                 conf_buttons.forEach(dict => {
                     for (let [key, value] of Object.entries(dict)) {
                         button_array[key] = new Button(key, value)
@@ -573,7 +573,7 @@ export default {
                             $(vm.$refs.department_users).val(null).trigger("change");
                             vm.selected_referral = '';
                             vm.referral_text = '';
-                        }, 
+                        },
                         error => {
                             console.error(error);
                             swal(

@@ -60,6 +60,7 @@ class MapLayer(models.Model):
     option_for_internal = models.BooleanField(default=True)
     option_for_external = models.BooleanField(default=True)
     display_all_columns = models.BooleanField(default=False)
+    transparency = models.PositiveSmallIntegerField(default=50)  # Transparency of the layer. 0 means solid.  100 means fully transparent.
 
     class Meta:
         app_label = 'leaseslicensing'

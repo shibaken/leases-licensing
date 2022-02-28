@@ -46,7 +46,7 @@
         </CollapsibleFilters>
 
         <div class="text-end mb-2">
-            <button type="button" class="btn btn-primary" @click="geoJsonButtonClicked">Get GeoJSON</button>
+            <button type="button" class="btn btn-primary" @click="geoJsonButtonClicked"><i class="fa-solid fa-download"></i> Get GeoJSON</button>
         </div>
 
         <div :id="map_container_id">
@@ -81,6 +81,9 @@
                                         class="layer_option"
                                     />
                                     <label :for="layer.ol_uid" class="layer_option">{{ layer.get('title') }}</label>
+                                    <RangeSlider
+                                        @valueChanged='valueChanged($event, layer)'
+                                    />
                                 </div>
                             </div>
                         </transition>
@@ -129,6 +132,7 @@ import 'select2-bootstrap-theme/dist/select2-bootstrap.min.css'
 import MeasureStyles, { formatLength } from '@/components/common/measure.js'
 require("select2/dist/css/select2.min.css");
 //require("select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.css");
+import RangeSlider from '@/components/forms/range_slider.vue'
 
 export default {
     name: 'MapComponentWithFilters',
@@ -403,6 +407,7 @@ export default {
     },
     components:{
         CollapsibleFilters,
+        RangeSlider,
     },
     watch: {
         filterProposalLodgedFrom: function() {
@@ -421,6 +426,11 @@ export default {
         }
     },
     methods: {
+        valueChanged: function(value, tileLayer){
+            console.log(value)
+            console.log(tileLayer)
+            tileLayer.setOpacity((100 - value)/100)
+        },
         updateVariablesFromSession: function(){
             this.filterApplicationTypes = sessionStorage.getItem('filterApplicationTypesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) : this.filterApplicationTypes
             this.filterApplicationStatuses = sessionStorage.getItem('filterApplicationStatusesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationStatusesForMap')) : this.filterApplicationStatuses
@@ -592,6 +602,7 @@ export default {
             this.$http.get('/api/map_layers/').then(response => {
                 let layers = response.body
                 for (var i = 0; i < layers.length; i++){
+                    console.log(layers[i])
                     let l = new TileWMS({
                         url: env['kmi_server_url'] + '/geoserver/' + layers[i].layer_group_name + '/wms',
                         params: {

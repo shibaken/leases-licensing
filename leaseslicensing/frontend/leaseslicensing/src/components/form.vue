@@ -7,7 +7,7 @@
 
         <div class="">
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-                <li class="nav-item" role="presentation">
+                <li class="nav-item mr-1" role="presentation">
                     <!--a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true"-->
                     <button class="nav-link active" id="pills-applicant-tab" data-bs-toggle="pill" data-bs-target="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
                       Applicant
@@ -377,5 +377,18 @@ import Confirmation from '@/components/common/confirmation.vue'
 	  vertical-align: top;
 	  margin-right: 1em;
 	}
+    .nav-pills .nav-link {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-top-left-radius: 0.25em;
+        border-top-right-radius: 0.25em;
+        margin-right: 0.25em;
+    }
+    .nav-pills .nav-link {
+        background: lightgray;
+    }
+    .nav-pills .nav-link.active {
+        background: gray;
+    }
 </style>
 
