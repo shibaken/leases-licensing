@@ -77,7 +77,9 @@
                                             <template v-if="selected_referral">
                                                 <label class="control-label pull-left"  for="Name">Comments</label>
                                                 <textarea class="form-control comments_to_referral" name="name" v-model="referral_text"></textarea>
-                                                <a v-if="canLimitedAction" @click.prevent="sendReferral()" class="actionBtn pull-right">Send</a>
+                                                <div class="text-end">
+                                                    <a v-if="canLimitedAction" @click.prevent="sendReferral()" class="actionBtn">Send</a>
+                                                </div>
                                             </template>
                                         </template>
                                         <template v-else>
