@@ -376,7 +376,24 @@ export default {
 
             let columns = []
             let search = null
-            let buttons = []
+            let buttons = [
+                {
+                    extend: 'excel',
+                    text: '<i class="fa-solid fa-download"></i> Excel',
+                    className: 'btn btn-primary ml-2',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                },
+                {
+                    extend: 'csv',
+                    text: '<i class="fa-solid fa-download"></i> CSV',
+                    className: 'btn btn-primary',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                },
+            ]
             if(vm.is_external){
                 columns = [
                     vm.column_id,
@@ -390,7 +407,6 @@ export default {
                     vm.column_action,
                 ]
                 search = false
-                buttons = []
             }
             if(vm.is_internal){
                 columns = [
@@ -405,20 +421,6 @@ export default {
                     vm.column_action,
                 ]
                 search = true
-                buttons = [
-                    {
-                        extend: 'excel',
-                        exportOptions: {
-                            columns: ':visible'
-                        }
-                    },
-                    {
-                        extend: 'csv',
-                        exportOptions: {
-                            columns: ':visible'
-                        }
-                    },
-                ]
             }
 
             return {
@@ -433,7 +435,7 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
-                searching: search,
+                searching: true,
                 ajax: {
                     "url": api_endpoints.proposals_paginated_list + '?format=datatables&email_user_id_assigned=' + vm.email_user_id_assigned,
                     "dataSrc": 'data',
@@ -447,8 +449,9 @@ export default {
                         d.level = vm.level
                     }
                 },
-                dom: 'lBfrtip',
-                //buttons:[ ],
+                dom: "<'d-flex'<'me-auto'l>fB>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'d-flex'<'me-auto'i>p>",
                 buttons: buttons,
                 order: [[1, 'desc']],
 
