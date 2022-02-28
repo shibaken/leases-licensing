@@ -28,6 +28,7 @@ class MapLayerAdmin(admin.ModelAdmin):
         'option_for_external',
         'display_all_columns',
         'column_names',
+        'transparency',
     ]
     list_filter = ['option_for_internal', 'option_for_external', 'display_all_columns',]
     form = MyForm
