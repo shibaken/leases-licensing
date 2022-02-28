@@ -374,7 +374,8 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
         email_user_id_assigned = int(request.query_params.get('email_user_id_assigned', '0'))
 
         if email_user_id_assigned:
-            qs = qs.filter(Q(assigned_officer=email_user_id_assigned) | Q(assigned_approver=email_user_id_assigned))
+            qs = qs.filter(Q(referrals__in=Referral.objects.filter(referral=email_user_id_assigned)))
+            # qs = qs.filter(Q(assigned_officer=email_user_id_assigned) | Q(assigned_approver=email_user_id_assigned))
 
         self.paginator.page_size = qs.count()
         # result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
@@ -1394,7 +1395,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def assign_request_user(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            instance.assign_officer(request,request.user)
+            instance.assign_officer(request, request.user)
             #serializer = InternalProposalSerializer(instance,context={'request':request})
             serializer_class = self.internal_serializer_class()
             serializer = serializer_class(instance,context={'request':request})

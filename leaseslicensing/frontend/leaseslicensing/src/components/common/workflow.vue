@@ -16,7 +16,7 @@
                     <div v-if="!isFinalised" class="col-sm-12">
                         <strong>Currently assigned to</strong><br/>
                         <div class="form-group">
-                            <template v-if="proposal.processing_status == 'With Approver'">
+                            <template v-if="proposal.processing_status_id == 'with_approver'">
                                 <select
                                     ref="assigned_officer"
                                     :disabled="!canAction"
@@ -96,7 +96,7 @@
                                         </tr>
                                         <tr v-for="r in proposal.latest_referrals">
                                             <td>
-                                                <small><strong>{{r.referral}}</strong></small><br/>
+                                                <small><strong>{{r.referral_obj.first_name}} {{ r.referral_obj.last_name }}</strong></small><br/>
                                                 <small><strong>{{r.lodged_on | formatDate}}</strong></small>
                                             </td>
                                             <td>
@@ -517,16 +517,17 @@ export default {
                 vm.assignTo();
             });
         },
-        updateAssignedOfficerSelect:function(){
+        updateAssignedOfficerSelect:function(selected_user){
             let vm = this;
-            if (vm.proposal.processing_status == 'With Approver'){
-                $(vm.$refs.assigned_officer).val(vm.proposal.assigned_approver);
-                $(vm.$refs.assigned_officer).trigger('change');
-            }
-            else{
-                $(vm.$refs.assigned_officer).val(vm.proposal.assigned_officer);
-                $(vm.$refs.assigned_officer).trigger('change');
-            }
+            //if (vm.proposal.processing_status == 'With Approver'){
+                //$(vm.$refs.assigned_officer).val(vm.proposal.assigned_approver);
+                $(vm.$refs.assigned_officer).val(selected_user)
+                $(vm.$refs.assigned_officer).trigger('change')
+            //}
+            //else{
+            //    $(vm.$refs.assigned_officer).val(vm.proposal.assigned_officer);
+            //    $(vm.$refs.assigned_officer).trigger('change');
+            //}
         },
         refreshFromResponse:function(response){
             let vm = this;
@@ -565,8 +566,8 @@ export default {
 
                             vm.sendingReferral = false;
                             vm.original_proposal = helpers.copyObject(response.body);
-                            vm.proposal = response.body;
-                            vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
+                            vm.proposal = response.body;  // <== Mutating props... Is this fine???
+                            //vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
                             swal(
                                 'Referral Sent',
                                 'The referral has been sent to ' + vm.department_users.find(d => d.email == vm.selected_referral).name,

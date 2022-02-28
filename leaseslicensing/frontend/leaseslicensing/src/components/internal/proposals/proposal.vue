@@ -22,6 +22,7 @@
                 />
 
                 <Workflow
+                    ref='workflow'
                     :proposal="proposal"
                     :isFinalised="isFinalised"
                     :canAction="canAction"
@@ -921,15 +922,18 @@ export default {
             console.log('updateAssignedOfficerSelect')
             let vm = this;
             if (vm.proposal.processing_status == 'With Approver'){
-                $(vm.$refs.assigned_officer).val(vm.proposal.assigned_approver);
-                $(vm.$refs.assigned_officer).trigger('change');
+                //$(vm.$refs.assigned_officer).val(vm.proposal.assigned_approver);
+                //$(vm.$refs.assigned_officer).trigger('change');
+                vm.$refs.workflow.updateAssignedOfficerSelect(vm.proposal.assigned_approver)
             }
             else{
-                $(vm.$refs.assigned_officer).val(vm.proposal.assigned_officer);
-                $(vm.$refs.assigned_officer).trigger('change');
+                //$(vm.$refs.assigned_officer).val(vm.proposal.assigned_officer);
+                //$(vm.$refs.assigned_officer).trigger('change');
+                vm.$refs.workflow.updateAssignedOfficerSelect(vm.proposal.assigned_officer)
             }
         },
         assignRequestUser: function(){
+            console.log('in assignRequestUser')
             let vm = this;
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/assign_request_user')))
             .then((response) => {
@@ -968,6 +972,7 @@ export default {
               vm.requirementsComplete = bool;
         },
         assignTo: function(){
+            console.log('in assignTo')
             let vm = this;
             let unassign = true;
             let data = {};
@@ -1125,6 +1130,8 @@ export default {
                 $(vm.$refs.assigned_officer).data('select2') ? $(vm.$refs.assigned_officer).select2('destroy'): '';
             }
             // Assigned officer select
+            console.log('Elem: ')
+            console.log(vm.$refs.assigned_officer)
             $(vm.$refs.assigned_officer).select2({
                 "theme": "bootstrap",
                 allowClear: true,
