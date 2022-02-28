@@ -342,10 +342,15 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
             #return qs.exclude(migrated=True)
             return Proposal.objects.all()
         elif is_customer(self.request):
-            #user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
+            # user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
             #qs= Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(application_type=self.excluded_type)
             #return qs.exclude(migrated=True)
-            return Proposal.objects.all()
+            # return Proposal.objects.all()
+            qs = Proposal.objects.filter(Q(ind_applicant=user.id) | Q(submitter=user.id) | Q(proxy_applicant=user.id))
+
+            # TODO: Take into account organisations
+
+            return qs
         return Proposal.objects.none()
 
 #    def filter_queryset(self, request, queryset, view):
