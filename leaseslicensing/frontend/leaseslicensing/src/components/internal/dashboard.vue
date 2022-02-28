@@ -193,5 +193,18 @@ export default {
 	  vertical-align: top;
 	  margin-right: 1em;
 	}
+    .nav-pills .nav-link {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-top-left-radius: 0.5em;
+        border-top-right-radius: 0.5em;
+        margin-right: 0.25em;
+    }
+    .nav-pills .nav-link {
+        background: lightgray;
+    }
+    .nav-pills .nav-link.active {
+        background: gray;
+    }
 </style>
 
