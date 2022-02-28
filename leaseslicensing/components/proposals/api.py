@@ -342,10 +342,15 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
             #return qs.exclude(migrated=True)
             return Proposal.objects.all()
         elif is_customer(self.request):
-            #user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
+            # user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
             #qs= Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(application_type=self.excluded_type)
             #return qs.exclude(migrated=True)
-            return Proposal.objects.all()
+            # return Proposal.objects.all()
+            qs = Proposal.objects.filter(Q(ind_applicant=user.id) | Q(submitter=user.id) | Q(proxy_applicant=user.id))
+
+            # TODO: Take into account organisations
+
+            return qs
         return Proposal.objects.none()
 
 #    def filter_queryset(self, request, queryset, view):
@@ -369,7 +374,8 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
         email_user_id_assigned = int(request.query_params.get('email_user_id_assigned', '0'))
 
         if email_user_id_assigned:
-            qs = qs.filter(Q(assigned_officer=email_user_id_assigned) | Q(assigned_approver=email_user_id_assigned))
+            qs = qs.filter(Q(referrals__in=Referral.objects.filter(referral=email_user_id_assigned)))
+            # qs = qs.filter(Q(assigned_officer=email_user_id_assigned) | Q(assigned_approver=email_user_id_assigned))
 
         self.paginator.page_size = qs.count()
         # result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
@@ -1389,7 +1395,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def assign_request_user(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            instance.assign_officer(request,request.user)
+            instance.assign_officer(request, request.user)
             #serializer = InternalProposalSerializer(instance,context={'request':request})
             serializer_class = self.internal_serializer_class()
             serializer = serializer_class(instance,context={'request':request})
