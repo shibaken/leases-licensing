@@ -702,10 +702,16 @@ class ProposalReferralSerializer(serializers.ModelSerializer):
     #referral = serializers.CharField(source='referral.get_full_name')
     # referral = serializers.CharField(source='referral_group.name')
     processing_status = serializers.CharField(source='get_processing_status_display')
+    referral_obj = serializers.SerializerMethodField()
 
     class Meta:
         model = Referral
         fields = '__all__'
+
+    def get_referral_obj(self, obj):
+        referral_email_user = retrieve_email_user(obj.referral)
+        serializer = EmailUserSerializer(referral_email_user)
+        return serializer.data
 
 
 class ProposalDeclinedDetailsSerializer(serializers.ModelSerializer):
@@ -760,7 +766,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     current_assessor = serializers.SerializerMethodField()
     latest_referrals = ProposalReferralSerializer(many=True)
 
-    # allowed_assessors = EmailUserSerializer(many=True)
+    allowed_assessors = EmailUserSerializer(many=True)
     approval_level_document = serializers.SerializerMethodField()
     #application_type = serializers.CharField(source='application_type.name', read_only=True)
     #qaofficer_referrals = QAOfficerReferralSerializer(many=True)
@@ -802,7 +808,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'current_assessor',
                 'latest_referrals',
 
-                # 'allowed_assessors',
+                'allowed_assessors',
 
                 'proposed_issuance_approval',
                 'proposed_decline_status',
@@ -1126,10 +1132,16 @@ class ReferralSerializer(serializers.ModelSerializer):
     application_type=serializers.CharField(read_only=True)
     allowed_assessors = EmailUserSerializer(many=True)
     current_assessor = serializers.SerializerMethodField()
+    referral_obj = serializers.SerializerMethodField()
 
     class Meta:
         model = Referral
-        fields = '__all__'
+        fields = ['__all__', 'referral_obj',]
+
+    def get_referral_obj(self, obj):
+        referral_email_user = retrieve_email_user(obj.referral)
+        serializer = EmailUserSerializer(referral_email_user)
+        return serializer.data
 
     def get_current_assessor(self,obj):
         return {
@@ -1138,12 +1150,7 @@ class ReferralSerializer(serializers.ModelSerializer):
             'email': self.context['request'].user.email
         }
 
-    # def __init__(self,*args,**kwargs):
-    #     super(ReferralSerializer, self).__init__(*args, **kwargs)
-    #     self.fields['proposal'] = ReferralProposalSerializer(context={'request':self.context['request']})
-        
-
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         super(ReferralSerializer, self).__init__(*args, **kwargs)
         try:
             self.fields['proposal'] = ReferralProposalSerializer(context={'request': self.context['request']})
@@ -1156,7 +1163,7 @@ class ReferralSerializer(serializers.ModelSerializer):
         except:
             raise
 
-    def get_can_process(self,obj):
+    def get_can_process(self, obj):
         request = self.context['request']
         user = request.user._wrapped if hasattr(request.user,'_wrapped') else request.user
         return obj.can_process(user)

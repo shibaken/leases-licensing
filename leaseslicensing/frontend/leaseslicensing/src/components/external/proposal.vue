@@ -1,92 +1,89 @@
 <template lang="html">
     <div class="container" >
-            <div v-if="!proposal_readonly">
-              <div v-if="hasAmendmentRequest" class="row" style="color:red;">
-                  <div class="col-lg-12 pull-right">
-                    <div class="card card-default">
-                      <div class="card-heading">
-                        <h3 class="card-title" style="color:red;">An amendment has been requested for this Application
-                          <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
-                                <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                          </a>
-                        </h3>
-                      </div>
-                      <div class="card-body collapse in" :id="pBody">
-                        <div v-for="a in amendment_request">
-                          <p>Reason: {{a.reason}}</p>
-                          <p>Details: <p v-for="t in splitText(a.text)">{{t}}</p></p>
-                      </div>
-                    </div>
+        <div v-if="!proposal_readonly">
+          <div v-if="hasAmendmentRequest" class="row" style="color:red;">
+              <div class="col-lg-12 pull-right">
+                <div class="card card-default">
+                  <div class="card-heading">
+                    <h3 class="card-title" style="color:red;">An amendment has been requested for this Application
+                      <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
+                            <span class="glyphicon glyphicon-chevron-down pull-right "></span>
+                      </a>
+                    </h3>
+                  </div>
+                  <div class="card-body collapse in" :id="pBody">
+                    <div v-for="a in amendment_request">
+                      <p>Reason: {{a.reason}}</p>
+                      <p>Details: <p v-for="t in splitText(a.text)">{{t}}</p></p>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div id="error" v-if="missing_fields.length > 0" style="margin: 10px; padding: 5px; color: red; border:1px solid red;">
-                <b>Please answer the following mandatory question(s):</b>
-                <ul>
-                    <li v-for="error in missing_fields">
-                        {{ error.label }}
-                    </li>
-                </ul>
-            </div>
-            <ApplicationForm
-            v-if="proposal"
-            :proposal="proposal"
-            :is_external="true"
-            ref="application_form"
-            :readonly="readonly"
-            :submitterId="submitterId"
-            @updateSubmitText="updateSubmitText"
-            :registrationOfInterest="registrationOfInterest"
-            :leaseLicence="leaseLicence"
-            />
+        <div id="error" v-if="missing_fields.length > 0" style="margin: 10px; padding: 5px; color: red; border:1px solid red;">
+            <b>Please answer the following mandatory question(s):</b>
+            <ul>
+                <li v-for="error in missing_fields">
+                    {{ error.label }}
+                </li>
+            </ul>
+        </div>
+        <ApplicationForm
+        v-if="proposal"
+        :proposal="proposal"
+        :is_external="true"
+        ref="application_form"
+        :readonly="readonly"
+        :submitterId="submitterId"
+        @updateSubmitText="updateSubmitText"
+        :registrationOfInterest="registrationOfInterest"
+        :leaseLicence="leaseLicence"
+        />
 
-            <div>
-                <input type="hidden" name="csrfmiddlewaretoken" :value="csrf_token"/>
-                <input type='hidden' name="schema" :value="JSON.stringify(proposal)" />
-                <input type='hidden' name="proposal_id" :value="1" />
+        <div>
+            <input type="hidden" name="csrfmiddlewaretoken" :value="csrf_token"/>
+            <input type='hidden' name="schema" :value="JSON.stringify(proposal)" />
+            <input type='hidden' name="proposal_id" :value="1" />
 
-                <div class="row" style="margin-bottom: 50px">
-                        <div class="row" style="margin-bottom: 50px">
-                            <div class="navbar fixed-bottom" style="background-color: #f5f5f5;">
-                                <div v-if="proposal && !proposal.readonly" class="container-fluid justify-content-end">
+            <div class="navbar fixed-bottom" style="background-color: #f5f5f5;">
+                <div v-if="proposal && !proposal.readonly" class="container">
+                    <div class="col-md-12 text-end">
+                        <button v-if="saveExitProposal" type="button" class="btn btn-primary" disabled>
+                            Save and Exit&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                        </button>
+                        <input v-else type="button" @click.prevent="save_exit" class="btn btn-primary" value="Save and Exit" :disabled="savingProposal || paySubmitting"/>
 
-                                    <button v-if="saveExitProposal" type="button" class="btn btn-primary" disabled>
-                                        Save and Exit&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                    </button>
-                                    <input v-else type="button" @click.prevent="save_exit" class="btn btn-primary" value="Save and Exit" :disabled="savingProposal || paySubmitting"/>
+                        <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
+                            Save and Continue&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                        </button>
+                        <input v-else type="button" @click.prevent="save" class="btn btn-primary" value="Save and Continue" :disabled="saveExitProposal || paySubmitting"/>
 
-                                    <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
-                                        Save and Continue&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                    </button>
-                                    <input v-else type="button" @click.prevent="save" class="btn btn-primary" value="Save and Continue" :disabled="saveExitProposal || paySubmitting"/>
+                        <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>
+                            {{ submitText }}&nbsp; <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                        </button>
 
-                                    <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>
-                                        {{ submitText }}&nbsp; <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                    </button>
-                                    <input v-else
-                                    type="button"
-                                    @click.prevent="submit"
-                                    class="btn btn-primary"
-                                    :value="submitText"
-                                    :disabled="saveExitProposal || savingProposal || disableSubmit"
-                                    id="submitButton"
-                                    :title="disabledSubmitText"
-                                    />
+                        <input v-else
+                            type="button"
+                            @click.prevent="submit"
+                            class="btn btn-primary"
+                            :value="submitText"
+                            :disabled="saveExitProposal || savingProposal || disableSubmit"
+                            id="submitButton"
+                            :title="disabledSubmitText"
+                        />
 
-                                    <input id="save_and_continue_btn" type="hidden" @click.prevent="save_wo_confirm" class="btn btn-primary" value="Save Without Confirmation"/>
-                                </div>
-                                <div v-else>
-                                  <div class="container-fluid">
-                                    <router-link class="btn btn-primary" :to="{name: 'external-dashboard'}">Back to Dashboard</router-link>
-                                  </div>
-                                </div>
-                            </div>
-                        </div>
+                        <input id="save_and_continue_btn" type="hidden" @click.prevent="save_wo_confirm" class="btn btn-primary" value="Save Without Confirmation"/>
+                    </div>
+                </div>
+                <div v-else>
+                    <div class="container-fluid">
+                        <router-link class="btn btn-primary" :to="{name: 'external-dashboard'}">Back to Dashboard</router-link>
+                    </div>
                 </div>
             </div>
-
+        </div>
     </div>
 </template>
 

@@ -52,7 +52,7 @@
         <div v-if="is_external" class="row">
             <div class="col-md-12">
                 <div class="text-end">
-                    <button type="button" class="btn btn-primary" @click="new_application_button_clicked">New Application</button>
+                    <button type="button" class="btn btn-primary mb-2" @click="new_application_button_clicked"><i class="fa-solid fa-circle-plus"></i> New Application</button>
                 </div>
             </div>
         </div>
