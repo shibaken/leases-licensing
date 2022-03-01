@@ -1,7 +1,7 @@
 {%  extends 'leaseslicensing/emails/base_email.txt' %}
 
 {%  block content %}
-	Your Application {{ proposal.lodgement_number }} has been reviewed and has been recommended for decline.
+	Your {{ proposal.application_type.name_display }} {{ proposal.lodgement_number }} has been reviewed and has been recommended for decline.
 
     {% if reason %}
         <p>
@@ -10,7 +10,7 @@
     {% endif %}
 
     <p>
-    You can access this Application using the following link:
+    You can access this {{ proposal.application_type.name_display }} using the following link:
     </p>
     {{url}}
 
