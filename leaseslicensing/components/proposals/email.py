@@ -89,15 +89,15 @@ class ExternalSubmitSendNotificationEmail(TemplateEmailBase):
     html_template = 'leaseslicensing/emails/proposals/send_external_submit_notification.html'
     txt_template = 'leaseslicensing/emails/proposals/send_external_submit_notification.txt'
 
-class ApproverDeclineSendNotificationEmail(TemplateEmailBase):
-    subject = 'An Application has been recommended for decline.'
-    html_template = 'leaseslicensing/emails/proposals/send_approver_decline_notification.html'
-    txt_template = 'leaseslicensing/emails/proposals/send_approver_decline_notification.txt'
+#class ApproverDeclineSendNotificationEmail(TemplateEmailBase):
+#    subject = 'A {} has been recommended for decline.'.format(application_type)
+#    html_template = 'leaseslicensing/emails/proposals/send_approver_decline_notification.html'
+#    txt_template = 'leaseslicensing/emails/proposals/send_approver_decline_notification.txt'
 
-class ApproverApproveSendNotificationEmail(TemplateEmailBase):
-    subject = 'An Application has been recommended for approval.'
-    html_template = 'leaseslicensing/emails/proposals/send_approver_approve_notification.html'
-    txt_template = 'leaseslicensing/emails/proposals/send_approver_approve_notification.txt'
+#class ApproverApproveSendNotificationEmail(TemplateEmailBase):
+#    subject = 'A {} has been recommended for approval.'.format(application_type)
+#    html_template = 'leaseslicensing/emails/proposals/send_approver_approve_notification.html'
+#    txt_template = 'leaseslicensing/emails/proposals/send_approver_approve_notification.txt'
 
 class ApproverSendBackNotificationEmail(TemplateEmailBase):
     subject = 'An Application has been sent back by approver.'
@@ -338,7 +338,13 @@ def send_external_submit_email_notification(request, proposal):
 
 #send email when Proposal is 'proposed to decline' by assessor.
 def send_approver_decline_email_notification(reason, request, proposal):
-    email = ApproverDeclineSendNotificationEmail()
+    application_type = proposal.application_type.name_display
+    email = TemplateEmailBase(
+            subject = 'A {} has been recommended for decline.'.format(application_type),
+            html_template='leaseslicensing/emails/proposals/send_approver_decline_notification.html',
+            txt_template = 'leaseslicensing/emails/proposals/send_approver_decline_notification.txt'
+            )
+    #email = ApproverDeclineSendNotificationEmail()
     url = request.build_absolute_uri(reverse('internal-proposal-detail',kwargs={'proposal_pk': proposal.id}))
     context = {
         'proposal': proposal,
@@ -358,7 +364,13 @@ def send_approver_decline_email_notification(reason, request, proposal):
 
 
 def send_approver_approve_email_notification(request, proposal):
-    email = ApproverApproveSendNotificationEmail()
+    application_type = proposal.application_type.name_display
+    email = TemplateEmailBase(
+            subject = 'A {} has been recommended for approval.'.format(application_type),
+            html_template = 'leaseslicensing/emails/proposals/send_approver_approve_notification.html',
+            txt_template = 'leaseslicensing/emails/proposals/send_approver_approve_notification.txt'
+            )
+    #email = ApproverApproveSendNotificationEmail()
     url = request.build_absolute_uri(reverse('internal-proposal-detail',kwargs={'proposal_pk': proposal.id}))
     context = {
         'start_date' : proposal.proposed_issuance_approval.get('start_date'),
@@ -378,7 +390,7 @@ def send_approver_approve_email_notification(request, proposal):
 
 
 def send_proposal_decline_email_notification(proposal,request,proposal_decline):
-    email = ProposalDeclineSendNotificationEmail()
+    email = ProposalDeclineSendNotificationEmail(proposal.application_type.name_display)
 
     context = {
         'proposal': proposal,
