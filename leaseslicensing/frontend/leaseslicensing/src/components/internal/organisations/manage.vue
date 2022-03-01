@@ -19,7 +19,7 @@
                         <div class="row">
                             <div class="col-sm-12">
                                 <div class="card card-default">
-                                  <div class="card-heading">
+                                  <div class="card-header">
                                     <h3 class="card-title">Organisation Details
                                         <a class="panelClicker" :href="'#'+pdBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pdBody">
                                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
@@ -133,7 +133,7 @@
                         <div class="row">
                             <div class="col-sm-12">
                                 <div class="card card-default">
-                                  <div class="card-heading">
+                                  <div class="card-header">
                                     <h3 class="card-title">Address Details
                                         <a class="panelClicker" :href="'#'+adBody" data-toggle="collapse" expanded="false"  data-parent="#userInfo" :aria-controls="adBody">
                                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
@@ -186,7 +186,7 @@
                         <div class="row">
                             <div class="col-sm-12">
                                 <div class="card card-default">
-                                  <div class="card-heading">
+                                  <div class="card-header">
                                     <h3 class="card-title">Contact Details
                                         <a class="panelClicker" :href="'#'+cdBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="cdBody">
                                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>

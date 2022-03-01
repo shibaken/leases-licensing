@@ -869,7 +869,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
             roles.append('assessor')
         if accessing_user.id in proposal.get_approver_group().get_system_group_member_ids():
             roles.append('approver')
-        referral_ids = proposal.referrals.values_list('referral', flat=True)
+        referral_ids = list(proposal.referrals.values_list('referral', flat=True))
         if accessing_user.id in referral_ids:
             roles.append('referral')
         return roles

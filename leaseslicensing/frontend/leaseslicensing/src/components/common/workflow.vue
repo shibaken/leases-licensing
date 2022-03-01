@@ -405,7 +405,7 @@ export default {
             return !this.isFinalised && this.canAction
         },
         display_action_complete_referral: function(){
-            if (vm.debug)
+            if (this.debug)
                 return true
 
             let display = false

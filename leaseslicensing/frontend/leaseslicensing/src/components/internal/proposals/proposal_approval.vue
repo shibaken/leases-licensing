@@ -39,7 +39,7 @@
             <div class="col-md-12">
                 <div class="row">
                     <div class="card card-default">
-                        <div class="card-heading">
+                        <div class="card-header">
                             <h3 class="card-title">Level of Approval
                                 <a class="panelClicker" :href="'#'+proposedLevel" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="proposedLevel">
                                     <span class="glyphicon glyphicon-chevron-down pull-right "></span>
@@ -104,7 +104,7 @@
         <!--div class="col-md-12"-->
             <!--div class="row"-->
                 <div class="card card-default">
-                    <div class="card-heading">
+                    <div class="card-header">
                         <h3 v-if="!isFinalised" class="card-title">Proposed Decision
                             <a class="panelClicker" :href="'#'+proposedDecision" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="proposedDecision">
                                 <span class="glyphicon glyphicon-chevron-down pull-right "></span>
