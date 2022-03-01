@@ -405,7 +405,16 @@ export default {
             return !this.isFinalised && this.canAction
         },
         display_action_complete_referral: function(){
-            return this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            if (vm.debug)
+                return true
+
+            let display = false
+            if (this.proposal.accessing_user_roles.includes('referral')){
+                if (this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)){
+                    display = true
+                }
+            }
+            return display
         },
         display_action_request_amendment: function(){
             return this.buttons['request_amendment'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
