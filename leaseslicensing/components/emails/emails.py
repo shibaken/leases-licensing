@@ -26,10 +26,16 @@ def _render(template, context):
 
 
 class TemplateEmailBase(object):
-    subject = ''
-    html_template = 'leaseslicensing/emails/base_email.html'
-    # txt_template can be None, in this case a 'tag-stripped' version of the html will be sent. (see send)
-    txt_template = 'leaseslicensing/emails/base-email.txt'
+    def __init__(
+            self, 
+            subject='', 
+            html_template='leaseslicensing/emails/base_email.html',
+            txt_template='leaseslicensing/emails/base-email.txt'
+            ):
+        self.subject = subject
+        self.html_template = html_template
+        # txt_template can be None, in this case a 'tag-stripped' version of the html will be sent. (see send)
+        self.txt_template = txt_template
 
     def send_to_user(self, user, context=None):
         return self.send(user.email, context=context)

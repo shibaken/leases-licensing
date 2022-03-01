@@ -266,6 +266,7 @@ export default {
                     this.newFeatureId++;
                 };
             }
+            this.forceMapRefresh();
         },
 
         getJSONFeatures: function() {

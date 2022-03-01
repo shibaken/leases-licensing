@@ -7,7 +7,7 @@
                         <VueAlert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></VueAlert>
                         <div class="col-sm-12">
                             <div class="form-group">
-                                <div class="row">
+                                <div class="row modal-input-row">
                                     <div class="col-sm-3">
                                         <label v-if=check_status() class="control-label"  for="Name">Details</label>
                                         <label v-else class="control-label"  for="Name">Provide Reason for the proposed decline </label>
@@ -25,7 +25,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <div class="row">
+                                <div class="row modal-input-row">
                                     <div class="col-sm-3">
                                         <label v-if=check_status() class="control-label"  for="Name">CC email</label>
                                         <label v-else class="control-label"  for="Name">Proposed CC email</label>
@@ -40,9 +40,9 @@
                 </div>
             </div>
             <div slot="footer">
-                <button type="button" v-if="decliningProposal" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-default" @click="ok">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" v-if="decliningProposal" disabled class="btn btn-light" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                <button type="button" v-else class="btn btn-light" @click="ok">Ok</button>
+                <button type="button" class="btn btn-light" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>
@@ -239,4 +239,10 @@ export default {
 </script>
 
 <style lang="css">
+.modal-input-row {
+    margin-bottom: 20px;
+}
+.btn-light:hover {
+    background-color: lightgrey;
+}
 </style>
