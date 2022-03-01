@@ -35,6 +35,8 @@ module.exports = {
     return error_str;
   },
     apiVueResourceError: function(resp){
+        console.log('in apiVueResourceError')
+        console.log(resp)
         var error_str = '';
         var text = null;
         if (resp.status === 400) {
@@ -51,9 +53,12 @@ module.exports = {
             if (typeof text == 'object'){
                 if (text.hasOwnProperty('non_field_errors')) {
                     error_str = text.non_field_errors[0].replace(/[\[\]"]/g, '');
-                }
-                else{
-                    error_str = text;
+                } else{
+                    console.log('text')
+                    console.log(text)
+                    for (let key in text){
+                        error_str += key + ': ' + text[key] + '<br/>'
+                    }
                 }
             }
             else{
@@ -64,6 +69,8 @@ module.exports = {
         else if ( resp.status === 404) {
             error_str = 'The resource you are looking for does not exist.';
         }
+        console.log('error_str')
+        console.log(error_str)
         return error_str;
     },
 

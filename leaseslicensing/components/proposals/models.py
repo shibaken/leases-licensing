@@ -1098,7 +1098,10 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def latest_referrals(self):
-        return self.referrals.all()[:2]
+        referrals = self.referrals
+        for referral in referrals.all():
+            print(referral)
+        return referrals.all()[:3]
 
     @property
     def land_parks(self):
@@ -1185,11 +1188,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return False
 
     def __assessor_group(self):
-        #default_group = ProposalAssessorGroup.objects.get(default=True)
+        # TODO: Take application_type into account
         return SystemGroup.objects.get(name='ProposalAssessorGroup')
 
     def __approver_group(self):
-        #default_group = ProposalApproverGroup.objects.get(default=True)
+        # TODO: Take application_type into account
         return SystemGroup.objects.get(name='ProposalApproverGroup')
 
     def __check_proposal_filled_out(self):
@@ -1244,13 +1247,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return recipients
 
     #Check if the user is member of assessor group for the Proposal
-    def is_assessor(self,user):
-            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
+    def is_assessor(self, user):
             return user.id in self.__assessor_group().get_system_group_member_ids()
 
     #Check if the user is member of assessor group for the Proposal
-    def is_approver(self,user):
-            #return self.__approver_group() in user.proposalapprovergroup_set.all()
+    def is_approver(self, user):
             return user.id in self.__assessor_group().get_system_group_member_ids()
 
     def can_assess(self,user):

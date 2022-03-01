@@ -25,7 +25,9 @@
                                     @change="assignTo()">
                                     <option v-for="member in proposal.allowed_assessors" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
                                 </select>
-                                <a v-if="canAssess && proposal.assigned_approver != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                <div class="text-end">
+                                    <a v-if="canAssess && proposal.assigned_approver != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                </div>
                             </template>
                             <template v-else>
                                 <select
@@ -36,7 +38,9 @@
                                     @change="assignTo()">
                                     <option v-for="member in proposal.allowed_assessors" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
                                 </select>
-                                <a v-if="canAssess && proposal.assigned_officer != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                <div class="text-end">
+                                    <a v-if="canAssess && proposal.assigned_officer != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                </div>
                             </template>
                         </div>
                     </div>
@@ -568,22 +572,22 @@ export default {
                             vm.original_proposal = helpers.copyObject(response.body);
                             vm.proposal = response.body;  // <== Mutating props... Is this fine???
                             //vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
-                            swal(
-                                'Referral Sent',
-                                'The referral has been sent to ' + vm.department_users.find(d => d.email == vm.selected_referral).name,
-                                'success'
-                            )
-                            $(vm.$refs.department_users).val(null).trigger("change");
+                            //swal(
+                            //    'Referral Sent',
+                            //    'The referral has been sent to ' + vm.department_users.find(d => d.email == vm.selected_referral).name,
+                            //    'success'
+                            //)
+                            $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
                             vm.selected_referral = '';
                             vm.referral_text = '';
                         },
                         error => {
-                            console.error(error);
                             swal(
                                 'Referral Error',
                                 helpers.apiVueResourceError(error),
                                 'error'
                             )
+                            $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
                             vm.sendingReferral = false;
                         }
                     )  // END 2nd vm.$http.post

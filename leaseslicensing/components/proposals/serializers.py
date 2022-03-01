@@ -1,5 +1,5 @@
 from django.conf import settings
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address, EmailUserRO
 from leaseslicensing.components.main.models import ApplicationType
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.proposals.models import (
@@ -777,6 +777,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
 
     requirements_completed=serializers.SerializerMethodField()
     applicant_obj = serializers.SerializerMethodField()
+    accessing_user_roles = serializers.SerializerMethodField()  # Accessing user's roles for this proposal.
 
     class Meta:
         model = Proposal
@@ -854,10 +855,24 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'key_milestones_text',
                 'risk_factors_text',
                 'legislative_requirements_text',
+                'accessing_user_roles',
                 )
         read_only_fields = (
             'requirements',
             )
+
+    def get_accessing_user_roles(self, proposal):
+        request = self.context.get('request')
+        accessing_user = request.user
+        roles = []
+        if accessing_user.id in proposal.__assessor_group().get_system_group_member_ids():
+            roles.append('assessor')
+        if accessing_user.id in proposal.__approver_group().get_system_group_member_ids():
+            roles.append('approver')
+        referral_ids = proposal.referrals.values_list('referral', flat=True)
+        if accessing_user.id in referral_ids:
+            roles.append('referral')
+        return roles
 
     def get_applicant_obj(self, obj):
         try:
@@ -937,9 +952,34 @@ class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
 
 
 class SendReferralSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    # email_group = serializers.CharField()
+    email = serializers.EmailField(allow_blank=True)
     text = serializers.CharField(allow_blank=True)
+
+    def validate(self, data):
+        field_errors = {}
+        non_field_errors = []
+
+        request = self.context.get('request')
+        if request.user.email == data['email']:
+            non_field_errors.append('You cannot send referral to yourself.')
+        elif not data['email']:
+            non_field_errors.append('Referral not found.')
+
+        # if not self.partial:
+        #     if not data['skipper']:
+        #         field_errors['skipper'] = ['Please enter the skipper name.',]
+        #     if not data['contact_number']:
+        #         field_errors['contact_number'] = ['Please enter the contact number.',]
+
+        # Raise errors
+        if field_errors:
+            raise serializers.ValidationError(field_errors)
+        if non_field_errors:
+            raise serializers.ValidationError(non_field_errors)
+        # else:
+            # pass
+
+        return data
 
 
 class DTReferralSerializer(serializers.ModelSerializer):

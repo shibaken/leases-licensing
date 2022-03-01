@@ -1804,7 +1804,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def assesor_send_referral(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = SendReferralSerializer(data=request.data)
+        serializer = SendReferralSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         #text=serializer.validated_data['text']
         #instance.send_referral(request,serializer.validated_data['email'])
@@ -2008,7 +2008,7 @@ class ReferralViewSet(viewsets.ModelViewSet):
     def send_referral(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = SendReferralSerializer(data=request.data)
+            serializer = SendReferralSerializer(data=request.data, context={'request': request})
             serializer.is_valid(raise_exception=True)
             instance.send_referral(request,serializer.validated_data['email'],serializer.validated_data['text'])
             serializer = self.get_serializer(instance, context={'request':request})
