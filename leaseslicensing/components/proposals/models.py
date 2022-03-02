@@ -56,7 +56,8 @@ from django.contrib.gis.db.models.fields import PointField, PolygonField
 
 import logging
 
-from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
+from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE, \
+    GROUP_NAME_ASSESSOR, GROUP_NAME_APPROVER
 
 #logger = logging.getLogger(__name__)
 logger = logging.getLogger('leaseslicensing')
@@ -1189,11 +1190,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def get_assessor_group(self):
         # TODO: Take application_type into account
-        return SystemGroup.objects.get(name='ProposalAssessorGroup')
+        return SystemGroup.objects.get(name=GROUP_NAME_ASSESSOR)
 
     def get_approver_group(self):
         # TODO: Take application_type into account
-        return SystemGroup.objects.get(name='ProposalApproverGroup')
+        return SystemGroup.objects.get(name=GROUP_NAME_APPROVER)
 
     def __check_proposal_filled_out(self):
         if not self.data:

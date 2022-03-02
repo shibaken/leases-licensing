@@ -555,6 +555,7 @@ export default {
         fetchDeparmentUsers: function(){
             let vm = this;
             vm.loading.push('Loading Department Users');
+            console.log(api_endpoints.department_users)
             vm.$http.get(api_endpoints.department_users).then((response) => {
                 vm.department_users = response.body
                 vm.loading.splice('Loading Department Users',1);

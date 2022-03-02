@@ -98,7 +98,7 @@ from leaseslicensing.components.compliances.models import Compliance
 from leaseslicensing.components.compliances.serializers import ComplianceSerializer
 from ledger_api_client.ledger_models import Invoice
 
-from leaseslicensing.helpers import is_customer, is_internal
+from leaseslicensing.helpers import is_customer, is_internal, is_assessor, is_approver
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
@@ -337,10 +337,12 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         #import ipdb; ipdb.set_trace()
         user = self.request.user
-        if is_internal(self.request): #user.is_authenticated():
-            #qs= Proposal.objects.all().exclude(application_type=self.excluded_type)
-            #return qs.exclude(migrated=True)
-            return Proposal.objects.all()
+        if is_internal(self.request):
+            if is_assessor(user.id) or is_approver(user.id):
+                return Proposal.objects.all()
+            else:
+                # accessing user might be referral
+                return Proposal.objects.filter(referrals__in=Referral.objects.filter(referral=user.id))
         elif is_customer(self.request):
             # user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
             #qs= Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(application_type=self.excluded_type)

@@ -1,47 +1,22 @@
 import traceback
-import base64
-import geojson
-from six.moves.urllib.parse import urlparse
-from wsgiref.util import FileWrapper
-from django.db.models import Q, Min
 from django.db import transaction
-from django.http import HttpResponse
-from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from django.contrib import messages
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
 from django_countries import countries
 from rest_framework import viewsets, serializers, status, generics, views
 from rest_framework.decorators import action as detail_route, renderer_classes
-from rest_framework.decorators import action as list_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
-from rest_framework.pagination import PageNumberPagination
-from datetime import datetime, timedelta
-from collections import OrderedDict
 from django.core.cache import cache
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser,Address, EmailIdentity #EmailUserAction
-from ledger_api_client.country_models import Country
-from datetime import datetime,timedelta, date
 
 from leaseslicensing.components.main.utils import retrieve_department_users
-from leaseslicensing.components.organisations.models import  (
-                                    Organisation,
-                                )
-
-from leaseslicensing.components.users.serializers import   (
+from leaseslicensing.components.users.serializers import (
                                                 UserSerializer,
                                                 UserFilterSerializer,
                                                 UserAddressSerializer,
                                                 PersonalSerializer,
                                                 ContactSerializer,
-                                                #EmailUserActionSerializer,
-                                                #EmailUserCommsSerializer,
-                                                #EmailUserLogEntrySerializer,
                                                 UserSystemSettingsSerializer,
                                             )
 from leaseslicensing.components.organisations.serializers import (
@@ -54,13 +29,12 @@ class DepartmentUserList(views.APIView):
     renderer_classes = [JSONRenderer, ]
 
     def get(self, request, format=None):
-        data = cache.get('department_users')
-        if not data:
-            retrieve_department_users()
-            data = cache.get('department_users')
+        # data = cache.get('department_users')
+        # if not data:
+        #     retrieve_department_users()
+        #     data = cache.get('department_users')
+        data = retrieve_department_users()
         return Response(data)
-
-        # serializer = UserSerializer(request.user)
 
 
 class GetCountries(views.APIView):
