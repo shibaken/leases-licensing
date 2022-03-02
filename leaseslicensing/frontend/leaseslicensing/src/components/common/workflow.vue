@@ -236,51 +236,63 @@ export default {
         let vm = this;
 
         let PS = constants.PROPOSAL_STATUS
+        let ROLES = constants.ROLES
         let conf_buttons = [ // List the statuses for which the button is to be displayed
             {
                 'enter_conditions': {
                     'registration_of_interest': [],  // No conditions for registration_of_interest
                     'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
+                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,]
                 },
                 'complete_referral': {
                     'registration_of_interest': [PS.WITH_REFERRAL,],
                     'lease_licence': [PS.WITH_REFERRAL,],
+                    'roles_allowed': [ROLES.REFERRAL,],
                 },
                 'request_amendment': {
                     'registration_of_interest': [PS.WITH_ASSESSOR,],
                     'lease_licence': [PS.WITH_ASSESSOR,],
+                    'roles_allowed': [ROLES.ASSESSOR,]
                 },
                 'propose_decline': {
-                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
                     'lease_licence': [PS.WITH_ASSESSOR,],
+                    'roles_allowed': [ROLES.ASSESSOR,]
                 },
                 'back_to_application': {
                     'registration_of_interest': [],  // No conditions for the registration_of_interest
                     'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
+                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,]
                 },
                 'propose_approve': {
-                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
                     'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
+                    'roles_allowed': [ROLES.ASSESSOR,]
                 },
                 'back_to_assessor': {
                     'registration_of_interest': [PS.WITH_APPROVER,],
                     'lease_licence': [PS.WITH_APPROVER,],
+                    'roles_allowed': [ROLES.APPROVER,]
                 },
                 'approve': {
                     'registration_of_interest': [PS.WITH_APPROVER,],
                     'lease_licence': [PS.WITH_APPROVER,],
+                    'roles_allowed': [ROLES.APPROVER,]
                 },
                 'decline': {
                     'registration_of_interest': [PS.WITH_APPROVER],
                     'lease_licence': [PS.WITH_APPROVER,],
+                    'roles_allowed': [ROLES.APPROVER,]
                 },
                 'require_das': {
                     'registration_of_interest': [],
                     'lease_licence': [PS.WITH_ASSESSOR],
+                    'roles_allowed': [ROLES.ASSESSOR,]
                 },
                 'complete_editing': {
                     'registration_of_interest': [],
                     'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
+                    'roles_allowed': [ROLES.ASSESSOR,]
                 },
             },
         ]
@@ -291,13 +303,10 @@ export default {
                 this._condition = condition
             }
 
-            displayable(application_type, processing_status_id){
+            get_allowed_ids(key_name){
                 let me = this
-                if (vm.debug)
-                    return true
 
-                // Absorb type difference
-                let displayable_statuses = me._condition[application_type].map(a_status => {
+                let displayable_status_ids = me._condition[key_name].map(a_status => {
                     if (a_status.hasOwnProperty('ID'))
                         return a_status.ID
                     else if (a_status.hasOwnProperty('id'))
@@ -307,18 +316,43 @@ export default {
                     else
                         return a_status
                 })
-                processing_status_id = (function(){
-                    if(processing_status_id.hasOwnProperty('ID'))
-                        return processing_status_id.ID
-                    else if(processing_status_id.hasOwnProperty('id'))
-                        return processing_status_id.id
-                    else if(processing_status_id.hasOwnProperty('Id'))
-                        return processing_status_id.Id
-                    else
-                        return processing_status_id
-                })()
 
-                return displayable_statuses.includes(processing_status_id)
+                return displayable_status_ids
+            }
+
+            absorb_type_difference(processing_status_id){
+                let ret_value = ''
+
+                if(processing_status_id.hasOwnProperty('ID'))
+                    ret_value = processing_status_id.ID
+                else if(processing_status_id.hasOwnProperty('id'))
+                    ret_value = processing_status_id.id
+                else if(processing_status_id.hasOwnProperty('Id'))
+                    ret_value = processing_status_id.Id
+                else
+                    ret_value = processing_status_id.toLowerCase()
+
+                return ret_value
+            }
+
+            displayable(application_type, processing_status_id, accessing_user_roles){
+                let me = this
+                if (vm.debug)
+                    return true
+
+                let displayable_status_ids = me.get_allowed_ids(application_type)
+                let displayable_role_ids = me.get_allowed_ids('roles_allowed')
+                let my_processing_status_id = me.absorb_type_difference(processing_status_id)
+
+                console.log('---------' + me._id + '--------------')
+                console.log(displayable_status_ids)
+                console.log(displayable_role_ids)
+                console.log(my_processing_status_id)
+
+                let status_allowed = displayable_status_ids.includes(my_processing_status_id)
+                let intersection = displayable_role_ids.filter(x => accessing_user_roles.includes(x));
+
+                return status_allowed && intersection.length > 0
             }
         }
 
@@ -409,46 +443,37 @@ export default {
             return !this.isFinalised && this.canAction
         },
         display_action_complete_referral: function(){
-            if (this.debug)
-                return true
-
-            let display = false
-            if (this.proposal.accessing_user_roles.includes('referral')){
-                if (this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)){
-                    display = true
-                }
-            }
-            return display
+            return this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_request_amendment: function(){
-            return this.buttons['request_amendment'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['request_amendment'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_enter_conditions: function(){
-            return this.buttons['enter_conditions'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['enter_conditions'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_propose_decline: function(){
-            return this.buttons['propose_decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['propose_decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_back_to_application: function(){
-            return this.buttons['back_to_application'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['back_to_application'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_propose_approve: function(){
-            return this.buttons['propose_approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['propose_approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_require_das: function(){
-            return this.buttons['require_das'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['require_das'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_complete_editing: function(){
-            return this.buttons['complete_editing'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['complete_editing'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_back_to_assessor: function(){
-            return this.buttons['back_to_assessor'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['back_to_assessor'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_approve: function(){
-            return this.buttons['approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         display_action_decline: function(){
-            return this.buttons['decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            return this.buttons['decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
     },
     filters: {

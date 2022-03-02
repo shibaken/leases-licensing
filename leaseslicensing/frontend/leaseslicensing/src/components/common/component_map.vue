@@ -38,6 +38,10 @@
                                         class="layer_option"
                                     />
                                     <label :for="layer.ol_uid" class="layer_option">{{ layer.get('title') }}</label>
+                                    <RangeSlider
+                                        class="col-md-5"
+                                        @valueChanged='valueChanged($event, layer)'
+                                    />
                                 </div>
                             </div>
                         </transition>
@@ -129,11 +133,8 @@ import { LineString, Point } from 'ol/geom';
 import { Circle as CircleStyle, Fill, Stroke, Style, Text, RegularShape } from 'ol/style';
 import FileField from '@/components/forms/filefield_immediate.vue'
 import VueAlert from '@vue-utils/alert.vue'
-import {
-  api_endpoints,
-  helpers
-}
-from '@/utils/hooks'
+import { api_endpoints, helpers } from '@/utils/hooks'
+import RangeSlider from '@/components/forms/range_slider.vue'
 //import { getDisplayNameFromStatus, getDisplayNameOfCategory, getStatusForColour, getApiaryFeatureStyle } from '@/components/common/site_colours.js'
 
 export default {
@@ -190,6 +191,7 @@ export default {
     components: {
         FileField,
         VueAlert,
+        RangeSlider,
     },
     computed: {
         shapefileDocumentUrl: function() {
@@ -210,6 +212,12 @@ export default {
 
     },
     methods: {
+        valueChanged: function(value, tileLayer){
+            console.log(value)
+            console.log(tileLayer)
+            //tileLayer.setOpacity((100 - value)/100)
+            tileLayer.setOpacity(value/100)
+        },
         updateShape: function() {
             let vm = this
             vm.shapeVectorSource=null;
