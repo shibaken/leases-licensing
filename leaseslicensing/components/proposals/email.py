@@ -108,7 +108,7 @@ def send_referral_email_notification(referral, recipients, request, reminder=Fal
     #recipients = list(ReferralRecipientGroup.objects.get(name=referral.email_group).members.all().values_list('email', flat=True))
     msg = email.send(recipients, context=context)
     sender = request.user if request else settings.DEFAULT_FROM_EMAIL
-    _log_proposal_email(msg, referral, sender=sender)
+    _log_proposal_email(msg, referral.proposal, sender=sender)
     if referral.proposal.org_applicant:
         _log_org_email(msg, referral.proposal.org_applicant, referral.referral, sender=sender)
     elif referral.proposal.ind_applicant:
@@ -143,7 +143,7 @@ def send_referral_complete_email_notification(referral, request):
 
     msg = email.send(sent_by.email, attachments=attachments, context=context)
     sender = request.user if request else settings.DEFAULT_FROM_EMAIL
-    _log_proposal_email(msg, referral, sender=sender)
+    _log_proposal_email(msg, referral.proposal, sender=sender)
     if referral.proposal.org_applicant:
         _log_org_email(msg, referral.proposal.org_applicant, referral.referral, sender=sender)
     elif referral.proposal.ind_applicant:
