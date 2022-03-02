@@ -830,6 +830,7 @@ export default {
     .map{
         height: 800px;
         width: 100%;
+        padding: 0;
     }
     .map-wrapper {
         position: relative;

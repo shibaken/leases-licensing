@@ -4,7 +4,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card card-default">
-                  <div class="card-heading">
+                  <div class="card-header">
                     <h3 class="card-title">Organisation Details <small> - View and update the organisation's details</small>
                         <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
@@ -54,7 +54,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card card-default">
-                  <div class="card-heading">
+                  <div class="card-header">
                     <h3 class="card-title">Address Details <small> - View and update the organisation's address details</small>
                         <a class="panelClicker" :href="'#'+adBody" data-toggle="collapse" expanded="false"  data-parent="#userInfo" :aria-controls="adBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
@@ -109,7 +109,7 @@
         <div v-if="!isApplication" class="row">
             <div class="col-sm-12">
                 <div class="card card-default">
-                  <div class="card-heading">
+                  <div class="card-header">
                     <h3 class="card-title">Contact Details <small> - View and update the organisation's contact details</small>
                         <a class="panelClicker" :href="'#'+cBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="cBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
@@ -131,7 +131,7 @@
             <div class="col-sm-12">
 
                 <div class="card card-default">
-                    <div class="card-heading">
+                    <div class="card-header">
                         <h3 class="card-title">Linked User Accounts<small> Manage the user accounts linked to the organisation</small>
                             <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
                                 <span class="glyphicon glyphicon-chevron-down pull-right "></span>

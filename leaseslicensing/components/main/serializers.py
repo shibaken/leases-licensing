@@ -4,7 +4,7 @@ from leaseslicensing.components.main.models import (
         CommunicationsLogEntry, 
         RequiredDocument, Question, GlobalSettings, ApplicationType, MapLayer, MapColumn,
         )
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, EmailUserRO
 from datetime import datetime, date
 #from leaseslicensing.components.proposals.serializers import ProposalTypeSerializer
 
@@ -120,3 +120,23 @@ class MapLayerSerializer(serializers.ModelSerializer):
 
     def get_layer_name(self, obj):
         return obj.layer_name.strip().split(':')[1]
+
+
+class EmailUserROSerializerForReferral(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    telephone = serializers.CharField(source='phone_number')
+    mobile_phone = serializers.CharField(source='mobile_number')
+
+    class Meta:
+        model = EmailUserRO
+        fields = (
+            'id',
+            'name',
+            'title',
+            'email',
+            'telephone',
+            'mobile_phone',
+        )
+
+    def get_name(self, user):
+        return user.get_full_name()

@@ -4,7 +4,7 @@
             <div class="col-md-12">
                         <div class="row">
                             <div class="card card-default">
-                                <div class="card-heading">
+                                <div class="card-header">
                                     <h3 class="card-title">{{ customerLabel }}
                                         <a class="panelClicker" :href="'#'+detailsBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="detailsBody">
                                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
@@ -56,7 +56,7 @@
                     <div class="col-md-12">
                         <div class="row">
                             <div class="card card-default">
-                                <div class="card-heading">
+                                <div class="card-header">
                                     <h3 class="card-title">Address Details
                                         <a class="panelClicker" :href="'#'+addressBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="addressBody">
                                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>

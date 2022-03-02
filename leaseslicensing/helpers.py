@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, EmailUserRO
 from ledger_api_client.managed_models import SystemGroup
 from django.conf import settings
 from django.core.cache import cache
@@ -43,16 +43,14 @@ def is_leaseslicensing_admin(request):
 
 
 def is_assessor(user_id):
-    if isinstance(user_id, EmailUser):
-        # In case user_id is EmailUserRO type by mistake, retrieve its id
+    if isinstance(user_id, EmailUser) or isinstance(user_id, EmailUserRO):
         user_id = user_id.id
     assessor_group = SystemGroup.objects.get(name=GROUP_NAME_ASSESSOR)
     return True if user_id in assessor_group.get_system_group_member_ids() else False
 
 
 def is_approver(user_id):
-    if isinstance(user_id, EmailUser):
-        # In case user_id is EmailUserRO type by mistake, retrieve its id
+    if isinstance(user_id, EmailUser) or isinstance(user_id, EmailUserRO):
         user_id = user_id.id
     assessor_group = SystemGroup.objects.get(name=GROUP_NAME_APPROVER)
     return True if user_id in assessor_group.get_system_group_member_ids() else False
@@ -74,17 +72,20 @@ def in_dbca_domain(request):
 def is_in_organisation_contacts(request, organisation):
     return request.user.email in organisation.contacts.all().values_list('email', flat=True)
 
+
 def is_departmentUser(request):
     #return request.user.is_authenticated and is_model_backend(request) and in_dbca_domain(request)
     return request.user.is_authenticated and request.user.is_staff
+
 
 def is_customer(request):
     #return request.user.is_authenticated and is_email_auth_backend(request)
     return request.user.is_authenticated and not request.user.is_staff
 
+
 def is_internal(request):
     return is_departmentUser(request)
 
+
 def get_all_officers():
     return EmailUser.objects.filter(groups__name='Commercial Operator Admin')
-

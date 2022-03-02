@@ -98,7 +98,7 @@ from leaseslicensing.components.compliances.models import Compliance
 from leaseslicensing.components.compliances.serializers import ComplianceSerializer
 from ledger_api_client.ledger_models import Invoice
 
-from leaseslicensing.helpers import is_customer, is_internal
+from leaseslicensing.helpers import is_customer, is_internal, is_assessor, is_approver
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
@@ -337,10 +337,12 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         #import ipdb; ipdb.set_trace()
         user = self.request.user
-        if is_internal(self.request): #user.is_authenticated():
-            #qs= Proposal.objects.all().exclude(application_type=self.excluded_type)
-            #return qs.exclude(migrated=True)
-            return Proposal.objects.all()
+        if is_internal(self.request):
+            if is_assessor(user.id) or is_approver(user.id):
+                return Proposal.objects.all()
+            else:
+                # accessing user might be referral
+                return Proposal.objects.filter(referrals__in=Referral.objects.filter(referral=user.id))
         elif is_customer(self.request):
             # user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
             #qs= Proposal.objects.filter( Q(org_applicant_id__in = user_orgs) | Q(submitter = user) ).exclude(application_type=self.excluded_type)
@@ -1804,7 +1806,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def assesor_send_referral(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = SendReferralSerializer(data=request.data)
+        serializer = SendReferralSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         #text=serializer.validated_data['text']
         #instance.send_referral(request,serializer.validated_data['email'])
@@ -1925,11 +1927,11 @@ class ReferralViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['GET',], detail=False)
     def datatable_list(self, request, *args, **kwargs):
-        proposal = request.GET.get('proposal',None)
+        proposal = request.GET.get('proposal', None)
         qs = self.get_queryset().all()
         if proposal:
             qs = qs.filter(proposal_id=int(proposal))
-        serializer = DTReferralSerializer(qs, many=True, context={'request':request})
+        serializer = DTReferralSerializer(qs, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -2008,7 +2010,7 @@ class ReferralViewSet(viewsets.ModelViewSet):
     def send_referral(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = SendReferralSerializer(data=request.data)
+            serializer = SendReferralSerializer(data=request.data, context={'request': request})
             serializer.is_valid(raise_exception=True)
             instance.send_referral(request,serializer.validated_data['email'],serializer.validated_data['text'])
             serializer = self.get_serializer(instance, context={'request':request})
