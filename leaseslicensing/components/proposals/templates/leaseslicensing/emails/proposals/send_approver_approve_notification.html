@@ -1,7 +1,7 @@
 {%  extends 'leaseslicensing/emails/base_email.html' %}
 
 {%  block content %}
-	The Application {{ proposal.lodgement_number }} has been assessed and has been recommended for approval.
+    The {{ proposal.application_type.name_display }} {{ proposal.lodgement_number }} has been assessed and has been recommended for approval.
 
     {% comment %}
     {% if proposal.proposed_issuance_approval %}
@@ -15,9 +15,9 @@
     {% endcomment %}
 
     <p>
-    You can access this Application using the following link:
+    You can access this {{ proposal.application_type.name_display }} using the following link:
     </p>
-    <a href="{{url}}">Access Application</a>
+    <a href="{{url}}">Access {{ proposal.application_type.name_display }}</a>
 
 
 {%  endblock %}
