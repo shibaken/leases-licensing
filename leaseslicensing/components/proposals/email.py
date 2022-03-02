@@ -84,7 +84,7 @@ def send_referral_email_notification(referral, recipients, request, reminder=Fal
     # else:
     #     email = ReferralSendNotificationEmail()
     #email = ReferralSendNotificationEmail()
-    application_type = proposal.application_type.name_display
+    application_type = referral.proposal.application_type.name_display
     email = TemplateEmailBase(
             subject = 'A referral for a {} has been sent to you.'.format(application_type),
             html_template = 'leaseslicensing/emails/proposals/send_referral_notification.html',
@@ -118,7 +118,7 @@ def send_referral_email_notification(referral, recipients, request, reminder=Fal
 def send_referral_complete_email_notification(referral, request):
     sent_by = retrieve_email_user(referral.sent_by)
 
-    application_type = proposal.application_type.name_display
+    application_type = referral.proposal.application_type.name_display
     email = TemplateEmailBase(
             subject = 'A referral for a {} has been completed.'.format(application_type),
             html_template = 'leaseslicensing/emails/proposals/send_referral_complete_notification.html',
