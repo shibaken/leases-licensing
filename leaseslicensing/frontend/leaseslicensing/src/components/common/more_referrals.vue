@@ -192,21 +192,22 @@ export default {
             });
         },
         initialiseTable: function(){
+
+            // To allow table elements (ref: https://getbootstrap.com/docs/5.1/getting-started/javascript/#sanitizer)
+            var myDefaultAllowList = bootstrap.Tooltip.Default.allowList
+            myDefaultAllowList.table = []
+
             let vm = this;
             let table_id = 'more-referrals-table'+vm._uid;
             let popover_name = 'popover-'+ vm._uid;
-
-
-            //$(vm.$refs.showRef).popover({
+            let my_content = '<table id="' + table_id + '" class="hover table table-striped table-bordered dt-responsive" cellspacing="0" width="100%"></table>'
+            let my_template = '<div class="popover ' + popover_name +'" role="tooltip"><div class="popover-arrow" style="top:110px;"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>'
             let popover_elem = $(vm.$refs.showRef)[0]
-            let popover_link = new bootstrap.Popover(popover_elem, {
-                content: function() {
-                    return `
-                    <table id="${table_id}" class="hover table table-striped table-bordered dt-responsive " cellspacing="0" width="100%">
-                    </table>`
-                },
-                template: `<div class="popover ${popover_name}" role="tooltip"><div class="arrow" style="top:110px;"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>`,
+
+            new bootstrap.Popover(popover_elem, {
                 html: true,
+                content: my_content,
+                template: my_template,
                 title: 'Referrals',
                 container: 'body',
                 placement: 'right',
@@ -214,19 +215,10 @@ export default {
                 //offset: '0 10',
             }) 
             popover_elem.addEventListener('inserted.bs.popover', function () {
-
                 console.log('in inserted.bs.popover')
-                console.log(vm.datatable_options)
-
-                console.log('table_id')
-                console.log(table_id)
 
                 let table_jelem = $('#'+table_id)
-                console.log(table_jelem)
-                console.log(table_jelem[0])
-
                 vm.table = $('#'+table_id).DataTable(vm.datatable_options);
-                console.log(vm.table)
 
                 // activate popover when table is drawn.
                 vm.table.on('draw.dt', function () {
@@ -257,7 +249,6 @@ export default {
                 });
             })
             popover_elem.addEventListener('shown.bs.popover', function () {
-
                 console.log('in shown.bs.popover')
 
                 var el = vm.$refs.showRef;
