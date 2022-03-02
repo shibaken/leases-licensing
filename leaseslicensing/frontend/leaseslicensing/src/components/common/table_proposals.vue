@@ -449,9 +449,9 @@ export default {
                         d.level = vm.level
                     }
                 },
-                dom: "<'d-flex'<'me-auto'l>fB>" +
+                dom: "<'d-flex align-items-center'<'me-auto'l>fB>" +
                      "<'row'<'col-sm-12'tr>>" +
-                     "<'d-flex'<'me-auto'i>p>",
+                     "<'d-flex align-items-center'<'me-auto'i>p>",
                 buttons: buttons,
                 order: [[1, 'desc']],
 
