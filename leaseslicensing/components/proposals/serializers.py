@@ -1007,10 +1007,12 @@ class DTReferralSerializer(serializers.ModelSerializer):
     submitter = serializers.SerializerMethodField()
     #egion = serializers.CharField(source='region.name', read_only=True)
     #referral = EmailUserSerializer()
-    referral = serializers.CharField(source='referral_group.name')
+    referral = serializers.SerializerMethodField()
+    # referral = serializers.CharField(source='referral_group.name')
     document = serializers.SerializerMethodField()
-    can_user_process=serializers.SerializerMethodField()
+    can_user_process = serializers.SerializerMethodField()
     assigned_officer = serializers.CharField(source='assigned_officer.get_full_name', allow_null=True)
+
     class Meta:
         model = Referral
         fields = (
@@ -1018,7 +1020,7 @@ class DTReferralSerializer(serializers.ModelSerializer):
             #'region',
             #'activity',
             'title',
-            'applicant',
+            # 'applicant',
             'submitter',
             'processing_status',
             'application_type',
@@ -1035,8 +1037,13 @@ class DTReferralSerializer(serializers.ModelSerializer):
             'can_user_process',
         )
 
+    def get_referral(self, obj):
+        serializer = EmailUserSerializer(retrieve_email_user(obj.referral))
+        return serializer.data
+
     def get_submitter(self, obj):
-        if obj.submitter:
+        # if obj.submitter:
+        if hasattr(obj, 'submitter') and obj.submitter:
             email_user = retrieve_email_user(obj.submitter)
             return EmailUserSerializer(email_user).data
         else:
@@ -1064,12 +1071,12 @@ class DTReferralSerializer(serializers.ModelSerializer):
         return False
 
 
-
 class RequirementDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequirementDocument
         fields = ('id', 'name', '_file')
         #fields = '__all__'
+
 
 class ProposalRequirementSerializer(serializers.ModelSerializer):
     #due_date = serializers.DateField(input_formats=['%d/%m/%Y'],required=False,allow_null=True)
@@ -1091,7 +1098,7 @@ class ProposalRequirementSerializer(serializers.ModelSerializer):
             'requirement',
             'is_deleted',
             'copied_from',
-            'referral_group',
+            # 'referral_group',
             'can_referral_edit',
             'requirement_documents',
             'require_due_date',

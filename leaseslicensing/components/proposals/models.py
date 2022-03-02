@@ -2810,14 +2810,15 @@ class Referral(RevisionedMixin):
         return []  # TODO: correct this
 
     def can_process(self, user):
-        if self.processing_status == Referral.PROCESSING_STATUS_WITH_REFERRAL:
-            group =  ReferralRecipientGroup.objects.filter(id=self.referral_group.id)
-            #user=request.user
-            if group and group[0] in user.referralrecipientgroup_set.all():
-                return True
-            else:
-                return False
-        return False
+        return True  # TODO: implement
+        #if self.processing_status == Referral.PROCESSING_STATUS_WITH_REFERRAL:
+        #    group =  ReferralRecipientGroup.objects.filter(id=self.referral_group.id)
+        #    #user=request.user
+        #    if group and group[0] in user.referralrecipientgroup_set.all():
+        #        return True
+        #    else:
+        #        return False
+        #return False
 
     def assign_officer(self,request,officer):
         with transaction.atomic():
