@@ -313,9 +313,11 @@ import Confirmation from '@/components/common/confirmation.vue'
             toggleComponentMapOn: function() {
                 this.incrementComponentMapKey()
                 this.componentMapOn = true;
+                /*
                 this.$nextTick(() => {
                     this.$refs.component_map.forceMapRefresh();
                 });
+                */
             },
             updateTableByFeatures: function() {
             },

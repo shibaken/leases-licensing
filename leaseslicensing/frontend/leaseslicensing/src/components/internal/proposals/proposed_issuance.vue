@@ -86,9 +86,9 @@
             <p v-if="can_preview">Click <a href="#" @click.prevent="preview">here</a> to preview the approval letter.</p>
 
             <div slot="footer">
-                <button type="button" v-if="issuingApproval" disabled class="btn btn-primary" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-primary" @click="ok">Ok</button>
-                <button type="button" class="btn btn-primary" @click="cancel">Cancel</button>
+                <button type="button" v-if="issuingApproval" disabled class="btn btn-light" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                <button type="button" v-else class="btn btn-light" @click="ok">Ok</button>
+                <button type="button" class="btn btn-light" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>
@@ -347,5 +347,8 @@ export default {
 <style lang="css">
 .modal-input-row {
     margin-bottom: 20px;
+}
+.btn-light:hover {
+    background-color: lightgrey;
 }
 </style>
