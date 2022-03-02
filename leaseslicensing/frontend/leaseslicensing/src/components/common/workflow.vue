@@ -25,7 +25,9 @@
                                     @change="assignTo()">
                                     <option v-for="member in proposal.allowed_assessors" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
                                 </select>
-                                <a v-if="canAssess && proposal.assigned_approver != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                <div class="text-end">
+                                    <a v-if="canAssess && proposal.assigned_approver != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                </div>
                             </template>
                             <template v-else>
                                 <select
@@ -36,7 +38,9 @@
                                     @change="assignTo()">
                                     <option v-for="member in proposal.allowed_assessors" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
                                 </select>
-                                <a v-if="canAssess && proposal.assigned_officer != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                <div class="text-end">
+                                    <a v-if="canAssess && proposal.assigned_officer != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                </div>
                             </template>
                         </div>
                     </div>
@@ -110,10 +114,14 @@
                                             </td>
                                         </tr>
                                     </table>
-                                    <template>
 
-                                    </template>
-                                    <MoreReferrals @refreshFromResponse="refreshFromResponse" :proposal="proposal" :canAction="canLimitedAction" :isFinalised="isFinalised" :referral_url="referralListURL"/>
+                                    <MoreReferrals 
+                                        @refreshFromResponse="refreshFromResponse" 
+                                        :proposal="proposal" 
+                                        :canAction="canLimitedAction" 
+                                        :isFinalised="isFinalised" 
+                                        :referral_url="referralListURL"
+                                    />
                                 </div>
                                 <div class="col-sm-12">
                                     <div class="separator"></div>
@@ -401,7 +409,16 @@ export default {
             return !this.isFinalised && this.canAction
         },
         display_action_complete_referral: function(){
-            return this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
+            if (this.debug)
+                return true
+
+            let display = false
+            if (this.proposal.accessing_user_roles.includes('referral')){
+                if (this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)){
+                    display = true
+                }
+            }
+            return display
         },
         display_action_request_amendment: function(){
             return this.buttons['request_amendment'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id)
@@ -542,6 +559,7 @@ export default {
         fetchDeparmentUsers: function(){
             let vm = this;
             vm.loading.push('Loading Department Users');
+            console.log(api_endpoints.department_users)
             vm.$http.get(api_endpoints.department_users).then((response) => {
                 vm.department_users = response.body
                 vm.loading.splice('Loading Department Users',1);
@@ -568,22 +586,22 @@ export default {
                             vm.original_proposal = helpers.copyObject(response.body);
                             vm.proposal = response.body;  // <== Mutating props... Is this fine???
                             //vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
-                            swal(
-                                'Referral Sent',
-                                'The referral has been sent to ' + vm.department_users.find(d => d.email == vm.selected_referral).name,
-                                'success'
-                            )
-                            $(vm.$refs.department_users).val(null).trigger("change");
+                            //swal(
+                            //    'Referral Sent',
+                            //    'The referral has been sent to ' + vm.department_users.find(d => d.email == vm.selected_referral).name,
+                            //    'success'
+                            //)
+                            $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
                             vm.selected_referral = '';
                             vm.referral_text = '';
                         },
                         error => {
-                            console.error(error);
                             swal(
                                 'Referral Error',
                                 helpers.apiVueResourceError(error),
                                 'error'
                             )
+                            $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
                             vm.sendingReferral = false;
                         }
                     )  // END 2nd vm.$http.post

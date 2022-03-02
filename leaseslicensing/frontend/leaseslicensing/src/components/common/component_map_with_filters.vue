@@ -72,19 +72,22 @@
                         </transition>
                         <transition v-if="optionalLayers.length">
                             <div div class="layer_options" v-show="hover" @mouseleave="hover=false" >
-                                <div v-for="layer in optionalLayers">
-                                    <input
-                                        type="checkbox"
-                                        :id="layer.ol_uid"
-                                        :checked="layer.values_.visible"
-                                        @change="changeLayerVisibility(layer)"
-                                        class="layer_option"
-                                    />
-                                    <label :for="layer.ol_uid" class="layer_option">{{ layer.get('title') }}</label>
-                                    <RangeSlider
-                                        @valueChanged='valueChanged($event, layer)'
-                                    />
-                                </div>
+                                <template v-for="layer in optionalLayers">
+                                    <div class="row">
+                                        <input
+                                            type="checkbox"
+                                            :id="layer.ol_uid"
+                                            :checked="layer.values_.visible"
+                                            @change="changeLayerVisibility(layer)"
+                                            class="layer_option col-md-1"
+                                        />
+                                        <label :for="layer.ol_uid" class="layer_option col-md-6">{{ layer.get('title') }}</label>
+                                        <RangeSlider
+                                            class="col-md-5"
+                                            @valueChanged='valueChanged($event, layer)'
+                                        />
+                                    </div>
+                                </template>
                             </div>
                         </transition>
                     </div>
@@ -429,7 +432,8 @@ export default {
         valueChanged: function(value, tileLayer){
             console.log(value)
             console.log(tileLayer)
-            tileLayer.setOpacity((100 - value)/100)
+            //tileLayer.setOpacity((100 - value)/100)
+            tileLayer.setOpacity(value/100)
         },
         updateVariablesFromSession: function(){
             this.filterApplicationTypes = sessionStorage.getItem('filterApplicationTypesForMap') ?  JSON.parse(sessionStorage.getItem('filterApplicationTypesForMap')) : this.filterApplicationTypes

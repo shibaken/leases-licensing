@@ -736,31 +736,25 @@ export default {
             await this.save()
             this.$router.push({ name: 'internal-dashboard' })
         },
-        completeReferral: function(){
+        completeReferral: async function(){
             let vm = this;
             vm.checkAssessorData();
             try {
-                swal({
+                const swal_result = await swal({
                     title: "Complete Referral",
                     text: "Are you sure you want to complete this referral?",
                     type: "question",
                     showCancelButton: true,
                     confirmButtonText: 'Submit'
-                }).then(
-                    async(res) => {
-                        const response = await vm.$http.post(vm.complete_referral_url, {'proposal': this.proposal})
-                        if(response.ok){
-
-                        } else {
-
-                        }
-                    },
-                    err => {
-
-                    },
-                )
+                })
+                const res_save_data = await vm.$http.post(vm.complete_referral_url, {'proposal': this.proposal})
+                this.$router.push({ name: 'internal-dashboard' })
             } catch (err) {
-                console.error(err)
+                swal(
+                    'Referral Error',
+                    helpers.apiVueResourceError(error),
+                    'error'
+                )
             }
         },
         save: async function() {

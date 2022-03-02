@@ -8,7 +8,7 @@
             <div v-if="hasAmendmentRequest" class="row" style="color:red;">
                 <div class="col-lg-12 pull-right">
                   <div class="card card-default">
-                      <div class="card-heading">
+                      <div class="card-header">
                         <h3 class="card-title" style="color:red;">An amendment has been requested for this Compliance with Requirements
                             <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
                                 <span class="glyphicon glyphicon-chevron-down pull-right "></span>
@@ -31,7 +31,7 @@
         <div class="col-md-12">
             <div class="row">
                 <div class="card card-default">
-                    <div class="card-heading">
+                    <div class="card-header">
                         <h3 class="panel-title">Compliance with Requirements
                                         <a class="panelClicker" :href="'#'+pdBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pdBody">
                                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
