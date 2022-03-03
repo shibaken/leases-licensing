@@ -6,7 +6,7 @@
         </div>
 
         <div class="">
-            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <ul class="nav nav-pills" id="pills-tab" role="tablist">
                 <li class="nav-item mr-1" role="presentation">
                     <!--a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true"-->
                     <button class="nav-link active" id="pills-applicant-tab" data-bs-toggle="pill" data-bs-target="#pills-applicant" role="tab" aria-controls="pills-applicant" aria-selected="true">
@@ -64,26 +64,24 @@
                   </div>
               </div>
               <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
-                  <div class="row col-sm-12">
-                      <FormSection :formCollapse="false" label="Map" Index="proposal_geometry">
-                          <slot name="slot_map_checklist_questions"></slot>
-                          <ComponentMap
-                              ref="component_map"
-                              :is_internal="is_internal"
-                              :is_external="is_external"
-                              :key="componentMapKey"
-                              v-if="componentMapOn"
-                              @featuresDisplayed="updateTableByFeatures"
-                              :can_modify="can_modify"
-                              :display_at_time_of_submitted="show_col_status_when_submitted"
-                              @featureGeometryUpdated="featureGeometryUpdated"
-                              @popupClosed="popupClosed"
-                              :proposal="proposal"
-                              :readonly="readonly"
-                          />
+                  <FormSection :formCollapse="false" label="Map" Index="proposal_geometry">
+                      <slot name="slot_map_checklist_questions"></slot>
+                      <ComponentMap
+                          ref="component_map"
+                          :is_internal="is_internal"
+                          :is_external="is_external"
+                          :key="componentMapKey"
+                          v-if="componentMapOn"
+                          @featuresDisplayed="updateTableByFeatures"
+                          :can_modify="can_modify"
+                          :display_at_time_of_submitted="show_col_status_when_submitted"
+                          @featureGeometryUpdated="featureGeometryUpdated"
+                          @popupClosed="popupClosed"
+                          :proposal="proposal"
+                          :readonly="readonly"
+                      />
 
-                      </FormSection>
-                  </div>
+                  </FormSection>
               </div>
               <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
                   <RegistrationOfInterest

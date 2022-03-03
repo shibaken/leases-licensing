@@ -382,14 +382,16 @@ def save_referral_data(proposal, request, referral_completed=False):
                     if assessment['referral']['referral']['id'] == request.user.id:
                         # When this assessment is for the accessing user
                         for section, answers in assessment['section_answers'].items():
+                            # Save answers
                             for answer_dict in answers:
                                 answer_obj = _save_answer_dict(answer_dict)
-                    if referral_completed:
-                        assessment = ProposalAssessment.objects.get(id=int(assessment['id']))
-                        assessment.completed = True
-                        assessment.submitter = request.user.id
-                        assessment.save()
-                        assessment.referral.complete(request)
+                        if referral_completed:
+                            # Make this assessment completed
+                            assessment = ProposalAssessment.objects.get(id=int(assessment['id']))
+                            assessment.completed = True
+                            assessment.submitter = request.user.id
+                            assessment.save()
+                            assessment.referral.complete(request)
 
             # Referrals are not allowed to edit geometry
 

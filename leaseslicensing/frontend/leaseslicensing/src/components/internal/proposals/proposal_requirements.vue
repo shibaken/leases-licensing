@@ -2,7 +2,7 @@
     <div>
 <!--
     <div class="card card-default">
-        <div class="card-heading">
+        <div class="card-header">
             <h3 class="card-title">Conditions
                 <a class="panelClicker" :href="'#'+panelBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="panelBody">
                     <span class="glyphicon glyphicon-chevron-down pull-right "></span>

@@ -56,7 +56,8 @@ from django.contrib.gis.db.models.fields import PointField, PolygonField
 
 import logging
 
-from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE
+from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE, \
+    GROUP_NAME_ASSESSOR, GROUP_NAME_APPROVER
 
 #logger = logging.getLogger(__name__)
 logger = logging.getLogger('leaseslicensing')
@@ -1098,7 +1099,10 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def latest_referrals(self):
-        return self.referrals.all()[:2]
+        referrals = self.referrals
+        for referral in referrals.all():
+            print(referral)
+        return referrals.all()[:3]
 
     @property
     def land_parks(self):
@@ -1137,18 +1141,18 @@ class Proposal(DirtyFieldsMixin, models.Model):
         group = None
         # TODO: Take application_type into account
         if self.processing_status in [Proposal.PROCESSING_STATUS_WITH_APPROVER,]:
-            group = self.__approver_group()
+            group = self.get_approver_group()
         elif self.processing_status in [Proposal.PROCESSING_STATUS_WITH_REFERRAL,
                                         Proposal.PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS,
                                         Proposal.PROCESSING_STATUS_WITH_ASSESSOR,
                                         Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS,]:
-            group = self.__assessor_group()
+            group = self.get_assessor_group()
         users = list(map(lambda id: retrieve_email_user(id), group.get_system_group_member_ids())) if group else []
         return users
 
     @property
     def compliance_assessors(self):
-        group = self.__assessor_group()
+        group = self.get_assessor_group()
         return group.members if group else []
 
     @property
@@ -1184,13 +1188,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
             return True
         return False
 
-    def __assessor_group(self):
-        #default_group = ProposalAssessorGroup.objects.get(default=True)
-        return SystemGroup.objects.get(name='ProposalAssessorGroup')
+    def get_assessor_group(self):
+        # TODO: Take application_type into account
+        return SystemGroup.objects.get(name=GROUP_NAME_ASSESSOR)
 
-    def __approver_group(self):
-        #default_group = ProposalApproverGroup.objects.get(default=True)
-        return SystemGroup.objects.get(name='ProposalApproverGroup')
+    def get_approver_group(self):
+        # TODO: Take application_type into account
+        return SystemGroup.objects.get(name=GROUP_NAME_APPROVER)
 
     def __check_proposal_filled_out(self):
         if not self.data:
@@ -1211,7 +1215,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def assessor_recipients(self):
         logger.info("assessor_recipients")
         recipients = []
-        group_ids = self.__assessor_group().get_system_group_member_ids()
+        group_ids = self.get_assessor_group().get_system_group_member_ids()
         for id in group_ids:
             logger.info(id)
             recipients.append(EmailUser.objects.get(id=id).email)
@@ -1229,7 +1233,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def approver_recipients(self):
         logger.info("assessor_recipients")
         recipients = []
-        group_ids = self.__approver_group().get_system_group_member_ids()
+        group_ids = self.get_approver_group().get_system_group_member_ids()
         for id in group_ids:
             logger.info(id)
             recipients.append(EmailUser.objects.get(id=id).email)
@@ -1244,14 +1248,12 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return recipients
 
     #Check if the user is member of assessor group for the Proposal
-    def is_assessor(self,user):
-            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
-            return user.id in self.__assessor_group().get_system_group_member_ids()
+    def is_assessor(self, user):
+            return user.id in self.get_assessor_group().get_system_group_member_ids()
 
     #Check if the user is member of assessor group for the Proposal
-    def is_approver(self,user):
-            #return self.__approver_group() in user.proposalapprovergroup_set.all()
-            return user.id in self.__assessor_group().get_system_group_member_ids()
+    def is_approver(self, user):
+            return user.id in self.get_assessor_group().get_system_group_member_ids()
 
     def can_assess(self,user):
         logger.info("can assess")
@@ -1263,10 +1265,10 @@ class Proposal(DirtyFieldsMixin, models.Model):
         if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
             #return self.__assessor_group() in user.proposalassessorgroup_set.all()
             logger.info("self.__assessor_group().get_system_group_member_ids()")
-            logger.info(self.__assessor_group().get_system_group_member_ids())
-            return user.id in self.__assessor_group().get_system_group_member_ids()
+            logger.info(self.get_assessor_group().get_system_group_member_ids())
+            return user.id in self.get_assessor_group().get_system_group_member_ids()
         elif self.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER:
-            return user.id in self.__approver_group().get_system_group_member_ids()
+            return user.id in self.get_approver_group().get_system_group_member_ids()
         else:
             return False
 
@@ -1285,7 +1287,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def can_edit_period(self,user):
         if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
             #return self.__assessor_group() in user.proposalassessorgroup_set.all()
-            return user.id in self.__assessor_group().get_system_group_member_ids()
+            return user.id in self.get_assessor_group().get_system_group_member_ids()
         else:
             return False
 
@@ -1299,10 +1301,10 @@ class Proposal(DirtyFieldsMixin, models.Model):
             if referral:
                 return True
             #elif self.__assessor_group() in user.proposalassessorgroup_set.all():
-            elif user.id in self.__assessor_group().get_system_group_member_ids():
+            elif user.id in self.get_assessor_group().get_system_group_member_ids():
                 return True
             #elif self.__approver_group() in user.proposalapprovergroup_set.all():
-            elif user.id in self.__approver_group().get_system_group_member_ids():
+            elif user.id in self.get_approver_group().get_system_group_member_ids():
                 return True
             else:
                 return False
@@ -1317,12 +1319,12 @@ class Proposal(DirtyFieldsMixin, models.Model):
             if self.assigned_officer:
                 if self.assigned_officer == user.id:
                     #return self.__assessor_group() in user.proposalassessorgroup_set.all()
-                    return user.id in self.__assessor_group().get_system_group_member_ids()
+                    return user.id in self.get_assessor_group().get_system_group_member_ids()
                 else:
                     return False
             else:
                 #return self.__assessor_group() in user.proposalassessorgroup_set.all()
-                return user.id in self.__assessor_group().get_system_group_member_ids()
+                return user.id in self.get_assessor_group().get_system_group_member_ids()
 
     def log_user_action(self, action, request):
         return ProposalUserAction.log_action(self, action, request.user.id)
@@ -1633,7 +1635,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
             if not self.processing_status in allowed_status and not self.is_lawful_authority_finalised:
                 raise ValidationError('You cannot change the current status at this time')
             elif self.approval and self.approval.can_reissue:
-                if self.__assessor_group() in request.user.proposalassessorgroup_set.all():
+                if self.get_assessor_group() in request.user.proposalassessorgroup_set.all():
                     self.processing_status = status
                     self.save(version_comment='Reissue Approval: {}'.format(self.approval.lodgement_number))
                     #self.save()
@@ -1648,7 +1650,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
             if not self.processing_status=='approved' :
                 raise ValidationError('You cannot change the current status at this time')
             elif self.approval and self.approval.can_reissue:
-                if self.__approver_group() in request.user.proposalapprovergroup_set.all():
+                if self.get_approver_group() in request.user.proposalapprovergroup_set.all():
                     self.processing_status = status
                     #self.save()
                     self.save(version_comment='Reissue Approval: {}'.format(self.approval.lodgement_number))
@@ -2808,14 +2810,15 @@ class Referral(RevisionedMixin):
         return []  # TODO: correct this
 
     def can_process(self, user):
-        if self.processing_status == Referral.PROCESSING_STATUS_WITH_REFERRAL:
-            group =  ReferralRecipientGroup.objects.filter(id=self.referral_group.id)
-            #user=request.user
-            if group and group[0] in user.referralrecipientgroup_set.all():
-                return True
-            else:
-                return False
-        return False
+        return True  # TODO: implement
+        #if self.processing_status == Referral.PROCESSING_STATUS_WITH_REFERRAL:
+        #    group =  ReferralRecipientGroup.objects.filter(id=self.referral_group.id)
+        #    #user=request.user
+        #    if group and group[0] in user.referralrecipientgroup_set.all():
+        #        return True
+        #    else:
+        #        return False
+        #return False
 
     def assign_officer(self,request,officer):
         with transaction.atomic():
