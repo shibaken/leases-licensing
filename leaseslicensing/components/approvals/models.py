@@ -20,7 +20,7 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.main.models import RevisionedMixin
 from leaseslicensing import exceptions
 from leaseslicensing.components.organisations.models import Organisation
-from leaseslicensing.components.proposals.models import Proposal, ProposalUserAction, RequirementDocument
+from leaseslicensing.components.proposals.models import Proposal, ProposalUserAction, RequirementDocument, ProposalType
 from leaseslicensing.components.main.models import CommunicationsLogEntry, UserAction, Document, ApplicationType
 from leaseslicensing.components.approvals.email import (
     send_approval_expire_email_notification,
@@ -29,6 +29,7 @@ from leaseslicensing.components.approvals.email import (
     send_approval_reinstate_email_notification,
     send_approval_surrender_email_notification
 )
+from leaseslicensing.settings import PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL
 from leaseslicensing.utils import search_keys, search_multiple_keys
 from leaseslicensing.helpers import is_customer
 #from leaseslicensing.components.approvals.email import send_referral_email_notification
@@ -276,29 +277,21 @@ class Approval(RevisionedMixin):
         else:
             return False
 
-
-
     @property
     def can_extend(self):
-        if self.current_proposal.application_type.name == 'E Class':
-            return self.current_proposal.application_type.max_renewals > self.renewal_count
+        if self.current_proposal:
+            if self.current_proposal.application_type.name == 'E Class':
+                return self.current_proposal.application_type.max_renewals > self.renewal_count
         return False
-
 
     @property
     def can_renew(self):
         try:
-            return True  # TODO: implement logic
-#            if self.current_proposal.application_type.name == 'E Class':
-#                #return (self.current_proposal.application_type.max_renewals is not None and self.current_proposal.application_type.max_renewals > self.renewal_count)
-#                return self.current_proposal.application_type.max_renewals > self.renewal_count
-#                #pass
-#            else:
             renew_conditions = {
                 'previous_application': self.current_proposal,
-                'proposal_type': 'renewal'
+                'proposal_type': ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL)
             }
-            proposal=Proposal.objects.get(**renew_conditions)
+            proposal = Proposal.objects.get(**renew_conditions)
             if proposal:
                 return False
         except Proposal.DoesNotExist:
@@ -308,18 +301,18 @@ class Approval(RevisionedMixin):
     def can_amend(self):
         try:
             amend_conditions = {
-                    'previous_application': self.current_proposal,
-                    'proposal_type': 'amendment'
-                    }
+                'previous_application': self.current_proposal,
+                'proposal_type': ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
+            }
             proposal=Proposal.objects.get(**amend_conditions)
             if proposal:
                 return False
         except Proposal.DoesNotExist:
             if self.current_proposal.is_lawful_authority:
                 if self.current_proposal.is_lawful_authority_finalised and self.can_renew:
-                        return True
+                    return True
                 else:
-                        return False
+                    return False
             else:
                 if self.can_renew:
                     return True
