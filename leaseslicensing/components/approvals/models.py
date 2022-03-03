@@ -259,14 +259,11 @@ class Approval(RevisionedMixin):
     def allowed_assessors(self):
         return self.current_proposal.allowed_assessors
 
-
-    def is_assessor(self,user):
+    def is_assessor(self, user):
         return self.current_proposal.is_assessor(user)
 
-
-    def is_approver(self,user):
+    def is_approver(self, user):
         return self.current_proposal.is_approver(user)
-
 
     @property
     def is_issued(self):
@@ -291,6 +288,7 @@ class Approval(RevisionedMixin):
     @property
     def can_renew(self):
         try:
+            return True  # TODO: implement logic
 #            if self.current_proposal.application_type.name == 'E Class':
 #                #return (self.current_proposal.application_type.max_renewals is not None and self.current_proposal.application_type.max_renewals > self.renewal_count)
 #                return self.current_proposal.application_type.max_renewals > self.renewal_count

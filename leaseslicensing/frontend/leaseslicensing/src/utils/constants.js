@@ -3,6 +3,11 @@ module.exports = {
 		REGISTRATION_OF_INTEREST: 'registration_of_interest',
 		LEASE_LICENCE: 'lease_licence',
 	},
+    ROLES: {
+        ASSESSOR: {ID: 'assessor', TEXT: 'Assessor'},
+        APPROVER: {ID: 'approver', TEXT: 'Approver'},
+        REFERRAL: {ID: 'referral', TEXT: 'Referral'},
+    },
     PROPOSAL_STATUS: {
         DRAFT: {ID: 'draft', TEXT: 'Draft'},
         AMENDMENT_REQUIRED: {ID: 'amendment_required', TEXT: 'Amendment Required'},

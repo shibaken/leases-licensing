@@ -4,7 +4,7 @@
         <div class="col-sm-12">
             <div class="card card-default">
 
-                <div class="card-heading">
+                <div class="card-header">
                     <h3 class="card-title">Organisation Access Requests
                         <a :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>

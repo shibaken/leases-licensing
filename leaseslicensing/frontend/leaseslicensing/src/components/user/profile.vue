@@ -20,7 +20,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card card-default">
-                  <div class="card-heading">
+                  <div class="card-header">
                     <i v-if="showCompletion && profile.personal_details" class="fa fa-check fa-2x pull-left" style="color:green"></i>
                     <i v-else-if="showCompletion && !profile.personal_details" class="fa fa-times fa-2x pull-left" style="color:red"></i>
                     <h3 class="card-title">Personal Details <small>Provide your personal details</small>
@@ -68,7 +68,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card card-default">
-                  <div class="card-heading">
+                  <div class="card-header">
                     <i v-if="showCompletion && profile.address_details" class="fa fa-check fa-2x pull-left" style="color:green"></i>
                     <i v-else-if="showCompletion && !profile.address_details" class="fa fa-times fa-2x pull-left" style="color:red"></i>
                     <h3 class="card-title">Address Details <small>Provide your address details</small>
@@ -171,7 +171,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card card-default">
-                  <div class="card-heading">
+                  <div class="card-header">
                     <i v-if="showCompletion && profile.contact_details" class="fa fa-check fa-2x pull-left" style="color:green"></i>
                     <i v-else-if="showCompletion && !profile.contact_details" class="fa fa-times fa-2x pull-left" style="color:red"></i>
                     <h3 class="card-title">Contact Details <small>Provide your contact details</small>

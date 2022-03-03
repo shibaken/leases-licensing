@@ -84,7 +84,7 @@ def send_referral_email_notification(referral, recipients, request, reminder=Fal
     # else:
     #     email = ReferralSendNotificationEmail()
     #email = ReferralSendNotificationEmail()
-    application_type = proposal.application_type.name_display
+    application_type = referral.proposal.application_type.name_display
     email = TemplateEmailBase(
             subject = 'A referral for a {} has been sent to you.'.format(application_type),
             html_template = 'leaseslicensing/emails/proposals/send_referral_notification.html',
@@ -108,7 +108,7 @@ def send_referral_email_notification(referral, recipients, request, reminder=Fal
     #recipients = list(ReferralRecipientGroup.objects.get(name=referral.email_group).members.all().values_list('email', flat=True))
     msg = email.send(recipients, context=context)
     sender = request.user if request else settings.DEFAULT_FROM_EMAIL
-    _log_proposal_email(msg, referral, sender=sender)
+    _log_proposal_email(msg, referral.proposal, sender=sender)
     if referral.proposal.org_applicant:
         _log_org_email(msg, referral.proposal.org_applicant, referral.referral, sender=sender)
     elif referral.proposal.ind_applicant:
@@ -118,7 +118,7 @@ def send_referral_email_notification(referral, recipients, request, reminder=Fal
 def send_referral_complete_email_notification(referral, request):
     sent_by = retrieve_email_user(referral.sent_by)
 
-    application_type = proposal.application_type.name_display
+    application_type = referral.proposal.application_type.name_display
     email = TemplateEmailBase(
             subject = 'A referral for a {} has been completed.'.format(application_type),
             html_template = 'leaseslicensing/emails/proposals/send_referral_complete_notification.html',
@@ -143,7 +143,7 @@ def send_referral_complete_email_notification(referral, request):
 
     msg = email.send(sent_by.email, attachments=attachments, context=context)
     sender = request.user if request else settings.DEFAULT_FROM_EMAIL
-    _log_proposal_email(msg, referral, sender=sender)
+    _log_proposal_email(msg, referral.proposal, sender=sender)
     if referral.proposal.org_applicant:
         _log_org_email(msg, referral.proposal.org_applicant, referral.referral, sender=sender)
     elif referral.proposal.ind_applicant:

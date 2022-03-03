@@ -6,7 +6,7 @@
             <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
             <div class="row">
                 <div class="card card-default">
-                    <div class="card-heading">
+                    <div class="card-header">
                        Submission
                     </div>
                     <div class="card-body card-collapse">
@@ -34,7 +34,7 @@
             </div>
             <div class="row">
                 <div class="card card-default">
-                    <div class="card-heading">
+                    <div class="card-header">
                         Workflow
                     </div>
                     <div class="card-body card-collapse">
@@ -70,7 +70,7 @@
         <div class="col-md-8">
             <div class="row">
                 <div class="card card-default">
-                    <div class="card-heading">
+                    <div class="card-header">
                         <h3>Organisation Access Request</h3>
                     </div>
                     <div class="card-body card-collapse">

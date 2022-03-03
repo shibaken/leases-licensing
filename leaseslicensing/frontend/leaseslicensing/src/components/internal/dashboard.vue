@@ -1,7 +1,7 @@
 <template>
     <div class="container" id="externalDash">
         <div v-if="is_debug">src/components/internal/dashboard.vue</div>
-        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+        <ul class="nav nav-pills" id="pills-tab" role="tablist">
             <li class="nav-item">
                 <a
                     class="nav-link"
