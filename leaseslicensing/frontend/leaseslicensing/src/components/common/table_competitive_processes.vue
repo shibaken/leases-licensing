@@ -57,7 +57,7 @@
 
         <div v-if="is_internal" class="row">
             <div class="text-end mb-2">
-                <button type="button" class="btn btn-primary pull-right" @click="new_competitive_process_clicked">New Competitive Process</button>
+                <button type="button" class="btn btn-primary pull-right" @click="new_competitive_process_clicked"><i class="fa-solid fa-circle-plus"></i> New Competitive Process</button>
             </div>
         </div>
 
