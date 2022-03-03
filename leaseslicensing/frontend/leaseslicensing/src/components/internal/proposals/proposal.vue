@@ -55,7 +55,6 @@
                 <template v-if="display_requirements">
                     <Requirements
                         :proposal="proposal"
-                        @refreshRequirements="refreshRequirements"
                     />
                 </template>
 
@@ -292,7 +291,7 @@ export default {
             showingProposal:false,
             showingRequirements:false,
             hasAmendmentRequest: false,
-            requirementsComplete:true,
+            //requirementsComplete:true,
             state_options: ['requirements','processing'],
             contacts_table_id: vm._uid+'contacts-table',
             contacts_options:{
@@ -990,12 +989,14 @@ export default {
                 vm.updateAssignedOfficerSelect();
             });
         },
+        /*
         refreshRequirements: function(bool){
               let vm=this;
               //vm.proposal.requirements_completed=bool;
               //console.log('here', bool);
               vm.requirementsComplete = bool;
         },
+        */
         assignTo: function(){
             console.log('in assignTo')
             let vm = this;
