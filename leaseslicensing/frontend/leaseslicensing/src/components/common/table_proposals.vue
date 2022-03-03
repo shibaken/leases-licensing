@@ -343,7 +343,7 @@ export default {
                 'render': function(row, type, full){
                     let links = '';
                     if (vm.is_internal){
-                        if(full.assessor_process){
+                        if(full.accessing_user_can_process){
                             links +=  `<a href='/internal/proposal/${full.id}'>Process</a><br/>`;
                         } else {
                             links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;

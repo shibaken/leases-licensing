@@ -234,11 +234,11 @@
         <input type='hidden' name="schema" :value="JSON.stringify(proposal)" />
         <input type='hidden' name="proposal_id" :value="1" />
         -->
-        <div class="navbar fixed-bottom" style="background-color: #f5f5f5;">
+        <div v-if="displaySaveBtns" class="navbar fixed-bottom" style="background-color: #f5f5f5;">
             <div class="container">
                 <div class="col-md-12 text-end">
-                    <button class="btn btn-primary" @click.prevent="save_and_continue()">Save and Continue</button>
-                    <button class="btn btn-primary" @click.prevent="save_and_exit()">Save and Exit</button>
+                    <button class="btn btn-primary" @click.prevent="save_and_continue()" :disabled="disableSaveAndContinueBtn">Save and Continue</button>
+                    <button class="btn btn-primary" @click.prevent="save_and_exit()" :disabled="disableSaveAndExitBtn">Save and Exit</button>
                 </div>
             </div>
         </div>
@@ -373,6 +373,37 @@ export default {
 
     },
     computed: {
+        displaySaveBtns: function(){
+            let display = false
+            if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
+                if (this.proposal.accessing_user_roles.includes(constants.ROLES.ASSESSOR.ID)){
+                    display = true
+                }
+            }
+            if ([constants.WITH_REFERRAL, constants.WITH_REFERRAL_CONDITIONS].includes(this.proposal.processing_status)){
+                if (this.proposal.accessing_user_roles.includes(constants.ROLES.REFERRAL.ID)){
+                    display = true
+                }
+            }
+            return display
+        },
+        disableSaveAndContinueBtn: function(){
+            let enabled = false
+            if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
+                if (this.proposal.accessing_user_roles.includes(constants.ROLES.ASSESSOR.ID)){
+                    enabled = true
+                }
+            }
+            if ([constants.WITH_REFERRAL, constants.WITH_REFERRAL_CONDITIONS].includes(this.proposal.processing_status)){
+                if (this.proposal.accessing_user_roles.includes(constants.ROLES.REFERRAL.ID)){
+                    enabled = true
+                }
+            }
+            return !enabled
+        },
+        disableSaveAndExitBtn: function(){
+            return this.disableSaveAndContinueBtn
+        },
         submitter_first_name: function(){
             if (this.proposal.submitter){
                 return this.proposal.submitter.first_name
