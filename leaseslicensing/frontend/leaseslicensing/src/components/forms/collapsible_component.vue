@@ -1,11 +1,14 @@
 <template lang="html">
     <div>
         <div class="toggle_filters_wrapper">
-            <div data-bs-toggle="collapse" :data-bs-target="'#' + target_elem_id" :id="button_elem_id" class="toggle_filters_button collapsed" @click="toggle_filters_button_clicked">
-                <div class="toggle_filters_icon">
+            <div data-bs-toggle="collapse" :data-bs-target="'#' + target_elem_id" :id="button_elem_id" class="toggle_filters_button collapsed d-flex align-items-center" @click="toggle_filters_button_clicked">
+                <div class="me-auto">{{ component_title }}</div>
+                <div class="">
+                    <i :id="warning_icon_id" :title="warning_icon_title" class="fa-solid fa-exclamation-circle fa-2x filter_warning_icon"></i>
+                </div>
+                <div class="ml-2">
                     <i :id="chevron_elem_id" class="rotate_icon fa-solid fa-chevron-down"></i>
                 </div>
-                <i :id="warning_icon_id" :title="warning_icon_title" class="fa-solid fa-exclamation-circle fa-2x filter_warning_icon"></i>
             </div>
 
             <div class="collapse" :id="target_elem_id">
@@ -20,6 +23,13 @@ import uuid from 'uuid';
 
 export default {
     name:"CollapsibleComponent",
+    props: {
+        component_title: {
+            type: String,
+            required: false,
+            default: '',
+        }
+    },
     watch: {
         filters_expanded: function(){
             let chevron_icon = $('#' + this.chevron_elem_id)
@@ -74,15 +84,10 @@ export default {
 }
 .toggle_filters_button {
     cursor: pointer;
-    display: flex;
-    flex-direction: row-reverse;
 }
 .filter_warning_icon {
     color: #ffc107;
     transition: 0.5s;
-}
-.toggle_filters_icon {
-    margin: 0 0 0 0.5em;
 }
 .rotate_icon {
     transition: 0.5s;
