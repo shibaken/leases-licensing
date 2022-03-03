@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError, MultipleObjectsReturned
 from django.core.validators import MaxValueValidator, MinValueValidator
 #from django.contrib.postgres.fields.jsonb import JSONField
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import JSONField
+from django.db.models import JSONField, Max, Min
 from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -39,7 +39,6 @@ from leaseslicensing.components.proposals.email import (
     send_amendment_email_notification,
 )
 from leaseslicensing.ledger_api_utils import retrieve_email_user
-from leaseslicensing.ordered_model import OrderedModel
 from leaseslicensing.components.proposals.email import send_submit_email_notification, send_external_submit_email_notification, send_approver_decline_email_notification, send_approver_approve_email_notification, send_referral_complete_email_notification, send_proposal_approver_sendback_email_notification
 import copy
 import subprocess
@@ -3086,7 +3085,7 @@ class Referral(RevisionedMixin):
     def can_assess_referral(self,user):
         return self.processing_status == 'with_referral'
 
-class ProposalRequirement(OrderedModel):
+class ProposalRequirement(RevisionedMixin):
     RECURRENCE_PATTERNS = [(1, 'Weekly'), (2, 'Monthly'), (3, 'Yearly')]
     standard_requirement = models.ForeignKey(ProposalStandardRequirement,null=True,blank=True, on_delete=models.SET_NULL)
     free_requirement = models.TextField(null=True,blank=True)
@@ -3104,10 +3103,90 @@ class ProposalRequirement(OrderedModel):
     #Null if added by an assessor
     referral_group = models.ForeignKey(ReferralRecipientGroup,null=True,blank=True,related_name='requirement_referral_groups', on_delete=models.SET_NULL)
     notification_only = models.BooleanField(default=False)
+    req_order = models.IntegerField(null=True,blank=True)
 
     class Meta:
         app_label = 'leaseslicensing'
+        ordering = ['proposal', 'req_order']
+        constraints = [
+                models.UniqueConstraint(fields=['proposal', 'req_order'], name='unique requirement order per proposal')
+                ]
 
+    def save(self, **kwargs):
+        #import ipdb; ipdb.set_trace()
+        # set the req_order if saving for the first time
+        if not self.id:
+            max_req_order = ProposalRequirement.objects.filter(proposal_id=self.proposal_id).aggregate(max_req_order=Max('req_order')).get('max_req_order')
+            if not max_req_order:
+                self.req_order = 1
+            else:
+                self.req_order = max_req_order + 1
+        super(ProposalRequirement, self).save(**kwargs)
+
+    def swap_obj(self, up):
+        increment = -1
+        swap_increment = None
+        for req in ProposalRequirement.objects.filter(proposal_id=self.proposal_id, is_deleted=False).order_by('req_order'):
+            increment += 1
+            if req.id == self.id:
+                break
+        if up:
+            swap_increment = increment - 1
+        else:
+            swap_increment = increment + 1
+
+        return ProposalRequirement.objects.filter(proposal_id=self.proposal_id, is_deleted=False).order_by('req_order')[swap_increment]
+
+    #def _next_req(self):
+    #    increment = -1
+    #    for req in ProposalRequirement.objects.filter(proposal_id=self.proposal_id, is_deleted=False).order_by('-req_order'):
+    #        increment += 1
+    #        if req.id == self.id:
+    #            break
+    #    return ProposalRequirement.objects.filter(proposal_id=self.proposal_id, is_deleted=False).order_by('req_order')[increment]
+
+    def move_up(self):
+        # ignore deleted reqs
+        if self.req_order == ProposalRequirement.objects.filter(
+                is_deleted=False, proposal_id=self.proposal_id).aggregate(
+                        min_req_order=Min('req_order')).get(
+                                'min_req_order'):
+            pass
+        else:
+            #self.swap(ProposalRequirement.objects.get(proposal=self.proposal, req_order=self.req_order-1))
+            self.swap(self.swap_obj(True))
+
+    def move_down(self):
+        # ignore deleted reqs
+        if self.req_order == ProposalRequirement.objects.filter(
+                is_deleted=False, proposal_id=self.proposal_id).aggregate(
+                        max_req_order=Max('req_order')).get(
+                                'max_req_order'):
+            pass
+        else:
+            #self.swap(ProposalRequirement.objects.get(proposal=self.proposal, req_order=self.req_order-1))
+            self.swap(self.swap_obj(False))
+            #self.swap(self._next_req())
+
+    def swap(self, other):
+        new_self_position = other.req_order
+        print(self.id)
+        print("new_self_position")
+        print(new_self_position)
+        new_other_position = self.req_order
+        print(other.id)
+        print("new_other_position")
+        print(new_other_position)
+        # null out both values to prevent a db constraint error on save()
+        self.req_order = None
+        self.save()
+        other.req_order = None
+        other.save()
+        # set new positions
+        self.req_order = new_self_position
+        self.save()
+        other.req_order = new_other_position
+        other.save()
 
     @property
     def requirement(self):

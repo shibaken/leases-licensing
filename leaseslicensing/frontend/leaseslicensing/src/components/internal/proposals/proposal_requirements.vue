@@ -146,8 +146,12 @@ export default {
                             let links = '';
                             // TODO check permission to change the order
                             if (vm.proposal.assessor_mode.has_assessor_mode){
+                                links +=  `<i data-id="${full.id}" class="dtMoveUp fa fa-angle-up fa-2x"></i><br/>`;
+                                links +=  `<i data-id="${full.id}" class="dtMoveDown fa fa-angle-down fa-2x"></i><br/>`;
+                                /*
                                 links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="fa fa-angle-up fa-2x"></i></a><br/>`;
                                 links +=  `<a class="dtMoveDown" data-id="${full.id}" href='#'><i class="fa fa-angle-down fa-2x"></i></a><br/>`;
+                                */
                                 /*
                                 links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="down-chevron-close"></i></a><br/>`;
                                 //links +=  `<i class="bi fw-bold down-chevron-close chevron-toggle" :data-bs-target="'#' +section_body_id"></i>`;
@@ -160,12 +164,14 @@ export default {
                 ],
                 processing: true,
                 rowCallback: function ( row, data, index) {
+                    console.log("rowCallback")
                     if (data.copied_for_renewal && data.require_due_date && !data.due_date) {
                         $('td', row).css('background-color', 'Red');
                         vm.setApplicationWorkflowState(false)
                         //vm.$emit('refreshRequirements',false);
                     }
                 },
+                /*
                 drawCallback: function (settings) {
                     console.log("drawCallback")
                     $(vm.$refs.requirements_datatable.table).find('tr:last .dtMoveDown').remove();
@@ -179,15 +185,31 @@ export default {
                     $('.dtMoveUp').click(vm.moveUp);
                     $('.dtMoveDown').click(vm.moveDown);
                 },
+                */
                  preDrawCallback: function (settings) {
+                    console.log("preDrawCallback")
                     vm.setApplicationWorkflowState(true)
                     //vm.$emit('refreshRequirements',true);
                 },
                 initComplete: function() {
+                    console.log(vm.$refs)
                     vm.enablePopovers();
                     //console.log($(vm.$refs.requirements_datatable).DataTable())
                     console.log($('#' + vm.datatableId).DataTable());
+                    vm.addTableListeners();
                     //$('#' + vm.datatableId).DataTable().draw();
+                    /*
+                    $(vm.$refs.requirements_datatable.table).find('tr:last .dtMoveDown').remove();
+                    $(vm.$refs.requirements_datatable.table).children('tbody').find('tr:first .dtMoveUp').remove();
+                    // Remove previous binding before adding it
+                    $('.dtMoveUp').off('click');
+                    $('.dtMoveDown').off('click');
+
+                    // Bind clicks to functions
+                    $('.dtMoveUp').click(vm.moveUp);
+                    $('.dtMoveDown').click(vm.moveDown);
+                    */
+                    console.log("initComplete")
                 },
             }
         }
@@ -283,32 +305,73 @@ export default {
                 var id = $(this).attr('data-id');
                 vm.editRequirement(id);
             });
+            console.log("event listeners")
+            /*
+            // Bind clicks to functions
+            $('.dtMoveUp').click(vm.moveUp);
+            $('.dtMoveDown').click(vm.moveDown);
+            */
         },
-        sendDirection(req,direction){
-            let movement = direction == 'down'? 'move_down': 'move_up';
-            this.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,req+'/'+movement)).then((response) => {
-            },(error) => {
-                console.log(error);
+        addTableListeners: function() {
+            console.log("draw table")
+            let vm = this;
+            /*
+            $(vm.$refs.requirements_datatable.table).find('tr:last .dtMoveDown').remove();
+            $(vm.$refs.requirements_datatable.table).children('tbody').find('tr:first .dtMoveUp').remove();
+            // Remove previous binding before adding it
+            $('.dtMoveUp').off('click');
+            $('.dtMoveDown').off('click');
+            */
 
-            })
+            // Bind clicks to functions
+            vm.$refs.requirements_datatable.vmDataTable.on('click', '.dtMoveUp', function(e) {
+                console.log
+                e.preventDefault();
+                var id = $(this).attr('data-id');
+                //vm.removeRequirement(id);
+            });
+            /*
+            $('.dtMoveUp').click(vm.moveUp);
+            $('.dtMoveDown').click(vm.moveDown);
+            */
+        },
+        async sendDirection(req,direction){
+            let vm = this;
+            let movement = direction == 'down'? 'move_down': 'move_up';
+            try {
+                const res = await this.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,req+'/'+movement))
+                await this.$refs.requirements_datatable.vmDataTable.ajax.reload();
+                console.log($('.dtMoveUp'));
+                this.addTableListeners();
+                /*
+                this.$nextTick(() => {
+                    this.addTableListeners();
+                });
+                */
+            } catch(error) {
+                console.log(error);
+            }
         },
         moveUp(e) {
             console.log("moveUp")
             // Move the row up
             let vm = this;
             e.preventDefault();
-            var tr = $(e.target).parents('tr');
-            vm.moveRow(tr, 'up');
-            vm.sendDirection($(e.target).parent().data('id'),'up');
+            //var tr = $(e.target).parents('tr');
+            //vm.moveRow(tr, 'up');
+            //vm.sendDirection($(e.target).parent().data('id'),'up');
+            vm.sendDirection($(e.target).data('id'),'up');
         },
         moveDown(e) {
+            console.log("moveDown")
             // Move the row down
             e.preventDefault();
             let vm = this;
-            var tr = $(e.target).parents('tr');
-            vm.moveRow(tr, 'down');
-            vm.sendDirection($(e.target).parent().data('id'),'down');
+            //var tr = $(e.target).parents('tr');
+            //vm.moveRow(tr, 'down');
+            vm.sendDirection($(e.target).data('id'),'down');
         },
+        /*
         moveRow(row, direction) {
             // Move up or down (depending...)
             var table = this.$refs.requirements_datatable.vmDataTable;
@@ -336,6 +399,7 @@ export default {
             //console.log('child', bool);
             vm.$emit('refreshRequirements',bool);
         },
+        */
         enablePopovers: function() {
             var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
             console.log(popoverTriggerList)
@@ -358,7 +422,7 @@ export default {
         vm.$nextTick(() => {
             this.eventListeners();
         });
-    }
+    },
 }
 </script>
 <style scoped>

@@ -1090,7 +1090,7 @@ class ProposalRequirementSerializer(serializers.ModelSerializer):
             'free_requirement',
             'standard_requirement',
             'standard',
-            'order',
+            'req_order',
             'proposal',
             'recurrence',
             'recurrence_schedule',
@@ -1105,7 +1105,7 @@ class ProposalRequirementSerializer(serializers.ModelSerializer):
             'copied_for_renewal',
             'notification_only',
         )
-        read_only_fields = ('order','requirement', 'copied_from')
+        read_only_fields = ('req_order','requirement', 'copied_from')
 
     def get_can_referral_edit(self,obj):
         request = self.context['request']
