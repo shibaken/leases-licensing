@@ -650,6 +650,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
         PROCESSING_STATUS_DECLINED,
     ]
 
+    OFFICER_PROCESSABLE_STATE = [
+        PROCESSING_STATUS_WITH_ASSESSOR,
+        PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS,
+        PROCESSING_STATUS_WITH_REFERRAL,  # <-- Be aware
+        PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS,  # <-- Be aware
+        PROCESSING_STATUS_WITH_APPROVER,
+    ]
+
     ID_CHECK_STATUS_CHOICES = (('not_checked', 'Not Checked'), ('awaiting_update', 'Awaiting Update'),
                                ('updated', 'Updated'), ('accepted', 'Accepted'))
 
@@ -1158,8 +1166,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     @property
     def can_officer_process(self):
         """ :return: True if the application is in one of the processable status for Assessor role."""
-        officer_view_state = ['draft','approved','declined','temp','discarded', 'with_referral', 'with_qa_officer', 'waiting_payment', 'partially_approved', 'partially_declined', 'with_district_assessor']
-        return False if self.processing_status in officer_view_state else True
+        return True if self.processing_status in Proposal.OFFICER_PROCESSABLE_STATE else True
 
     # @property
     # def can_view_district_table(self):
