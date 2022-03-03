@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="col-md-12">
-                        <div class="row">
+                        <!-- div class="row" -->
                             <div class="card card-default">
                                 <div class="card-header">
                                     <h3 class="card-title">{{ customerLabel }}
@@ -51,10 +51,10 @@
                                       </form>
                                 </div>
                             </div>
-                        </div>
+                        <!-- /div -->
                     </div>
                     <div class="col-md-12">
-                        <div class="row">
+                        <!-- div class="row" -->
                             <div class="card card-default">
                                 <div class="card-header">
                                     <h3 class="card-title">Address Details
@@ -183,13 +183,13 @@
 
                                 </div>
                             </div>
-                        </div>
+                        <!-- /div -->
                     </div>
                     <div class="col-md-12">
-                        <div class="row">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">Contact Details
+                        <!-- div class="row" -->
+                            <div class="card card-default">
+                                <div class="card-header">
+                                    <h3 class="card-title">Contact Details
                                         <a class="panelClicker" :href="'#'+contactsBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="contactsBody">
                                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                                         </a>
@@ -222,13 +222,13 @@
                                   </form>
                                 </div>
                             </div>
-                        </div>
+                        <!-- /div -->
                     </div>
                     <div class="col-md-12" v-if="showElectoralRoll">
-                        <div class="row">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">WA State Electoral Roll
+                        <!-- div class="row" -->
+                            <div class="card card-default">
+                                <div class="card-header">
+                                    <h3 class="card-title">WA State Electoral Roll
                                         <a class="panelClicker" :href="'#'+electoralRollBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="electoralRollBody">
                                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                                         </a>
@@ -272,7 +272,7 @@
                                   </form>
                                 </div>
                             </div>
-                        </div>
+                        <!-- /div -->
                     </div>
 
                 </div>

@@ -496,8 +496,17 @@ export default {
             vm.select2AppliedToApplicationStatus = true
             $(vm.$refs.filter_application_status).val(vm.filterApplicationStatuses).trigger('change')
         },
+        download: function(content, fileName, contentType){
+            var a = document.createElement("a");
+            var file = new Blob([content], {type: contentType});
+            a.href = URL.createObjectURL(file);
+            a.download = fileName;
+            a.click();
+        },
         geoJsonButtonClicked: function(){
-            // TODO: export all the polygons shown as geojson file
+            let vm = this
+            let json = new GeoJSON().writeFeatures(vm.proposalQuerySource.getFeatures(), {})
+            vm.download(json, 'your_layer.geojson', 'text/plain');
         },
         setBaseLayer: function(selected_layer_name){
             let vm = this

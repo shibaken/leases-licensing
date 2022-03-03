@@ -367,7 +367,7 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
 #        return response
 
     def list(self, request, *args, **kwargs):
-        """
+        """serializer.data = {ReturnList: 10} [OrderedDict([('id', 4), ('application_type', OrderedDict([('id', 1), ('name_display', 'Registration of Interest'), ('confirmation_text', 'registration of interest'), ('name', 'registration_of_interest'), ('order', 0), ('visible', True), ('application_fee'… View
         User is accessing /external/ page
         """
         qs = self.get_queryset()
@@ -377,8 +377,8 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
 
         if email_user_id_assigned:
             qs = qs.filter(Q(referrals__in=Referral.objects.filter(referral=email_user_id_assigned)))
-            # qs = qs.filter(Q(assigned_officer=email_user_id_assigned) | Q(assigned_approver=email_user_id_assigned))
 
+        qs = qs.distinct()
         self.paginator.page_size = qs.count()
         # result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
         result_page = self.paginator.paginate_queryset(qs, request)

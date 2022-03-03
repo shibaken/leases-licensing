@@ -298,7 +298,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     documents_url = serializers.SerializerMethodField()
     proposal_type = ProposalTypeSerializer()
     application_type = ApplicationTypeSerializer()
-    is_qa_officer = serializers.SerializerMethodField()
+    # is_qa_officer = serializers.SerializerMethodField()
     proposalgeometry = ProposalGeometrySerializer(many=True, read_only=True)
     applicant = serializers.SerializerMethodField()
 
@@ -402,8 +402,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     def get_customer_status(self,obj):
         return obj.get_processing_status_display()
 
-    def get_is_qa_officer(self,obj):
-        return True
+    # def get_is_qa_officer(self,obj):
+    #     return True
 
     def get_allow_full_discount(self,obj):
         return True if obj.application_type.name==ApplicationType.TCLASS and obj.allow_full_discount else False
@@ -433,10 +433,10 @@ class ListProposalSerializer(BaseProposalSerializer):
     assigned_officer = serializers.SerializerMethodField(read_only=True)
 
     # application_type = serializers.CharField(source='application_type.name', read_only=True)
-    assessor_process = serializers.SerializerMethodField(read_only=True)
     qaofficer_referrals = QAOfficerReferralSerializer(many=True)
     #fee_invoice_url = serializers.SerializerMethodField()
     allowed_assessors = EmailUserSerializer(many=True)
+    accessing_user_can_process = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -464,14 +464,14 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'lodgement_number',
                 'lodgement_sequence',
                 'can_officer_process',
-                'assessor_process',
                 'allowed_assessors',
                 'proposal_type',
                 'qaofficer_referrals',
-                'is_qa_officer',
+                # 'is_qa_officer',
                 #'fee_invoice_url',
                 #'fee_invoice_reference',
                 #'fee_paid',
+                'accessing_user_can_process',
                 )
         # the serverSide functionality of datatables is such that only columns that have field 'data' defined are requested from the serializer. We
         # also require the following additional fields for some of the mRender functions
@@ -492,12 +492,29 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'reference',
                 'lodgement_number',
                 'can_officer_process',
-                'assessor_process',
                 # 'allowed_assessors',
                 #'fee_invoice_url',
                 #'fee_invoice_reference',
                 #'fee_paid',
+                'accessing_user_can_process',
                 )
+
+    def get_accessing_user_can_process(self, proposal):
+        request = self.context['request']
+        user = request.user
+        accessing_user_can_process = False
+
+        if proposal.processing_status in [Proposal.PROCESSING_STATUS_WITH_ASSESSOR, Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS,]:
+            if user.id in proposal.get_assessor_group().get_system_group_member_ids():
+                accessing_user_can_process = True
+        elif proposal.processing_status in [Proposal.PROCESSING_STATUS_WITH_APPROVER,]:
+            if user.id in proposal.get_approver_group().get_system_group_member_ids():
+                accessing_user_can_process = True
+        elif proposal.processing_status in [Proposal.PROCESSING_STATUS_WITH_REFERRAL, Proposal.PROCESSING_STATUS_WITH_REFERRAL_CONDITIONS,]:
+            if proposal.referrals.filter(Q(referral=user.id), Q(processing_status=Referral.PROCESSING_STATUS_WITH_REFERRAL)):
+                accessing_user_can_process = True
+
+        return accessing_user_can_process
 
     def get_submitter(self, obj):
         if obj.submitter:
@@ -514,28 +531,6 @@ class ListProposalSerializer(BaseProposalSerializer):
             email_user = retrieve_email_user(obj.assigned_officer)
             return EmailUserSerializer(email_user).data
         return None
-
-    def get_assessor_process(self,obj):
-        # Check if currently logged in user has access to process the proposal
-        request = self.context['request']
-        user = request.user
-        if obj.can_officer_process:
-            '''if (obj.assigned_officer and obj.assigned_officer == user) or (user in obj.allowed_assessors):
-                return True'''
-            if obj.assigned_officer:
-                if obj.assigned_officer == user.id:
-                    return True
-            elif user in obj.allowed_assessors:
-                return True
-        return False
-
-    def get_is_qa_officer(self,obj):
-        #request = self.context['request']
-        #return request.user.email in obj.qa_officers()
-        return True
-
-    #def get_fee_invoice_url(self,obj):
-     #   return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
 
 
 class ProposalSerializer(BaseProposalSerializer):
