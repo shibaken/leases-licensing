@@ -1,6 +1,6 @@
 <template>
     <div>
-        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
+        <CollapsibleFilters component_title="Filters" ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
             <div class="row">
                 <div class="col-md-3">
                     <div class="form-group">
@@ -45,7 +45,8 @@
             </div>
         </CollapsibleFilters>
 
-        <div class="text-end mb-2">
+        <div class="d-flex justify-content-end align-items-center mb-2">
+            <div @click="displayAllFeatures" class="btn mr-2">Zoom to All</div>
             <button type="button" class="btn btn-primary" @click="geoJsonButtonClicked"><i class="fa-solid fa-download"></i> Get GeoJSON</button>
         </div>
 
@@ -496,7 +497,7 @@ export default {
             vm.select2AppliedToApplicationStatus = true
             $(vm.$refs.filter_application_status).val(vm.filterApplicationStatuses).trigger('change')
         },
-        download: function(content, fileName, contentType){
+        download_content: function(content, fileName, contentType){
             var a = document.createElement("a");
             var file = new Blob([content], {type: contentType});
             a.href = URL.createObjectURL(file);
@@ -506,7 +507,21 @@ export default {
         geoJsonButtonClicked: function(){
             let vm = this
             let json = new GeoJSON().writeFeatures(vm.proposalQuerySource.getFeatures(), {})
-            vm.download(json, 'your_layer.geojson', 'text/plain');
+            vm.download_content(json, 'leases_and_licensing_layers.geojson', 'text/plain');
+        },
+        displayAllFeatures: function(){
+            console.log('in displayAllFeatures()')
+            let vm = this
+            if (vm.map){
+                if (vm.proposalQuerySource.getFeatures().length > 0){
+                    let view = vm.map.getView()
+                    let ext = vm.proposalQuerySource.getExtent()
+                    let centre = [(ext[0] + ext[2])/2.0, (ext[1] + ext[3])/2.0]
+                    let resolution = view.getResolutionForExtent(ext);
+                    let z = view.getZoomForResolution(resolution) - 1
+                    view.animate({zoom: z, center: centre})
+                }
+            }
         },
         setBaseLayer: function(selected_layer_name){
             let vm = this
