@@ -228,8 +228,9 @@ class ApprovalSerializer(serializers.ModelSerializer):
         return None
 
     def get_application_type(self,obj):
-        if obj.current_proposal.application_type:
-            return obj.current_proposal.application_type.name
+        if obj.current_proposal:
+            if obj.current_proposal.application_type:
+                return obj.current_proposal.application_type.name
         return None
 
     def get_applicant(self,obj):
