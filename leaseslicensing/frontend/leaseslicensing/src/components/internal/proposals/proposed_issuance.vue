@@ -87,8 +87,8 @@
 
             <div slot="footer">
                 <button type="button" v-if="issuingApproval" disabled class="btn btn-light" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-light" @click="ok">Ok</button>
-                <button type="button" class="btn btn-light" @click="cancel">Cancel</button>
+                <button type="button" v-else class="btn btn-primary" @click="ok">Ok</button>
+                <button type="button" class="btn btn-primary" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>
