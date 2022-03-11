@@ -164,9 +164,7 @@ class GetApplicationTypeDict(views.APIView):
             else:
                 cache.set(
                     cache_data_name,
-                    #[{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'],
-                    ##TODO: remove lease_licence once internal workflow is complete
-                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] in ['registration_of_interest', 'lease_licence']],
+                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'],
                     settings.LOV_CACHE_TIMEOUT,
                 )
             data = cache.get(cache_data_name)

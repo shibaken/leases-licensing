@@ -740,7 +740,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
     #If the proposal is created as part of migration of approvals
     migrated=models.BooleanField(default=False)
     # Registration of Interest generates a Lease Licence
-    generated_lease_licence = models.ForeignKey('self', related_name='registration_of_interest',  blank=True, null=True, on_delete=models.SET_NULL)
+    generated_proposal = models.ForeignKey('self', related_name='originating_proposal',  blank=True, null=True, on_delete=models.SET_NULL)
     ## Registration of Interest additional form fields
     # proposal details
     exclusive_use = models.BooleanField(null=True)
@@ -1997,12 +1997,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                 'proxy_applicant' : self.proxy_applicant,
                             }
                         )
-                    if (self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and 
-                            self.proposed_issuance_approval.get('decision') == 'approve_lease_licence' and
-                            not self.generated_lease_licence):
+                    if self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
+                        if self.proposed_issuance_approval.get('decision') == 'approve_lease_licence' and not self.generated_proposal:
                                 lease_licence = self.create_lease_licence_from_registration_of_interest()
-                                self.generated_lease_licence = lease_licence
+                                self.generated_proposal = lease_licence
                                 self.save()
+                        elif self.proposed_issuance_approval.get('decision') == 'approve_competitive_process' and not self.generated_proposal:
+                            # TODO: add logic
+                            pass
                     elif self.application_type.name == APPLICATION_TYPE_COMPETITIVE_PROCESS:
                         pass
 
@@ -2050,7 +2052,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     def create_lease_licence_from_registration_of_interest(self):
         lease_licence = Proposal.objects.create(
-                application_type_id=self.application_type.id,
+                application_type=ApplicationType.objects.get(name=APPLICATION_TYPE_LEASE_LICENCE),
                 submitter=self.submitter,
                 ind_applicant=self.ind_applicant,
                 org_applicant=self.org_applicant,
