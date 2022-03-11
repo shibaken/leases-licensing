@@ -339,7 +339,6 @@ export default {
                 this.selectedDecision = this.approval.decision;
             }
         });
-        console.log(this.approval)
    }
 }
 </script>

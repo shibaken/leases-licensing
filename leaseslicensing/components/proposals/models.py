@@ -739,6 +739,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     details_text = models.TextField(blank=True)
     #If the proposal is created as part of migration of approvals
     migrated=models.BooleanField(default=False)
+    # Registration of Interest generates a Lease Licence
+    generated_lease_licence = models.ForeignKey('self', related_name='registration_of_interest',  blank=True, null=True, on_delete=models.SET_NULL)
     ## Registration of Interest additional form fields
     # proposal details
     exclusive_use = models.BooleanField(null=True)
@@ -1941,7 +1943,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 if self.processing_status == self.PROCESSING_STATUS_APPROVED:
                     # TODO if it is an ammendment proposal then check appropriately
                     checking_proposal = self
-                    if self.proposal_type == 'renewal':
+                    if self.proposal_type == 'renewal' and self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
                         if self.previous_application:
                             previous_approval = self.previous_application.approval
                             approval,created = Approval.objects.update_or_create(
@@ -1964,7 +1966,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                             self.reset_licence_discount(request.user)
 
-                    elif self.proposal_type == 'amendment':
+                    elif self.proposal_type == 'amendment' and self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
                         if self.previous_application:
                             previous_approval = self.previous_application.approval
                             approval,created = Approval.objects.update_or_create(
@@ -1983,6 +1985,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                 previous_approval.replaced_by = approval
                                 previous_approval.save()
                     else:
+                        # can be rog, ll or cp
                         approval,created = Approval.objects.update_or_create(
                             current_proposal = checking_proposal,
                             defaults = {
@@ -1994,6 +1997,15 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                 'proxy_applicant' : self.proxy_applicant,
                             }
                         )
+                    if (self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and 
+                            self.proposed_issuance_approval.get('decision') == 'approve_lease_licence' and
+                            not self.generated_lease_licence):
+                                lease_licence = self.create_lease_licence_from_registration_of_interest()
+                                self.generated_lease_licence = lease_licence
+                                self.save()
+                    elif self.application_type.name == APPLICATION_TYPE_COMPETITIVE_PROCESS:
+                        pass
+
                     # Generate compliances
                     from leaseslicensing.components.compliances.models import Compliance, ComplianceUserAction
                     if created:
@@ -2035,6 +2047,24 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
             except:
                 raise
+
+    def create_lease_licence_from_registration_of_interest(self):
+        lease_licence = Proposal.objects.create(
+                application_type_id=self.application_type.id,
+                submitter=self.submitter,
+                ind_applicant=self.ind_applicant,
+                org_applicant=self.org_applicant,
+                proposal_type_id=self.proposal_type.id,
+                )
+        # add geometry
+        from copy import deepcopy
+        for geo in self.proposalgeometry.all():
+            new_geo = deepcopy(geo)
+            new_geo.proposal = lease_licence
+            new_geo.copied_from=geo
+            new_geo.id = None
+            new_geo.save()
+        return lease_licence
 
     def generate_compliances(self,approval, request):
         today = timezone.now().date()
@@ -2315,6 +2345,7 @@ class ProposalGeometry(models.Model):
     proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE, related_name="proposalgeometry")
     polygon = PolygonField(srid=4326, blank=True, null=True)
     intersects = models.BooleanField(default=False)
+    copied_from = models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         app_label = 'leaseslicensing'
