@@ -1,6 +1,6 @@
 <template>
     <div>
-        <CollapsibleFilters ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
+        <CollapsibleFilters component_title="Filters" ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
