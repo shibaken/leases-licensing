@@ -55,7 +55,7 @@
                 <template v-if="display_requirements">
                     <Requirements
                         :proposal="proposal"
-                        @refreshRequirements="refreshRequirements"
+                        :key="requirementsKey"
                     />
                 </template>
 
@@ -292,7 +292,7 @@ export default {
             showingProposal:false,
             showingRequirements:false,
             hasAmendmentRequest: false,
-            requirementsComplete:true,
+            //requirementsComplete:true,
             state_options: ['requirements','processing'],
             contacts_table_id: vm._uid+'contacts-table',
             contacts_options:{
@@ -374,6 +374,10 @@ export default {
 
     },
     computed: {
+        requirementsKey: function() {
+            const req = "proposal_requirements_" + this.uuid;
+            return req;
+        },
         displaySaveBtns: function(){
             let display = false
             if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
@@ -990,12 +994,14 @@ export default {
                 vm.updateAssignedOfficerSelect();
             });
         },
+        /*
         refreshRequirements: function(bool){
               let vm=this;
               //vm.proposal.requirements_completed=bool;
               //console.log('here', bool);
               vm.requirementsComplete = bool;
         },
+        */
         assignTo: function(){
             console.log('in assignTo')
             let vm = this;
@@ -1155,8 +1161,10 @@ export default {
                 $(vm.$refs.assigned_officer).data('select2') ? $(vm.$refs.assigned_officer).select2('destroy'): '';
             }
             // Assigned officer select
+            /*
             console.log('Elem: ')
             console.log(vm.$refs.assigned_officer)
+            */
             $(vm.$refs.assigned_officer).select2({
                 "theme": "bootstrap",
                 allowClear: true,
@@ -1210,7 +1218,7 @@ export default {
             }
         },
         fetchAdditionalDocumentTypesDict: async function(){
-            console.log('fetch')
+            //console.log('fetch')
             const response = await this.$http.get('/api/additional_document_types_dict')
             this.applySelect2ToAdditionalDocumentType(response.body)
         },
