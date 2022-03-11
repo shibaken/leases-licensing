@@ -344,10 +344,12 @@ export default {
                 let displayable_role_ids = me.get_allowed_ids('roles_allowed')
                 let my_processing_status_id = me.absorb_type_difference(processing_status_id)
 
+                /*
                 console.log('---------' + me._id + '--------------')
                 console.log(displayable_status_ids)
                 console.log(displayable_role_ids)
                 console.log(my_processing_status_id)
+                */
 
                 let status_allowed = displayable_status_ids.includes(my_processing_status_id)
                 let intersection = displayable_role_ids.filter(x => accessing_user_roles.includes(x));
@@ -584,7 +586,6 @@ export default {
         fetchDeparmentUsers: function(){
             let vm = this;
             vm.loading.push('Loading Department Users');
-            console.log(api_endpoints.department_users)
             vm.$http.get(api_endpoints.department_users).then((response) => {
                 vm.department_users = response.body
                 vm.loading.splice('Loading Department Users',1);
