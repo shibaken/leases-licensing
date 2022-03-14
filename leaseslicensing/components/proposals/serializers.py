@@ -773,6 +773,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     requirements_completed=serializers.SerializerMethodField()
     applicant_obj = serializers.SerializerMethodField()
     accessing_user_roles = serializers.SerializerMethodField()  # Accessing user's roles for this proposal.
+    approval_issue_date = serializers.SerializerMethodField()  # Accessing user's roles for this proposal.
 
     class Meta:
         model = Proposal
@@ -867,6 +868,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'risk_factors_text',
                 'legislative_requirements_text',
                 'accessing_user_roles',
+                'approval_issue_date',
                 )
         read_only_fields = (
             'requirements',
@@ -939,6 +941,10 @@ class InternalProposalSerializer(BaseProposalSerializer):
 
     def get_reversion_ids(self,obj):
         return obj.reversion_ids[:5]
+
+    def get_approval_issue_date(self, obj):
+        if obj.approval:
+            return obj.approval.issue_date.strftime('%d/%m/%Y')
 
     # def get_fee_invoice_url(self,obj):
     #     return '/cols/payments/invoice-pdf/{}'.format(obj.fee_invoice_reference) if obj.fee_paid else None
