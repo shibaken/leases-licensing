@@ -1,13 +1,10 @@
 <template id="proposal_approval">
     <div>
         <div v-if="displayApprovedMsg" class="col-md-12 alert alert-success">
-            <p>The approval has been issued and has been emailed to {{ proposal.submitter.email }}</p>
-            <p>Expiry date: {{ approvalExpiryDate }}</p>
-            <p>Permit: <a target="_blank" :href="proposal.permit">approval.pdf</a></p>
-        </div>
-        <div v-if="displayAwaitingPaymentMsg" class="col-md-12 alert alert-success">
-            <p>The application has been approved</p>
-            <p>Status: Awaiting Payment</p>
+            <!--p>The {{ applicationTypeNameDisplay }} was approved to proceed to a full application on date by {{ proposal.assigned_approver.email }}</p-->
+            <p>The {{ applicationTypeNameDisplay }} was approved to proceed to a full application on {{ approvalIssueDate }} by { insert approver name here }</p>
+            <!--p>Expiry date: {{ approvalExpiryDate }}</p>
+            <p>Permit: <a target="_blank" :href="proposal.permit">approval.pdf</a></p-->
         </div>
         <div v-if="displayDeclinedMsg" class="col-md-12 alert alert-warning">
             <p>The proposal was declined. The decision was emailed to {{ proposal.submitter.email }}</p>
@@ -85,6 +82,16 @@ export default {
         //ComponentSiteSelection,
     },
     computed:{
+        approvalIssueDate: function() {
+            if (this.proposal) {
+                return this.proposal.approval_issue_date;
+            }
+        },
+        applicationTypeNameDisplay: function() {
+            if (this.proposal) {
+                return this.proposal.application_type.name_display;
+            }
+        },
         displayAwaitingPaymentMsg: function(){
             let display = false
             console.log(this.proposal.processing_status)
