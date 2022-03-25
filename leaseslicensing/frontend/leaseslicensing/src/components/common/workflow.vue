@@ -343,6 +343,7 @@ export default {
                 let displayable_status_ids = me.get_allowed_ids(application_type)
                 let displayable_role_ids = me.get_allowed_ids('roles_allowed')
                 let my_processing_status_id = me.absorb_type_difference(processing_status_id)
+
                 /*
                 console.log('---------' + me._id + '--------------')
                 console.log(displayable_status_ids)
@@ -585,7 +586,6 @@ export default {
         fetchDeparmentUsers: function(){
             let vm = this;
             vm.loading.push('Loading Department Users');
-            console.log(api_endpoints.department_users)
             vm.$http.get(api_endpoints.department_users).then((response) => {
                 vm.department_users = response.body
                 vm.loading.splice('Loading Department Users',1);

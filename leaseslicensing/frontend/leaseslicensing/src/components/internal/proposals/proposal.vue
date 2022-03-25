@@ -74,6 +74,7 @@
                         :show_additional_documents_tab="true"
                         :registrationOfInterest="isRegistrationOfInterest"
                         :leaseLicence="isLeaseLicence"
+                        @formMounted="applicationFormMounted"
                     >
                         <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
                         <template v-slot:slot_map_checklist_questions>
@@ -184,10 +185,8 @@
                             </CollapsibleQuestions>
 
                             <strong>Select one or more documents that need to be provided by the applicant:</strong>
-                            <template v-show="select2Applied">
-                                <select class="form-control" ref="selectAdditionalDocumentTypes">
-                                    <option v-for="type in additional_document_types">{{ type.name }}</option>
-                                </select>
+                            <template v-show="select2AppliedToAdditionalDocumentTypes">
+                                <select class="form-select" ref="select_additional_document_types"></select>
                             </template>
                         </template>
 
@@ -341,8 +340,9 @@ export default {
             panelClickersInitialised: false,
             //sendingReferral: false,
             uuid: 0,
-            additional_document_types: [],
-            select2Applied: false,
+            //additional_document_types: [],
+            additionalDocumentTypesSelected: [],
+            select2AppliedToAdditionalDocumentTypes: false,
         }
     },
     components: {
@@ -724,9 +724,42 @@ export default {
         },
     },
     methods: {
+        applicationFormMounted: function(){
+            this.fetchAdditionalDocumentTypesDict()  // <select> element for the additional document type exists in the ApplicationForm component, which is a child component of this component.
+                                                     // Therefore to apply select2 to the element inside child component, we have to make sure the childcomponent has been mounted.  Then select2 can be applied.
+        },
+        applySelect2ToAdditionalDocumentTypes: function(option_data){
+            let vm = this
+
+            console.log('in applySelect2ToAdditionalDocumentTypes')
+            console.log(this.$refs.select_additional_document_types)
+
+            if (!vm.select2AppliedToAdditionalDocumentTypes){
+                $(vm.$refs.select_additional_document_types).select2({
+                    "theme": "bootstrap-5",
+                    allowClear: false,
+                    placeholder:"Select Type",
+                    multiple:true,
+                    data: option_data,
+                }).
+                on('select2:select', function(e){
+                    //vm.updateApplicationTypeFilterCache()
+                    //vm.main_manager.show_me()
+                }).
+                on('select2:unselect', function(e){
+                    //vm.updateApplicationTypeFilterCache()
+                    //vm.main_manager.show_me()
+                })
+                vm.select2AppliedToAdditionalDocumentTypes = true
+            }
+
+            // Set default selections
+            //$(vm.$refs.select_additional_document_types).val(vm.additionalDocumentTypesSelected).trigger('change')
+        },
         addEventListeners: function(){
 
         },
+        /*
         applySelect2ToAdditionalDocumentType: function(option_data){
             let vm = this
             vm.additional_document_types = option_data
@@ -741,8 +774,9 @@ export default {
                 minimumResultsForSearch: -1,  // This hide the search box below selections
             //    data: option_data,
             })
-            vm.select2Applied = true
+            vm.select2AppliedToAdditionalDocumentTypes = true
         },
+        */
         collapsible_map_checklist_questions_component_mounted: function(){
             this.$refs.collapsible_map_checklist_questions.show_warning_icon(false)
         },
@@ -1218,12 +1252,13 @@ export default {
             }
         },
         fetchAdditionalDocumentTypesDict: async function(){
-            //console.log('fetch')
             const response = await this.$http.get('/api/additional_document_types_dict')
-            this.applySelect2ToAdditionalDocumentType(response.body)
+            console.log(response)
+            this.applySelect2ToAdditionalDocumentTypes(response.body)
         },
     },
     mounted: function() {
+        console.log('in mounted')
         let vm = this
         this.$nextTick(() => {
             vm.addEventListeners()
@@ -1250,6 +1285,7 @@ export default {
         });
     },
     created: function() {
+        console.log('in created')
         Vue.http.get(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`).then(res => {
             this.proposal = res.body;
             this.original_proposal = Object.assign({}, res.body);
@@ -1259,7 +1295,6 @@ export default {
         err => {
           console.log(err);
         });
-        this.fetchAdditionalDocumentTypesDict()
     },
     /*
     beforeRouteEnter: function(to, from, next) {

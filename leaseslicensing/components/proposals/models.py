@@ -92,6 +92,12 @@ def update_events_park_doc_filename(instance, filename):
 def update_pre_event_park_doc_filename(instance, filename):
     return '{}/proposals/{}/pre_event_park_documents/{}'.format(settings.MEDIA_APP_DIR, instance.pre_event_park.proposal.id,filename)
 
+def update_additional_doc_filename(instance, filename):
+    return '{}/proposals/{}/additional_documents/{}/{}'.format(settings.MEDIA_APP_DIR,
+                                                               instance.proposal.id,
+                                                               instance.proposal_additional_document_type.additional_document_type.name,
+                                                               filename)
+
 
 def application_type_choicelist():
     try:
@@ -2304,6 +2310,22 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 proposal.save(version_comment='New Amendment/Renewal Application created, from origin {}'.format(proposal.previous_application_id))
                 #proposal.save()
             return proposal
+
+
+class ProposalAdditionalDocumentType(models.Model):
+    proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE)
+    additional_document_type = models.ForeignKey(AdditionalDocumentType, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+
+class AdditionalDocument(Document):
+    _file = models.FileField(upload_to=update_additional_doc_filename, max_length=512)
+    proposal_additional_document_type = models.ForeignKey(ProposalAdditionalDocumentType, null=True, blank=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        app_label = 'leaseslicensing'
 
 
 class ApplicationFeeDiscount(RevisionedMixin):

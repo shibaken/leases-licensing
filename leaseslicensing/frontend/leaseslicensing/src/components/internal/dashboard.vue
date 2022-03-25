@@ -11,6 +11,7 @@
                     role="tab"
                     aria-controls="pills-applications"
                     aria-selected="true"
+                    @click="tabClicked('applications')"
                 >Applications</a>
             </li>
             <li class="nav-item">
@@ -22,6 +23,7 @@
                     role="tab"
                     aria-controls="pills-competitive-processes"
                     aria-selected="false"
+                    @click="tabClicked('competitive-processes')"
                 >Competitive Processes</a>
             </li>
             <li class="nav-item">
@@ -42,6 +44,7 @@
             <div class="tab-pane active" id="pills-applications" role="tabpanel" aria-labelledby="pills-applications-tab">
                 <FormSection :formCollapse="false" label="Applications" Index="applications">
                     <ApplicationsTable
+                        ref="applications_table"
                         level="internal"
                         filterApplicationType_cache_name="filterApplicationTypeForApplicationTabley"
                         filterApplicationStatus_cache_name="filterApplicationStatusForApplicationTable"
@@ -51,6 +54,7 @@
                 </FormSection>
                 <FormSection :formCollapse="false" label="Applications referred to me" Index="leases_and_licences">
                     <ApplicationsReferredToMeTable
+                        ref="applications_referred_to_me_table"
                         v-if="accessing_user"
                         level="internal"
                         :email_user_id_assigned="accessing_user.id"
@@ -64,6 +68,7 @@
             <div class="tab-pane" id="pills-competitive-processes" role="tabpanel" aria-labelledby="pills-competitive-processes-tab">
                 <FormSection :formCollapse="false" label="Competitive Processes" Index="competitive_processes">
                     <CompetitiveProcessesTable
+                        ref="competitive_processes_table"
                         level="internal"
                     />
                 </FormSection>
@@ -133,6 +138,14 @@ export default {
         },
     },
     methods: {
+        tabClicked: function(param){
+            if (param == 'applications'){
+                this.$refs.applications_table.adjust_table_width()
+                this.$refs.applications_referred_to_me_table.adjust_table_width()
+            } else if (param === 'competitive-processes'){
+                this.$refs.competitive_processes_table.adjust_table_width()
+            }
+        },
         mapTabClicked: function(){
             this.$refs.component_map_with_filters.forceToRefreshMap()
         },
@@ -143,6 +156,17 @@ export default {
                 tab = new bootstrap.Tab(elem)
             tab.show()
         },
+        /*
+        addEventListener: function(){
+            let elems = $('a[data-bs-toggle="pill"]')
+            console.log('---')
+            console.log(elems)
+            elems.on('click', function (e) {
+                console.log('click: ')
+                console.log(e.target);
+            })
+        }
+        */
     },
     mounted: function () {
         let vm = this
@@ -151,6 +175,7 @@ export default {
             vm.accessing_user = res.body
         })
         this.$nextTick(function(){
+            //vm.addEventListener()
             chevron_toggle.init();
             vm.set_active_tab('pills-applications')
         })

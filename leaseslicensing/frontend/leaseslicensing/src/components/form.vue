@@ -330,6 +330,7 @@ import Confirmation from '@/components/common/confirmation.vue'
             },
         },
         mounted: function() {
+            this.$emit('formMounted')
         }
 
     }
