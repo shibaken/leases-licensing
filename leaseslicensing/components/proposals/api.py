@@ -164,9 +164,7 @@ class GetApplicationTypeDict(views.APIView):
             else:
                 cache.set(
                     cache_data_name,
-                    #[{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'],
-                    ##TODO: remove lease_licence once internal workflow is complete
-                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] in ['registration_of_interest', 'lease_licence']],
+                    [{"code": app_type[0], "description": app_type[1]} for app_type in settings.APPLICATION_TYPES if app_type[0] == 'registration_of_interest'],
                     settings.LOV_CACHE_TIMEOUT,
                 )
             data = cache.get(cache_data_name)
@@ -1214,7 +1212,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
             #qs = instance.requirements.all()
             qs = instance.requirements.all().exclude(is_deleted=True)
-            qs=qs.order_by('order')
+            #qs=qs.order_by('order')
             serializer = ProposalRequirementSerializer(qs,many=True, context={'request':request})
             return Response(serializer.data)
         except serializers.ValidationError:
@@ -2103,11 +2101,13 @@ class ProposalRequirementViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['GET',], detail=True)
     def move_up(self, request, *args, **kwargs):
         try:
+            print("move_up")
             instance = self.get_object()
-            instance.up()
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
+            instance.move_up()
+            #instance.save()
+            #serializer = self.get_serializer(instance)
+            #return Response(serializer.data)
+            return Response()
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -2121,11 +2121,13 @@ class ProposalRequirementViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['GET',], detail=True)
     def move_down(self, request, *args, **kwargs):
         try:
+            print("move_down")
             instance = self.get_object()
-            instance.down()
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
+            instance.move_down()
+            #instance.save()
+            #serializer = self.get_serializer(instance)
+            #return Response(serializer.data)
+            return Response()
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise

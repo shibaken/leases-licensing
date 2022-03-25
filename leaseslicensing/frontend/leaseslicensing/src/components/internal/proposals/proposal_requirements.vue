@@ -1,17 +1,5 @@
 <template id="proposal_requirements">
     <div>
-<!--
-    <div class="card card-default">
-        <div class="card-header">
-            <h3 class="card-title">Conditions
-                <a class="panelClicker" :href="'#'+panelBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="panelBody">
-                    <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                </a>
-            </h3>
-        </div>
-        <div class="card-body card-collapse collapse in" :id="panelBody">
-        </div>
--->
         <FormSection :formCollapse="false" label="Conditions" Index="conditions">
             <form class="form-horizontal" action="index.html" method="post">
                 <div class="col-sm-12">
@@ -146,6 +134,10 @@ export default {
                             let links = '';
                             // TODO check permission to change the order
                             if (vm.proposal.assessor_mode.has_assessor_mode){
+                                /*
+                                links +=  `<i data-id="${full.id}" class="dtMoveUp fa fa-angle-up fa-2x"></i><br/>`;
+                                links +=  `<i data-id="${full.id}" class="dtMoveDown fa fa-angle-down fa-2x"></i><br/>`;
+                                */
                                 links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="fa fa-angle-up fa-2x"></i></a><br/>`;
                                 links +=  `<a class="dtMoveDown" data-id="${full.id}" href='#'><i class="fa fa-angle-down fa-2x"></i></a><br/>`;
                                 /*
@@ -159,7 +151,9 @@ export default {
                     }
                 ],
                 processing: true,
+                /*
                 rowCallback: function ( row, data, index) {
+                    console.log("rowCallback")
                     if (data.copied_for_renewal && data.require_due_date && !data.due_date) {
                         $('td', row).css('background-color', 'Red');
                         vm.setApplicationWorkflowState(false)
@@ -180,14 +174,15 @@ export default {
                     $('.dtMoveDown').click(vm.moveDown);
                 },
                  preDrawCallback: function (settings) {
+                    console.log("preDrawCallback")
                     vm.setApplicationWorkflowState(true)
                     //vm.$emit('refreshRequirements',true);
                 },
+                */
                 initComplete: function() {
                     vm.enablePopovers();
-                    //console.log($(vm.$refs.requirements_datatable).DataTable())
-                    console.log($('#' + vm.datatableId).DataTable());
-                    //$('#' + vm.datatableId).DataTable().draw();
+                    //console.log($('#' + vm.datatableId).DataTable());
+                    vm.addTableListeners();
                 },
             }
         }
@@ -228,13 +223,6 @@ export default {
                 confirmButtonText: 'Remove Requirement',
                 confirmButtonColor:'#d9534f'
             }).then(() => {
-                // vm.$http.delete(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id))
-                // .then((response) => {
-                //     vm.$refs.requirements_datatable.vmDataTable.ajax.reload();
-                // }, (error) => {
-                //     console.log(error);
-                // });
-
                 vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id+'/discard'))
                 .then((response) => {
                     vm.$refs.requirements_datatable.vmDataTable.ajax.reload();
@@ -246,11 +234,8 @@ export default {
             });
         },
         fetchRequirements(){
-            console.log('fetchRequirements')
             let vm = this;
             let url = api_endpoints.proposal_standard_requirements
-            //let url = api_endpoints.proposal_requirements
-            console.log('url: ' + url)
             vm.$http.get(url, {params: {'application_type_code': vm.proposal.application_type_code}}).then((response) => {
                 vm.requirements = response.body
             },(error) => {
@@ -284,72 +269,50 @@ export default {
                 vm.editRequirement(id);
             });
         },
-        sendDirection(req,direction){
+        addTableListeners: function() {
+            let vm = this;
+            $(vm.$refs.requirements_datatable.table).find('tr:last .dtMoveDown').remove();
+            $(vm.$refs.requirements_datatable.table).children('tbody').find('tr:first .dtMoveUp').remove();
+            // Remove previous binding before adding it
+            $('.dtMoveUp').off('click');
+            $('.dtMoveDown').off('click');
+
+            // Bind clicks to functions
+            vm.$refs.requirements_datatable.vmDataTable.on('click', '.dtMoveUp', function(e) {
+                e.preventDefault();
+                var id = $(this).attr('data-id');
+                vm.moveUp(id);
+            });
+            vm.$refs.requirements_datatable.vmDataTable.on('click', '.dtMoveDown', function(e) {
+                e.preventDefault();
+                var id = $(this).attr('data-id');
+                vm.moveDown(id);
+            });
+        },
+        async sendDirection(req,direction){
+            let vm = this;
             let movement = direction == 'down'? 'move_down': 'move_up';
-            this.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,req+'/'+movement)).then((response) => {
-            },(error) => {
+            try {
+                const res = await this.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,req+'/'+movement))
+                this.$parent.uuid++;
+                //await this.$refs.requirements_datatable.vmDataTable.ajax.reload();
+                //this.$refs.requirements_datatable.vmDataTable.page(0).draw(false);
+                //this.$refs.requirements_datatable.vmDataTable.draw();
+            } catch(error) {
                 console.log(error);
-
-            })
-        },
-        moveUp(e) {
-            console.log("moveUp")
-            // Move the row up
-            let vm = this;
-            e.preventDefault();
-            var tr = $(e.target).parents('tr');
-            vm.moveRow(tr, 'up');
-            vm.sendDirection($(e.target).parent().data('id'),'up');
-        },
-        moveDown(e) {
-            // Move the row down
-            e.preventDefault();
-            let vm = this;
-            var tr = $(e.target).parents('tr');
-            vm.moveRow(tr, 'down');
-            vm.sendDirection($(e.target).parent().data('id'),'down');
-        },
-        moveRow(row, direction) {
-            // Move up or down (depending...)
-            var table = this.$refs.requirements_datatable.vmDataTable;
-            var index = table.row(row).index();
-
-            var order = -1;
-            if (direction === 'down') {
-              order = 1;
             }
-
-            var data1 = table.row(index).data();
-            data1.order += order;
-
-            var data2 = table.row(index + order).data();
-            data2.order += -order;
-
-            table.row(index).data(data2);
-            table.row(index + order).data(data1);
-
-            table.page(0).draw(false);
         },
-        setApplicationWorkflowState(bool){
-            let vm=this;
-            //vm.proposal.requirements_completed=bool;
-            //console.log('child', bool);
-            vm.$emit('refreshRequirements',bool);
+        moveUp(id) {
+            this.sendDirection(id,'up');
+        },
+        moveDown(id) {
+            this.sendDirection(id,'down');
         },
         enablePopovers: function() {
             var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-            console.log(popoverTriggerList)
             var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
                 let popover = new bootstrap.Popover(popoverTriggerEl)
-                console.log(popover)
-                //return popover;
-
             })
-            /*
-            var popover = new bootstrap.Popover(document.querySelector('.popover-dismiss'), {
-                  trigger: 'focus'
-            })
-            */
         },
     },
     mounted: function(){
@@ -358,7 +321,7 @@ export default {
         vm.$nextTick(() => {
             this.eventListeners();
         });
-    }
+    },
 }
 </script>
 <style scoped>

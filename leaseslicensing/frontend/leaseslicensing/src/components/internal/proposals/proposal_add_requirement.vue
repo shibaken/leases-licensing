@@ -124,10 +124,6 @@ export default {
                 type: Array,
                 required: true
             },
-            sitetransfer_approval_id:{
-                type:Number,
-                required: false
-            },
     },
     data:function () {
         let vm = this;
@@ -140,7 +136,6 @@ export default {
                 recurrence: false,
                 recurrence_pattern: '1',
                 proposal: vm.proposal_id,
-                sitetransfer_approval: vm.sitetransfer_approval_id,
             },
             addingRequirement: false,
             updatingRequirement: false,
@@ -164,69 +159,18 @@ export default {
         showError: function() {
             return this.errors;
         },
-        /*
-        due_date: {
-            cache: false,
-            get(){
-                if (this.requirement.due_date == undefined  || this.requirement.due_date == '' || this.requirement.due_date ==  null){
-                    return '';
-                }
-                else{
-                    return this.requirement.due_date;
-                }
-            }
-        }
-        */
     },
     watch: {
-        /*
-        still required??
-        due_date: function(){
-            this.validDate = moment(this.requirement.due_date,'DD/MM/YYYY').isValid();
-        },
-        */
     },
     methods:{
-        /*
-        initialiseRequirement: function(){
-            this.requirement = {
-                due_date: '',
-                standard: true,
-                recurrence: false,
-                recurrence_pattern: '1',
-                proposal: vm.proposal_id
-            }
-        },
-        */
         ok:function () {
             this.sendData();
-            /*
-            let vm =this;
-            if($(vm.form).valid()){
-                vm.sendData();
-            }
-            */
         },
         cancel:function () {
             this.close()
         },
         close:function () {
             this.isModalOpen = false;
-            /*
-            // TODO: still required??
-            $(this.$refs.standard_req).val(null).trigger('change');
-            this.requirement = {
-                standard: true,
-                recurrence: false,
-                due_date: '',
-                recurrence_pattern: '1',
-                proposal: this.proposal_id
-            };
-            this.errors = false;
-            $('.has-error').removeClass('has-error');
-            //$(this.$refs.due_date).data('DateTimePicker').clear();
-            this.validation_form.resetForm();
-            */
         },
         fetchContact: function(id){
             let vm = this;
@@ -236,109 +180,8 @@ export default {
                 console.log(error);
             } );
         },
-        /*
         sendData:function(){
-            let vm = this;
-            //vm.errors = false;
-            let requirement = JSON.parse(JSON.stringify(vm.requirement));
-            if (requirement.standard){
-                requirement.free_requirement = '';
-            }
-            else{
-                requirement.standard_requirement = '';
-                $(this.$refs.standard_req).val(null).trigger('change');
-            }
-            if (!requirement.due_date){
-                requirement.due_date = null;
-                requirement.recurrence = false;
-                delete requirement.recurrence_pattern;
-                requirement.recurrence_schedule ? delete requirement.recurrence_schedule : '';
-            }
-            if (vm.requirement.id){
-                vm.updatingRequirement = true;
-                vm.$http.put(helpers.add_endpoint_json(api_endpoints.proposal_requirements,requirement.id),JSON.stringify(requirement),{
-                        emulateJSON:true,
-                    }).then((response)=>{
-                        vm.updatingRequirement = false;
-                        vm.$parent.updatedRequirements();
-                        vm.close();
-                    },(error)=>{
-                        vm.errors = true;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                        vm.updatingRequirement = false;
-                    });
-            } else {
-                vm.addingRequirement = true;
-                vm.$http.post(api_endpoints.proposal_requirements,JSON.stringify(requirement),{
-                        emulateJSON:true,
-                    }).then((response)=>{
-                        vm.addingRequirement = false;
-                        vm.close();
-                        vm.$parent.updatedRequirements();
-                    },(error)=>{
-                        vm.errors = true;
-                        vm.addingRequirement = false;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                    });
-            }
-        },
-        addFormValidations: function() {
-            let vm = this;
-            vm.validation_form = $(vm.form).validate({
-                rules: {
-                    standard_requirement:{
-                        required: {
-                            depends: function(el){
-                                return vm.requirement.standard;
-                            }
-                        }
-                    },
-                    free_requirement:{
-                        required: {
-                            depends: function(el){
-                                return !vm.requirement.standard;
-                            }
-                        }
-                    },
-                    schedule:{
-                        required: {
-                            depends: function(el){
-                                return vm.requirement.recurrence;
-                            }
-                        }
-                    }
-                },
-                messages: {
-                    arrival:"field is required",
-                    departure:"field is required",
-                    campground:"field is required",
-                    campsite:"field is required"
-                },
-                showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
-                }
-            });
-       },
-       */
-        sendData:function(){
-            //let vm = this;
             this.errors = false;
-            //let requirement = JSON.parse(JSON.stringify(vm.requirement));
             if (this.requirement.standard){
                 this.requirement.free_requirement = '';
             }
@@ -355,7 +198,6 @@ export default {
             if (this.requirement.id){
                 this.updatingRequirement = true;
                 this.$http.put(helpers.add_endpoint_json(api_endpoints.proposal_requirements,requirement.id),this.requirement,{
-                        //emulateJSON:true,
                     }).then((response)=>{
                         this.updatingRequirement = false;
                         this.$parent.updatedRequirements();
@@ -368,7 +210,6 @@ export default {
             } else {
                 this.addingRequirement = true;
                 this.$http.post(api_endpoints.proposal_requirements,this.requirement,{
-                        //emulateJSON:true,
                     }).then((response)=>{
                         this.addingRequirement = false;
                         this.close();
@@ -383,35 +224,11 @@ export default {
 
        eventListeners:function () {
             let vm = this;
-            /*
-
-            // Intialise select2
-            $(vm.$refs.standard_req).select2({
-                theme: "bootstrap-5",
-                allowClear: true,
-                minimumInputLength: 2,
-                placeholder:"Select Requirement"
-            }).
-            on("select2:select",function (e) {
-                var selected = $(e.currentTarget);
-                vm.requirement.standard_requirement = selected.val();
-            }).
-            on("select2:unselect",function (e) {
-                var selected = $(e.currentTarget);
-                vm.requirement.standard_requirement = selected.val();
-            }).
-            on("select2:open",function (e) {
-                const searchField = $(".select2-search__field")
-                // move focus to select2 field
-                searchField[0].focus();
-            });
-            */
        }
    },
    mounted:function () {
         let vm =this;
         vm.form = document.forms.requirementForm;
-        //vm.addFormValidations();
         this.$nextTick(()=>{
             vm.eventListeners();
         });
