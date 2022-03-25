@@ -480,6 +480,10 @@ export default {
         },
     },
     methods: {
+        adjust_table_width: function(){
+            this.$refs.approvals_datatable.vmDataTable.columns.adjust()
+            this.$refs.approvals_datatable.vmDataTable.responsive.recalc()
+        },
         collapsible_component_mounted: function(){
             this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
         },
