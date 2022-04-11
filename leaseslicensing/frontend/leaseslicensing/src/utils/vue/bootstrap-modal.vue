@@ -6,12 +6,11 @@
                     <!--Header-->
                     <slot name="header">
                         <div class="modal-header">
+<!--
                             <a type="button" class="close" @click="cancel">x</a>
-                            <h4 class="modal-title">
-                                <slot name="title">
-                                    {{title}}
-                                </slot>
-                            </h4>
+-->
+                            <h4 class="modal-title"><slot name="title">{{title}}</slot></h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="cancel"></button>
                         </div>
                     </slot>
                     <!--Container-->
