@@ -287,7 +287,8 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            return full.holder;
+                            //return full.holder;
+                            return 'holder?';
                         }
                     }
         },
@@ -311,7 +312,7 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            return full.expiry_date_str;
+                            return full.expiry_date;
                         }
                     }
         },
@@ -354,9 +355,6 @@ export default {
                                     links +=  `<a href='#${full.id}' data-surrender-approval='${full.id}'>Surrender</a><br/>`;
                                 }
 
-                                if (full.approval_type_dict.code != 'wla') {
-                                    links +=  `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`;
-                                }
 
                             } else if (!vm.is_external){
                                 links +=  `<a href='/internal/approval/${full.id}'>View</a><br/>`;

@@ -1327,36 +1327,19 @@ class Proposal(DirtyFieldsMixin, models.Model):
             raise ValidationError('The provided status cannot be found.')
 
     def reissue_approval(self,request,status):
-        if self.application_type.name==ApplicationType.FILMING and self.filming_approval_type=='lawful_authority':
-            allowed_status=['approved', 'partially_approved']
-            if not self.processing_status in allowed_status and not self.is_lawful_authority_finalised:
-                raise ValidationError('You cannot change the current status at this time')
-            elif self.approval and self.approval.can_reissue:
-                if self.get_assessor_group() in request.user.proposalassessorgroup_set.all():
-                    self.processing_status = status
-                    self.save(version_comment='Reissue Approval: {}'.format(self.approval.lodgement_number))
-                    #self.save()
-                    # Create a log entry for the proposal
-                    self.log_user_action(ProposalUserAction.ACTION_REISSUE_APPROVAL.format(self.id),request)
-                else:
-                    raise ValidationError('Cannot reissue Approval. User not permitted.')
+        if not self.processing_status=='approved' :
+            raise ValidationError('You cannot change the current status at this time')
+        elif self.approval and self.approval.can_reissue:
+            if self.get_approver_group() in request.user.proposalapprovergroup_set.all():
+                self.processing_status = status
+                #self.save()
+                self.save(version_comment='Reissue Approval: {}'.format(self.approval.lodgement_number))
+                # Create a log entry for the proposal
+                self.log_user_action(ProposalUserAction.ACTION_REISSUE_APPROVAL.format(self.id),request)
             else:
-                raise ValidationError('Cannot reissue Approval')
-
+                raise ValidationError('Cannot reissue Approval. User not permitted.')
         else:
-            if not self.processing_status=='approved' :
-                raise ValidationError('You cannot change the current status at this time')
-            elif self.approval and self.approval.can_reissue:
-                if self.get_approver_group() in request.user.proposalapprovergroup_set.all():
-                    self.processing_status = status
-                    #self.save()
-                    self.save(version_comment='Reissue Approval: {}'.format(self.approval.lodgement_number))
-                    # Create a log entry for the proposal
-                    self.log_user_action(ProposalUserAction.ACTION_REISSUE_APPROVAL.format(self.id),request)
-                else:
-                    raise ValidationError('Cannot reissue Approval. User not permitted.')
-            else:
-                raise ValidationError('Cannot reissue Approval')
+            raise ValidationError('Cannot reissue Approval')
 
     def proposed_decline(self,request,details):
         with transaction.atomic():
