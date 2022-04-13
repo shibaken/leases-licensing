@@ -257,7 +257,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import $ from 'jquery'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import FormSection from '@/components/forms/section_toggle.vue'
@@ -751,7 +750,7 @@ export default {
                     vm.uploadedFile = null;
                     vm.addingCompany = false;
                     vm.resetNewOrg();
-                    Vue.http.get(api_endpoints.profile).then((response) => {
+                    this.$http.get(api_endpoints.profile).then((response) => {
                         vm.profile = response.body
                         if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
                         if (vm.profile.postal_address == null){ vm.profile.postal_address = {}; }
@@ -916,7 +915,7 @@ export default {
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.organisations,org.id+'/unlink_user'),JSON.stringify(vm.profile),{
                     emulateJSON:true
                 }).then((response) => {
-                    Vue.http.get(api_endpoints.profile).then((response) => {
+                    this.$http.get(api_endpoints.profile).then((response) => {
                         vm.profile = response.body
                         if (vm.profile.residential_address == null){ vm.profile.residential_address = {}; }
                         if ( vm.profile.leaseslicensing_organisations && vm.profile.leaseslicensing_organisations.length > 0 ) { vm.managesOrg = 'Yes' }
@@ -942,9 +941,9 @@ export default {
             let response = null;
             //let submitter_id = 666;
             if (this.submitterId) {
-                response = await Vue.http.get(`${api_endpoints.submitter_profile}?submitter_id=${this.submitterId}`);
+                response = await this.$http.get(`${api_endpoints.submitter_profile}?submitter_id=${this.submitterId}`);
             } else {
-                response = await Vue.http.get(api_endpoints.profile);
+                response = await this.$http.get(api_endpoints.profile);
             }
             this.profile = Object.assign(response.body);
             if (this.profile.residential_address == null){ this.profile.residential_address = Object.assign({country:'AU'}); }
@@ -956,7 +955,7 @@ export default {
         },
     },
     beforeRouteEnter: function(to,from,next){
-        Vue.http.get(api_endpoints.profile).then((response) => {
+        this.$http.get(api_endpoints.profile).then((response) => {
             if (response.body.address_details && response.body.personal_details && response.body.contact_details && to.name == 'first-time'){
                 window.location.href='/';
             }

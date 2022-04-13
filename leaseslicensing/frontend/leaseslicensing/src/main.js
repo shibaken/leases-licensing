@@ -4,7 +4,6 @@
 import { createApp } from 'vue'
 import resource from 'vue-resource'
 import App from './App'
-import router from './router'
 import helpers from '@/utils/helpers'
 import hooks from './packages'
 import api_endpoints from './api'
@@ -40,7 +39,6 @@ Vue.http.interceptors.push( function ( request, next ) {
 /* eslint-disable no-new */
 const app = createApp(App)
 
-app.use(router)
 app.use(CKEditor)
 /*
 app.component('my-heading', {
