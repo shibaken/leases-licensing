@@ -1,10 +1,12 @@
-import Vue from 'vue'
+//import Vue from 'vue'
 import Router from 'vue-router'
 import Profile from '@/components/user/profile.vue'
+/*
 import external_routes from '@/components/external/routes'
 import internal_routes from '@/components/internal/routes'
+*/
 
-Vue.use(Router)
+//Vue.use(Router)
 
 export default new Router({
     mode: 'history',
@@ -19,7 +21,9 @@ export default new Router({
           name: 'account',
           component: Profile
         },
+        /*
         external_routes,
         internal_routes,
+        */
     ]
 })

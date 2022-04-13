@@ -1,12 +1,14 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import Vue from 'vue'
+//import Vue from 'vue'
+import { createApp } from 'vue'
 import resource from 'vue-resource'
 import App from './App'
 import router from './router'
 import helpers from '@/utils/helpers'
 import hooks from './packages'
 import api_endpoints from './api'
+import CKEditor from '@ckeditor/ckeditor5-vue';
 //import("./scss/custom.scss");
 //require('../node_modules/font-awesome/css/font-awesome.min.css' )
 require('@/../node_modules/@fortawesome/fontawesome-free/css/all.min.css')
@@ -14,6 +16,7 @@ require('@/../node_modules/select2-bootstrap-5-theme/dist/select2-bootstrap-5-th
 require('@/../node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css')
 //require('@/../node_modules/datatables.net-bs/css/dataTables.bootstrap.min.css')
 
+/*
 Vue.config.devtools = true;
 Vue.config.productionTip = false
 Vue.use( resource );
@@ -32,9 +35,20 @@ Vue.http.interceptors.push( function ( request, next ) {
   // continue to next interceptor
   next();
 } );
-
+*/
 
 /* eslint-disable no-new */
+const app = createApp(App)
+
+app.use(router)
+app.use(CKEditor)
+/*
+app.component('my-heading', {
+    template: '<App/>',
+})
+*/
+app.mount('#app')
+/*
 new Vue( {
   el: '#app',
   router,
@@ -43,3 +57,4 @@ new Vue( {
     App
   }
 } )
+*/
