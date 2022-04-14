@@ -249,7 +249,6 @@
 //import ProposalDisturbance from '../../form.vue'
 //import ProposalApiary from '@/components/form_apiary.vue'
 //import NewApply from '../../external/proposal_apply_new.vue'
-import Vue from 'vue'
 import ProposedDecline from '@/components/internal/proposals/proposal_proposed_decline.vue'
 import AmendmentRequest from '@/components/internal/proposals/amendment_request.vue'
 import datatable from '@vue-utils/datatable.vue'
@@ -259,7 +258,6 @@ import ApprovalScreen from '@/components/internal/proposals/proposal_approval.vu
 import CommsLogs from '@common-utils/comms_logs.vue'
 import Submission from '@common-utils/submission.vue'
 import Workflow from '@common-utils/workflow.vue'
-import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import ApplicationForm from '@/components/form.vue';
 import FormSection from "@/components/forms/section_toggle.vue"
@@ -1286,7 +1284,7 @@ export default {
     },
     created: function() {
         console.log('in created')
-        Vue.http.get(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`).then(res => {
+        this.$http.get(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`).then(res => {
             this.proposal = res.body;
             this.original_proposal = Object.assign({}, res.body);
             //this.proposal.applicant.address = this.proposal.applicant.address != null ? this.proposal.applicant.address : {};
@@ -1296,34 +1294,6 @@ export default {
           console.log(err);
         });
     },
-    /*
-    beforeRouteEnter: function(to, from, next) {
-          Vue.http.get(`/api/proposal/${to.params.proposal_id}/internal_proposal.json`).then(res => {
-              next(vm => {
-                vm.proposal = res.body;
-                vm.original_proposal = helpers.copyObject(res.body);
-                vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
-                vm.hasAmendmentRequest=vm.proposal.hasAmendmentRequest;
-              });
-            },
-            err => {
-              console.log(err);
-            });
-    },
-    beforeRouteUpdate: function(to, from, next) {
-        console.log("beforeRouteUpdate")
-          Vue.http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
-              next(vm => {
-                vm.proposal = res.body;
-                vm.original_proposal = helpers.copyObject(res.body);
-                //vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
-              });
-            },
-            err => {
-              console.log(err);
-            });
-    }
-    */
 }
 </script>
 <style scoped>

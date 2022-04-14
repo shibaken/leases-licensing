@@ -89,7 +89,6 @@
 
 <script>
 import ApplicationForm from '../form.vue';
-import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
@@ -574,41 +573,19 @@ export default {
   beforeRouteEnter: function(to, from, next) {
     if (to.params.proposal_id) {
       let vm = this;
-      Vue.http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
+      this.$http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
           next(vm => {
             vm.loading.push('fetching proposal')
             vm.proposal = res.body;
             //used in activities_land for T Class licence
             vm.loading.splice('fetching proposal', 1);
             vm.setdata(vm.proposal.readonly);
-              /*
-            Vue.http.get(helpers.add_endpoint_json(api_endpoints.proposals,to.params.proposal_id+'/amendment_request')).then((res) => {
-                      vm.setAmendmentData(res.body);
-                },
-              err => {
-                        console.log(err);
-                  });
-              */
               });
           },
         err => {
           console.log(err);
         });
     }
-      /*
-    else {
-      Vue.http.post('/api/proposal.json').then(res => {
-          next(vm => {
-            vm.loading.push('fetching proposal')
-            vm.proposal = res.body;
-            vm.loading.splice('fetching proposal', 1);
-          });
-        },
-        err => {
-          console.log(err);
-        });
-    }
-    */
   }
 }
 </script>

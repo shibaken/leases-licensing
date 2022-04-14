@@ -125,10 +125,9 @@
 </template>
 <script>
 import $ from 'jquery'
-import Vue from 'vue'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
-import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
+//import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import {
   api_endpoints,
   helpers
@@ -306,7 +305,7 @@ export default {
     }
   },
   beforeRouteEnter: function(to, from, next){
-    Vue.http.get(helpers.add_endpoint_json(api_endpoints.organisation_requests,to.params.access_id)).then((response) => {
+    this.$http.get(helpers.add_endpoint_json(api_endpoints.organisation_requests,to.params.access_id)).then((response) => {
         next(vm => {
             vm.access = response.body
         })
@@ -433,7 +432,7 @@ export default {
 
     fetchProfile: function(){
         let vm = this;
-        Vue.http.get(api_endpoints.profile).then((response) => {
+        this.$http.get(api_endpoints.profile).then((response) => {
             vm.profile = response.body
 
          },(error) => {

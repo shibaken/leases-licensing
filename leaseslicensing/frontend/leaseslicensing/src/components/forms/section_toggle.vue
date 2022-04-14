@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { uuid as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 export default {
     name:"FormSection",

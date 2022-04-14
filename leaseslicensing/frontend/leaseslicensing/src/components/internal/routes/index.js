@@ -15,20 +15,8 @@ import Approval from '@/components/internal/approvals/approval.vue'
 export default
 {
     path: '/internal',
-    component:
-    {
-        render(c)
-        {
-            return c('router-view')
-        }
-    },
+    component: InternalDashboard,
     children: [
-        {
-            path: '/',
-            component: InternalDashboard,
-            name: 'internal-dashboard'
-
-        },
         {
             path: 'approvals',
             component: ApprovalDash,
@@ -61,12 +49,7 @@ export default
         },
         {
             path: 'organisations',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: OrgAccessTable,
             children: [
                 {
                     path: 'access',
@@ -87,31 +70,9 @@ export default
             ]
         },
         {
-            path: 'proposal',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
-            children: [
-                {
-                    path: ':proposal_id',
-                    component: {
-                        render(c)
-                        {
-                            return c('router-view')
-                        }
-                    },
-                    children: [
-                        {
-                            path: '/',
-                            component: Proposal,
-                            name:"internal-proposal"
-                        },
-                    ]
-                },
-            ]
+            path: 'proposal/:proposal_id',
+            component: Proposal,
+            name: 'internal-proposal',
         },
     ]
 }

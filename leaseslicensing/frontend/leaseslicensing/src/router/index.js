@@ -1,5 +1,5 @@
 //import Vue from 'vue'
-import { createRouter } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import Profile from '@/components/user/profile.vue'
 import external_routes from '@/components/external/routes'
 import internal_routes from '@/components/internal/routes'
@@ -7,7 +7,7 @@ import internal_routes from '@/components/internal/routes'
 //Vue.use(Router)
 
 const router = createRouter({
-    mode: 'history',
+    history: createWebHistory(),
     routes: [
         {
           path: '/firsttime',
@@ -23,3 +23,5 @@ const router = createRouter({
         internal_routes,
     ]
 })
+
+export { router };
