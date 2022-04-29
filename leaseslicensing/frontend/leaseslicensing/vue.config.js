@@ -43,11 +43,18 @@ module.exports = {
                datetimepicker:"../node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
            })
         ],
+        /*
         devServer: {
-            //headers: { "Access-Control-Allow_origin": "*" },
+            headers: { 
+                "Access-Control-Allow-Origin": "*",
+                //"Access-Control-Allow-Credentials": true,
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+                "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
+            }
             //headers: { 'X-CSRFToken': getCookie( 'csrftoken' ) },
-            proxy: "http://localhost:8080",
+            //proxy: "http://localhost:8080",
             //proxy: "http://api.back.end",
         }
+        */
     }
 };
