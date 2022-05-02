@@ -24,6 +24,9 @@ return value;
 }
 
 module.exports = {
+    outputDir: path.resolve(__dirname, "../../static/leaseslicensing_vue"),
+    filenameHashing: false,
+    //runtimeCompiler: true,
     chainWebpack: config => {
         config.resolve.alias.set('@vue-utils', path.resolve(__dirname, 'src/utils/vue'));
         config.resolve.alias.set('@common-utils', path.resolve(__dirname, 'src/components/common/'));
@@ -43,7 +46,34 @@ module.exports = {
                datetimepicker:"../node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
            })
         ],
+        devServer: {
+            host: 'localhost',
+            allowedHosts: 'all',
+            devMiddleware: {
+                //index: true,
+                writeToDisk: true,
+            }
+        },
         /*
+        devServer: {
+            host: 'localhost',
+            port: 9000,
+            client: {
+                logging: "info",
+            },
+            headers: { 
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": true,
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+                "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
+            }
+        },
+        devServer: {
+            NODE_ENV: '"development"',
+            //WEBPACK_HOST: '"172.31.1.50:8080"',
+            WEBPACK_HOST: '"localhost:8080"',
+            PORT: '"8080"'
+        },
         devServer: {
             headers: { 
                 "Access-Control-Allow-Origin": "*",
