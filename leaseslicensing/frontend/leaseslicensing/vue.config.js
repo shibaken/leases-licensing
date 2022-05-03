@@ -1,8 +1,9 @@
 var path = require('path')
 var webpack = require('webpack');
-const axios = require('axios').default;
+//const axios = require('axios').default;
 //import helpers from 'src/utils/helpers'
 
+/*
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
@@ -22,6 +23,7 @@ if ( document.cookie && document.cookie !== '' ) {
 }
 return value;
 }
+*/
 
 module.exports = {
     outputDir: path.resolve(__dirname, "../../static/leaseslicensing_vue"),
@@ -30,20 +32,22 @@ module.exports = {
     chainWebpack: config => {
         config.resolve.alias.set('@vue-utils', path.resolve(__dirname, 'src/utils/vue'));
         config.resolve.alias.set('@common-utils', path.resolve(__dirname, 'src/components/common/'));
-        config.resolve.alias.set('datetimepicker','eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
-        config.resolve.alias.set('easing','jquery.easing/jquery.easing.js');
+        //config.resolve.alias.set('datetimepicker','eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
+        //config.resolve.alias.set('easing','jquery.easing/jquery.easing.js');
     },
     configureWebpack: {
         plugins:[
             new webpack.ProvidePlugin({
-               axios: "axios",
+               // use fetch api instead
+               //axios: "axios",
+               //
                $: "jquery",
                jQuery: "jquery",
                "select2": "../node_modules/select2/dist/js/select2.full.min.js",
                moment: "moment",
                swal: 'sweetalert2',
-               _: 'lodash',
-               datetimepicker:"../node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
+               //_: 'lodash',
+               //datetimepicker:"../node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
            })
         ],
         devServer: {

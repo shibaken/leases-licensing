@@ -6,14 +6,13 @@ console.log(process.env.NODE_ENV)
 console.log("dev")
 //import { createApp } from 'vue/dist/vue.esm-browser.js'
 import { createApp } from 'vue'
-import { Resource } from 'vue-resource'
-import { router } from './router'
+import router from './router'
 import App from './App'
 import helpers from '@/utils/helpers'
 import hooks from './packages'
 import api_endpoints from './api'
 import CKEditor from '@ckeditor/ckeditor5-vue';
-import axios from 'axios';
+//import axios from 'axios';
 //import("./scss/custom.scss");
 //require('../node_modules/font-awesome/css/font-awesome.min.css' )
 require('@/../node_modules/@fortawesome/fontawesome-free/css/all.min.css')
@@ -29,26 +28,36 @@ Vue.use( resource );
 // ckeditor4 is installed in 'wildlifecompliance/templates/wildlifecompliance/base.html'
 import CKEditor from 'ckeditor4-vue';
 Vue.use( CKEditor );
-*/
-// Add CSRF Token to every request
 axios.interceptors.request.use( function ( config ) {
   // modify headers
   if ( config.url != api_endpoints.countries ) {
-      /*
-    config.headers.set( 'X-CSRFToken', helpers.getCookie( 'csrftoken' ) );
-    config.headers.set( 'Content-Type', "application/json" );
-    config.headers.set( "Access-Control-Allow-Origin", "*" );
-    */
+    //config.headers.set( 'X-CSRFToken', helpers.getCookie( 'csrftoken' ) );
+    //config.headers.set( 'Content-Type', "application/json" );
+    //config.headers.set( "Access-Control-Allow-Origin", "*" );
   }
 } );
+*/
+
+// Add CSRF Token to every request
+var customHeaders = new Headers({
+    'X-CSRFToken': helpers.getCookie( 'csrftoken' ),
+});
+/*
+fetch = (originalFetch => {
+    return (...args) => {
+        console.log(args)
+        //arguments.headers = 
+        const result = originalFetch.apply(this, {args);
+        return result.then(console.log('Request was sent'));
+    };
+})(fetch);
+*/
 
 /* eslint-disable no-new */
 const app = createApp(App)
 
 app.use(CKEditor)
-console.log("router")
 app.use(router)
-app.use(Resource)
 router.isReady().then(() => app.mount('#app'))
 //app.mount('#app')
 

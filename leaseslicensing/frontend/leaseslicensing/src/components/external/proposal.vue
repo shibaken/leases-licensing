@@ -377,7 +377,7 @@ export default {
         if (this.$refs.application_form.componentMapOn) {
             payload.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
         }
-        const res = await vm.$http.post(url, payload);
+        const res = await fetch(url, { body: payload, method: 'POST' });
         if (res.ok) {
             if (withConfirm) {
                 swal(
@@ -571,15 +571,17 @@ export default {
 
 
   beforeRouteEnter: function(to, from, next) {
+      console.log(to)
+      console.log(from)
+      //console.log(next)
     if (to.params.proposal_id) {
       let vm = this;
-      this.$http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
-          next(vm => {
-            vm.loading.push('fetching proposal')
-            vm.proposal = res.body;
-            //used in activities_land for T Class licence
-            vm.loading.splice('fetching proposal', 1);
-            vm.setdata(vm.proposal.readonly);
+      fetch(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
+          next(async (vm) => {
+              console.log(vm)
+              const proposalData = await res.json()
+              console.log(proposalData)
+              vm.proposal = proposalData;
               });
           },
         err => {

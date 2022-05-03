@@ -92,7 +92,7 @@
 </template>
 
 <script>
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid';
 import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 
@@ -118,7 +118,6 @@ import { circular} from 'ol/geom/Polygon';
 import GeoJSON from 'ol/format/GeoJSON';
 import Overlay from 'ol/Overlay';
 import { getArea, getLength } from 'ol/sphere'
-import Datatable from '@vue-utils/datatable.vue'
 import Cluster from 'ol/source/Cluster';
 /*
 import 'select2/dist/css/select2.min.css'
@@ -128,7 +127,6 @@ import MeasureStyles, { formatLength } from '@/components/common/measure.js'
 require("select2/dist/css/select2.min.css");
 //require("select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.css");
 import RangeSlider from '@/components/forms/range_slider.vue'
-const axios = require('axios').default;
 
 export default {
     name: 'MapComponentWithFilters',
@@ -619,7 +617,7 @@ export default {
         },
         addOptionalLayers: function(){
             let vm = this
-            axios.get('/api/map_layers/').then(response => {
+            fetch('/api/map_layers/').then(response => {
                 let layers = response.body
                 for (var i = 0; i < layers.length; i++){
                     console.log(layers[i])
@@ -743,14 +741,16 @@ export default {
             let vm = this;
 
             // Application Types
-            axios.get(api_endpoints.application_types_dict + '?for_filter=true').then((response) => {
-                vm.applySelect2ToApplicationTypes(response.body)
+            fetch(api_endpoints.application_types_dict + '?for_filter=true').then(async (response) => {
+                const resData = await response.json()
+                vm.applySelect2ToApplicationTypes(resData)
             },(error) => {
             })
 
             // Application Statuses
-            axios.get(api_endpoints.application_statuses_dict + '?for_filter=true').then((response) => {
-                vm.applySelect2ToApplicationStatuses(response.body)
+            fetch(api_endpoints.application_statuses_dict + '?for_filter=true').then(async (response) => {
+                const resData = await response.json()
+                vm.applySelect2ToApplicationStatuses(resData)
             },(error) => {
             })
         },

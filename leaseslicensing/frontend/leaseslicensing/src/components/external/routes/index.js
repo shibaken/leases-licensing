@@ -12,7 +12,7 @@ import Approval from '../approvals/approval.vue'
 */
 export default
 {
-    path: '/external',
+    path: '/external/',
     component: ExternalDashboard,
     name: 'external-dashboard',
     children: [
@@ -30,12 +30,12 @@ export default
             name:"submit_compliance"
         },
         {
-            path: '/proposal/',
+            path: 'proposal/',
             component: ProposalApply,
             name:"apply_proposal"
         },
         {
-            path: '/proposal/submit',
+            path: 'proposal/submit',
             component: ProposalSubmit,
             name:"submit-proposal"
         },

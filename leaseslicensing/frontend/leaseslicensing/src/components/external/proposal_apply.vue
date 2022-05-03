@@ -189,10 +189,8 @@ export default {
     this.applicationsLoading = false;
   },
   beforeRouteEnter: function(to, from, next) {
-
     let initialisers = [
         utils.fetchProfile(),
-        
         //utils.fetchProposal(to.params.proposal_id)
     ]
     next(vm => {
