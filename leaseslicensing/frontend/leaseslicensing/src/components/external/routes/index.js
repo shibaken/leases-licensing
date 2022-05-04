@@ -1,3 +1,4 @@
+import { RouterView } from 'vue-router'
 import ExternalDashboard from '@/components/external/dashboard.vue'
 import Proposal from '@/components/external/proposal.vue'
 import ProposalApply from '@/components/external/proposal_apply.vue'
@@ -12,10 +13,15 @@ import Approval from '../approvals/approval.vue'
 */
 export default
 {
-    path: '/external/',
-    component: ExternalDashboard,
+    path: '/external',
+    component: RouterView,
     name: 'external-dashboard',
     children: [
+        {
+            path: '/',
+            component: ExternalDashboard,
+            name: 'external-dashboard'
+        },
         {
             path: 'organisations/manage/:org_id',
             component: Organisation

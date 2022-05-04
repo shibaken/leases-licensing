@@ -1,5 +1,5 @@
 <template>
-    <router-view></router-view>
+    <!--router-view></router-view-->
     <div class="container" id="externalDash">
         <!--div v-if="is_debug">src/components/external/dashboard.vue</div-->
         <FormSection 

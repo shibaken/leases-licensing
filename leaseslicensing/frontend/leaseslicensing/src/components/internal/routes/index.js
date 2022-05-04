@@ -1,4 +1,5 @@
 
+import { RouterView } from 'vue-router'
 import InternalDashboard from '@/components/internal/dashboard.vue'
 import OrgAccessTable from '@/components/internal/organisations/dashboard.vue'
 import OrgAccess from '@/components/internal/organisations/access.vue'
@@ -15,8 +16,12 @@ import Approval from '@/components/internal/approvals/approval.vue'
 export default
 {
     path: '/internal',
-    component: InternalDashboard,
+    component: RouterView,
     children: [
+        {
+            path: '/',
+            component: InternalDashboard
+        },
         {
             path: 'approvals',
             component: ApprovalDash,
@@ -49,8 +54,13 @@ export default
         },
         {
             path: 'organisations',
-            component: OrgAccessTable,
+            component: RouterView,
             children: [
+                {
+                    path: 'access',
+                    component: OrgAccessTable,
+                    name:"org-access-dash"
+                },
                 {
                     path: 'access',
                     component: OrgAccessTable,

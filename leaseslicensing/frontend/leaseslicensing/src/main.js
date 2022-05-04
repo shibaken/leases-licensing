@@ -39,20 +39,29 @@ axios.interceptors.request.use( function ( config ) {
 */
 
 // Add CSRF Token to every request
-var customHeaders = new Headers({
+const customHeaders = new Headers({
     'X-CSRFToken': helpers.getCookie( 'csrftoken' ),
 });
-/*
+const customHeadersJSON = new Headers({
+    'X-CSRFToken': helpers.getCookie( 'csrftoken' ),
+    'Content-Type': 'application/json',
+});
 fetch = (originalFetch => {
     return (...args) => {
-        console.log(args)
-        //arguments.headers = 
-        const result = originalFetch.apply(this, {args);
-        return result.then(console.log('Request was sent'));
+        if (args.length > 1) {
+            if (typeof(args[1].body) === 'string') {
+                args[1].headers = customHeadersJSON;
+            } else {
+                args[1].headers = customHeaders;
+            }
+            //console.log(args[1].headers)
+            //args[1].headers = customHeaders;
+        }
+        const result = originalFetch.apply(this, args);
+        //return result.then(console.log('Request was sent'));
+        return result;
     };
 })(fetch);
-*/
-
 /* eslint-disable no-new */
 const app = createApp(App)
 

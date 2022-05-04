@@ -1,5 +1,6 @@
-var path = require('path')
-var webpack = require('webpack');
+//const Swal = require('sweetalert2')
+const path = require('path')
+const webpack = require('webpack');
 //const axios = require('axios').default;
 //import helpers from 'src/utils/helpers'
 
@@ -41,11 +42,14 @@ module.exports = {
                // use fetch api instead
                //axios: "axios",
                //
+                /*
                $: "jquery",
                jQuery: "jquery",
                "select2": "../node_modules/select2/dist/js/select2.full.min.js",
+               */
                moment: "moment",
-               swal: 'sweetalert2',
+               swal: "sweetalert2",
+               //swal: Swal,
                //_: 'lodash',
                //datetimepicker:"../node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
            })

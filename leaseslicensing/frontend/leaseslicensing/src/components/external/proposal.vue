@@ -377,7 +377,7 @@ export default {
         if (this.$refs.application_form.componentMapOn) {
             payload.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
         }
-        const res = await fetch(url, { body: payload, method: 'POST' });
+        const res = await fetch(url, { body: JSON.stringify(payload), method: 'POST' });
         if (res.ok) {
             if (withConfirm) {
                 swal(
@@ -388,15 +388,18 @@ export default {
             };
             vm.savingProposal=false;
             //this.$refs.application_form.incrementComponentMapKey();
-            this.proposal = res.body;
+            const resData = res.json()
+            this.proposal = resData;
             this.$nextTick(async () => {
                 this.$refs.application_form.incrementComponentMapKey();
             });
-            return res;
+            return resData;
         } else {
-            swal({
+            const err = await res.json()
+            swal.fire({
                 title: "Please fix following errors before saving",
-                text: err.bodyText,
+                //text: err.bodyText,
+                text: JSON.stringify(err),
                 type:'error'
             });
             vm.savingProposal=false;
