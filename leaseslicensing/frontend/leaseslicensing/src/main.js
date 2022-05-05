@@ -49,6 +49,7 @@ const customHeadersJSON = new Headers({
 fetch = (originalFetch => {
     return (...args) => {
         if (args.length > 1) {
+            //console.log(typeof(args[1].body))
             if (typeof(args[1].body) === 'string') {
                 args[1].headers = customHeadersJSON;
             } else {

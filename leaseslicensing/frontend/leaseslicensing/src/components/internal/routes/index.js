@@ -19,7 +19,7 @@ export default
     component: RouterView,
     children: [
         {
-            path: '/',
+            path: '/internal',
             component: InternalDashboard
         },
         {

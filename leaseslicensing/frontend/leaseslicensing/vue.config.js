@@ -1,30 +1,5 @@
-//const Swal = require('sweetalert2')
 const path = require('path')
 const webpack = require('webpack');
-//const axios = require('axios').default;
-//import helpers from 'src/utils/helpers'
-
-/*
-function resolve (dir) {
-  return path.join(__dirname, '..', dir)
-}
-
-function getCookie ( name ) {
-var value = null;
-if ( document.cookie && document.cookie !== '' ) {
-  var cookies = document.cookie.split( ';' );
-  for ( var i = 0; i < cookies.length; i++ ) {
-    var cookie = cookies[ i ].trim();
-    if ( cookie.substring( 0, name.length + 1 )
-      .trim() === ( name + '=' ) ) {
-      value = decodeURIComponent( cookie.substring( name.length + 1 ) );
-      break;
-    }
-  }
-}
-return value;
-}
-*/
 
 module.exports = {
     outputDir: path.resolve(__dirname, "../../static/leaseslicensing_vue"),
@@ -43,10 +18,10 @@ module.exports = {
                //axios: "axios",
                //
                 /*
-               $: "jquery",
                jQuery: "jquery",
                "select2": "../node_modules/select2/dist/js/select2.full.min.js",
                */
+               $: "jquery",
                moment: "moment",
                swal: "sweetalert2",
                //swal: Swal,
@@ -62,37 +37,5 @@ module.exports = {
                 writeToDisk: true,
             }
         },
-        /*
-        devServer: {
-            host: 'localhost',
-            port: 9000,
-            client: {
-                logging: "info",
-            },
-            headers: { 
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Credentials": true,
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-                "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
-            }
-        },
-        devServer: {
-            NODE_ENV: '"development"',
-            //WEBPACK_HOST: '"172.31.1.50:8080"',
-            WEBPACK_HOST: '"localhost:8080"',
-            PORT: '"8080"'
-        },
-        devServer: {
-            headers: { 
-                "Access-Control-Allow-Origin": "*",
-                //"Access-Control-Allow-Credentials": true,
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-                "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
-            }
-            //headers: { 'X-CSRFToken': getCookie( 'csrftoken' ) },
-            //proxy: "http://localhost:8080",
-            //proxy: "http://api.back.end",
-        }
-        */
     }
 };
