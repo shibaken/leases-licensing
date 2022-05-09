@@ -73,9 +73,9 @@ import ApprovalCancellation from '../internal/approvals/approval_cancellation.vu
 import ApprovalSuspension from '../internal/approvals/approval_suspension.vue'
 import ApprovalSurrender from '../internal/approvals/approval_surrender.vue'
 import ApprovalHistory from '../internal/approvals/approval_history.vue'
-import Vue from 'vue'
 import { api_endpoints, helpers }from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
+import { v4 as uuid } from 'uuid';
 
 export default {
     name: 'TableApprovals',
@@ -103,7 +103,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'approvals-datatable-' + vm._uid,
+            datatable_id: 'approvals-datatable-' + uuid(),
             //approvalTypesToDisplay: ['wla'],
             show_expired_surrendered: false,
             selectedWaitingListAllocationId: null,
@@ -287,7 +287,8 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            return full.holder;
+                            //return full.holder;
+                            return 'holder?';
                         }
                     }
         },
@@ -311,7 +312,7 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            return full.expiry_date_str;
+                            return full.expiry_date;
                         }
                     }
         },
@@ -354,9 +355,6 @@ export default {
                                     links +=  `<a href='#${full.id}' data-surrender-approval='${full.id}'>Surrender</a><br/>`;
                                 }
 
-                                if (full.approval_type_dict.code != 'wla') {
-                                    links +=  `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`;
-                                }
 
                             } else if (!vm.is_external){
                                 links +=  `<a href='/internal/approval/${full.id}'>View</a><br/>`;
@@ -489,7 +487,7 @@ export default {
         },
         sendData: function(params){
             let vm = this
-            vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/request_new_stickers'), params).then(
+            fetch(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/request_new_stickers'), {body: params, method: 'POST', }).then(
                 res => {
                     helpers.post_and_redirect('/sticker_replacement_fee/', {'csrfmiddlewaretoken' : vm.csrf_token, 'data': JSON.stringify(res.body)});
                 },
@@ -500,7 +498,7 @@ export default {
         },
         fetchProfile: function(){
             let vm = this;
-            Vue.http.get(api_endpoints.profile).then((response) => {
+            fetch(api_endpoints.profile).then((response) => {
                 vm.profile = response.body
 
             },(error) => {
@@ -649,8 +647,9 @@ export default {
         },
         fetchFilterLists: async function(){
             // Status values
-            const statusRes = await this.$http.get(api_endpoints.approval_statuses_dict);
-            for (let s of statusRes.body) {
+            const statusRes = await fetch(api_endpoints.approval_statuses_dict);
+            const statusData = await statusRes.json()
+            for (let s of statusData) {
                 if (this.wlaDash && !(['extended', 'awaiting_payment', 'approved'].includes(s.code))) {
                     this.statusValues.push(s);
                 //} else if (!(['extended', 'awaiting_payment', 'offered', 'approved'].includes(s.code))) {
@@ -671,8 +670,8 @@ export default {
                 confirmButtonText: 'Reissue approval',
                 //confirmButtonColor:'#d9534f'
             }).then(() => {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/reissue_approval')),JSON.stringify(data),{
-                emulateJSON:true,
+                fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/reissue_approval')),JSON.stringify(data),{
+                method: 'POST',
                 })
                 .then((response) => {
 
@@ -705,8 +704,8 @@ export default {
                 confirmButtonText: 'Reinstate approval',
                 //confirmButtonColor:'#d9534f'
             }).then(() => {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals,(approval_id+'/approval_reinstate')),{
-
+                fetch(helpers.add_endpoint_json(api_endpoints.approvals,(approval_id+'/approval_reinstate')),{
+                    method: 'POST',
                 })
                 .then((response) => {
                     swal(
@@ -765,8 +764,8 @@ export default {
                 showCancelButton: true,
                 confirmButtonText: 'Renew approval',
             }).then(() => {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=renew', {
-
+                fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=renew', {
+                    method: 'POST',
                 })
                 .then((response) => {
                    let proposal = {}
@@ -798,8 +797,8 @@ export default {
                 showCancelButton: true,
                 confirmButtonText: 'Amend approval',
             }).then(() => {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=amend', {
-
+                fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=amend', {
+                    method: 'POST',
                 })
                 .then((response) => {
                    let proposal = {}

@@ -51,7 +51,6 @@ import {
   helpers
 }
 from '@/utils/hooks';
-import Vue from 'vue';
 export default {
     name: "FileField",
     props:{
@@ -199,9 +198,13 @@ export default {
                 }
                 formData.append('input_name', this.name);
                 formData.append('csrfmiddlewaretoken', this.csrf_token);
-                let res = await Vue.http.post(this.document_action_url, formData)
-                this.documents = res.body.filedata;
-                this.commsLogId = res.body.comms_instance_id;
+                const res = await fetch(this.document_action_url, { 
+                    body: formData, 
+                    method: 'POST' 
+                })
+                const resData = await res.json()
+                this.documents = resData.filedata;
+                this.commsLogId = resData.comms_instance_id;
             }
             this.show_spinner = false;
 
@@ -224,9 +227,10 @@ export default {
             formData.append('document_id', file.id);
             formData.append('csrfmiddlewaretoken', this.csrf_token);
             if (this.document_action_url) {
-                let res = await Vue.http.post(this.document_action_url, formData)
-                this.documents = res.body.filedata;
-                this.commsLogId = res.body.comms_instance_id;
+                const res = await fetch(this.document_action_url, { body: formData, method: 'POST' })
+                const resData = await res.json()
+                this.documents = resData.filedata;
+                this.commsLogId = resData.comms_instance_id;
             }
             this.show_spinner = false;
 
@@ -242,7 +246,7 @@ export default {
             }
             formData.append('csrfmiddlewaretoken', this.csrf_token);
             if (this.document_action_url) {
-                let res = await Vue.http.post(this.document_action_url, formData)
+                let res = await fetch(this.document_action_url, { body: formData, method: 'POST' })
             }
             this.show_spinner = false;
         },
@@ -263,8 +267,9 @@ export default {
             this.show_spinner = true;
             if (this.documentActionUrl === 'temporary_document' && !this.temporary_document_collection_id) {
                 // If temporary_document, create TemporaryDocumentCollection object and allow document_action_url to update
-                const res = await Vue.http.post(this.document_action_url)
-                this.temporary_document_collection_id = res.body.id
+                const res = await fetch(this.document_action_url, { method: 'POST' })
+                const resData = await res.json()
+                this.temporary_document_collection_id = resData.id
                 await this.handleChange(e);
                 await this.$emit('update-temp-doc-coll-id', this.temporary_document_collection_id);
             } else {
@@ -292,7 +297,8 @@ export default {
                 formData.append('filename', e.target.files[0].name);
                 formData.append('_file', this.uploadFile(e));
                 formData.append('csrfmiddlewaretoken', this.csrf_token);
-                let res = await Vue.http.post(this.document_action_url, formData)
+                const res = await fetch(this.document_action_url, { body: formData, method: 'POST' })
+                const resData = await res.json()
                 /*
                 if (this.replace_button_by_text){
                     let button_name = 'button-' + this.name + e.target.dataset.que
@@ -303,8 +309,8 @@ export default {
                 }
                 */
                 
-                this.documents = res.body.filedata;
-                this.commsLogId = res.body.comms_instance_id;
+                this.documents = resData.filedata;
+                this.commsLogId = resData.comms_instance_id;
             } else {
             }
 

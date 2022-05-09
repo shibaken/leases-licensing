@@ -1,14 +1,22 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+//import Vue from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 import Profile from '@/components/user/profile.vue'
 import external_routes from '@/components/external/routes'
 import internal_routes from '@/components/internal/routes'
 
-Vue.use(Router)
+//Vue.use(Router)
+var NotFoundComponent = null
 
-export default new Router({
-    mode: 'history',
+//console.log(process.env.BASE_URL)
+const router = createRouter({
+    //history: createWebHistory(process.env.BASE_URL),
+    history: createWebHistory(),
+    //strict: true,
     routes: [
+        {
+            path: '/:pathMatch(.*)', 
+            component: NotFoundComponent
+        },
         {
           path: '/firsttime',
           name: 'first-time',
@@ -23,3 +31,5 @@ export default new Router({
         internal_routes,
     ]
 })
+
+export default router;

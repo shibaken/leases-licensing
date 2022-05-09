@@ -73,7 +73,7 @@
 <script>
 
 import datatable from '@/utils/vue/datatable.vue'
-import Vue from 'vue'
+import { v4 as uuid } from 'uuid';
 import { api_endpoints, helpers } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 
@@ -117,7 +117,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'applications-datatable-' + vm._uid,
+            datatable_id: 'applications-datatable-' + uuid(),
 
             // selected values for filtering
             filterApplicationType: sessionStorage.getItem(vm.filterApplicationType_cache_name) ? sessionStorage.getItem(vm.filterApplicationType_cache_name) : 'all',
@@ -497,10 +497,13 @@ export default {
         //    let details = '<table class="table table-striped table-bordered table-sm table-sticker-details" id="table-sticker-details-' + sticker.id + '">' + thead + tbody + '</table>'
         //    return details
         //},
-        new_application_button_clicked: function(){
-            this.$router.push({
+        new_application_button_clicked: async function(){
+            //await this.$router.isReady()
+            console.log(this.$router)
+            await this.$router.push({
                 name: 'apply_proposal'
             })
+            console.log(" new application")
         },
         discardProposal: function(proposal_id) {
             let vm = this;
@@ -512,7 +515,7 @@ export default {
                 confirmButtonText: 'Discard Application',
                 confirmButtonColor:'#dc3545'
             }).then(() => {
-                vm.$http.delete(api_endpoints.discard_proposal(proposal_id))
+                fetch(api_endpoints.discard_proposal(proposal_id), { method: 'DELETE', })
                 .then((response) => {
                     swal(
                         'Discarded',
@@ -531,13 +534,13 @@ export default {
             let vm = this;
 
             // Application Types
-            vm.$http.get(api_endpoints.application_types_dict+'?apply_page=False').then((response) => {
+            fetch(api_endpoints.application_types_dict+'?apply_page=False').then((response) => {
                 vm.application_types = response.body
             },(error) => {
             })
 
             // Application Statuses
-            vm.$http.get(api_endpoints.application_statuses_dict).then((response) => {
+            fetch(api_endpoints.application_statuses_dict).then((response) => {
                 if (vm.is_internal){
                     vm.application_statuses = response.body.internal_statuses
                 } else {

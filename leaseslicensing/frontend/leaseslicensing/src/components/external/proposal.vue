@@ -89,7 +89,6 @@
 
 <script>
 import ApplicationForm from '../form.vue';
-import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
@@ -378,7 +377,7 @@ export default {
         if (this.$refs.application_form.componentMapOn) {
             payload.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
         }
-        const res = await vm.$http.post(url, payload);
+        const res = await fetch(url, { body: JSON.stringify(payload), method: 'POST' });
         if (res.ok) {
             if (withConfirm) {
                 swal(
@@ -389,15 +388,18 @@ export default {
             };
             vm.savingProposal=false;
             //this.$refs.application_form.incrementComponentMapKey();
-            this.proposal = res.body;
+            const resData = res.json()
+            this.proposal = resData;
             this.$nextTick(async () => {
                 this.$refs.application_form.incrementComponentMapKey();
             });
-            return res;
+            return resData;
         } else {
-            swal({
+            const err = await res.json()
+            swal.fire({
                 title: "Please fix following errors before saving",
-                text: err.bodyText,
+                //text: err.bodyText,
+                text: JSON.stringify(err),
                 type:'error'
             });
             vm.savingProposal=false;
@@ -572,43 +574,23 @@ export default {
 
 
   beforeRouteEnter: function(to, from, next) {
+      console.log(to)
+      console.log(from)
+      //console.log(next)
     if (to.params.proposal_id) {
       let vm = this;
-      Vue.http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
-          next(vm => {
-            vm.loading.push('fetching proposal')
-            vm.proposal = res.body;
-            //used in activities_land for T Class licence
-            vm.loading.splice('fetching proposal', 1);
-            vm.setdata(vm.proposal.readonly);
-              /*
-            Vue.http.get(helpers.add_endpoint_json(api_endpoints.proposals,to.params.proposal_id+'/amendment_request')).then((res) => {
-                      vm.setAmendmentData(res.body);
-                },
-              err => {
-                        console.log(err);
-                  });
-              */
+      fetch(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
+          next(async (vm) => {
+              console.log(vm)
+              const proposalData = await res.json()
+              console.log(proposalData)
+              vm.proposal = proposalData;
               });
           },
         err => {
           console.log(err);
         });
     }
-      /*
-    else {
-      Vue.http.post('/api/proposal.json').then(res => {
-          next(vm => {
-            vm.loading.push('fetching proposal')
-            vm.proposal = res.body;
-            vm.loading.splice('fetching proposal', 1);
-          });
-        },
-        err => {
-          console.log(err);
-        });
-    }
-    */
   }
 }
 </script>

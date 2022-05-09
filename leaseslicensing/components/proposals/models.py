@@ -58,7 +58,6 @@ import logging
 from leaseslicensing.settings import APPLICATION_TYPE_REGISTRATION_OF_INTEREST, APPLICATION_TYPE_LEASE_LICENCE, \
     GROUP_NAME_ASSESSOR, GROUP_NAME_APPROVER
 
-#logger = logging.getLogger(__name__)
 logger = logging.getLogger('leaseslicensing')
 
 
@@ -97,27 +96,6 @@ def update_additional_doc_filename(instance, filename):
                                                                instance.proposal.id,
                                                                instance.proposal_additional_document_type.additional_document_type.name,
                                                                filename)
-
-
-def application_type_choicelist():
-    try:
-        return [( (choice.name), (choice.name) ) for choice in ApplicationType.objects.filter(visible=True)]
-    except:
-        # required because on first DB tables creation, there are no ApplicationType objects -- setting a default value
-        return ( ('T Class', 'T Class'), )
-
-#class ProposalType(models.Model):
-#    description = models.CharField(max_length=256, blank=True, null=True)
-#    name = models.CharField(verbose_name='Application name (eg. T Class, Filming, Event, E Class)', max_length=64, choices=application_type_choicelist(), default='T Class')
-#    replaced_by = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
-#    version = models.SmallIntegerField(default=1, blank=False, null=False)
-#
-#    def __str__(self):
-#        return '{} - v{}'.format(self.name, self.version)
-#
-#    class Meta:
-#        app_label = 'leaseslicensing'
-#        unique_together = ('name', 'version')
 
 
 class AdditionalDocumentType(RevisionedMixin):
@@ -677,25 +655,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         ('not_reviewed', 'Not Reviewed'), ('awaiting_amendments', 'Awaiting Amendments'), ('amended', 'Amended'),
         ('accepted', 'Accepted'))
 
-    #APPLICATION_TYPE_CHOICES = (
-    #PROPOSAL_TYPE_CHOICES = (
-    #    ('new_proposal', 'New Application'),
-    #    ('amendment', 'Amendment'),
-    #    ('renewal', 'Renewal'),
-    #    ('external', 'External'),
-    #)
-
     proposal_type = models.ForeignKey(ProposalType, blank=True, null=True, on_delete=models.SET_NULL)
-    #proposal_type = models.CharField('Proposal Type', max_length=40, choices=PROPOSAL_TYPE_CHOICES,
-     #                                   default=PROPOSAL_TYPE_CHOICES[0][0])
-    #proposal_state = models.PositiveSmallIntegerField('Proposal state', choices=PROPOSAL_STATE_CHOICES, default=1)
-
     proposed_issuance_approval = JSONField(blank=True, null=True)
-    #hard_copy = models.ForeignKey(Document, blank=True, null=True, related_name='hard_copy')
-
-    # customer_status = models.CharField('Customer Status', max_length=40, choices=CUSTOMER_STATUS_CHOICES,
-    #                                    default=CUSTOMER_STATUS_CHOICES[1][0])
-    #applicant = models.ForeignKey(Organisation, blank=True, null=True, related_name='proposals')
     ind_applicant = models.IntegerField(null=True, blank=True)  #EmailUserRO
     org_applicant = models.ForeignKey(
         Organisation,
@@ -705,16 +666,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     proxy_applicant = models.IntegerField(null=True, blank=True)  #EmailUserRO
     lodgement_number = models.CharField(max_length=9, blank=True, default='')
     lodgement_sequence = models.IntegerField(blank=True, default=0)
-    #lodgement_date = models.DateField(blank=True, null=True)
     lodgement_date = models.DateTimeField(blank=True, null=True)
-
-    #proxy_applicant = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proxy', on_delete=models.SET_NULL)
-    #submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals', on_delete=models.SET_NULL)
     submitter = models.IntegerField(null=True)  #EmailUserRO
-
-    #assigned_officer = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_assigned', on_delete=models.SET_NULL)
-    #assigned_approver = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_proposals_approvals', on_delete=models.SET_NULL)
-    #approved_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_approved_by', on_delete=models.SET_NULL)
     assigned_officer = models.IntegerField(null=True) #EmailUserRO
     assigned_approver = models.IntegerField(null=True) #EmailUserRO
     approved_by = models.IntegerField(null=True) #EmailUserRO
@@ -732,8 +685,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                      default=REVIEW_STATUS_CHOICES[0][0])
 
     approval = models.ForeignKey('leaseslicensing.Approval',null=True,blank=True, on_delete=models.SET_NULL)
-
-    #previous_application = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
     previous_application = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
     proposed_decline_status = models.BooleanField(default=False)
     # Special Fields
@@ -802,126 +753,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def __str__(self):
         return str(self.id)
 
-    #@classmethod
-    #def application_types_dict(cls, apply_page):
-    #    type_list = []
-    #    for application_type in Proposal.__subclasses__():
-    #        if apply_page:
-    #            if application_type.apply_page_visibility:
-    #                type_list.append({
-    #                    "code": application_type.code,
-    #                    "description": application_type.description,
-    #                    "new_application_text": application_type.new_application_text
-    #                    })
-    #        else:
-    #            type_list.append({
-    #                "code": application_type.code,
-    #                "description": application_type.description,
-    #                "new_application_text": application_type.new_application_text
-    #            })
-
-    #    return type_list
-
     #Append 'P' to Proposal id to generate Lodgement number. Lodgement number and lodgement sequence are used to generate Reference.
     def save(self, *args, **kwargs):
-        #self.update_property_cache(False)
-        #orig_processing_status = self._original_state['processing_status']
         super(Proposal, self).save(*args,**kwargs)
-        #if self.processing_status != orig_processing_status:
-         #   self.save(version_comment='processing_status: {}'.format(self.processing_status))
 
         if self.lodgement_number == '':
             new_lodgment_id = 'A{0:06d}'.format(self.pk)
             self.lodgement_number = new_lodgment_id
-            #self.save(version_comment='processing_status: {}'.format(self.processing_status))
             self.save()
-
-    #def get_property_cache(self):
-    #    '''
-    #    Get properties which were previously resolved.
-    #    '''
-    #    if len(self.property_cache) == 0:
-    #        self.update_property_cache()
-
-    #    if self.processing_status == self.PROCESSING_STATUS_AWAITING_PAYMENT:
-    #        self.update_property_cache()
-
-    #    return self.property_cache
-
-    #def get_property_cache_key(self, key):
-    #    '''
-    #    Get properties which were previously resolved with key.
-    #    '''
-    #    try:
-
-    #        self.property_cache[key]
-
-    #    except KeyError:
-    #        self.update_property_cache()
-
-    #    return self.property_cache[key]
-
-    #def update_property_cache(self, save=True):
-    #    '''
-    #    Refresh cached properties with updated properties.
-    #    '''
-    #    logger.debug('Proposal.update_property_cache()')
-
-    #    self.property_cache['fee_paid'] = self._fee_paid
-    #    self.set_property_cache_fee_amount(self._fee_amount)
-
-    #    if save is True:
-    #        self.save()
-
-    #    return self.property_cache
-
-    #@property
-    #def invoice(self):
-    #    """ specific to application fee invoices """
-    #    return Invoice.objects.get(reference=self.fee_invoice_reference) if self.fee_invoice_reference else None
-
-    #@property
-    #def fee_paid(self):
-    #    """ get cached value, if it exists """
-    #    if 'fee_paid' not in self.property_cache:
-    #        self.update_property_cache()
-
-    #    return self.get_property_cache_key('fee_paid')
-
-    #@property
-    #def _fee_paid(self):
-    #    if (self.invoice and self.invoice.payment_status in ['paid','over_paid']) or self.proposal_type=='amendment':
-    #        return True
-    #    return False
-
-    #@property
-    #def fee_amount(self):
-    #    """ get cached value, if it exists """
-    #    if 'fee_amount' not in self.property_cache:
-    #        self.update_property_cache()
-
-    #    return self.get_property_cache_key('fee_amount')
-
-    #@property
-    #def _fee_amount(self):
-    #    return self.invoice.amount if self.invoice and self._fee_paid else None
-
-    #def set_property_cache_fee_amount(self, amount):
-    #    '''
-    #    Setter for fee_amount on the property cache.
-    #    '''
-    #    import json
-    #    from decimal import Decimal as D
-
-    #    class DecimalEncoder(json.JSONEncoder):
-    #        def default(self, obj):
-    #            if isinstance(obj, D):
-    #                return float(obj)
-    #            return json.JSONEncoder.default(self, obj)
-
-    #    if self.id:
-    #        data = DecimalEncoder().encode(amount)
-    #        self.property_cache['fee_amount'] = data
 
     @property
     def can_create_final_approval(self):
@@ -1018,33 +857,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         else:
             return 'submitter'
 
-    @property
-    def applicant_training_completed(self):
-        today = timezone.now().date()
-        timedelta = datetime.timedelta
-        if self.org_applicant: 
-            if self.org_applicant.event_training_completed:
-                future_date =self.org_applicant.event_training_date+timedelta(days=365)
-                if future_date < today:
-                    return False
-                else:
-                    return self.org_applicant.event_training_completed
-        elif self.proxy_applicant:
-            if self.proxy_applicant.system_settings.event_training_completed:
-                future_date =self.proxy_applicant.system_settings.event_training_date+timedelta(days=365)
-                if future_date < today:
-                    return False
-                else:
-                    return self.proxy_applicant.system_settings.event_training_completed
-        else:
-            if self.submitter.system_settings.event_training_completed:
-                future_date =self.submitter.system_settings.event_training_date+timedelta(days=365)
-                if future_date < today:
-                    return False
-                else:
-                    return self.submitter.system_settings.event_training_completed
-        return False
-
     def qa_officers(self, name=None):
         if not name:
             return QAOfficerGroup.objects.get(default=True).members.all().values_list('email', flat=True)
@@ -1120,24 +932,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         return referrals.all()[:3]
 
     @property
-    def land_parks(self):
-        return self.parks.filter(park__park_type='land')
-
-    @property
-    def land_parks_exclude_free(self):
-        """ exlude parks with free admission """
-        return self.parks.filter(park__park_type='land').exclude(park__adult_price=D(0.0), park__child_price=D(0.0))
-
-    @property
-    def marine_parks(self):
-        return self.parks.filter(park__park_type='marine')
-
-    @property
-    def regions_list(self):
-        #return self.region.split(',') if self.region else []
-        return [self.region.name] if self.region else []
-
-    @property
     def assessor_assessment(self):
         qs = self.assessment.filter(referral=None)
         return qs[0] if qs else None
@@ -1175,14 +969,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         """ :return: True if the application is in one of the processable status for Assessor role."""
         return True if self.processing_status in Proposal.OFFICER_PROCESSABLE_STATE else True
 
-    # @property
-    # def can_view_district_table(self):
-    #     officer_view_state = ['with_district_assessor','approved','declined','partially_approved','partially_declined', ]
-    #     if self.filming_approval_type=='lawful_authority' and self.processing_status in officer_view_state:
-    #         return True
-    #     else:
-    #         return False
-
     @property
     def amendment_requests(self):
         qs =AmendmentRequest.objects.filter(proposal = self)
@@ -1215,9 +1001,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
             raise exceptions.ProposalNotComplete()
         missing_fields = []
         required_fields = {
-        #    'region':'Region/District',
-        #    'title': 'Title',
-        #    'activity': 'Activity'
         }
         for k,v in required_fields.items():
             val = getattr(self,k)
@@ -1233,14 +1016,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         for id in group_ids:
             logger.info(id)
             recipients.append(EmailUser.objects.get(id=id).email)
-        #try:
-            #recipients = ProposalAssessorGroup.objects.get(region=self.region).members_email
-        #except:
-            #recipients = ProposalAssessorGroup.objects.get(default=True).members_email
-
-        ## dead code from COLS - required here?
-        #if self.submitter.email not in recipients:
-        #    recipients.append(self.submitter.email)
         return recipients
 
     @property
@@ -1251,14 +1026,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         for id in group_ids:
             logger.info(id)
             recipients.append(EmailUser.objects.get(id=id).email)
-        #try:
-            #recipients = ProposalApproverGroup.objects.get(region=self.region).members_email
-        #except:
-            #recipients = ProposalApproverGroup.objects.get(default=True).members_email
-
-        ## dead code from COLS - required here?
-        #if self.submitter.email not in recipients:
-        #    recipients.append(self.submitter.email)
         return recipients
 
     #Check if the user is member of assessor group for the Proposal
@@ -1275,9 +1042,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         logger.info(type(user))
         logger.info(user)
         logger.info(user.id)
-        #if self.processing_status == 'on_hold' or self.processing_status == 'with_assessor' or self.processing_status == 'with_referral' or self.processing_status == 'with_assessor_conditions':
         if self.processing_status in ['on_hold', 'with_qa_officer', 'with_assessor', 'with_referral', 'with_assessor_conditions']:
-            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
             logger.info("self.__assessor_group().get_system_group_member_ids()")
             logger.info(self.get_assessor_group().get_system_group_member_ids())
             return user.id in self.get_assessor_group().get_system_group_member_ids()
@@ -1285,18 +1050,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
             return user.id in self.get_approver_group().get_system_group_member_ids()
         else:
             return False
-
-#    #To allow/ prevent internal user to edit activities (Land and Marine) for T-class licence
-#    #still need to check to assessor mode in on or not
-#    def can_edit_activities(self,user):
-#        if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
-#            #return self.__assessor_group() in user.proposalassessorgroup_set.all()
-#            return user.id in self.__assessor_group().get_system_group_member_ids()
-#        elif self.processing_status == 'with_approver':
-#            #return self.__approver_group() in user.proposalapprovergroup_set.all()
-#            return user.id in self.__approver_group().get_system_group_member_ids()
-#        else:
-#            return False
 
     def can_edit_period(self,user):
         if self.processing_status == 'with_assessor' or self.processing_status == 'with_assessor_conditions':
@@ -1367,52 +1120,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         except:
             raise ValidationError('Please upload a valid shapefile')
 
-    
-    # proposal.utils.proposal_submit appears to be used instead
-    #def submit(self, request, viewset):
-    #    from leaseslicensing.components.proposals.utils import save_proponent_data
-    #    with transaction.atomic():
-    #        if self.can_user_edit:
-    #            # Save the data first
-    #            save_proponent_data(self,request,viewset)
-    #            # Check if the special fields have been completed
-    #            missing_fields = self.__check_proposal_filled_out()
-    #            if missing_fields:
-    #                error_text = 'The proposal has these missing fields, {}'.format(','.join(missing_fields))
-    #                raise exceptions.ProposalMissingFields(detail=error_text)
-    #            self.submitter = request.user
-    #            #self.lodgement_date = datetime.datetime.strptime(timezone.now().strftime('%Y-%m-%d'),'%Y-%m-%d').date()
-    #            self.lodgement_date = timezone.now()
-    #            if self.amendment_requests:
-    #                qs = self.amendment_requests.filter(status="requested")
-    #                if qs:
-    #                    for q in qs:
-    #                        q.status = 'amended'
-    #                        q.save()
-
-    #            # Create a log entry for the proposal
-    #            self.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
-    #            # Create a log entry for the organisation
-    #            #self.applicant.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
-    #            applicant_field=getattr(self, self.applicant_field)
-    #            applicant_field.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id),request)
-
-    #            ret1 = send_submit_email_notification(request, self)
-    #            ret2 = send_external_submit_email_notification(request, self)
-
-    #            #self.save_form_tabs(request)
-    #            if ret1 and ret2:
-    #                self.processing_status = self.PROCESSING_STATUS_WITH_ASSESSOR
-    #                self.documents.all().update(can_delete=False)
-    #                self.save()
-    #            else:
-    #                raise ValidationError('An error occurred while submitting proposal (Submit email notifications failed)')
-
-    #            # Create questions if not exist
-    #            self.make_questions_ready()
-    #        else:
-    #            raise ValidationError('You can\'t edit this proposal at this moment')
-
     def make_questions_ready(self, referral=None):
         """
         Create checklist answers
@@ -1425,24 +1132,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
             for section_checklist in section_checklists:
                 for checklist_question in section_checklist.questions.filter(enabled=True):
                     answer = ProposalAssessmentAnswer.objects.create(proposal_assessment=proposal_assessment, checklist_question=checklist_question)
-
-    #def make_referral_questions_ready(self):
-    #    """
-    #    Create referral checklist questions
-    #    Assessment instance already exits then skip.
-    #    """
-    #    try:
-    #        assessor_assessment = ProposalAssessment.objects.get(proposal=self, referral=None)
-    #    except ProposalAssessment.DoesNotExist:
-    #        assessor_assessment = ProposalAssessment.objects.create(proposal=self)
-    #        section_checklists = SectionChecklist.objects.filter(
-    #            application_type=self.application_type, list_type=SectionChecklist.LIST_TYPE_ASSESSOR, enabled=True
-    #        )
-    #        for section_checklist in section_checklists:
-    #            for checklist_question in section_checklist.questions.filter(enabled=True):
-    #                answer = ProposalAssessmentAnswer.objects.create(
-    #                    proposal_assessment=assessor_assessment, question=checklist_question
-    #                    )
 
     def update(self,request,viewset):
         from leaseslicensing.components.proposals.utils import save_proponent_data
@@ -1606,12 +1295,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def add_default_requirements(self):
         #Add default standard requirements to Proposal
         due_date=None
-        # if self.application_type.name==ApplicationType.TCLASS:
-        #     due_date=self.other_details.nominated_start_date
-        # if self.application_type.name==ApplicationType.FILMING:
-        #     due_date=self.filming_activity.commencement_date
-        # if self.application_type.name==ApplicationType.EVENT:
-        #     due_date=self.event_activity.commencement_date
         default_requirements=ProposalStandardRequirement.objects.filter(application_type=self.application_type, default=True, obsolete=False)
         if default_requirements:
             for req in default_requirements:
@@ -1644,36 +1327,19 @@ class Proposal(DirtyFieldsMixin, models.Model):
             raise ValidationError('The provided status cannot be found.')
 
     def reissue_approval(self,request,status):
-        if self.application_type.name==ApplicationType.FILMING and self.filming_approval_type=='lawful_authority':
-            allowed_status=['approved', 'partially_approved']
-            if not self.processing_status in allowed_status and not self.is_lawful_authority_finalised:
-                raise ValidationError('You cannot change the current status at this time')
-            elif self.approval and self.approval.can_reissue:
-                if self.get_assessor_group() in request.user.proposalassessorgroup_set.all():
-                    self.processing_status = status
-                    self.save(version_comment='Reissue Approval: {}'.format(self.approval.lodgement_number))
-                    #self.save()
-                    # Create a log entry for the proposal
-                    self.log_user_action(ProposalUserAction.ACTION_REISSUE_APPROVAL.format(self.id),request)
-                else:
-                    raise ValidationError('Cannot reissue Approval. User not permitted.')
+        if not self.processing_status=='approved' :
+            raise ValidationError('You cannot change the current status at this time')
+        elif self.approval and self.approval.can_reissue:
+            if self.get_approver_group() in request.user.proposalapprovergroup_set.all():
+                self.processing_status = status
+                #self.save()
+                self.save(version_comment='Reissue Approval: {}'.format(self.approval.lodgement_number))
+                # Create a log entry for the proposal
+                self.log_user_action(ProposalUserAction.ACTION_REISSUE_APPROVAL.format(self.id),request)
             else:
-                raise ValidationError('Cannot reissue Approval')
-
+                raise ValidationError('Cannot reissue Approval. User not permitted.')
         else:
-            if not self.processing_status=='approved' :
-                raise ValidationError('You cannot change the current status at this time')
-            elif self.approval and self.approval.can_reissue:
-                if self.get_approver_group() in request.user.proposalapprovergroup_set.all():
-                    self.processing_status = status
-                    #self.save()
-                    self.save(version_comment='Reissue Approval: {}'.format(self.approval.lodgement_number))
-                    # Create a log entry for the proposal
-                    self.log_user_action(ProposalUserAction.ACTION_REISSUE_APPROVAL.format(self.id),request)
-                else:
-                    raise ValidationError('Cannot reissue Approval. User not permitted.')
-            else:
-                raise ValidationError('Cannot reissue Approval')
+            raise ValidationError('Cannot reissue Approval')
 
     def proposed_decline(self,request,details):
         with transaction.atomic():
@@ -1846,8 +1512,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 if not ((self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR) or (self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE and self.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR_CONDITIONS)):
                     raise ValidationError('You cannot propose for approval')
                 self.proposed_issuance_approval = {
-                    # 'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
-                    # 'expiry_date' : details.get('expiry_date').strftime('%d/%m/%Y'),
                     'details': details.get('details'),
                     'cc_email':details.get('cc_email'),
                     'decision':details.get('decision')
@@ -1888,8 +1552,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     expiry_date = datetime.datetime.strptime(details.get('due_date'), '%d/%m/%Y').date(),
                     start_date = datetime.datetime.strptime(details.get('start_date'), '%d/%m/%Y').date(),
                     submitter = self.submitter,
-                    #org_applicant = self.applicant if isinstance(self.applicant, Organisation) else None,
-                    #proxy_applicant = self.applicant if isinstance(self.applicant, EmailUser) else None,
                     org_applicant = self.org_applicant,
                     proxy_applicant = self.proxy_applicant,
                     lodgement_number = lodgement_number
@@ -2339,7 +2001,6 @@ class ApplicationFeeDiscount(RevisionedMixin):
     discount_type = models.CharField(max_length=40, choices=DISCOUNT_TYPE_CHOICES)
     discount = models.FloatField(validators=[MinValueValidator(0.0)])
     created = models.DateTimeField(auto_now_add=True)
-    #ser = models.ForeignKey(EmailUser,on_delete=models.PROTECT, related_name='created_by_fee_discount')
     user = models.IntegerField() #EmailUserRO
     reset_date = models.DateTimeField(blank=True, null=True)
 
@@ -2364,8 +2025,6 @@ class ApplicationFeeDiscount(RevisionedMixin):
 
 
 class ProposalGeometry(models.Model):
-    #proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE)
-    #polygons = MultiPolygonField(srid=4326, blank=True, null=True)
     proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE, related_name="proposalgeometry")
     polygon = PolygonField(srid=4326, blank=True, null=True)
     intersects = models.BooleanField(default=False)
@@ -3119,22 +2778,9 @@ class Referral(RevisionedMixin):
                 raise
 
 
-    # Properties
-    @property
-    def region(self):
-        return self.proposal.region
-
-    @property
-    def activity(self):
-        return self.proposal.activity
-
     @property
     def title(self):
         return self.proposal.title
-
-    # @property
-    # def applicant(self):
-    #     return self.proposal.applicant.name
 
     @property
     def applicant(self):
@@ -3343,18 +2989,6 @@ class SectionChecklist(RevisionedMixin):
     def number_of_enabled_questions(self):
         return self.questions.filter(enabled=True).count() if self.questions and self.questions.filter(enabled=True) else 0  # 'questions' is a related_name of ChecklistQuestion
 
-    # @property
-    # def application_type_name(self):
-    #     return self.application_type.get_name_display()
-    #
-    # @property
-    # def section_name(self):
-    #     return self.get_section_display()
-    #
-    # @property
-    # def type_name(self):
-    #     return self.get_list_type_display()
-
 
 class ChecklistQuestion(RevisionedMixin):
     TYPE_CHOICES = (
@@ -3457,14 +3091,6 @@ class QAOfficerReferral(RevisionedMixin):
         return QAOfficer.objects.filter(sent_by=self.qaofficer, proposal=self.proposal)[:2]
 
     # Properties
-    @property
-    def region(self):
-        return self.proposal.region
-
-    @property
-    def activity(self):
-        return self.proposal.activity
-
     @property
     def title(self):
         return self.proposal.title

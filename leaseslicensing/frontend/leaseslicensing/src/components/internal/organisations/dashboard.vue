@@ -62,7 +62,6 @@
 </div>
 </template>
 <script>
-import Vue from 'vue'
 import $ from 'jquery'
 import datatable from '@vue-utils/datatable.vue'
 import {
@@ -245,7 +244,7 @@ export default {
         },
         fetchProfile: function(){
         let vm = this;
-        Vue.http.get(api_endpoints.profile).then((response) => {
+        this.$http.get(api_endpoints.profile).then((response) => {
             vm.profile = response.body
 
          },(error) => {
