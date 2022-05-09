@@ -138,66 +138,43 @@ export default {
 
             this.validation_form.resetForm();
         },
-        fetchAmendmentChoices: function(){
-            let vm = this;
-            vm.$http.get('/api/amendment_request_reason_choices.json').then((response) => {
-                vm.reason_choices = response.body;
-
-            },(error) => {
+        fetchAmendmentChoices: async function(){
+            try {
+                const res = await fetch('/api/amendment_request_reason_choices.json')
+                const resData = await res.json()
+                this.reason_choices = Object.assign({}, resData);
+            } catch (error) {
                 console.log(error);
-            } );
+            }
         },
-        sendData:function(){
-            console.log('in sendData')
-            let vm = this;
-            vm.errors = false;
-            //let amendment = JSON.parse(JSON.stringify(vm.amendment));
-            //let formData = new FormData()
-            //var files = vm.$refs.filefield.files;
-            //$.each(files, function (idx, v) {
-            //    var file = v['file'];
-            //    var filename = v['name'];
-            //    var name = 'file-' + idx;
-            //    formData.append(name, file, filename);
-            //});
-            //amendment.num_files = files.length;
-            //amendment.input_name = 'requirement_doc';
-            ////amendment.proposal_id = vm.proposal.id;
-            //amendment.proposal = vm.proposal
-            //amendment.update = true;
-
-            //formData.append('data', JSON.stringify(amendment));
-            // vm.$http.post('/api/amendment_request.json',JSON.stringify(amendment),{
-            //vm.$http.post('/api/amendment_request.json', formData, { emulateJSON: true, }).then(
-            console.log('vm.amendment')
-            console.log(vm.amendment)
-            vm.$http.post('/api/amendment_request.json', vm.amendment).then(
-                response => {
-                    //vm.$parent.loading.splice('processing contact',1);
-                    swal(
-                         'Sent',
-                         'An email has been sent to the applicant with the request to amend this application',
-                         'success'
-                    );
-                    vm.amendingProposal = true;
-                    vm.close();
-                    //vm.$emit('refreshFromResponse',response);
-                    this.$http.get(`/api/proposal/${vm.proposal.id}/internal_proposal.json`).then(
-                        response => {
-                            vm.$emit('refreshFromResponse', response);
-                        }, error => {
-                            console.log(error);
-                        }
-                    );
-                    vm.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
-                }, error => {
+        sendData:async function(){
+            this.errors = false;
+            try {
+                const res = await fetch('/api/amendment_request.json', 
+                    { body: vm.amendment,
+                        method: 'POST'
+                    })
+                swal(
+                     'Sent',
+                     'An email has been sent to the applicant with the request to amend this application',
+                     'success'
+                );
+                this.amendingProposal = true;
+                this.close();
+                try {
+                    const res = await fetch(`/api/proposal/${vm.proposal.id}/internal_proposal.json`)
+                    const resData = await res.json()
+                    await this.$emit('refreshFromResponse', response);
+                } catch (error) {
                     console.log(error);
-                    vm.errors = true;
-                    vm.errorString = helpers.apiVueResourceError(error);
-                    vm.amendingProposal = true;
-
                 }
-            );
+                this.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
+            } catch (error) {
+                console.log(error);
+                this.errors = true;
+                this.errorString = helpers.apiVueResourceError(error);
+                this.amendingProposal = true;
+            }
         },
         addFormValidations: function() {
             let vm = this;
