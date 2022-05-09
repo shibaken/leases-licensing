@@ -98,9 +98,6 @@ importo.py
 uwsgi*.ini
 *.djcache
 
-#npm locks
-*-lock.json
-
 # npm build files
 leaseslicensing/static/leaseslicensing_vue/
 

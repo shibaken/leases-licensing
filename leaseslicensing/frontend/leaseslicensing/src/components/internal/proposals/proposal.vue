@@ -993,14 +993,13 @@ export default {
         },
         assignRequestUser: async function(){
             console.log('in assignRequestUser')
-            let vm = this;
             try {
                 const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/assign_request_user')))
                 const resData = await response.json();
-                vm.proposal = Object.assign({}, resData);
-                vm.updateAssignedOfficerSelect();
+                this.proposal = Object.assign({}, resData);
+                this.updateAssignedOfficerSelect();
             } catch (error) {
-                vm.updateAssignedOfficerSelect();
+                this.updateAssignedOfficerSelect();
                 swal.fire(
                     'Proposal Error',
                     helpers.apiVueResourceError(error),
@@ -1009,156 +1008,134 @@ export default {
             }
         },
         refreshFromResponse:function(response){
-            console.log('in refreshFromResponse')
-            console.log('response')
-            console.log(response)
-            let vm = this;
-            vm.proposal = helpers.copyObject(response.body);
-            vm.$nextTick(() => {
-                vm.initialiseAssignedOfficerSelect(true);
-                vm.updateAssignedOfficerSelect();
+            this.proposal = helpers.copyObject(response.body);
+            this.$nextTick(() => {
+                this.initialiseAssignedOfficerSelect(true);
+                this.updateAssignedOfficerSelect();
             });
         },
-        /*
-        refreshRequirements: function(bool){
-              let vm=this;
-              //vm.proposal.requirements_completed=bool;
-              //console.log('here', bool);
-              vm.requirementsComplete = bool;
-        },
-        */
-        assignTo: function(){
+        assignTo: async function(){
             console.log('in assignTo')
-            let vm = this;
             let unassign = true;
             let data = {};
-            if (vm.processing_status == 'With Approver'){
-                unassign = vm.proposal.assigned_approver != null && vm.proposal.assigned_approver != 'undefined' ? false: true;
-                data = {'assessor_id': vm.proposal.assigned_approver};
+            if (this.processing_status == 'With Approver'){
+                unassign = this.proposal.assigned_approver != null && this.proposal.assigned_approver != 'undefined' ? false: true;
+                data = {'assessor_id': this.proposal.assigned_approver};
             }
             else{
-                unassign = vm.proposal.assigned_officer != null && vm.proposal.assigned_officer != 'undefined' ? false: true;
-                data = {'assessor_id': vm.proposal.assigned_officer};
+                unassign = this.proposal.assigned_officer != null && this.proposal.assigned_officer != 'undefined' ? false: true;
+                data = {'assessor_id': this.proposal.assigned_officer};
             }
             if (!unassign){
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id+'/assign_to')),JSON.stringify(data),{
-                    emulateJSON:true
-                }).then((response) => {
-                    vm.proposal = response.body;
-                    vm.updateAssignedOfficerSelect();
-                }, (error) => {
-                    vm.updateAssignedOfficerSelect();
-                    swal(
+                try {
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id+'/assign_to')),
+                    {
+                        body: JSON.stringify(data),
+                        method: 'POST',
+                    })
+                    const resData = await response.json()
+                    this.proposal = Object.assign({}, resData);
+                    this.updateAssignedOfficerSelect();
+                } catch (error) {
+                    this.updateAssignedOfficerSelect();
+                    swal.fire(
                         'Proposal Error',
                         helpers.apiVueResourceError(error),
                         'error'
                     )
-                });
+                }
             }
             else{
-                vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id+'/unassign')))
-                .then((response) => {
-                    vm.proposal = response.body;
-                    vm.updateAssignedOfficerSelect();
-                }, (error) => {
-                    vm.updateAssignedOfficerSelect();
-                    swal(
+                try {
+                    const response = fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id+'/unassign')))
+                    const responseData = await response.json()
+                    this.proposal = Object.assign({}, responseData);
+                    this.updateAssignedOfficerSelect();
+                } catch (error) {
+                    this.updateAssignedOfficerSelect();
+                    swal.fire(
                         'Proposal Error',
                         helpers.apiVueResourceError(error),
                         'error'
                     )
-                });
+                }
             }
         },
-        switchStatus: function(new_status){
-            console.log('in switchStatus')
-            console.log(this.proposal.processing_status)
-            console.log(new_status)
-
-            let vm = this;
-            if(vm.proposal.processing_status == 'With Assessor' && new_status == 'with_assessor_requirements'){
-                vm.checkAssessorData();
+        switchStatus:async function(new_status){
+            if(this.proposal.processing_status == 'With Assessor' && new_status == 'with_assessor_requirements'){
+                this.checkAssessorData();
                 let formData = new FormData(vm.form);
                 let data = {'status': new_status, 'approver_comment': vm.approver_comment}
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), JSON.stringify(data),{
-                    emulateJSON:true,
-                })
-                .then((response) => {
-                    console.log('0 response.body: ')
-                    console.log(response.body)
-                    vm.proposal = response.body;
-                    vm.approver_comment='';
-                    vm.$nextTick(() => {
-                        vm.initialiseAssignedOfficerSelect(true);
-                        vm.updateAssignedOfficerSelect();
+                try {
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), 
+                    {
+                        body: JSON.stringify(data),
+                        method: 'POST',
+                    })
+                    const responseData = await response.json()
+                    this.proposal = responseData;
+                    this.approver_comment='';
+                    this.$nextTick(() => {
+                        this.initialiseAssignedOfficerSelect(true);
+                        this.updateAssignedOfficerSelect();
                     });
-                }, (error) => {
-                    swal(
+                } catch (error) {
+                    swal.fire(
                         'Proposal Error',
                         helpers.apiVueResourceError(error),
                         'error'
                     )
-                });
+                }
             }
 
             //if approver is pushing back proposal to Assessor then navigate the approver back to dashboard page
-            else if(vm.proposal.processing_status == 'With Approver' && (new_status == 'with_assessor_requirements' || new_status=='with_assessor')) {
-                let data = {'status': new_status, 'approver_comment': vm.approver_comment}
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')),JSON.stringify(data),{
-                    emulateJSON:true,
-                })
-                .then((response) => {
-                    vm.proposal = response.body;
-                    vm.approver_comment='';
-                    vm.$nextTick(() => {
-                        vm.initialiseAssignedOfficerSelect(true);
-                        vm.updateAssignedOfficerSelect();
+            else if(this.proposal.processing_status == 'With Approver' && (new_status == 'with_assessor_requirements' || new_status=='with_assessor')) {
+                let data = {'status': new_status, 'approver_comment': this.approver_comment}
+                try {
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')),
+                    {
+                        body: JSON.stringify(data),
+                        method: 'POST',
+                    })
+                    const responseData = await response.json()
+                    this.proposal = Object.assign({}, responseData);
+                    this.approver_comment='';
+                    this.$nextTick(() => {
+                        this.initialiseAssignedOfficerSelect(true);
+                        this.updateAssignedOfficerSelect();
                     });
-                    vm.$router.push({ path: '/internal' });
-                }, (error) => {
-                    swal(
+                    this.$router.push({ path: '/internal' });
+                } catch (error) {
+                    swal.fire(
                         'Proposal Error',
                         helpers.apiVueResourceError(error),
                         'error'
                     )
-                });
+                }
             } else {
                 let data = {'status': new_status, 'approver_comment': vm.approver_comment}
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), JSON.stringify(data),{
-                    emulateJSON:true,
-                })
-                .then((response) => {
-                    console.log('2 response.body:')
-                    console.log(response.body)
-
-                    vm.proposal = response.body;
-                    vm.approver_comment='';
-                    vm.$nextTick(() => {
-                        vm.initialiseAssignedOfficerSelect(true);
-                        vm.updateAssignedOfficerSelect();
+                try {
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), 
+                    {
+                        body: JSON.stringify(data),
+                        method: 'POST',
+                    })
+                    const resData = await response.json()
+                    this.proposal = Object.assign({}, resData);
+                    this.approver_comment='';
+                    this.$nextTick(() => {
+                        this.initialiseAssignedOfficerSelect(true);
+                        this.updateAssignedOfficerSelect();
                     });
-                }, (error) => {
-                    swal(
+                } catch (error) {
+                    swal.fire(
                         'Proposal Error',
                         helpers.apiVueResourceError(error),
                         'error'
                     )
-                });
+                }
             }
         },
-        /*
-        fetchDeparmentUsers: function(){
-            let vm = this;
-            vm.loading.push('Loading Department Users');
-            vm.$http.get(api_endpoints.department_users).then((response) => {
-                vm.department_users = response.body
-                vm.loading.splice('Loading Department Users',1);
-            },(error) => {
-                console.log(error);
-                vm.loading.splice('Loading Department Users',1);
-            })
-        },
-        */
         initialiseAssignedOfficerSelect:function(reinit=false){
             console.log('initialiseAssignedOfficerSelect')
             let vm = this;
@@ -1223,9 +1200,10 @@ export default {
             }
         },
         fetchAdditionalDocumentTypesDict: async function(){
-            const response = await this.$http.get('/api/additional_document_types_dict')
+            const response = await fetch('/api/additional_document_types_dict')
             console.log(response)
-            this.applySelect2ToAdditionalDocumentTypes(response.body)
+            const resData = await response.json()
+            this.applySelect2ToAdditionalDocumentTypes(resData)
         },
     },
     mounted: function() {

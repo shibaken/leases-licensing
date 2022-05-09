@@ -41,5 +41,9 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^8.15.0",
+    "vls": "^0.7.6"
+  }
 }

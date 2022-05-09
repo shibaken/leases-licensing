@@ -575,7 +575,6 @@ export default {
         },
         refreshFromResponse:function(response){
             let vm = this;
-            vm.original_proposal = helpers.copyObject(response.body);
             vm.proposal = helpers.copyObject(response.body);
             vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
             vm.$nextTick(() => {
@@ -583,105 +582,91 @@ export default {
                 vm.updateAssignedOfficerSelect();
             });
         },
-        fetchDeparmentUsers: function(){
-            let vm = this;
-            vm.loading.push('Loading Department Users');
-            vm.$http.get(api_endpoints.department_users).then((response) => {
-                vm.department_users = response.body
-                vm.loading.splice('Loading Department Users',1);
-            },(error) => {
+        fetchDeparmentUsers: async function(){
+            this.loading.push('Loading Department Users');
+            try {
+                const response  = await fetch(api_endpoints.department_users)
+                const resData = response.json()
+                this.department_users = Object.assign(resData)
+                this.loading.splice('Loading Department Users',1);
+            } catch(error) {
                 console.log(error);
-                vm.loading.splice('Loading Department Users',1);
-            })
+                this.loading.splice('Loading Department Users',1);
+            }
         },
-        sendReferral: function(){
-            let vm = this;
-            vm.checkAssessorData();
+        sendReferral: async function(){
+            this.checkAssessorData();
             let formData = new FormData(vm.form);
-            vm.sendingReferral = true;
-            //vm.$http.post(vm.proposal_form_url, formData).then(
-            vm.$http.post(vm.proposal_form_url, {'proposal': this.proposal}).then(
-                res => {
-                    let data = {'email':vm.selected_referral, 'text': vm.referral_text}
-                    vm.sendingReferral = true;
-
-                    vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), JSON.stringify(data), { emulateJSON:true }).then(
-                        response => {
-
-                            vm.sendingReferral = false;
-                            vm.original_proposal = helpers.copyObject(response.body);
-                            vm.proposal = response.body;  // <== Mutating props... Is this fine???
-                            //vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
-                            //swal(
-                            //    'Referral Sent',
-                            //    'The referral has been sent to ' + vm.department_users.find(d => d.email == vm.selected_referral).name,
-                            //    'success'
-                            //)
-                            $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
-                            vm.selected_referral = '';
-                            vm.referral_text = '';
-                        },
-                        error => {
-                            swal(
-                                'Referral Error',
-                                helpers.apiVueResourceError(error),
-                                'error'
-                            )
-                            $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
-                            vm.sendingReferral = false;
-                        }
-                    )  // END 2nd vm.$http.post
-                },
-                err=>{
-
-                }
-            )  // END 1st vm.$http.post
-        },
-        remindReferral:function(r){
-            let vm = this;
-
-            vm.$http.get(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/remind')).then(response => {
-                vm.original_proposal = helpers.copyObject(response.body);
-                vm.proposal = response.body;
-                vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
+            this.sendingReferral = true;
+            try {
+                const res = await fetch(this.proposal_form_url, { body: {'proposal': this.proposal}, method: 'POST' })
+                const resData = await res.json()
+                let data = {'email':this.selected_referral, 'text': this.referral_text}
+                this.sendingReferral = true;
+                const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals, (this.proposal.id + '/assesor_send_referral')), 
+                { 
+                    body: JSON.stringify(data),
+                    method: 'POST',
+                })
+                this.sendingReferral = false;
+                    //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
+                    /* 
+                    // Don't use this endpoint
+                    $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
+                    vm.selected_referral = '';
+                    vm.referral_text = '';
+                    },
+                    error => {
+                        $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
+                        vm.sendingReferral = false;
+                    }
+                    */
+            } catch (error) {
                 swal(
+                    'Referral Error',
+                    helpers.apiVueResourceError(error),
+                    'error'
+                )
+            }
+        },
+        remindReferral: async function(r){
+            try {
+                fetch(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/remind'))
+                //this.proposal = response.body;
+                //vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
+                swal.fire(
                     'Referral Reminder',
                     'A reminder has been sent to '+r.referral,
                     'success'
                 )
-            },
-            error => {
-                swal(
+            } catch (error) {
+                swal.fire(
                     'Proposal Error',
                     helpers.apiVueResourceError(error),
                     'error'
                 )
-            });
+            }
         },
-        resendReferral:function(r){
-            let vm = this;
-
-            vm.$http.get(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/resend')).then(response => {
-                vm.original_proposal = helpers.copyObject(response.body);
-                vm.proposal = response.body;
-                vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
-                swal(
+        resendReferral:async function(r){
+            try {
+                await fetch(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/resend'))
+                //vm.proposal = response.body;
+                //vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
+                swal.fire(
                     'Referral Resent',
                     'The referral has been resent to '+r.referral,
                     'success'
                 )
-            },
-            error => {
-                swal(
+            } catch (error) {
+                swal.fire(
                     'Proposal Error',
                     helpers.apiVueResourceError(error),
                     'error'
                 )
-            });
+            }
         },
-        recallReferral:function(r){
-            let vm = this;
-            swal({
+        recallReferral:async function(r){
+            swal.fire({
                     title: "Loading...",
                     //text: "Loading...",
                     allowOutsideClick: false,
@@ -690,26 +675,26 @@ export default {
                         swal.showLoading()
                     }
             })
-
-            vm.$http.get(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/recall')).then(response => {
+            try {
+                await fetch(helpers.add_endpoint_json(api_endpoints.referrals,r.id+'/recall'))
                 swal.hideLoading();
                 swal.close();
-                vm.original_proposal = helpers.copyObject(response.body);
+                /*
                 vm.proposal = response.body;
                 vm.proposal.applicant.address = vm.proposal.applicant.address != null ? vm.proposal.applicant.address : {};
-                swal(
+                */
+                await swal.fire(
                     'Referral Recall',
                     'The referall has been recalled from '+r.referral,
                     'success'
                 )
-            },
-            error => {
-                swal(
+            } catch (error) {
+                swal.fire(
                     'Proposal Error',
                     helpers.apiVueResourceError(error),
                     'error'
                 )
-            });
+            }
         },
         assignRequestUser: function(){
             this.$emit('assignRequestUser')
