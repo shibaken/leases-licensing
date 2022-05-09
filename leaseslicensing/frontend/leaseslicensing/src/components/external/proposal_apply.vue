@@ -112,10 +112,10 @@ export default {
     */
     submit: function() {
         //let vm = this;
-        swal({
+        swal.fire({
             title: "Create " + this.selectedApplication.description,
             text: "Are you sure you want to create " + this.alertText + "?",
-            type: "question",
+            icon: "question",
             showCancelButton: true,
             confirmButtonText: 'Accept'
         }).then(() => {
@@ -136,9 +136,9 @@ export default {
                 const payload = {
                     "application_type": this.selectedApplication,
                 }
-                console.log(payload)
-                res = await this.$http.post(api_endpoints.proposal, payload);
-                const proposal = res.body;
+                res = await fetch(api_endpoints.proposal, { body: JSON.stringify(payload), method: 'POST' });
+                const resData = await res.json()
+                const proposal = Object.assign({}, resData);
                 this.$router.push({
                     name:"draft_proposal",
                     params:{proposal_id:proposal.id}
@@ -146,11 +146,11 @@ export default {
                 this.creatingProposal = false;
             } catch(error) {
                 console.log(error)
-                await swal({
+                await swal.fire({
                 //title: "Renew/Amend Approval",
                 title: "Create Proposal",
                 text: error.body,
-                type: "error",
+                icon: "error",
                 });
                 this.$router.go();
             }
@@ -167,8 +167,9 @@ export default {
     },
     fetchApplicationTypes: async function(){
         //const response = await this.$http.get(api_endpoints.application_types_dict+'?apply_page=True');
-        const response = await this.$http.get(api_endpoints.application_types_dict);
-        for (let app_type of response.body) {
+        const response = await fetch(api_endpoints.application_types_dict);
+        const resData = await response.json()
+        for (let app_type of resData) {
             this.application_types.push(app_type)
         }
     },
@@ -189,10 +190,8 @@ export default {
     this.applicationsLoading = false;
   },
   beforeRouteEnter: function(to, from, next) {
-
     let initialisers = [
         utils.fetchProfile(),
-        
         //utils.fetchProposal(to.params.proposal_id)
     ]
     next(vm => {

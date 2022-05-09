@@ -73,9 +73,9 @@ import ApprovalCancellation from '../internal/approvals/approval_cancellation.vu
 import ApprovalSuspension from '../internal/approvals/approval_suspension.vue'
 import ApprovalSurrender from '../internal/approvals/approval_surrender.vue'
 import ApprovalHistory from '../internal/approvals/approval_history.vue'
-import Vue from 'vue'
 import { api_endpoints, helpers }from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
+import { v4 as uuid } from 'uuid';
 
 export default {
     name: 'TableApprovals',
@@ -103,7 +103,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'approvals-datatable-' + vm._uid,
+            datatable_id: 'approvals-datatable-' + uuid(),
             //approvalTypesToDisplay: ['wla'],
             show_expired_surrendered: false,
             selectedWaitingListAllocationId: null,
@@ -487,7 +487,7 @@ export default {
         },
         sendData: function(params){
             let vm = this
-            vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/request_new_stickers'), params).then(
+            fetch(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/request_new_stickers'), {body: params, method: 'POST', }).then(
                 res => {
                     helpers.post_and_redirect('/sticker_replacement_fee/', {'csrfmiddlewaretoken' : vm.csrf_token, 'data': JSON.stringify(res.body)});
                 },
@@ -498,7 +498,7 @@ export default {
         },
         fetchProfile: function(){
             let vm = this;
-            Vue.http.get(api_endpoints.profile).then((response) => {
+            fetch(api_endpoints.profile).then((response) => {
                 vm.profile = response.body
 
             },(error) => {
@@ -647,8 +647,9 @@ export default {
         },
         fetchFilterLists: async function(){
             // Status values
-            const statusRes = await this.$http.get(api_endpoints.approval_statuses_dict);
-            for (let s of statusRes.body) {
+            const statusRes = await fetch(api_endpoints.approval_statuses_dict);
+            const statusData = await statusRes.json()
+            for (let s of statusData) {
                 if (this.wlaDash && !(['extended', 'awaiting_payment', 'approved'].includes(s.code))) {
                     this.statusValues.push(s);
                 //} else if (!(['extended', 'awaiting_payment', 'offered', 'approved'].includes(s.code))) {
@@ -657,74 +658,70 @@ export default {
                 }
             }
         },
-        reissueApproval:function (proposal_id) {
+        reissueApproval:async function (proposal_id) {
             let vm = this;
             let status= 'with_approver'
             let data = {'status': status}
-            swal({
+            await swal.fire({
                 title: "Reissue Approval",
                 text: "Are you sure you want to reissue this approval?",
-                type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Reissue approval',
                 //confirmButtonColor:'#d9534f'
-            }).then(() => {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/reissue_approval')),JSON.stringify(data),{
-                emulateJSON:true,
-                })
-                .then((response) => {
+            })
+            try {
+                const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/reissue_approval')),
+                    { 
+                        body: JSON.stringify(data),
+                        method: 'POST',
+                    })
 
-                    vm.$router.push({
-                    name:"internal-proposal",
-                    params:{proposal_id:proposal_id}
-                    });
-                }, (error) => {
+                vm.$router.push({
+                name:"internal-proposal",
+                params:{proposal_id:proposal_id}
+                });
+            } catch (error) {
                     console.log(error);
-                    swal({
+                    swal.fire({
                     title: "Reissue Approval",
                     text: error.body,
-                    type: "error",
+                    icon: "error",
                     })
-                });
-            },(error) => {
-
-            });
+            }
         },
 
-        reinstateApproval:function (approval_id) {
+        reinstateApproval:async function (approval_id) {
             let vm = this;
             let status= 'with_approver'
             //let data = {'status': status}
-            swal({
+            await swal.fire({
                 title: "Reinstate Approval",
                 text: "Are you sure you want to reinstate this approval?",
-                type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Reinstate approval',
                 //confirmButtonColor:'#d9534f'
-            }).then(() => {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals,(approval_id+'/approval_reinstate')),{
-
-                })
-                .then((response) => {
-                    swal(
+            })
+            try {
+                const response = fetch(helpers.add_endpoint_json(api_endpoints.approvals,(approval_id+'/approval_reinstate')),
+                    {
+                    method: 'POST',
+                    })
+                    await swal(
                         'Reinstate',
                         'Your approval has been reinstated',
                         'success'
                     )
                     vm.$refs.approvals_datatable.vmDataTable.ajax.reload();
-
-                }, (error) => {
+                } catch (error) {
                     console.log(error);
-                    swal({
+                    swal.fire({
                     title: "Reinstate Approval",
                     text: error.body,
                     type: "error",
                     })
-                });
-            },(error) => {
-
-            });
+                }
         },
         cancelApproval: function(approval_id){
             this.$refs.approval_cancellation.approval_id = approval_id;
@@ -753,72 +750,61 @@ export default {
             });
         },
 
-        renewApproval:function (proposal_id) {
+        renewApproval:async function (proposal_id) {
             let vm = this;
             let status= 'with_approver'
             swal({
                 title: "Renew Approval",
                 text: "Are you sure you want to renew this approval?",
-                type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Renew approval',
-            }).then(() => {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=renew', {
-
-                })
-                .then((response) => {
-                   let proposal = {}
-                   proposal = response.body
-                   vm.$router.push({
+            })
+            try {
+                const response = fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=renew',
+                    {
+                    method: 'POST',
+                    })
+                vm.$router.push({
                     name:"draft_proposal",
                     params:{proposal_id: proposal.id}
-                   });
-
-                }, (error) => {
+                });
+            } catch (error) {
                     console.log(error);
-                    swal({
+                    swal.fire({
                     title: "Renew Approval",
                     text: error.body,
-                    type: "error",
+                    icon: "error",
                     })
-                });
-            },(error) => {
-
-            });
+            }
         },
 
-        amendApproval:function (proposal_id) {
+        amendApproval:async function (proposal_id) {
             let vm = this;
-            swal({
+            swal.fire({
                 title: "Amend Approval",
                 text: "Are you sure you want to amend this approval?",
-                type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Amend approval',
-            }).then(() => {
-                vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=amend', {
-
+            })
+            try {
+                const response = fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=amend', 
+                {
+                    method: 'POST',
                 })
-                .then((response) => {
-                   let proposal = {}
-                   proposal = response.body
-                   vm.$router.push({
+                vm.$router.push({
                     name:"draft_proposal",
                     params:{proposal_id: proposal.id}
-                   });
-
-                }, (error) => {
+                });
+            } catch (error) {
                     console.log(error);
-                    swal({
+                    swal.fire({
                     title: "Amend Approval",
                     text: error.body,
-                    type: "error",
+                    icon: "error",
                     })
-
-                });
-            },(error) => {
-
-            });
+            }
         },
 
 

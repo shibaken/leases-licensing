@@ -11,7 +11,6 @@
                                     <div class="col-sm-3">
                                         <label v-if=check_status() class="control-label"  for="Name">Details</label>
                                         <label v-else class="control-label"  for="Name">Provide Reason for the proposed decline </label>
-                                        <!--textarea style="width: 70%;"class="form-control" name="reason" v-model="decline.reason"></textarea-->
                                     </div>
                                     <div class="col-sm-9">
                                         <RichText
@@ -31,7 +30,7 @@
                                         <label v-else class="control-label"  for="Name">Proposed CC email</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <input type="text" style="width: 70%;"class="form-control" name="cc_email" v-model="decline.cc_email"/>
+                                        <input type="text" style="width: 70%;" class="form-control" name="cc_email" v-model="decline.cc_email"/>
                                     </div>
                                 </div>
                             </div>

@@ -110,11 +110,10 @@
 </template>
 <script>
 import $ from 'jquery'
-import Vue from 'vue'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import ComplianceAmendmentRequest from './compliance_amendment_request.vue'
-import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
+//import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import {
   api_endpoints,
   helpers
@@ -145,7 +144,7 @@ export default {
         return data ? moment(data).format('DD/MM/YYYY'): '';    }
   },
   beforeRouteEnter: function(to, from, next){
-    Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/internal_compliance')).then((response) => {
+    this.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/internal_compliance')).then((response) => {
         next(vm => {
             vm.compliance = response.body
             vm.members = vm.compliance.allowed_assessors
@@ -231,7 +230,7 @@ export default {
     },
     fetchProfile: function(){
         let vm = this;
-        Vue.http.get(api_endpoints.profile).then((response) => {
+        this.$http.get(api_endpoints.profile).then((response) => {
             vm.profile = response.body
 
          },(error) => {

@@ -15,7 +15,7 @@
 <script>
     
     //import {$, DataTableBs} from '../../hooks'
-    import ResponsiveDatatablesHelper from "../responsive_datatable_helper.js"
+    //import ResponsiveDatatablesHelper from "../responsive_datatable_helper.js"
 module.exports = {
    name : 'DataTable',
    props:{
@@ -43,12 +43,13 @@ module.exports = {
    methods:{
        initEvents: function () {
            let vm =this;
-           var responsiveHelper;
+           //var responsiveHelper;
            var breakpointDefinition = {
                //bootstrap grid values
                tablet: 992,
                phone : 768
            };
+           /*
            var responsiveOptions = {
                autoWidth        : false,
                preDrawCallback: function () {
@@ -64,7 +65,10 @@ module.exports = {
                  responsiveHelper.respond();
              },
            }
-           var options = Object.assign(vm.dtOptions,responsiveOptions)
+           */
+           //var options = Object.assign(vm.dtOptions,responsiveOptions)
+           // forget about ResponsiveDatatablesHelper
+           var options = Object.assign(vm.dtOptions)
            vm.vmDataTable = $(vm.table).DataTable(options);
            $(vm.table).resize(function (e) {
                vm.vmDataTable.draw(true);

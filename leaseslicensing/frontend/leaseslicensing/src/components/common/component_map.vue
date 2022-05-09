@@ -112,7 +112,7 @@
 </template>
 
 <script>
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -765,7 +765,7 @@ export default {
         },
         addOptionalLayers: function(){
             let vm = this
-            this.$http.get('/api/map_layers/').then(response => {
+            fetch('/api/map_layers/').then(response => {
                 let layers = response.body
                 for (var i = 0; i < layers.length; i++){
                     let l = new TileWMS({

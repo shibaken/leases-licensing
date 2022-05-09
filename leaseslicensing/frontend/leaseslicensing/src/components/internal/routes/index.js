@@ -1,4 +1,5 @@
 
+import { RouterView } from 'vue-router'
 import InternalDashboard from '@/components/internal/dashboard.vue'
 import OrgAccessTable from '@/components/internal/organisations/dashboard.vue'
 import OrgAccess from '@/components/internal/organisations/access.vue'
@@ -15,19 +16,11 @@ import Approval from '@/components/internal/approvals/approval.vue'
 export default
 {
     path: '/internal',
-    component:
-    {
-        render(c)
-        {
-            return c('router-view')
-        }
-    },
+    component: RouterView,
     children: [
         {
-            path: '/',
-            component: InternalDashboard,
-            name: 'internal-dashboard'
-
+            path: '/internal',
+            component: InternalDashboard
         },
         {
             path: 'approvals',
@@ -61,13 +54,13 @@ export default
         },
         {
             path: 'organisations',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: RouterView,
             children: [
+                {
+                    path: 'access',
+                    component: OrgAccessTable,
+                    name:"org-access-dash"
+                },
                 {
                     path: 'access',
                     component: OrgAccessTable,
@@ -87,31 +80,9 @@ export default
             ]
         },
         {
-            path: 'proposal',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
-            children: [
-                {
-                    path: ':proposal_id',
-                    component: {
-                        render(c)
-                        {
-                            return c('router-view')
-                        }
-                    },
-                    children: [
-                        {
-                            path: '/',
-                            component: Proposal,
-                            name:"internal-proposal"
-                        },
-                    ]
-                },
-            ]
+            path: 'proposal/:proposal_id',
+            component: Proposal,
+            name: 'internal-proposal',
         },
     ]
 }

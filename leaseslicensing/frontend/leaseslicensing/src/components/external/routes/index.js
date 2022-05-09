@@ -1,3 +1,4 @@
+import { RouterView } from 'vue-router'
 import ExternalDashboard from '@/components/external/dashboard.vue'
 import Proposal from '@/components/external/proposal.vue'
 import ProposalApply from '@/components/external/proposal_apply.vue'
@@ -13,16 +14,11 @@ import Approval from '../approvals/approval.vue'
 export default
 {
     path: '/external',
-    component:
-    {
-        render(c)
-        {
-            return c('router-view')
-        }
-    },
+    component: RouterView,
+    name: 'external-dashboard',
     children: [
         {
-            path: '/',
+            path: '/external',
             component: ExternalDashboard,
             name: 'external-dashboard'
         },
@@ -39,38 +35,20 @@ export default
             component: ComplianceSubmit,
             name:"submit_compliance"
         },
-        /*
         {
-            path: 'approval/:approval_id',
-            component: Approval,
+            path: 'proposal/',
+            component: ProposalApply,
+            name:"apply_proposal"
         },
-        */
         {
-            path: 'proposal',
-            component:
-            {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
-            children: [
-                {
-                    path: '/',
-                    component: ProposalApply,
-                    name:"apply_proposal"
-                },
-                {
-                    path: 'submit',
-                    component: ProposalSubmit,
-                    name:"submit-proposal"
-                },
-                {
-                    path: ':proposal_id',
-                    component: Proposal,
-                    name:"draft_proposal"
-                },
-            ]
+            path: 'proposal/submit',
+            component: ProposalSubmit,
+            name:"submit-proposal"
+        },
+        {
+            path: 'proposal/:proposal_id',
+            component: Proposal,
+            name:"draft_proposal"
         },
     ]
 }
