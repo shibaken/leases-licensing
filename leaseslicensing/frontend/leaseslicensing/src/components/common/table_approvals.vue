@@ -658,74 +658,70 @@ export default {
                 }
             }
         },
-        reissueApproval:function (proposal_id) {
+        reissueApproval:async function (proposal_id) {
             let vm = this;
             let status= 'with_approver'
             let data = {'status': status}
-            swal({
+            await swal.fire({
                 title: "Reissue Approval",
                 text: "Are you sure you want to reissue this approval?",
-                type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Reissue approval',
                 //confirmButtonColor:'#d9534f'
-            }).then(() => {
-                fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/reissue_approval')),JSON.stringify(data),{
-                method: 'POST',
-                })
-                .then((response) => {
+            })
+            try {
+                const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/reissue_approval')),
+                    { 
+                        body: JSON.stringify(data),
+                        method: 'POST',
+                    })
 
-                    vm.$router.push({
-                    name:"internal-proposal",
-                    params:{proposal_id:proposal_id}
-                    });
-                }, (error) => {
+                vm.$router.push({
+                name:"internal-proposal",
+                params:{proposal_id:proposal_id}
+                });
+            } catch (error) {
                     console.log(error);
-                    swal({
+                    swal.fire({
                     title: "Reissue Approval",
                     text: error.body,
-                    type: "error",
+                    icon: "error",
                     })
-                });
-            },(error) => {
-
-            });
+            }
         },
 
-        reinstateApproval:function (approval_id) {
+        reinstateApproval:async function (approval_id) {
             let vm = this;
             let status= 'with_approver'
             //let data = {'status': status}
-            swal({
+            await swal.fire({
                 title: "Reinstate Approval",
                 text: "Are you sure you want to reinstate this approval?",
-                type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Reinstate approval',
                 //confirmButtonColor:'#d9534f'
-            }).then(() => {
-                fetch(helpers.add_endpoint_json(api_endpoints.approvals,(approval_id+'/approval_reinstate')),{
+            })
+            try {
+                const response = fetch(helpers.add_endpoint_json(api_endpoints.approvals,(approval_id+'/approval_reinstate')),
+                    {
                     method: 'POST',
-                })
-                .then((response) => {
-                    swal(
+                    })
+                    await swal(
                         'Reinstate',
                         'Your approval has been reinstated',
                         'success'
                     )
                     vm.$refs.approvals_datatable.vmDataTable.ajax.reload();
-
-                }, (error) => {
+                } catch (error) {
                     console.log(error);
-                    swal({
+                    swal.fire({
                     title: "Reinstate Approval",
                     text: error.body,
                     type: "error",
                     })
-                });
-            },(error) => {
-
-            });
+                }
         },
         cancelApproval: function(approval_id){
             this.$refs.approval_cancellation.approval_id = approval_id;
@@ -754,72 +750,61 @@ export default {
             });
         },
 
-        renewApproval:function (proposal_id) {
+        renewApproval:async function (proposal_id) {
             let vm = this;
             let status= 'with_approver'
             swal({
                 title: "Renew Approval",
                 text: "Are you sure you want to renew this approval?",
-                type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Renew approval',
-            }).then(() => {
-                fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=renew', {
+            })
+            try {
+                const response = fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=renew',
+                    {
                     method: 'POST',
-                })
-                .then((response) => {
-                   let proposal = {}
-                   proposal = response.body
-                   vm.$router.push({
+                    })
+                vm.$router.push({
                     name:"draft_proposal",
                     params:{proposal_id: proposal.id}
-                   });
-
-                }, (error) => {
+                });
+            } catch (error) {
                     console.log(error);
-                    swal({
+                    swal.fire({
                     title: "Renew Approval",
                     text: error.body,
-                    type: "error",
+                    icon: "error",
                     })
-                });
-            },(error) => {
-
-            });
+            }
         },
 
-        amendApproval:function (proposal_id) {
+        amendApproval:async function (proposal_id) {
             let vm = this;
-            swal({
+            swal.fire({
                 title: "Amend Approval",
                 text: "Are you sure you want to amend this approval?",
-                type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Amend approval',
-            }).then(() => {
-                fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=amend', {
+            })
+            try {
+                const response = fetch(helpers.add_endpoint_json(api_endpoints.proposal,(proposal_id+'/renew_amend_approval_wrapper')) + '?debug=' + vm.debug + '&type=amend', 
+                {
                     method: 'POST',
                 })
-                .then((response) => {
-                   let proposal = {}
-                   proposal = response.body
-                   vm.$router.push({
+                vm.$router.push({
                     name:"draft_proposal",
                     params:{proposal_id: proposal.id}
-                   });
-
-                }, (error) => {
+                });
+            } catch (error) {
                     console.log(error);
-                    swal({
+                    swal.fire({
                     title: "Amend Approval",
                     text: error.body,
-                    type: "error",
+                    icon: "error",
                     })
-
-                });
-            },(error) => {
-
-            });
+            }
         },
 
 

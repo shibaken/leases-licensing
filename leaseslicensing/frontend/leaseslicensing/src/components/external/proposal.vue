@@ -388,7 +388,7 @@ export default {
             };
             vm.savingProposal=false;
             //this.$refs.application_form.incrementComponentMapKey();
-            const resData = res.json()
+            const resData = await res.json()
             this.proposal = resData;
             this.$nextTick(async () => {
                 this.$refs.application_form.incrementComponentMapKey();
@@ -400,7 +400,7 @@ export default {
                 title: "Please fix following errors before saving",
                 //text: err.bodyText,
                 text: JSON.stringify(err),
-                type:'error'
+                icon:'error'
             });
             vm.savingProposal=false;
         }
@@ -525,10 +525,10 @@ export default {
         this.paySubmitting=true;
 
         try {
-            await swal({
+            await swal.fire({
                 title: this.submitText + " Application",
                 text: "Are you sure you want to " + this.submitText.toLowerCase()+ " this application?",
-                type: "question",
+                icon: "question",
                 showCancelButton: true,
                 confirmButtonText: this.submitText
             })
@@ -548,10 +548,10 @@ export default {
             }
         } catch(err) {
             console.log(err)
-            await swal({
+            await swal.fire({
                 title: 'Submit Error',
                 html: helpers.apiVueResourceError(err),
-                type: 'error',
+                icon: 'error',
             })
             this.savingProposal = false;
             this.paySubmitting = false;
