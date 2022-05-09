@@ -168,16 +168,16 @@ export default {
         }
         */
     },
-    mounted: function () {
-        let vm = this
+    mounted: async function () {
+        //let vm = this
 
-        vm.$http.get('/api/profile').then(res => {
-            vm.accessing_user = res.body
-        })
+        const res = await fetch('/api/profile');
+        const resData = await res.json();
+        this.accessing_user = resData
         this.$nextTick(function(){
             //vm.addEventListener()
             chevron_toggle.init();
-            vm.set_active_tab('pills-applications')
+            this.set_active_tab('pills-applications')
         })
     },
     created: function() {

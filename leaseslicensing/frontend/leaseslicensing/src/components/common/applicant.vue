@@ -421,16 +421,13 @@ from '@/utils/hooks'
             // },
         },
         methods:{
-            fetchCountries:function (){
-                let vm =this;
-                //vm.loading.push('fetching countries');
-                vm.$http.get(api_endpoints.countries).then((response)=>{
-                    vm.countries = response.body;
-                    //vm.loading.splice('fetching countries',1);
-                },(response)=>{
-                    //console.log(response);
-                    //vm.loading.splice('fetching countries',1);
-                });
+            fetchCountries:async function (){
+                try {
+                    const res = await fetch(api_endpoints.countries);
+                    const resData = await res.json()
+                    vm.countries = Object.assign({}, resData);
+                } catch (err) {
+                }
             },
 
             initialiseOrgContactTable: function(){

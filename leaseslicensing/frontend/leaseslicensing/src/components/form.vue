@@ -117,7 +117,8 @@
                       <div class="col-sm-12 section-style">
                           <p>
                               <strong>It is a requirement of all lease and licence holders to sign a deed poll to release and indemnify the State of Western Australia.
-                              Please note: electronic or digital signatures cannot be accepted.</br>
+                              Please note: electronic or digital signatures cannot be accepted.
+                              <p></p>
                               The deed poll must be signed and have a witness signature and be dated.  Once signed and dated, please scan and attach the deed poll below.
                               </strong>
                           </p>

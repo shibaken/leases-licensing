@@ -177,9 +177,6 @@ class ApprovalSerializer(serializers.ModelSerializer):
             'migrated',
             'is_assessor',
             'is_approver',
-            'can_reissue_lawful_authority',
-            'is_lawful_authority',
-            'is_lawful_authority_finalised',
             'requirement_docs'
         )
         # the serverSide functionality of datatables is such that only columns that have field 'data' defined are requested from the serializer. We
@@ -212,9 +209,6 @@ class ApprovalSerializer(serializers.ModelSerializer):
             'migrated',
             'is_assessor',
             'is_approver',
-            'can_reissue_lawful_authority',
-            'is_lawful_authority',
-            'is_lawful_authority_finalised',
             'requirement_docs',
         )
 

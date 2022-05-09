@@ -296,10 +296,15 @@ class Approval(RevisionedMixin):
                 return False
         except Proposal.DoesNotExist:
             return True
-
+    
+    ## copy amend_renew() from ML?
     @property
     def can_amend(self):
-        try:
+        #try:
+        if self.renewal_document and self.renewal_sent:
+            #amend_renew = 'renew'
+            return False
+        else:
             amend_conditions = {
                 'previous_application': self.current_proposal,
                 'proposal_type': ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
@@ -307,48 +312,15 @@ class Approval(RevisionedMixin):
             proposal=Proposal.objects.get(**amend_conditions)
             if proposal:
                 return False
-        except Proposal.DoesNotExist:
-            if self.current_proposal.is_lawful_authority:
-                if self.current_proposal.is_lawful_authority_finalised and self.can_renew:
-                    return True
-                else:
-                    return False
-            else:
-                if self.can_renew:
-                    return True
-                else:
-                    return False
-        return False
+        return True
 
-    @property
-    def is_lawful_authority(self):
-        return self.current_proposal.is_lawful_authority
-
-    @property
-    def is_lawful_authority_finalised(self):
-        return self.current_proposal.is_lawful_authority_finalised
-
-    @property
-    def is_filming_licence(self):
-        return self.current_proposal.is_filming_licence
-
-    @property
-    def can_reissue_lawful_authority(self):
-        if self.current_proposal.is_lawful_authority and self.current_proposal.is_lawful_authority_finalised:
-            return self.can_reissue
-        return False
-        
     @property
     def approved_by(self):
         return self.current_proposal.approved_by
 
     @property
     def requirement_docs(self):
-        if self.is_lawful_authority:
-            approved_district_proposals_ids= self.current_proposal.district_proposals.filter(processing_status='approved').values_list('id', flat=True)
-            requirement_ids = self.current_proposal.requirements.filter(district_proposal_id__in = approved_district_proposals_ids).exclude(is_deleted=True).values_list('id', flat=True)
-        else:
-            requirement_ids=self.current_proposal.requirements.all().exclude(is_deleted=True).values_list('id', flat=True)
+        requirement_ids=self.current_proposal.requirements.all().exclude(is_deleted=True).values_list('id', flat=True)
         if requirement_ids:
             req_doc=RequirementDocument.objects.filter(requirement__in=requirement_ids, visible=True)
             return req_doc

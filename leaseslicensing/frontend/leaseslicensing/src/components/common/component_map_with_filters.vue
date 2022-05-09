@@ -92,8 +92,7 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid';
 import { api_endpoints, helpers, constants } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 
@@ -119,7 +118,6 @@ import { circular} from 'ol/geom/Polygon';
 import GeoJSON from 'ol/format/GeoJSON';
 import Overlay from 'ol/Overlay';
 import { getArea, getLength } from 'ol/sphere'
-import Datatable from '@vue-utils/datatable.vue'
 import Cluster from 'ol/source/Cluster';
 /*
 import 'select2/dist/css/select2.min.css'
@@ -619,12 +617,12 @@ export default {
         },
         addOptionalLayers: function(){
             let vm = this
-            this.$http.get('/api/map_layers/').then(response => {
+            fetch('/api/map_layers/').then(response => {
                 let layers = response.body
                 for (var i = 0; i < layers.length; i++){
                     console.log(layers[i])
                     let l = new TileWMS({
-                        url: env['kmi_server_url'] + '/geoserver/' + layers[i].layer_group_name + '/wms',
+                        url: process.env['kmi_server_url'] + '/geoserver/' + layers[i].layer_group_name + '/wms',
                         params: {
                             'FORMAT': 'image/png',
                             'VERSION': '1.1.1',
@@ -653,7 +651,7 @@ export default {
             let vm = this;
 
             let satelliteTileWms = new TileWMS({
-                url: env['kmi_server_url'] + '/geoserver/public/wms',
+                url: process.env['kmi_server_url'] + '/geoserver/public/wms',
                 params: {
                     'FORMAT': 'image/png',
                     'VERSION': '1.1.1',
@@ -743,14 +741,16 @@ export default {
             let vm = this;
 
             // Application Types
-            vm.$http.get(api_endpoints.application_types_dict + '?for_filter=true').then((response) => {
-                vm.applySelect2ToApplicationTypes(response.body)
+            fetch(api_endpoints.application_types_dict + '?for_filter=true').then(async (response) => {
+                const resData = await response.json()
+                vm.applySelect2ToApplicationTypes(resData)
             },(error) => {
             })
 
             // Application Statuses
-            vm.$http.get(api_endpoints.application_statuses_dict + '?for_filter=true').then((response) => {
-                vm.applySelect2ToApplicationStatuses(response.body)
+            fetch(api_endpoints.application_statuses_dict + '?for_filter=true').then(async (response) => {
+                const resData = await response.json()
+                vm.applySelect2ToApplicationStatuses(resData)
             },(error) => {
             })
         },
