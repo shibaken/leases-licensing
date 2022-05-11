@@ -8,16 +8,35 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0008_mapcolumn_maplayer'),
+        ("leaseslicensing", "0008_mapcolumn_maplayer"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ProposalGeometry',
+            name="ProposalGeometry",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('polygons', django.contrib.gis.db.models.fields.MultiPolygonField(blank=True, null=True, srid=4326)),
-                ('proposal', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='leaseslicensing.proposal')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "polygons",
+                    django.contrib.gis.db.models.fields.MultiPolygonField(
+                        blank=True, null=True, srid=4326
+                    ),
+                ),
+                (
+                    "proposal",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="leaseslicensing.proposal",
+                    ),
+                ),
             ],
         ),
     ]

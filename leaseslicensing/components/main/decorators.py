@@ -10,7 +10,7 @@ from rest_framework import serializers
 from rest_framework.request import Request
 import logging
 
-logger = logging.getLogger('leaseslicensing')
+logger = logging.getLogger("leaseslicensing")
 
 
 def basic_exception_handler(func):
@@ -25,11 +25,13 @@ def basic_exception_handler(func):
             raise
         except ValidationError as e:
             from leaseslicensing.components.main.utils import handle_validation_error
+
             handle_validation_error(e)
         except Exception as e:
             print(traceback.print_exc())
             logger.error(traceback.print_exc())
             raise serializers.ValidationError(str(e))
+
     return wrapper
 
 
@@ -38,14 +40,16 @@ def timeit(method):
         ts = time.time()
         result = method(*args, **kw)
         te = time.time()
-        if 'log_time' in kw:
-            name = kw.get('log_name', method.__name__.upper())
-            kw['log_time'][name] = int((te - ts) * 1000)
+        if "log_time" in kw:
+            name = kw.get("log_name", method.__name__.upper())
+            kw["log_time"][name] = int((te - ts) * 1000)
         else:
-            print('%r  %2.2f ms' % (method.__name__, (te - ts) * 1000))
-            #logger.error('%r  %2.2f ms' % (method.__name__, (te - ts) * 1000))
+            print("%r  %2.2f ms" % (method.__name__, (te - ts) * 1000))
+            # logger.error('%r  %2.2f ms' % (method.__name__, (te - ts) * 1000))
         return result
+
     return timed
+
 
 def query_debugger(func):
     @functools.wraps(func)
@@ -59,12 +63,12 @@ def query_debugger(func):
         print(f"Function : {func.__name__}")
         print(f"Number of Queries : {end_queries - start_queries}")
         print(f"Finished in : {(end - start):.2f}s")
-        function_name = 'Function : {}'.format(func.__name__)
-        number_of_queries = 'Number of Queries : {}'.format(end_queries - start_queries)
-        time_taken = 'Finished in : {0:.2f}s'.format((end - start))
+        function_name = "Function : {}".format(func.__name__)
+        number_of_queries = "Number of Queries : {}".format(end_queries - start_queries)
+        time_taken = "Finished in : {0:.2f}s".format((end - start))
         logger.error(function_name)
         logger.error(number_of_queries)
         logger.error(time_taken)
         return result
-    return inner_func
 
+    return inner_func

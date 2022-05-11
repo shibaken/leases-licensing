@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0034_merge_20220208_0854'),
+        ("leaseslicensing", "0034_merge_20220208_0854"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='checklistquestion',
-            name='shown_to_others',
-            field=models.BooleanField(default=False, verbose_name='Comment'),
+            model_name="checklistquestion",
+            name="shown_to_others",
+            field=models.BooleanField(default=False, verbose_name="Comment"),
         ),
     ]

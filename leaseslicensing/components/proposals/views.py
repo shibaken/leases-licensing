@@ -1,34 +1,42 @@
-from django.http import HttpResponse,JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View, TemplateView
 from django.db.models import Q
 from leaseslicensing.components.proposals.utils import create_data_from_form
-from leaseslicensing.components.proposals.models import Proposal, Referral, ProposalType, HelpPage
+from leaseslicensing.components.proposals.models import (
+    Proposal,
+    Referral,
+    ProposalType,
+    HelpPage,
+)
 from leaseslicensing.components.approvals.models import Approval
 from leaseslicensing.components.compliances.models import Compliance
-import json,traceback
+import json, traceback
+
 
 class ProposalView(TemplateView):
-    template_name = 'leaseslicensing/proposal.html'
+    template_name = "leaseslicensing/proposal.html"
 
     def post(self, request, *args, **kwargs):
         extracted_fields = []
         try:
-            proposal_id = request.POST.pop('proposal_id')
+            proposal_id = request.POST.pop("proposal_id")
             proposal = Proposal.objects.get(proposal_id)
-            schema = json.loads(request.POST.pop('schema')[0])
-            extracted_fields = create_data_from_form(schema,request.POST, request.FILES)
-            proposal.schema = schema;
+            schema = json.loads(request.POST.pop("schema")[0])
+            extracted_fields = create_data_from_form(
+                schema, request.POST, request.FILES
+            )
+            proposal.schema = schema
             proposal.data = extracted_fields
             proposal.save()
-            return redirect(reverse('external'))
+            return redirect(reverse("external"))
         except:
             traceback.print_exc
-            return JsonResponse({error:"something went wrong"},safe=False,status=400)
+            return JsonResponse({error: "something went wrong"}, safe=False, status=400)
 
 
-#class ProposalHistoryCompareView(HistoryCompareDetailView):
+# class ProposalHistoryCompareView(HistoryCompareDetailView):
 #    """
 #    View for reversion_compare
 #    """
@@ -36,7 +44,7 @@ class ProposalView(TemplateView):
 #    template_name = 'leaseslicensing/reversion_history.html'
 #
 #
-#class ProposalFilteredHistoryCompareView(HistoryCompareDetailView):
+# class ProposalFilteredHistoryCompareView(HistoryCompareDetailView):
 #    """
 #    View for reversion_compare - with 'status' in the comment field only'
 #    """
@@ -55,7 +63,7 @@ class ProposalView(TemplateView):
 #        ]
 #        return action_list
 #
-#class ReferralHistoryCompareView(HistoryCompareDetailView):
+# class ReferralHistoryCompareView(HistoryCompareDetailView):
 #    """
 #    View for reversion_compare
 #    """
@@ -63,7 +71,7 @@ class ProposalView(TemplateView):
 #    template_name = 'leaseslicensing/reversion_history.html'
 #
 #
-#class ApprovalHistoryCompareView(HistoryCompareDetailView):
+# class ApprovalHistoryCompareView(HistoryCompareDetailView):
 #    """
 #    View for reversion_compare
 #    """
@@ -71,7 +79,7 @@ class ProposalView(TemplateView):
 #    template_name = 'leaseslicensing/reversion_history.html'
 #
 #
-#class ComplianceHistoryCompareView(HistoryCompareDetailView):
+# class ComplianceHistoryCompareView(HistoryCompareDetailView):
 #    """
 #    View for reversion_compare
 #    """
@@ -80,7 +88,7 @@ class ProposalView(TemplateView):
 #
 #
 #
-#class ProposalTypeHistoryCompareView(HistoryCompareDetailView):
+# class ProposalTypeHistoryCompareView(HistoryCompareDetailView):
 #    """
 #    View for reversion_compare
 #    """
@@ -88,7 +96,7 @@ class ProposalView(TemplateView):
 #    template_name = 'leaseslicensing/reversion_history.html'
 #
 #
-#class HelpPageHistoryCompareView(HistoryCompareDetailView):
+# class HelpPageHistoryCompareView(HistoryCompareDetailView):
 #    """
 #    View for reversion_compare
 #    """
@@ -98,36 +106,38 @@ class ProposalView(TemplateView):
 
 class PreviewLicencePDFView(View):
     def post(self, request, *args, **kwargs):
-        response = HttpResponse(content_type='application/pdf')
+        response = HttpResponse(content_type="application/pdf")
 
         proposal = self.get_object()
-        details = json.loads(request.POST.get('formData'))
+        details = json.loads(request.POST.get("formData"))
 
         response.write(proposal.preview_approval(request, details))
         return response
 
     def get_object(self):
-        return get_object_or_404(Proposal, id=self.kwargs['proposal_pk'])
+        return get_object_or_404(Proposal, id=self.kwargs["proposal_pk"])
+
 
 class PreviewDistrictLicencePDFView(View):
     def post(self, request, *args, **kwargs):
-        response = HttpResponse(content_type='application/pdf')
+        response = HttpResponse(content_type="application/pdf")
 
         district_proposal = self.get_object()
-        details = json.loads(request.POST.get('formData'))
+        details = json.loads(request.POST.get("formData"))
 
         response.write(district_proposal.preview_approval(request, details))
         return response
 
     def get_object(self):
-        return get_object_or_404(DistrictProposal, id=self.kwargs['district_proposal_pk'])
-
+        return get_object_or_404(
+            DistrictProposal, id=self.kwargs["district_proposal_pk"]
+        )
 
 
 from leaseslicensing.components.proposals.utils import test_proposal_emails
+
+
 class TestEmailView(View):
     def get(self, request, *args, **kwargs):
         test_proposal_emails(request)
-        return HttpResponse('Test Email Script Completed')
-
-
+        return HttpResponse("Test Email Script Completed")

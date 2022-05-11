@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0040_additionaldocumenttype'),
-        ('leaseslicensing', '0040_alter_approval_proxy_applicant'),
+        ("leaseslicensing", "0040_additionaldocumenttype"),
+        ("leaseslicensing", "0040_alter_approval_proxy_applicant"),
     ]
 
-    operations = [
-    ]
+    operations = []

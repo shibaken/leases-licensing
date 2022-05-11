@@ -6,25 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0042_maplayer_transparency'),
+        ("leaseslicensing", "0042_maplayer_transparency"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='proposalrequirement',
-            options={'ordering': ['proposal', 'req_order']},
+            name="proposalrequirement",
+            options={"ordering": ["proposal", "req_order"]},
         ),
         migrations.RemoveField(
-            model_name='proposalrequirement',
-            name='order',
+            model_name="proposalrequirement",
+            name="order",
         ),
         migrations.AddField(
-            model_name='proposalrequirement',
-            name='req_order',
+            model_name="proposalrequirement",
+            name="req_order",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AddConstraint(
-            model_name='proposalrequirement',
-            constraint=models.UniqueConstraint(fields=('proposal', 'req_order'), name='unique requirement order per proposal'),
+            model_name="proposalrequirement",
+            constraint=models.UniqueConstraint(
+                fields=("proposal", "req_order"),
+                name="unique requirement order per proposal",
+            ),
         ),
     ]

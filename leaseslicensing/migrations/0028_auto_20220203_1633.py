@@ -6,16 +6,19 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0027_rename_checklistquestions_sectionchecklistquestions'),
+        ("leaseslicensing", "0027_rename_checklistquestions_sectionchecklistquestions"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='checklistquestion',
-            options={'ordering': ['order']},
+            name="checklistquestion",
+            options={"ordering": ["order"]},
         ),
         migrations.AlterModelOptions(
-            name='sectionchecklistquestions',
-            options={'verbose_name': 'Section Questions', 'verbose_name_plural': 'Section Questions'},
+            name="sectionchecklistquestions",
+            options={
+                "verbose_name": "Section Questions",
+                "verbose_name_plural": "Section Questions",
+            },
         ),
     ]

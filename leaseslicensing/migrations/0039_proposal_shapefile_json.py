@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0038_auto_20220223_0953'),
+        ("leaseslicensing", "0038_auto_20220223_0953"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proposal',
-            name='shapefile_json',
+            model_name="proposal",
+            name="shapefile_json",
             field=models.JSONField(blank=True, null=True),
         ),
     ]

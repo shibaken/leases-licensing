@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
-#from crispy_forms.bootstrap import FormActions
-#from crispy_forms.helper import FormHelper
-#from crispy_forms.layout import Layout, Submit
+
+# from crispy_forms.bootstrap import FormActions
+# from crispy_forms.helper import FormHelper
+# from crispy_forms.layout import Layout, Submit
 from django.contrib.auth import get_user_model
 from django.forms import Form, ModelForm, CharField, ValidationError, EmailField
 
-#from ledger.accounts.models import Profile, Address, Organisation
+# from ledger.accounts.models import Profile, Address, Organisation
 
 
 User = get_user_model()
@@ -14,7 +15,8 @@ User = get_user_model()
 class LoginForm(Form):
     email = EmailField(max_length=254)
 
-#class PersonalForm(ModelForm):
+
+# class PersonalForm(ModelForm):
 #
 #    class Meta:
 #        model = User
@@ -27,14 +29,14 @@ class LoginForm(Form):
 #        self.helper.attrs = {'novalidate': ''}
 #        # Define the form layout.
 #        self.helper.layout = Layout(
-#            'first_name', 'last_name', 
+#            'first_name', 'last_name',
 #            FormActions(
 #                Submit('save', 'Save', css_class='btn-lg'),
 #                Submit('cancel', 'Cancel')
 #            )
 #        )
 #
-#class ContactForm(ModelForm):
+# class ContactForm(ModelForm):
 #
 #    class Meta:
 #        model = User
@@ -47,7 +49,7 @@ class LoginForm(Form):
 #        self.helper.attrs = {'novalidate': ''}
 #        # Define the form layout.
 #        self.helper.layout = Layout(
-#            'phone_number', 'mobile_number','email', 
+#            'phone_number', 'mobile_number','email',
 #            FormActions(
 #                Submit('save', 'Save', css_class='btn-lg'),
 #                Submit('cancel', 'Cancel')
@@ -55,7 +57,7 @@ class LoginForm(Form):
 #        )
 #
 #
-#class AddressForm(ModelForm):
+# class AddressForm(ModelForm):
 #
 #    class Meta:
 #        model = Address
@@ -70,7 +72,7 @@ class LoginForm(Form):
 #        self.helper.add_input(Submit('cancel', 'Cancel'))
 #
 #
-#class OrganisationAdminForm(ModelForm):
+# class OrganisationAdminForm(ModelForm):
 #    """ModelForm that is used in the Django admin site.
 #    """
 #    model = Organisation
@@ -83,7 +85,7 @@ class LoginForm(Form):
 #        return data
 #
 #
-#class OrganisationForm(OrganisationAdminForm):
+# class OrganisationForm(OrganisationAdminForm):
 #
 #    class Meta:
 #        model = Organisation
@@ -101,7 +103,7 @@ class LoginForm(Form):
 #        self.helper.add_input(Submit('cancel', 'Cancel'))
 #
 #
-#class DelegateAccessForm(Form):
+# class DelegateAccessForm(Form):
 #
 #    def __init__(self, *args, **kwargs):
 #        super(DelegateAccessForm, self).__init__(*args, **kwargs)
@@ -110,7 +112,7 @@ class LoginForm(Form):
 #        self.helper.add_input(Submit('cancel', 'Cancel'))
 #
 #
-#class UnlinkDelegateForm(ModelForm):
+# class UnlinkDelegateForm(ModelForm):
 #
 #    class Meta:
 #        model = Organisation

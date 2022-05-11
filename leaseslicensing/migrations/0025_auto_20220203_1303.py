@@ -7,30 +7,36 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0024_auto_20220203_1250'),
+        ("leaseslicensing", "0024_auto_20220203_1250"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='checklistquestion',
-            name='application_type',
+            model_name="checklistquestion",
+            name="application_type",
         ),
         migrations.RemoveField(
-            model_name='checklistquestion',
-            name='list_type',
+            model_name="checklistquestion",
+            name="list_type",
         ),
         migrations.RemoveField(
-            model_name='checklistquestion',
-            name='obsolete',
+            model_name="checklistquestion",
+            name="obsolete",
         ),
         migrations.AddField(
-            model_name='checklistquestion',
-            name='checklist_questions',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='questions', to='leaseslicensing.checklistquestions'),
+            model_name="checklistquestion",
+            name="checklist_questions",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="questions",
+                to="leaseslicensing.checklistquestions",
+            ),
         ),
         migrations.AddField(
-            model_name='checklistquestion',
-            name='enabled',
+            model_name="checklistquestion",
+            name="enabled",
             field=models.BooleanField(default=True),
         ),
     ]

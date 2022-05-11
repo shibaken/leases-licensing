@@ -8,23 +8,28 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0010_proposalgeometry_intersects'),
+        ("leaseslicensing", "0010_proposalgeometry_intersects"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='proposalgeometry',
-            name='intersects',
+            model_name="proposalgeometry",
+            name="intersects",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='proposalgeometry',
-            name='polygons',
-            field=django.contrib.gis.db.models.fields.PolygonField(blank=True, null=True, srid=4326),
+            model_name="proposalgeometry",
+            name="polygons",
+            field=django.contrib.gis.db.models.fields.PolygonField(
+                blank=True, null=True, srid=4326
+            ),
         ),
         migrations.AlterField(
-            model_name='proposalgeometry',
-            name='proposal',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='leaseslicensing.proposal'),
+            model_name="proposalgeometry",
+            name="proposal",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="leaseslicensing.proposal",
+            ),
         ),
     ]
