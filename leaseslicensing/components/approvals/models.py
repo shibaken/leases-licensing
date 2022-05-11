@@ -14,8 +14,6 @@ from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.db.models import Q
-from taggit.managers import TaggableManager
-from taggit.models import TaggedItemBase
 
 # from ledger.accounts.models import Organisation as ledger_organisation
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser

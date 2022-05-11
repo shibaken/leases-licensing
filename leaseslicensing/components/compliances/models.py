@@ -12,8 +12,6 @@ from django.db.models import JSONField
 from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.conf import settings
-from taggit.managers import TaggableManager
-from taggit.models import TaggedItemBase
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing import exceptions
 from leaseslicensing.components.main.models import (

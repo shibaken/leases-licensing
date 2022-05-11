@@ -385,9 +385,12 @@ class ProposalFilterBackend(DatatablesFilterBackend):
                     proposal__lodgement_date__lte=filter_lodged_to
                 )
 
-        getter = request.query_params.get
-        fields = self.get_fields(getter)
-        ordering = self.get_ordering(getter, fields)
+        #getter = request.query_params.get
+        #import ipdb; ipdb.set_trace()
+        #fields = self.get_fields(getter)
+        fields = self.get_fields(request)
+        #ordering = self.get_ordering(getter, fields)
+        ordering = self.get_ordering(request, view, fields)
         queryset = queryset.order_by(*ordering)
         if len(ordering):
             queryset = queryset.order_by(*ordering)
