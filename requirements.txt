@@ -77,3 +77,5 @@ rtree==0.9.7
 
 babel==2.9.1
 pylint==2.13.8
+flake8==4.0.1
+autopep8==1.6.0
