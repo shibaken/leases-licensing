@@ -27,9 +27,9 @@ BUILD_TAG=dbcawa/$REPO:$1_v$(date +%Y.%m.%d.%H.%M%S)
     cd $REPO/frontend/$REPO/ &&
     npm run build &&
     cd ../../../ &&
-    source venv/bin/activate &&
-    #./manage.py collectstatic --no-input &&
-    $(find . -maxdepth 1 -name "manage*.py") collectstatic --no-input &&
+    #source venv/bin/activate &&
+    #$(find . -maxdepth 1 -name "manage*.py") collectstatic --no-input &&
+    poetry run python manage.py collectstatic --no-input &&
     git log --pretty=medium -30 > ./git_history_recent &&
     docker image build --no-cache --tag $BUILD_TAG . &&
     git checkout $CURRENT_BRANCH
