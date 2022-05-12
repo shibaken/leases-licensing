@@ -31,31 +31,22 @@ RUN pip install --upgrade pip
 WORKDIR /app
 ENV POETRY_VERSION=1.1.13
 RUN pip install "poetry==$POETRY_VERSION"
-RUN python -m venv /venv
 COPY poetry.lock pyproject.toml /app/
 RUN poetry config virtualenvs.create false \
   && poetry install --no-dev --no-interaction --no-ansi
 
 # Install Python libs from requirements.txt.
-#FROM builder_base_leaseslicensing as python_libs_leaseslicensing
-#COPY requirements.txt ./
 COPY git_history_recent ./
 RUN touch /app/rand_hash
-#RUN pip3 install --no-cache-dir -r requirements.txt \
- # && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
 
 # Install the project (ensure that frontend projects have been built prior to this step).
-#FROM python_libs_leaseslicensing
 COPY timezone /etc/timezone
-#ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Patch also required on local environments after a venv rebuild
 # (in local) patch /home/<username>/leases-licensing/venv/lib/python3.8/site-packages/django/contrib/admin/migrations/0001_initial.py admin.patch.additional
 COPY admin.patch.additional /app/
-#RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
-RUN echo $(ls  /venv)
-RUN patch /venv/lib/python3.8/site-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
+RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
 RUN rm /app/admin.patch.additional
 
 # required for first time db setup
@@ -76,7 +67,8 @@ RUN touch /app/.env
 COPY leaseslicensing ./leaseslicensing
 #RUN mkdir /app/leaseslicensing/cache/
 #RUN chmod 777 /app/leaseslicensing/cache/
-RUN python manage.py collectstatic --noinput
+RUN poetry run python manage.py collectstatic --no-input
+#RUN python manage.py collectstatic --noinput
 RUN apt-get install --no-install-recommends -y python-pil
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
