@@ -45,7 +45,7 @@ RUN touch /app/rand_hash
  # && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
 
 # Install the project (ensure that frontend projects have been built prior to this step).
-FROM python_libs_leaseslicensing
+#FROM python_libs_leaseslicensing
 COPY timezone /etc/timezone
 #ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
