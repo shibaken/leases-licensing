@@ -6,63 +6,63 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0022_auto_20220201_1556'),
+        ("leaseslicensing", "0022_auto_20220201_1556"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proposal',
-            name='available_activities_text',
+            model_name="proposal",
+            name="available_activities_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='capital_investment_text',
+            model_name="proposal",
+            name="capital_investment_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='cash_flow_text',
+            model_name="proposal",
+            name="cash_flow_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='financial_capacity_text',
+            model_name="proposal",
+            name="financial_capacity_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='key_milestones_text',
+            model_name="proposal",
+            name="key_milestones_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='key_personnel_text',
+            model_name="proposal",
+            name="key_personnel_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='legislative_requirements_text',
+            model_name="proposal",
+            name="legislative_requirements_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='market_analysis_text',
+            model_name="proposal",
+            name="market_analysis_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='profit_and_loss_text',
+            model_name="proposal",
+            name="profit_and_loss_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='risk_factors_text',
+            model_name="proposal",
+            name="risk_factors_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='proposal',
-            name='staffing_text',
+            model_name="proposal",
+            name="staffing_text",
             field=models.TextField(blank=True),
         ),
     ]

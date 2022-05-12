@@ -1,8 +1,9 @@
 from leaseslicensing.components.organisations.models import Organisation
-#from reversion_compare.views import HistoryCompareDetailView
+
+# from reversion_compare.views import HistoryCompareDetailView
 
 
-#class OrganisationHistoryCompareView(HistoryCompareDetailView):
+# class OrganisationHistoryCompareView(HistoryCompareDetailView):
 #    """
 #    View for reversion_compare
 #    """

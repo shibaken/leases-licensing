@@ -4,40 +4,62 @@ from django.conf import settings
 from django.db import transaction
 from wsgiref.util import FileWrapper
 from rest_framework import viewsets, serializers, status, generics, views
-from rest_framework.decorators import action as detail_route, renderer_classes, parser_classes
+from rest_framework.decorators import (
+    action as detail_route,
+    renderer_classes,
+    parser_classes,
+)
 from rest_framework.decorators import action as list_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+    IsAdminUser,
+    BasePermission,
+)
 from rest_framework.pagination import PageNumberPagination
 from django.urls import reverse
 from leaseslicensing.components.main.models import (
-        ApplicationType, 
-        RequiredDocument, Question, GlobalSettings, MapLayer,
-        )
+    ApplicationType,
+    RequiredDocument,
+    Question,
+    GlobalSettings,
+    MapLayer,
+)
 from leaseslicensing.components.main.serializers import (
-        ApplicationTypeSerializer, 
-        RequiredDocumentSerializer, QuestionSerializer, GlobalSettingsSerializer, OracleSerializer, BookingSettlementReportSerializer, 
-        MapLayerSerializer,
-        )
+    ApplicationTypeSerializer,
+    RequiredDocumentSerializer,
+    QuestionSerializer,
+    GlobalSettingsSerializer,
+    OracleSerializer,
+    BookingSettlementReportSerializer,
+    MapLayerSerializer,
+)
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.proposals.serializers import ProposalSerializer
 from leaseslicensing.components.bookings.utils import oracle_integration
 from leaseslicensing.helpers import is_internal, is_customer
-#from leaseslicensing.components.bookings import reports
-from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission
+
+# from leaseslicensing.components.bookings import reports
+from ledger_api_client.utils import (
+    create_basket_session,
+    create_checkout_session,
+    place_order_submission,
+)
 from collections import namedtuple
 import json
 from decimal import Decimal
 
 import logging
-logger = logging.getLogger('payment_checkout')
+
+logger = logging.getLogger("payment_checkout")
 
 
 class GlobalSettingsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = GlobalSettings.objects.all().order_by('id')
+    queryset = GlobalSettings.objects.all().order_by("id")
     serializer_class = GlobalSettingsSerializer
 
 
@@ -72,7 +94,8 @@ class MapLayerViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-#class PaymentViewSet(viewsets.ModelViewSet):
+
+# class PaymentViewSet(viewsets.ModelViewSet):
 #    #queryset = Proposal.objects.all()
 #    queryset = Proposal.objects.none()
 #    #serializer_class = ProposalSerializer
@@ -87,7 +110,7 @@ class MapLayerViewSet(viewsets.ModelViewSet):
 #        return HttpResponseRedirect(redirect_to=fallback_url + '/success/')
 #
 #
-#class BookingSettlementReportView(views.APIView):
+# class BookingSettlementReportView(views.APIView):
 #    renderer_classes = (JSONRenderer,)
 #
 #    def get(self,request,format=None):
@@ -115,7 +138,7 @@ class MapLayerViewSet(viewsets.ModelViewSet):
 #            traceback.print_exc()
 #
 #
-#class OracleJob(views.APIView):
+# class OracleJob(views.APIView):
 #    renderer_classes = [JSONRenderer,]
 #    def get(self, request, format=None):
 #        try:
@@ -136,4 +159,3 @@ class MapLayerViewSet(viewsets.ModelViewSet):
 #        except Exception as e:
 #            print(traceback.print_exc())
 #            raise serializers.ValidationError(str(e[0]))
-

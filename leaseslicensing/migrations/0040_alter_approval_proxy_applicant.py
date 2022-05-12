@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0039_proposal_shapefile_json'),
+        ("leaseslicensing", "0039_proposal_shapefile_json"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='approval',
-            name='proxy_applicant',
+            model_name="approval",
+            name="proxy_applicant",
             field=models.IntegerField(null=True),
         ),
     ]

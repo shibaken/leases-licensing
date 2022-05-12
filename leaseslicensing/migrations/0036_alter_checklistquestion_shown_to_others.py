@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0035_checklistquestion_shown_to_others'),
+        ("leaseslicensing", "0035_checklistquestion_shown_to_others"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='checklistquestion',
-            name='shown_to_others',
-            field=models.BooleanField(default=False, help_text='When checked, question is shown to others', verbose_name='Comment'),
+            model_name="checklistquestion",
+            name="shown_to_others",
+            field=models.BooleanField(
+                default=False,
+                help_text="When checked, question is shown to others",
+                verbose_name="Comment",
+            ),
         ),
     ]

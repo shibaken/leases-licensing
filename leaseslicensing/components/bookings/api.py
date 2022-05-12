@@ -20,7 +20,12 @@ from rest_framework.decorators import action as detail_route, renderer_classes
 from rest_framework.decorators import action as list_route
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+    IsAdminUser,
+    BasePermission,
+)
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
 from collections import OrderedDict
@@ -38,12 +43,15 @@ from leaseslicensing.components.bookings.models import (
 from leaseslicensing.components.bookings.serializers import (
     BookingSerializer,
     OverdueBookingInvoiceSerializer,
-#    BookingSerializer2,
-#    ParkBookingSerializer2,
+    #    BookingSerializer2,
+    #    ParkBookingSerializer2,
 )
 from leaseslicensing.helpers import is_customer, is_internal
 from rest_framework_datatables.pagination import DatatablesPageNumberPagination
-from leaseslicensing.components.proposals.api import ProposalFilterBackend, ProposalRenderer
+from leaseslicensing.components.proposals.api import (
+    ProposalFilterBackend,
+    ProposalRenderer,
+)
 
 
 class BookingPaginatedViewSet(viewsets.ModelViewSet):
@@ -57,13 +65,23 @@ class BookingPaginatedViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if is_internal(self.request):
-            return Booking.objects.all().exclude(booking_type=Booking.BOOKING_TYPE_TEMPORARY)
+            return Booking.objects.all().exclude(
+                booking_type=Booking.BOOKING_TYPE_TEMPORARY
+            )
         elif is_customer(self.request):
             user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
-            return  Booking.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = user) ).exclude(booking_type=Booking.BOOKING_TYPE_TEMPORARY)
+            return Booking.objects.filter(
+                Q(proposal__org_applicant_id__in=user_orgs)
+                | Q(proposal__submitter=user)
+            ).exclude(booking_type=Booking.BOOKING_TYPE_TEMPORARY)
         return Booking.objects.none()
 
-    @list_route(methods=['GET',], detail=False)
+    @list_route(
+        methods=[
+            "GET",
+        ],
+        detail=False,
+    )
     def bookings_external(self, request, *args, **kwargs):
         """
         Paginated serializer for datatables - used by the internal and external dashboard (filtered by the get_queryset method)
@@ -77,7 +95,9 @@ class BookingPaginatedViewSet(viewsets.ModelViewSet):
 
         self.paginator.page_size = qs.count()
         result_page = self.paginator.paginate_queryset(qs, request)
-        serializer = BookingSerializer(result_page, context={'request':request}, many=True)
+        serializer = BookingSerializer(
+            result_page, context={"request": request}, many=True
+        )
         return self.paginator.get_paginated_response(serializer.data)
 
 
@@ -88,10 +108,15 @@ class BookingViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if is_internal(self.request):
-            return Booking.objects.all().exclude(booking_type=Booking.BOOKING_TYPE_TEMPORARY)
+            return Booking.objects.all().exclude(
+                booking_type=Booking.BOOKING_TYPE_TEMPORARY
+            )
         elif is_customer(self.request):
             user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
-            return  Booking.objects.filter( Q(proposal__org_applicant_id__in = user_orgs) | Q(proposal__submitter = user) ).exclude(booking_type=Booking.BOOKING_TYPE_TEMPORARY)
+            return Booking.objects.filter(
+                Q(proposal__org_applicant_id__in=user_orgs)
+                | Q(proposal__submitter=user)
+            ).exclude(booking_type=Booking.BOOKING_TYPE_TEMPORARY)
         return Booking.objects.none()
 
 
@@ -102,11 +127,15 @@ class OverdueBookingInvoiceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if is_internal(self.request):
-            bi = BookingInvoice.objects.all().exclude(booking__booking_type=Booking.BOOKING_TYPE_TEMPORARY)
+            bi = BookingInvoice.objects.all().exclude(
+                booking__booking_type=Booking.BOOKING_TYPE_TEMPORARY
+            )
             return [inv for inv in bi if inv.overdue]
         elif is_customer(self.request):
             user_orgs = [org.id for org in user.leaseslicensing_organisations.all()]
-            bi = BookingInvoice.objects.filter( Q(booking__proposal__org_applicant_id__in = user_orgs) | Q(booking__proposal__submitter = user) ).exclude(booking__booking_type=Booking.BOOKING_TYPE_TEMPORARY)
+            bi = BookingInvoice.objects.filter(
+                Q(booking__proposal__org_applicant_id__in=user_orgs)
+                | Q(booking__proposal__submitter=user)
+            ).exclude(booking__booking_type=Booking.BOOKING_TYPE_TEMPORARY)
             return [inv for inv in bi if inv.overdue]
         return BookingInvoice.objects.none()
-

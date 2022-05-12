@@ -6,9 +6,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0030_availableactivitiesdocument_capitalinvestmentdocument_cashflowdocument_financialcapacitydocument_key'),
-        ('leaseslicensing', '0033_auto_20220207_1529'),
+        (
+            "leaseslicensing",
+            "0030_availableactivitiesdocument_capitalinvestmentdocument_cashflowdocument_financialcapacitydocument_key",
+        ),
+        ("leaseslicensing", "0033_auto_20220207_1529"),
     ]
 
-    operations = [
-    ]
+    operations = []

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0009_proposalgeometry'),
+        ("leaseslicensing", "0009_proposalgeometry"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proposalgeometry',
-            name='intersects',
+            model_name="proposalgeometry",
+            name="intersects",
             field=models.BooleanField(default=False),
             preserve_default=False,
         ),
