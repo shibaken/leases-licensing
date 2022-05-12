@@ -5,17 +5,17 @@ MAINTAINER asi@dbca.wa.gov.au
 ENV DEBIAN_FRONTEND=noninteractive
 #ENV DEBUG=True
 ENV TZ=Australia/Perth
-#ENV EMAIL_HOST="smtp.corporateict.domain"
-#ENV DEFAULT_FROM_EMAIL='no-reply@dbca.wa.gov.au'
-#ENV NOTIFICATION_EMAIL='brendan.blackford@dbca.wa.gov.au'
-#ENV NON_PROD_EMAIL='brendan.blackford@dbca.wa.gov.au'
-#ENV PRODUCTION_EMAIL=False
-#ENV EMAIL_INSTANCE='DEV'
-#ENV SECRET_KEY="ThisisNotRealKey"
-#ENV SITE_PREFIX='lals-dev'
-#ENV SITE_DOMAIN='dbca.wa.gov.au'
-#ENV OSCAR_SHOP_NAME='Parks & Wildlife'
-#ENV BPAY_ALLOWED=False
+ENV EMAIL_HOST="smtp.corporateict.domain"
+ENV DEFAULT_FROM_EMAIL='no-reply@dbca.wa.gov.au'
+ENV NOTIFICATION_EMAIL='brendan.blackford@dbca.wa.gov.au'
+ENV NON_PROD_EMAIL='none@none.com'
+ENV PRODUCTION_EMAIL=False
+ENV EMAIL_INSTANCE='DEV'
+ENV SECRET_KEY="ThisisNotRealKey"
+ENV SITE_PREFIX='lals-dev'
+ENV SITE_DOMAIN='dbca.wa.gov.au'
+ENV OSCAR_SHOP_NAME='Parks & Wildlife'
+ENV BPAY_ALLOWED=False
 
 RUN apt-get clean
 RUN apt-get update
@@ -31,6 +31,7 @@ RUN pip install --upgrade pip
 WORKDIR /app
 ENV POETRY_VERSION=1.1.13
 RUN pip install "poetry==$POETRY_VERSION"
+RUN python -m venv /venv
 COPY poetry.lock pyproject.toml /app/
 RUN poetry config virtualenvs.create false \
   && poetry install --no-dev --no-interaction --no-ansi
@@ -67,8 +68,8 @@ RUN touch /app/.env
 COPY leaseslicensing ./leaseslicensing
 #RUN mkdir /app/leaseslicensing/cache/
 #RUN chmod 777 /app/leaseslicensing/cache/
-RUN poetry run python manage.py collectstatic --no-input
-#RUN python manage.py collectstatic --noinput
+#RUN poetry run python manage.py collectstatic --no-input
+RUN python manage.py collectstatic --noinput
 RUN apt-get install --no-install-recommends -y python-pil
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
