@@ -55,7 +55,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY admin.patch.additional /app/
 #RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
 RUN echo $(ls  /venv)
-RUN patch /venv/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
+RUN patch /venv/lib/python3.8/site-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
 RUN rm /app/admin.patch.additional
 
 # required for first time db setup
