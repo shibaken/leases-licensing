@@ -1,20 +1,21 @@
 # Prepare the base environment.
 FROM ubuntu:20.04 as builder_base_leaseslicensing
 MAINTAINER asi@dbca.wa.gov.au
+
 ENV DEBIAN_FRONTEND=noninteractive
-ENV DEBUG=True
+#ENV DEBUG=True
 ENV TZ=Australia/Perth
-ENV EMAIL_HOST="smtp.corporateict.domain"
-ENV DEFAULT_FROM_EMAIL='no-reply@dbca.wa.gov.au'
-ENV NOTIFICATION_EMAIL='brendan.blackford@dbca.wa.gov.au'
-ENV NON_PROD_EMAIL='brendan.blackford@dbca.wa.gov.au'
-ENV PRODUCTION_EMAIL=False
-ENV EMAIL_INSTANCE='DEV'
-ENV SECRET_KEY="ThisisNotRealKey"
-ENV SITE_PREFIX='lals-dev'
-ENV SITE_DOMAIN='dbca.wa.gov.au'
-ENV OSCAR_SHOP_NAME='Parks & Wildlife'
-ENV BPAY_ALLOWED=False
+#ENV EMAIL_HOST="smtp.corporateict.domain"
+#ENV DEFAULT_FROM_EMAIL='no-reply@dbca.wa.gov.au'
+#ENV NOTIFICATION_EMAIL='brendan.blackford@dbca.wa.gov.au'
+#ENV NON_PROD_EMAIL='brendan.blackford@dbca.wa.gov.au'
+#ENV PRODUCTION_EMAIL=False
+#ENV EMAIL_INSTANCE='DEV'
+#ENV SECRET_KEY="ThisisNotRealKey"
+#ENV SITE_PREFIX='lals-dev'
+#ENV SITE_DOMAIN='dbca.wa.gov.au'
+#ENV OSCAR_SHOP_NAME='Parks & Wildlife'
+#ENV BPAY_ALLOWED=False
 
 RUN apt-get clean
 RUN apt-get update
@@ -24,30 +25,36 @@ RUN apt-get install --no-install-recommends -y libpq-dev patch
 RUN apt-get install --no-install-recommends -y postgresql-client mtr
 RUN apt-get install --no-install-recommends -y sqlite3 vim postgresql-client ssh htop libspatialindex-dev
 RUN ln -s /usr/bin/python3 /usr/bin/python 
-#RUN ln -s /usr/bin/pip3 /usr/bin/pip
-RUN pip install --upgrade pip
-# Install Python libs from requirements.txt.
-FROM builder_base_leaseslicensing as python_libs_leaseslicensing
+
 WORKDIR /app
-COPY requirements.txt ./
+ENV POETRY_VERSION=1.1.13
+RUN pip install "poetry==$POETRY_VERSION"
+RUN python -m venv /venv
+COPY poetry.lock pyproject.toml /app/
+RUN poetry config virtualenvs.create false \
+  && poetry install --no-dev --no-interaction --no-ansi
+
+#RUN pip install --upgrade pip
+# Install Python libs from requirements.txt.
+#FROM builder_base_leaseslicensing as python_libs_leaseslicensing
+#COPY requirements.txt ./
 COPY git_history_recent ./
 RUN touch /app/rand_hash
-RUN pip3 install --no-cache-dir -r requirements.txt \
-  # Update the Django <1.11 bug in django/contrib/gis/geos/libgeos.py
-  # Reference: https://stackoverflow.com/questions/18643998/geodjango-geosexception-error
-  #&& sed -i -e "s/ver = geos_version().decode()/ver = geos_version().decode().split(' ')[0]/" /usr/local/lib/python3.6/dist-packages/django/contrib/gis/geos/libgeos.py \
-  && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
+#RUN pip3 install --no-cache-dir -r requirements.txt \
+ # && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
 
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_leaseslicensing
 COPY timezone /etc/timezone
-ENV TZ=Australia/Perth
+#ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Patch also required on local environments after a venv rebuild
 # (in local) patch /home/<username>/leases-licensing/venv/lib/python3.8/site-packages/django/contrib/admin/migrations/0001_initial.py admin.patch.additional
 COPY admin.patch.additional /app/
-RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
+#RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
+RUN echo $(ls  /venv)
+RUN patch /venv/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
 RUN rm /app/admin.patch.additional
 
 # required for first time db setup
