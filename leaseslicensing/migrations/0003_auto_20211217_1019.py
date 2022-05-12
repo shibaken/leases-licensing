@@ -7,49 +7,63 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0002_alter_proposaltype_name'),
+        ("leaseslicensing", "0002_alter_proposaltype_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proposaltype',
-            name='code',
+            model_name="proposaltype",
+            name="code",
             field=models.CharField(blank=True, max_length=30, null=True),
         ),
         migrations.AlterField(
-            model_name='globalsettings',
-            name='key',
+            model_name="globalsettings",
+            name="key",
             field=models.CharField(choices=[], max_length=255),
         ),
         migrations.AlterField(
-            model_name='oraclecode',
-            name='code_type',
-            field=models.CharField(choices=[('registration_of_interest', 'registration_of_interest'), ('lease', 'lease'), ('licence', 'licence')], default='registration_of_interest', max_length=64, verbose_name='Application Type'),
+            model_name="oraclecode",
+            name="code_type",
+            field=models.CharField(
+                choices=[
+                    ("registration_of_interest", "registration_of_interest"),
+                    ("lease", "lease"),
+                    ("licence", "licence"),
+                ],
+                default="registration_of_interest",
+                max_length=64,
+                verbose_name="Application Type",
+            ),
         ),
         migrations.AlterField(
-            model_name='proposal',
-            name='proposal_type',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='leaseslicensing.proposaltype'),
+            model_name="proposal",
+            name="proposal_type",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="leaseslicensing.proposaltype",
+            ),
         ),
         migrations.AlterField(
-            model_name='proposaltype',
-            name='description',
+            model_name="proposaltype",
+            name="description",
             field=models.CharField(blank=True, max_length=200, null=True),
         ),
         migrations.AlterUniqueTogether(
-            name='proposaltype',
+            name="proposaltype",
             unique_together=set(),
         ),
         migrations.RemoveField(
-            model_name='proposaltype',
-            name='name',
+            model_name="proposaltype",
+            name="name",
         ),
         migrations.RemoveField(
-            model_name='proposaltype',
-            name='replaced_by',
+            model_name="proposaltype",
+            name="replaced_by",
         ),
         migrations.RemoveField(
-            model_name='proposaltype',
-            name='version',
+            model_name="proposaltype",
+            name="version",
         ),
     ]

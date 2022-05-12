@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0041_merge_20220224_1611'),
+        ("leaseslicensing", "0041_merge_20220224_1611"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='maplayer',
-            name='transparency',
+            model_name="maplayer",
+            name="transparency",
             field=models.PositiveSmallIntegerField(default=50),
         ),
     ]

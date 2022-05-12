@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0021_remove_referral_referral_group'),
+        ("leaseslicensing", "0021_remove_referral_referral_group"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='proposalassessment',
+            name="proposalassessment",
             unique_together=set(),
         ),
         migrations.RemoveField(
-            model_name='proposalassessment',
-            name='referral_group',
+            model_name="proposalassessment",
+            name="referral_group",
         ),
     ]

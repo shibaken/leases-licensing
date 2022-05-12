@@ -8,7 +8,9 @@ from leaseslicensing.templatetags.users import system_maintenance_can_start
 import itertools
 
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     """
@@ -21,14 +23,15 @@ class Command(BaseCommand):
         mv /var/www/ubuntu-1604/cfg-grp1/leaseslicensing_prod.8094.ini /var/www/ubuntu-1604/cfg-grp1/leaseslicensing_prod.8094.ini.bak
     """
 
-    help = 'Check if System Maintenance is due, and terminate uwsgi/supervisor process'
-    log_file = os.getcwd() + '/logs/sys_maintenance.log'
+    help = "Check if System Maintenance is due, and terminate uwsgi/supervisor process"
+    log_file = os.getcwd() + "/logs/sys_maintenance.log"
 
     def handle(self, *args, **options):
-        cmd = 'mv /var/www/ubuntu-1604/cfg-grp1/leaseslicensing_prod.8094.ini /var/www/ubuntu-1604/cfg-grp1/leaseslicensing_prod.8094.ini.bak 2>&1 | tee -a {}'.format(self.log_file)
+        cmd = "mv /var/www/ubuntu-1604/cfg-grp1/leaseslicensing_prod.8094.ini /var/www/ubuntu-1604/cfg-grp1/leaseslicensing_prod.8094.ini.bak 2>&1 | tee -a {}".format(
+            self.log_file
+        )
         if system_maintenance_can_start():
-            logger.info('Running command {}'.format(__name__))
-            subprocess.Popen('date 2>&1 | tee -a {}'.format(self.log_file), shell=True)
-            #subprocess.Popen(settings.SUPERVISOR_STOP_CMD + ' 2>&1 | tee -a {}'.format(self.log_file), shell=True)
+            logger.info("Running command {}".format(__name__))
+            subprocess.Popen("date 2>&1 | tee -a {}".format(self.log_file), shell=True)
+            # subprocess.Popen(settings.SUPERVISOR_STOP_CMD + ' 2>&1 | tee -a {}'.format(self.log_file), shell=True)
             subprocess.Popen(cmd, shell=True)
-

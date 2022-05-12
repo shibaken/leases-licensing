@@ -8,19 +8,23 @@ from leaseslicensing.utils.migration_utils import OrganisationReader, check_park
 import itertools
 
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     """
     Runs the initial deployment
     """
 
-    help = 'Run the initial deployment'
+    help = "Run the initial deployment"
+
     def handle(self, *args, **options):
 
-        #reader=OrganisationReader('leaseslicensing/utils/csv/CommercialLicencesMigration_09Dec2019_test.csv')
-        #reader=OrganisationReader('leaseslicensing/utils/csv/CommercialLicencesMigration_09Dec2019.csv')
-        #reader=OrganisationReader('leaseslicensing/utils/csv/EClass_licences_02Dec2019.csv')
-        reader=OrganisationReader('leaseslicensing/utils/csv/CommercialLicencesMigration_07Jan2020_final.csv')
+        # reader=OrganisationReader('leaseslicensing/utils/csv/CommercialLicencesMigration_09Dec2019_test.csv')
+        # reader=OrganisationReader('leaseslicensing/utils/csv/CommercialLicencesMigration_09Dec2019.csv')
+        # reader=OrganisationReader('leaseslicensing/utils/csv/EClass_licences_02Dec2019.csv')
+        reader = OrganisationReader(
+            "leaseslicensing/utils/csv/CommercialLicencesMigration_07Jan2020_final.csv"
+        )
         reader.create_licences()
-

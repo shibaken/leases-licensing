@@ -1,25 +1,27 @@
 from confy import env
 from django.conf import settings
-#from ledger.payments.helpers import is_payment_admin
+
+# from ledger.payments.helpers import is_payment_admin
 
 from leaseslicensing.settings import (
-        KMI_SERVER_URL, 
-        template_group, 
-        template_title,
-        BUILD_TAG,
-        )
+    KMI_SERVER_URL,
+    template_group,
+    template_title,
+    BUILD_TAG,
+)
+
 
 def leaseslicensing_url(request):
-    #if settings.DOMAIN_DETECTED == 'apiary':
+    # if settings.DOMAIN_DETECTED == 'apiary':
     #    PUBLIC_URL = 'https://apiary.dbca.wa.gov.au/'
     #    displayed_system_name = settings.APIARY_SYSTEM_NAME
     #    support_email = settings.APIARY_SUPPORT_EMAIL
-    #else:
+    # else:
     #    PUBLIC_URL = 'https://das.dbca.wa.gov.au'
     #    displayed_system_name = settings.SYSTEM_NAME
     #    support_email = settings.SUPPORT_EMAIL
 
-    #is_payment_officer = is_payment_admin(request.user)
+    # is_payment_officer = is_payment_admin(request.user)
 
     return {
         #'DOMAIN_DETECTED': settings.DOMAIN_DETECTED,
@@ -34,8 +36,8 @@ def leaseslicensing_url(request):
         #'SUPPORT_EMAIL': support_email,
         #'is_payment_admin': is_payment_officer,
         #'build_tag': settings.BUILD_TAG,
-        'KMI_SERVER_URL': KMI_SERVER_URL,
-        'template_group': template_group,
-        'template_title': template_title,
-        'build_tag': BUILD_TAG,
+        "KMI_SERVER_URL": KMI_SERVER_URL,
+        "template_group": template_group,
+        "template_title": template_title,
+        "build_tag": BUILD_TAG,
     }

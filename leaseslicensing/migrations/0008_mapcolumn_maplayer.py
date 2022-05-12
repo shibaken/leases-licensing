@@ -7,35 +7,63 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0007_deedpolldocument'),
+        ("leaseslicensing", "0007_deedpolldocument"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MapLayer',
+            name="MapLayer",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('display_name', models.CharField(blank=True, max_length=100, null=True)),
-                ('layer_name', models.CharField(blank=True, max_length=200, null=True)),
-                ('option_for_internal', models.BooleanField(default=True)),
-                ('option_for_external', models.BooleanField(default=True)),
-                ('display_all_columns', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "display_name",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                ("layer_name", models.CharField(blank=True, max_length=200, null=True)),
+                ("option_for_internal", models.BooleanField(default=True)),
+                ("option_for_external", models.BooleanField(default=True)),
+                ("display_all_columns", models.BooleanField(default=False)),
             ],
             options={
-                'verbose_name': 'map layer',
+                "verbose_name": "map layer",
             },
         ),
         migrations.CreateModel(
-            name='MapColumn',
+            name="MapColumn",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=100, null=True)),
-                ('option_for_internal', models.BooleanField(default=True)),
-                ('option_for_external', models.BooleanField(default=True)),
-                ('map_layer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='columns', to='leaseslicensing.maplayer')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=100, null=True)),
+                ("option_for_internal", models.BooleanField(default=True)),
+                ("option_for_external", models.BooleanField(default=True)),
+                (
+                    "map_layer",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="columns",
+                        to="leaseslicensing.maplayer",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'map column',
+                "verbose_name": "map column",
             },
         ),
     ]

@@ -7,13 +7,18 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaseslicensing', '0044_proposal_generated_lease_licence'),
+        ("leaseslicensing", "0044_proposal_generated_lease_licence"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proposalgeometry',
-            name='copied_from',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='leaseslicensing.proposalgeometry'),
+            model_name="proposalgeometry",
+            name="copied_from",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="leaseslicensing.proposalgeometry",
+            ),
         ),
     ]

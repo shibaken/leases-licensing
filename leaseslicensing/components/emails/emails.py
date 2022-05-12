@@ -4,34 +4,35 @@ import mimetypes
 import six
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-#from django.core.urlresolvers import reverse
+
+# from django.core.urlresolvers import reverse
 from django.template import loader, Template
 from django.utils.html import strip_tags
 
 from ledger_api_client.ledger_models import Document
 
-logger = logging.getLogger('log')
+logger = logging.getLogger("log")
 
 
 def _render(template, context):
     if isinstance(context, dict):
-        context.update({'settings': settings})
+        context.update({"settings": settings})
     if isinstance(template, six.string_types):
         template = Template(template)
     return template.render(context)
 
 
-#def host_reverse(name, args=None, kwargs=None):
- #   return "{}{}".format(settings.DEFAULT_HOST, reverse(name, args=args, kwargs=kwargs))
+# def host_reverse(name, args=None, kwargs=None):
+#   return "{}{}".format(settings.DEFAULT_HOST, reverse(name, args=args, kwargs=kwargs))
 
 
 class TemplateEmailBase(object):
     def __init__(
-            self, 
-            subject='', 
-            html_template='leaseslicensing/emails/base_email.html',
-            txt_template='leaseslicensing/emails/base-email.txt'
-            ):
+        self,
+        subject="",
+        html_template="leaseslicensing/emails/base_email.html",
+        txt_template="leaseslicensing/emails/base-email.txt",
+    ):
         self.subject = subject
         self.html_template = html_template
         # txt_template can be None, in this case a 'tag-stripped' version of the html will be sent. (see send)
@@ -40,7 +41,15 @@ class TemplateEmailBase(object):
     def send_to_user(self, user, context=None):
         return self.send(user.email, context=context)
 
-    def send(self, to_addresses, from_address=None, context=None, attachments=None, cc=None, bcc=None):
+    def send(
+        self,
+        to_addresses,
+        from_address=None,
+        context=None,
+        attachments=None,
+        cc=None,
+        bcc=None,
+    ):
         """
         Send an email using EmailMultiAlternatives with text and html.
         :param to_addresses: a string or a list of addresses
@@ -84,13 +93,22 @@ class TemplateEmailBase(object):
                 _attachments.append((filename, content, mime))
             else:
                 _attachments.append(attachment)
-        msg = EmailMultiAlternatives(self.subject, txt_body, from_email=from_address, to=to_addresses,
-                                     attachments=_attachments, cc=cc, bcc=bcc)
-        msg.attach_alternative(html_body, 'text/html')
+        msg = EmailMultiAlternatives(
+            self.subject,
+            txt_body,
+            from_email=from_address,
+            to=to_addresses,
+            attachments=_attachments,
+            cc=cc,
+            bcc=bcc,
+        )
+        msg.attach_alternative(html_body, "text/html")
         try:
             if not settings.DISABLE_EMAIL:
                 msg.send(fail_silently=False)
             return msg
         except Exception as e:
-            logger.exception("Error while sending email to {}: {}".format(to_addresses, e))
+            logger.exception(
+                "Error while sending email to {}: {}".format(to_addresses, e)
+            )
             return None

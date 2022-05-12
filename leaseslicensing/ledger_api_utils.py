@@ -3,9 +3,10 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.main.decorators import basic_exception_handler
 
 import logging
-logger = logging.getLogger('leaseslicensing')
+
+logger = logging.getLogger("leaseslicensing")
+
 
 @basic_exception_handler
 def retrieve_email_user(email_user_id):
     return EmailUser.objects.get(id=email_user_id)
-
