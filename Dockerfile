@@ -21,7 +21,7 @@ RUN apt-get clean
 RUN apt-get update
 RUN apt-get upgrade -y
 RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin
-RUN apt-get install --no-install-recommends -y python3-setuptools python3-dev python3-pip tzdata libreoffice cron rsyslog python3.8-venv
+RUN apt-get install --no-install-recommends -y python3-setuptools python3-dev python3-pip tzdata libreoffice cron rsyslog python3.8-venv gunicorn libreoffice
 RUN apt-get install --no-install-recommends -y libpq-dev patch
 RUN apt-get install --no-install-recommends -y postgresql-client mtr
 RUN apt-get install --no-install-recommends -y sqlite3 vim postgresql-client ssh htop libspatialindex-dev
