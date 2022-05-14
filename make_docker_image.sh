@@ -1,5 +1,9 @@
 #!/bin/bash
 ## first parameter is DBCA branch name, optional second parameter is an integer indicating incremental daily version
+
+# copy pre-commit hook from git_hooks/
+cp git_hooks/pre-commit .git/hooks
+
 set -e
 if [[ $# -lt 1 ]]; then
     echo "ERROR: DBCA branch must be specified"
