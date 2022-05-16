@@ -37,5 +37,25 @@ module.exports = {
                 writeToDisk: true,
             }
         },
+        module: {
+            rules: [
+              /* config.module.rule('images') */
+              {
+                test: /\.(png|jpe?g|gif|webp|avif)(\?.*)?$/,
+                type: 'asset/resource',
+                generator: {
+                  filename: 'img/[name][ext]'
+                }
+              },
+              /* config.module.rule('fonts') */
+              {
+                test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/i,
+                type: 'asset/resource',
+                generator: {
+                  filename: 'fonts/[name][ext]'
+                }
+              },
+            ]
+        },
     }
 };
