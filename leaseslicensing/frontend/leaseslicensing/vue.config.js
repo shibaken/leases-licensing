@@ -3,6 +3,7 @@ const webpack = require('webpack');
 
 module.exports = {
     outputDir: path.resolve(__dirname, "../../static/leaseslicensing_vue"),
+    publicPath: '/static/leaseslicensing_vue/',
     filenameHashing: false,
     //runtimeCompiler: true,
     chainWebpack: config => {
