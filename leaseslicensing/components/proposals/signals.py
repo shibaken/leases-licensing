@@ -1,7 +1,5 @@
-from django.db.models.signals import post_delete, pre_save, post_save, m2m_changed
-from django.core.exceptions import ValidationError
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.proposals.models import Referral, Proposal
 
 import logging
