@@ -8,7 +8,6 @@ confy.read_environment_file(BASE_DIR + "/.env")
 os.environ.setdefault("BASE_DIR", BASE_DIR)
 
 from ledger_api_client.settings_base import *
-
 ROOT_URLCONF = "leaseslicensing.urls"
 SITE_ID = 1
 DEPT_DOMAINS = env("DEPT_DOMAINS", ["dpaw.wa.gov.au", "dbca.wa.gov.au"])
@@ -121,7 +120,8 @@ TEMPLATES[0]["OPTIONS"]["context_processors"].append(
     "leaseslicensing.context_processors.leaseslicensing_url"
 )
 
-del BOOTSTRAP3["css_url"]
+#del BOOTSTRAP3["css_url"]
+
 # BOOTSTRAP3 = {
 #    'jquery_url': '//static.dpaw.wa.gov.au/static/libs/jquery/2.2.1/jquery.min.js',
 #    'base_url': '//static.dpaw.wa.gov.au/static/libs/twitter-bootstrap/3.3.6/',
@@ -140,9 +140,9 @@ CACHES = {
     }
 }
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_ll")
-STATICFILES_DIRS.append(
-    os.path.join(os.path.join(BASE_DIR, "leaseslicensing", "static"))
-)
+STATICFILES_DIRS.extend([
+    os.path.join(os.path.join(BASE_DIR, "leaseslicensing", "static")),
+    ])
 DEV_STATIC = env("DEV_STATIC", False)
 DEV_STATIC_URL = env("DEV_STATIC_URL")
 if DEV_STATIC and not DEV_STATIC_URL:

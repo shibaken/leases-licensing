@@ -1,9 +1,6 @@
 #!/bin/bash
 ## first parameter is DBCA branch name, optional second parameter is an integer indicating incremental daily version
 
-# copy pre-commit hook from git_hooks/
-cp git_hooks/pre-commit .git/hooks
-
 set -e
 if [[ $# -lt 1 ]]; then
     echo "ERROR: DBCA branch must be specified"
@@ -31,8 +28,6 @@ BUILD_TAG=dbcawa/$REPO:$1_v$(date +%Y.%m.%d.%H.%M%S)
     cd $REPO/frontend/$REPO/ &&
     npm run build &&
     cd ../../../ &&
-    #source venv/bin/activate &&
-    #$(find . -maxdepth 1 -name "manage*.py") collectstatic --no-input &&
     poetry run python manage.py collectstatic --no-input &&
     git log --pretty=medium -30 > ./git_history_recent &&
     docker image build --no-cache --tag $BUILD_TAG . &&

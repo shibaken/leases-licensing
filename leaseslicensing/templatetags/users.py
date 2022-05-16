@@ -1,15 +1,13 @@
-from django.template import Library
 
-# from wildlifelicensing.apps.main import helpers
-# from leaseslicensing import helpers
+import pytz
+from datetime import timedelta
+from django.template import Library
+from django.utils import timezone
 from django.conf import settings
+
 from leaseslicensing import helpers as leaseslicensing_helpers
 from leaseslicensing.components.main.models import SystemMaintenance
 
-# from ledger.payments.helpers import is_payment_admin
-from datetime import datetime, timedelta
-from django.utils import timezone
-import pytz
 
 register = Library()
 
@@ -37,7 +35,7 @@ def is_model_backend(context):
 
 @register.simple_tag(takes_context=True)
 def is_payment_officer(context):
-    request = context["request"]
+    #request = context["request"]
     # TODO: fix this
     return False  # is_payment_admin(request.user)
 

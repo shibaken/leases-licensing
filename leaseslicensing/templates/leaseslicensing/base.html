@@ -17,6 +17,10 @@
 
 <!DOCTYPE html>
 <html lang="en">
+    {% block extra_hidden_inputs %}
+        <link rel="icon" href="{% static 'favicon.ico' %}">
+    {% endblock %}
+
     <body>
         {% block header_top_menu %}
         {% endblock %}
