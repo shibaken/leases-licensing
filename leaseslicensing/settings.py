@@ -8,7 +8,6 @@ confy.read_environment_file(BASE_DIR + "/.env")
 os.environ.setdefault("BASE_DIR", BASE_DIR)
 
 from ledger_api_client.settings_base import *
-
 ROOT_URLCONF = "leaseslicensing.urls"
 SITE_ID = 1
 DEPT_DOMAINS = env("DEPT_DOMAINS", ["dpaw.wa.gov.au", "dbca.wa.gov.au"])
@@ -121,7 +120,8 @@ TEMPLATES[0]["OPTIONS"]["context_processors"].append(
     "leaseslicensing.context_processors.leaseslicensing_url"
 )
 
-del BOOTSTRAP3["css_url"]
+#del BOOTSTRAP3["css_url"]
+
 # BOOTSTRAP3 = {
 #    'jquery_url': '//static.dpaw.wa.gov.au/static/libs/jquery/2.2.1/jquery.min.js',
 #    'base_url': '//static.dpaw.wa.gov.au/static/libs/twitter-bootstrap/3.3.6/',

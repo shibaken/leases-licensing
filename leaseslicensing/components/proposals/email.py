@@ -80,7 +80,6 @@ SYSTEM_NAME = settings.SYSTEM_NAME_SHORT + " Automated Message"
 
 
 def send_referral_email_notification(referral, recipients, request, reminder=False):
-    proposed_start_date = None
     # if referral.proposal.is_filming_application:
     #     email = ReferralFilmingSendNotificationEmail()
     #     proposed_start_date= referral.proposal.filming_activity.commencement_date

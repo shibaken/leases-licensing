@@ -1,8 +1,6 @@
 from django.conf import settings
 from ledger_api_client.ledger_models import (
     EmailUserRO as EmailUser,
-    Address,
-    EmailUserRO,
 )
 from leaseslicensing.components.main.models import ApplicationType
 from leaseslicensing.components.organisations.models import Organisation
@@ -381,7 +379,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
             "applicant_details",
             "details_text",
             "proposalgeometry",
-            ## additional form fields for registration of interest
+            # additional form fields for registration of interest
             "exclusive_use",
             "long_term_use",
             "consistent_purpose",
@@ -410,7 +408,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
             "aboriginal_site_text",
             "native_title_consultation_text",
             "mining_tenement_text",
-            ## additional form fields for lease_licence
+            # additional form fields for lease_licence
             "profit_and_loss_text",
             "cash_flow_text",
             "capital_investment_text",
@@ -654,7 +652,7 @@ class SaveLeaseLicenceSerializer(BaseProposalSerializer):
         fields = (
             "id",
             "details_text",
-            ## additional form fields for lease_licence
+            # additional form fields for lease_licence
             "profit_and_loss_text",
             "cash_flow_text",
             "capital_investment_text",
@@ -676,7 +674,7 @@ class SaveRegistrationOfInterestSerializer(BaseProposalSerializer):
         fields = (
             "id",
             "details_text",
-            ## additional form fields
+            # additional form fields
             "exclusive_use",
             "long_term_use",
             "consistent_purpose",
@@ -895,7 +893,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
             "proposalgeometry",
             "processing_status_id",
             "details_text",
-            ## additional form fields for registration of interest
+            # additional form fields for registration of interest
             "exclusive_use",
             "long_term_use",
             "consistent_purpose",
@@ -924,7 +922,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
             "aboriginal_site_text",
             "native_title_consultation_text",
             "mining_tenement_text",
-            ## additional form fields for lease_licence
+            # additional form fields for lease_licence
             "profit_and_loss_text",
             "cash_flow_text",
             "capital_investment_text",
