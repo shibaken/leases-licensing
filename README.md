@@ -1,5 +1,7 @@
 # Leases Licensing System
 
+The Leases and Licensing System is used by customers to submit a Registration of Interest or a Lease/Licence application in case they want to commercially use land managed by the Department and pay for annual fees for issued leases or licences. The system is used by Department staff to process the applications and to manage issued leases and licences, manage the annual fees and manage the outcomes of competitive processes.
+
 It is a database-backed Django application, using REST API with Vue.js as the client side app and integrates into the ledger system.
 
 # Requirements and installation
@@ -40,7 +42,7 @@ Then, run `npm run build` to build the software and move the output files to `le
 The build files are made available to the Django app by running `./collectstatic.sh`.
 
 If the `DEV_APP_BUILD_URL` is not set, the Django app will serve static Javascript from `staticfiles_ll/leaseslicensing_vue/js.app.js`, 
-else the Vue app will be served from the url provided.
+else the Vue app will be served from the url provided.  Start the dev server with `npm run serve`.
 
 # Environment variables
 
