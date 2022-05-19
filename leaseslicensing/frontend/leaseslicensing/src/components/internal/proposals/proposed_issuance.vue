@@ -251,13 +251,10 @@ export default {
             this.validation_form.resetForm();
             */
         },
-        fetchContact: function(id){
-            let vm = this;
-            vm.$http.get(api_endpoints.contact(id)).then((response) => {
-                vm.contact = response.body; vm.isModalOpen = true;
-            },(error) => {
-                console.log(error);
-            } );
+        fetchContact: async function(id){
+            const response = await fetch(api_endpoints.contact(id));
+            this.contact = await response.json(); 
+            this.isModalOpen = true;
         },
         sendData:function(){
             this.errors = false;
@@ -265,69 +262,41 @@ export default {
             this.approval.details = this.$refs.approval_details.detailsText;
             this.approval.decision = this.selectedDecision;
             this.issuingApproval = true;
-            this.$nextTick(() => {
+            this.$nextTick(async () => {
                 if (this.state == 'proposed_approval'){
-                    this.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/proposed_approval'),this.approval,{
-                            //emulateJSON:true,
-                        }).then((response)=>{
-                            this.issuingApproval = false;
-                            this.close();
-                            this.$emit('refreshFromResponse',response);
-                            this.$router.push({ path: '/internal' }); //Navigate to dashboard page after Propose issue.
+                    try {
+                        await fetch(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/proposed_approval'),{ 
+                            body: JSON.stringify(this.approval),
+                            method: 'POST',
+                        })
+                        this.issuingApproval = false;
+                        this.close();
+                        this.$emit('refreshFromResponse',response);
+                        this.$router.push({ path: '/internal' }); //Navigate to dashboard page after Propose issue.
 
-                        },(error)=>{
-                            this.errors = true;
-                            this.issuingApproval = false;
-                            this.errorString = helpers.apiVueResourceError(error);
-                        });
-                }
-                else if (this.state == 'final_approval'){
-                    this.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/final_approval'),this.approval,{
+                    } catch (error) {
+                        this.errors = true;
+                        this.issuingApproval = false;
+                        this.errorString = helpers.apiVueResourceError(error);
+                    }
+                } else if (this.state == 'final_approval'){
+                    try {
+                        await fetch(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/final_approval'),{ 
+                        body: JSON.stringify(this.approval),
+                        method: 'POST',
                             //emulateJSON:true,
-                        }).then((response)=>{
-                            this.issuingApproval = false;
-                            this.close();
-                            this.$emit('refreshFromResponse',response);
-                        },(error)=>{
-                            this.errors = true;
-                            this.issuingApproval = false;
-                            this.errorString = helpers.apiVueResourceError(error);
-                        });
-                }
-            });
-        },
-        /*
-        addFormValidations: function() {
-            let vm = this;
-            vm.validation_form = $(vm.form).validate({
-                rules: {
-                    start_date:"required",
-                    due_date:"required",
-                    approval_details:"required",
-                },
-                messages: {
-                },
-                showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
+                        })
+                        this.issuingApproval = false;
+                        this.close();
+                        this.$emit('refreshFromResponse',response);
+                    } catch (error) {
+                        this.errors = true;
+                        this.issuingApproval = false;
+                        this.errorString = helpers.apiVueResourceError(error);
                     }
                 }
             });
-       },
-       */
+        },
    },
    created:function () {
         let vm =this;
