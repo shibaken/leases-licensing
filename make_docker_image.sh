@@ -1,5 +1,5 @@
 #!/bin/bash
-## first parameter is DBCA branch name, optional second parameter is an integer indicating incremental daily version
+## first parameter is DBCA branch name
 
 set -e
 if [[ $# -lt 1 ]]; then
@@ -37,7 +37,6 @@ BUILD_TAG=dbcawa/$REPO:$1_v$(date +%Y.%m.%d.%H.%M%S)
 {
     git checkout $CURRENT_BRANCH
     echo "ERROR: Docker build failed"
-    echo "NB: This script assumes that your virtual environment folder is 'venv'"
     echo "$0 1"
     exit 1
 }

@@ -223,7 +223,7 @@ export default {
                 confirmButtonText: 'Remove Requirement',
                 confirmButtonColor:'#d9534f'
             }).then(() => {
-                vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id+'/discard'))
+                fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id+'/discard'))
                 .then((response) => {
                     vm.$refs.requirements_datatable.vmDataTable.ajax.reload();
                 }, (error) => {
@@ -236,7 +236,7 @@ export default {
         fetchRequirements(){
             let vm = this;
             let url = api_endpoints.proposal_standard_requirements
-            vm.$http.get(url, {params: {'application_type_code': vm.proposal.application_type_code}}).then((response) => {
+            fetch(url, {params: {'application_type_code': vm.proposal.application_type_code}}).then((response) => {
                 vm.requirements = response.body
             },(error) => {
                 console.log(error);
@@ -244,7 +244,7 @@ export default {
         },
         editRequirement(_id){
             let vm = this;
-            vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id)).then((response) => {
+            fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id)).then((response) => {
                 this.$refs.requirement_detail.requirement = response.body;
                 this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
                 response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
@@ -293,7 +293,7 @@ export default {
             let vm = this;
             let movement = direction == 'down'? 'move_down': 'move_up';
             try {
-                const res = await this.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,req+'/'+movement))
+                const res = await fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,req+'/'+movement))
                 this.$parent.uuid++;
                 //await this.$refs.requirements_datatable.vmDataTable.ajax.reload();
                 //this.$refs.requirements_datatable.vmDataTable.page(0).draw(false);

@@ -25,6 +25,7 @@ module.exports = {
                $: "jquery",
                moment: "moment",
                swal: "sweetalert2",
+               _: 'lodash',
                //swal: Swal,
                //_: 'lodash',
                //datetimepicker:"../node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
