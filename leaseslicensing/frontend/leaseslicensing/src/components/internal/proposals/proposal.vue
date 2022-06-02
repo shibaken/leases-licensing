@@ -930,7 +930,7 @@ export default {
                 this.$nextTick(() => {
                     this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? helpers.copyObject(this.proposal.proposed_issuance_approval) : {};
                     this.$refs.proposed_approval.state = 'final_approval';
-                    this.$refs.proposed_approval.isApprovalLevelDocument = this.isApprovalLevelDocument;
+                    //this.$refs.proposed_approval.isApprovalLevelDocument = this.isApprovalLevelDocument;
                     this.$refs.proposed_approval.isModalOpen = true;
                 });
             }
@@ -1067,7 +1067,7 @@ export default {
                 let formData = new FormData(vm.form);
                 let data = {'status': new_status, 'approver_comment': vm.approver_comment}
                 try {
-                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), 
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (this.proposal.id + '/switch_status')), 
                     {
                         body: JSON.stringify(data),
                         method: 'POST',
@@ -1092,7 +1092,7 @@ export default {
             else if(this.proposal.processing_status == 'With Approver' && (new_status == 'with_assessor_requirements' || new_status=='with_assessor')) {
                 let data = {'status': new_status, 'approver_comment': this.approver_comment}
                 try {
-                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')),
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (this.proposal.id + '/switch_status')),
                     {
                         body: JSON.stringify(data),
                         method: 'POST',
@@ -1113,9 +1113,9 @@ export default {
                     )
                 }
             } else {
-                let data = {'status': new_status, 'approver_comment': vm.approver_comment}
+                let data = {'status': new_status, 'approver_comment': this.approver_comment}
                 try {
-                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), 
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (this.proposal.id + '/switch_status')), 
                     {
                         body: JSON.stringify(data),
                         method: 'POST',

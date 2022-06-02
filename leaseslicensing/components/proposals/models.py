@@ -1111,7 +1111,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    ## Registration of Interest additional form fields
+    # Registration of Interest additional form fields
     # proposal details
     exclusive_use = models.BooleanField(null=True)
     exclusive_use_text = models.TextField(blank=True)

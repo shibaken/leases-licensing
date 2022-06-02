@@ -55,7 +55,7 @@ export default {
             editorConfig: {
                 language: 'en',
             },
-            detailsText: null,
+            detailsText: '',
             editor: ClassicEditor,
         }
     },
