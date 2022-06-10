@@ -228,12 +228,16 @@ export default {
             $('body').append(formElement);
             $(formElement).submit();
         },
-        ok:function () {
+        ok: async function() {
+            await this.sendData();
+            await this.$router.push({ path: '/internal' });
+            /*
             let vm =this;
             if($(vm.form).valid()){
                 vm.sendData();
                 //vm.$router.push({ path: '/internal' });
             }
+            */
         },
         cancel:function () {
             this.close()
@@ -256,7 +260,7 @@ export default {
             this.contact = await response.json(); 
             this.isModalOpen = true;
         },
-        sendData:function(){
+        sendData: async function(){
             this.errors = false;
             //let approval = JSON.parse(JSON.stringify(vm.approval));
             this.approval.details = this.$refs.approval_details.detailsText;
