@@ -72,6 +72,6 @@ jobs:
       - name: Run tests
         run: |
             poetry run ./apply_initial_migrations.sh
-            python manage.py collectstatic --no-input &&
-            python manage.py check
+            poetry run python manage.py collectstatic --no-input &&
+            poetry run python manage.py check
             #python manage.py test wildlifecompliance/tests
