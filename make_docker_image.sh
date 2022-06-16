@@ -10,7 +10,8 @@ fi
 
 REPO_NO_DASH=$(awk '{split($0, arr, "\/"); print arr[2]}' <<< $(git config -l|grep remote|grep url|head -n 1|sed 's/-//g'|sed 's/....$//'))
 REPO=$(awk '{split($0, arr, "\/"); print arr[2]}' <<< $(git config -l|grep remote|grep url|head -n 1|sed 's/....$//'))
-BUILD_TAG=dbcawa/$REPO:$1_v$(date +%Y.%m.%d.%H.%M%S)
+# Docker repo may be named differently to github repo
+BUILD_TAG=dbcawa/$REPO_NO_DASH:$1_v$(date +%Y.%m.%d.%H.%M%S)
 
 {
     docker image build --build-arg REPO_ARG=$REPO --build-arg REPO_NO_DASH_ARG=$REPO_NO_DASH --build-arg BRANCH_ARG=$1 --no-cache --tag $BUILD_TAG . &&
