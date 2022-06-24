@@ -103,3 +103,7 @@ uwsgi*.ini
 leaseslicensing/static/leaseslicensing_vue/
 
 git_history_recent
+
+# data files
+*.csv
+*.xls*
