@@ -10,6 +10,7 @@ from django.contrib.auth import logout, login  # DEV ONLY
 
 from django.conf.urls.static import static
 from rest_framework import routers
+from django_media_serv.urls import urlpatterns as media_serv_patterns
 from leaseslicensing import views
 
 # from leaseslicensing.admin import leaseslicensing_admin_site
@@ -234,13 +235,12 @@ urlpatterns = [
     # url(r'^history/proposaltype/(?P<pk>\d+)/$', proposal_views.ProposalTypeHistoryCompareView.as_view(), name='proposaltype_history'),
     # url(r'^history/helppage/(?P<pk>\d+)/$', proposal_views.HelpPageHistoryCompareView.as_view(), name='helppage_history'),
     # url(r'^history/organisation/(?P<pk>\d+)/$', organisation_views.OrganisationHistoryCompareView.as_view(), name='organisation_history'),
-] + ledger_patterns
+] + ledger_patterns + media_serv_patterns
 
 # if settings.EMAIL_INSTANCE != 'PROD':
 #   urlpatterns.append(path('accounts/', include('django.contrib.auth.urls')))
 
-if settings.DEBUG:  # Serve media locally in development.
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if not are_migrations_running():
     DefaultDataManager()
