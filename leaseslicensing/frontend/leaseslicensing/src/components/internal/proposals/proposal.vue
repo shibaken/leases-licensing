@@ -835,13 +835,13 @@ export default {
                 console.log('aho4')
 
                 if(res.ok){
-                    swal({
+                    new swal({
                         title: 'Saved',
                         text: 'Your proposal has been saved',
                         type: 'success',
                     })
                 } else {
-                    swal({
+                    new swal({
                         title: "Please fix following errors before saving",
                         text: err.bodyText,
                         type:'error',
