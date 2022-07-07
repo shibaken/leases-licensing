@@ -1,32 +1,24 @@
 <template lang="html">
-    <!--div class="accordion" :id="custom_id">
-      <div class="accordion-item">
-        <div class="accordion-header" :id="section_header_id">
-          <h2 class="mb-0">
-            <button id="mybutton" class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#'+section_body_id" :aria-expanded="true" :aria-controls="section_body_id">
-                {{ label }}
-            </button>
-          </h2>
-        </div>
-        <div :id="section_body_id" class="accordion-collapse collapse show" :aria-labelledby="section_header_id" :data-parent="'#'+custom_id">
-          <div class="accordion-body">
-              <slot></slot>
-          </div>
-        </div>
-      </div>
-    </div-->
     <div class="card section-wrapper" :id="custom_id">
         <div class="card-header fw-bold h4" style='padding:30px;'>
-            <div class='row'>
+            <div 
+                class='row show_hide_switch' 
+                :id="'show_hide_switch_' + section_body_id" 
+                data-bs-toggle="collapse" 
+                :data-bs-target="'#' +section_body_id" 
+                aria-expanded="true" 
+                :aria-controls="section_body_id"
+                @click="toggle_show_hide"
+            >
                 <div class='col-6'>
                     {{ label }}
                 </div>
                 <div class='col-6 text-end'>
-                    <i class="bi fw-bold down-chevron-close chevron-toggle" :data-bs-target="'#' +section_body_id"></i>
+                    <i :id="chevron_elem_id" class="rotate_icon fa-solid fa-chevron-down"></i>
                 </div>
             </div>
         </div>
-        <div class="card-body" :id='section_body_id' >
+        <div class="card-body collapse show" :id='section_body_id' >
             <!--div id="ledger_ui_contact_details"></div-->
             <slot></slot>
         </div>
@@ -46,21 +38,22 @@ export default {
         },
         Index: {},
         hideHeader: {},
-        /*
-        noChevron: {
-            default: false,
-        },
-        */
     },
     data:function () {
         return {
             custom_id: uuid(),
-            /*
-            title:"Section title",
-            panel_chevron_class: null,
-            chev_down_class_names: 'glyphicon glyphicon-chevron-down pull-right rotate_icon',
-            chev_up_class_names:   'glyphicon glyphicon-chevron-down pull-right rotate_icon chev_rotated',
-            */
+            chevron_elem_id: 'chevron_elem_' + uuid(),
+            elem_expanded: null,
+        }
+    },
+    watch: {
+        elem_expanded: function(){
+            let chevron_icon = $('#' + this.chevron_elem_id)
+            if (this.elem_expanded){
+                chevron_icon.addClass('chev_rotated')
+            } else {
+                chevron_icon.removeClass('chev_rotated')
+            }
         }
     },
     computed:{
@@ -70,44 +63,34 @@ export default {
         section_body_id: function () {
             return "section_body_"+this.Index;
         },
-        /*
-        panel_collapse_class: function() {
-            this.panel_chevron_class = this.chev_up_class_names
-            return "card-body collapse in";
-        },
-        */
     },
     methods: {
-        /*
-        switchPanelChevronClass: function() {
-            if (this.panel_chevron_class == this.chev_down_class_names) {
-                this.panel_chevron_class = this.chev_up_class_names
-            } else {
-                this.panel_chevron_class = this.chev_down_class_names
-            }
-        },
-        */
+        toggle_show_hide: function(){
+            // Bootstrap add a 'collapsed' class name to the element
+            let elem_expanded_when_clicked = $('#show_hide_switch_' + this.section_body_id).hasClass('collapsed')
+            this.elem_expanded = !elem_expanded_when_clicked
+        }
     },
     mounted: function() {
-        /*
-        let vm = this;
-        $('#' + vm.custom_id).on('click',function () {
-            vm.switchPanelChevronClass();
-        });
-        $('#mybutton').on('click', function(e) {
-            console.log(e);
-        });
-        */
+        this.toggle_show_hide()
     },
     created: function() {
     },
 }
 </script>
-<style scoped>
 
+<style scoped>
 .section-wrapper {
     margin-bottom: 20px;
     padding: 0;
 }
-
+.show_hide_switch{
+    cursor: pointer;
+}
+.rotate_icon {
+    transition: 0.5s;
+}
+.chev_rotated {
+    transform: rotate(180deg);
+}
 </style>
