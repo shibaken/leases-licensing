@@ -365,7 +365,7 @@ export default {
             "loading": [],
 
             department_users : [],
-            selected_referral: [],
+            selected_referral: '',
             referral_text: '',
             sendingReferral: false,
             buttons: (function(){
