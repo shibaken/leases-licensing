@@ -2355,7 +2355,8 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def assessor_save(self, request, *args, **kwargs):
         instance = self.get_object()
         save_assessor_data(instance, request, self)
-        return redirect(reverse("external"))
+        # return redirect(reverse("external"))
+        return Response({})
 
     @detail_route(methods=["post"], detail=True)
     @basic_exception_handler
