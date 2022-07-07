@@ -595,11 +595,19 @@ export default {
             }
         },
         sendReferral: async function(){
+            let vm = this
             this.checkAssessorData();
-            let formData = new FormData(vm.form);
+            //let formData = new FormData(vm.form);
             this.sendingReferral = true;
             try {
-                const res = await fetch(this.proposal_form_url, { body: {'proposal': this.proposal}, method: 'POST' })
+                const res = await fetch(this.proposal_form_url, {
+                    method: 'POST',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+                    body: JSON.stringify({'proposal': vm.proposal}), 
+                })
                 const resData = await res.json()
                 let data = {'email':this.selected_referral, 'text': this.referral_text}
                 this.sendingReferral = true;
