@@ -583,10 +583,12 @@ export default {
             });
         },
         fetchDeparmentUsers: async function(){
+			console.log('in fetchDeparmentUsers')
             this.loading.push('Loading Department Users');
+		
             try {
                 const response  = await fetch(api_endpoints.department_users)
-                const resData = response.json()
+                const resData = await response.json()
                 this.department_users = Object.assign(resData)
                 this.loading.splice('Loading Department Users',1);
             } catch(error) {
@@ -741,6 +743,7 @@ export default {
         },
     },
     created: function(){
+		console.log('created in workflow')
         this.fetchDeparmentUsers()
     },
     mounted: function(){
