@@ -14,7 +14,7 @@
                     {{ label }}
                 </div>
                 <div class='col-6 text-end'>
-                    <i :id="chevron_elem_id" class="rotate_icon fa-solid fa-chevron-down"></i>
+                    <i :id="chevron_elem_id" class="rotate_icon fa-solid fa-chevron-right"></i>
                 </div>
             </div>
         </div>
@@ -91,6 +91,6 @@ export default {
     transition: 0.5s;
 }
 .chev_rotated {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
 }
 </style>
