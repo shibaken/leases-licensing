@@ -583,7 +583,6 @@ export default {
             });
         },
         fetchDeparmentUsers: async function(){
-			console.log('in fetchDeparmentUsers')
             this.loading.push('Loading Department Users');
 		
             try {
@@ -592,7 +591,6 @@ export default {
                 this.department_users = Object.assign(resData)
                 this.loading.splice('Loading Department Users',1);
             } catch(error) {
-                console.log(error);
                 this.loading.splice('Loading Department Users',1);
             }
         },
@@ -632,7 +630,7 @@ export default {
                     }
                     */
             } catch (error) {
-                swal(
+                new swal(
                     'Referral Error',
                     helpers.apiVueResourceError(error),
                     'error'
@@ -743,7 +741,6 @@ export default {
         },
     },
     created: function(){
-		console.log('created in workflow')
         this.fetchDeparmentUsers()
     },
     mounted: function(){
