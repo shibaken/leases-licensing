@@ -832,16 +832,15 @@ export default {
                     payload['proposal_geometry'] = this.$refs.application_form.$refs.component_map.getJSONFeatures();
                 }
                 const res = await fetch(vm.proposal_form_url, { body: JSON.stringify(payload), method: 'POST' })
-                console.log('aho4')
 
                 if(res.ok){
-                    new swal({
+                    await new swal({
                         title: 'Saved',
                         text: 'Your proposal has been saved',
                         type: 'success',
                     })
                 } else {
-                    new swal({
+                    await new swal({
                         title: "Please fix following errors before saving",
                         text: err.bodyText,
                         type:'error',
@@ -992,6 +991,7 @@ export default {
             }
         },
         assignRequestUser: async function(){
+            let vm = this
             console.log('in assignRequestUser')
             try {
                 const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/assign_request_user')))
@@ -1015,6 +1015,7 @@ export default {
             });
         },
         assignTo: async function(){
+            let vm = this
             console.log('in assignTo')
             let unassign = true;
             let data = {};
@@ -1047,7 +1048,7 @@ export default {
             }
             else{
                 try {
-                    const response = fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id+'/unassign')))
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id+'/unassign')))
                     const responseData = await response.json()
                     this.proposal = Object.assign({}, responseData);
                     this.updateAssignedOfficerSelect();

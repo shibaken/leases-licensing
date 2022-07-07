@@ -365,7 +365,7 @@ export default {
             "loading": [],
 
             department_users : [],
-            selected_referral: [],
+            selected_referral: '',
             referral_text: '',
             sendingReferral: false,
             buttons: (function(){
@@ -584,22 +584,30 @@ export default {
         },
         fetchDeparmentUsers: async function(){
             this.loading.push('Loading Department Users');
+		
             try {
                 const response  = await fetch(api_endpoints.department_users)
-                const resData = response.json()
+                const resData = await response.json()
                 this.department_users = Object.assign(resData)
                 this.loading.splice('Loading Department Users',1);
             } catch(error) {
-                console.log(error);
                 this.loading.splice('Loading Department Users',1);
             }
         },
         sendReferral: async function(){
+            let vm = this
             this.checkAssessorData();
-            let formData = new FormData(vm.form);
+            //let formData = new FormData(vm.form);
             this.sendingReferral = true;
             try {
-                const res = await fetch(this.proposal_form_url, { body: {'proposal': this.proposal}, method: 'POST' })
+                const res = await fetch(this.proposal_form_url, {
+                    method: 'POST',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+                    body: JSON.stringify({'proposal': vm.proposal}), 
+                })
                 const resData = await res.json()
                 let data = {'email':this.selected_referral, 'text': this.referral_text}
                 this.sendingReferral = true;
@@ -622,7 +630,7 @@ export default {
                     }
                     */
             } catch (error) {
-                swal(
+                new swal(
                     'Referral Error',
                     helpers.apiVueResourceError(error),
                     'error'
