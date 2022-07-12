@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+
+import logging
 import re
 
 import json
@@ -44,6 +46,8 @@ from leaseslicensing.utils import search_keys, search_multiple_keys
 from leaseslicensing.helpers import is_customer
 
 # from leaseslicensing.components.approvals.email import send_referral_email_notification
+
+logger = logging.getLogger(__name__)
 
 
 def update_approval_doc_filename(instance, filename):
@@ -335,10 +339,18 @@ class Approval(RevisionedMixin):
         return self.current_proposal.allowed_assessors
 
     def is_assessor(self, user):
-        return self.current_proposal.is_assessor(user)
+        if self.current_proposal:
+            return self.current_proposal.is_assessor(user)
+        else:
+            logger.warning('Approval {} does not have current_proposal'.format(self.lodgement_number))
+            return False
 
     def is_approver(self, user):
-        return self.current_proposal.is_approver(user)
+        if self.current_proposal:
+            return self.current_proposal.is_approver(user)
+        else:
+            logger.warning('Approval {} does not have current_proposal'.format(self.lodgement_number))
+            return False
 
     @property
     def is_issued(self):
@@ -397,16 +409,19 @@ class Approval(RevisionedMixin):
 
     @property
     def requirement_docs(self):
-        requirement_ids = (
-            self.current_proposal.requirements.all()
-            .exclude(is_deleted=True)
-            .values_list("id", flat=True)
-        )
-        if requirement_ids:
-            req_doc = RequirementDocument.objects.filter(
-                requirement__in=requirement_ids, visible=True
+        if self.current_proposal:
+            requirement_ids = (
+                self.current_proposal.requirements.all()
+                .exclude(is_deleted=True)
+                .values_list("id", flat=True)
             )
-            return req_doc
+            if requirement_ids:
+                req_doc = RequirementDocument.objects.filter(
+                    requirement__in=requirement_ids, visible=True
+                )
+                return req_doc
+        else:
+            logger.warning('Approval {} does not have current_proposal'.format(self.lodgement_number))
         return None
 
     #    @property
