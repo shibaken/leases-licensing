@@ -805,19 +805,32 @@ export default {
             let vm = this;
             vm.checkAssessorData();
             try {
-                const swal_result = await swal({
+                new swal({
                     title: "Complete Referral",
                     text: "Are you sure you want to complete this referral?",
                     type: "question",
                     showCancelButton: true,
                     confirmButtonText: 'Submit'
+                }).then(async (result) => {
+                    if (result.isConfirmed){
+                        const res_save_data = await fetch(
+                            vm.complete_referral_url, 
+                            {
+                                body: JSON.stringify({'proposal': this.proposal}), 
+                                method: 'POST', 
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                            }
+                        )
+                        this.$router.push({ name: 'internal-dashboard' })
+                    }
                 })
-                const res_save_data = await fetch(vm.complete_referral_url, { body: {'proposal': JSON.stringify(this.proposal)}, method: 'POST', })
-                this.$router.push({ name: 'internal-dashboard' })
             } catch (err) {
-                swal(
+                new swal(
                     'Referral Error',
-                    helpers.apiVueResourceError(error),
+                    helpers.apiVueResourceError(err),
                     'error'
                 )
             }

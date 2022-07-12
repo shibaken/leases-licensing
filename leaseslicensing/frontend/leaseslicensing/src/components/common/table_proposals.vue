@@ -7,7 +7,7 @@
                         <label for="">Type</label>
                         <select class="form-control" v-model="filterApplicationType">
                             <option value="all">All</option>
-                            <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
+                            <option v-for="type in application_types" :value="type.code" :key="type.code">{{ type.description }}</option>
                         </select>
                     </div>
                 </div>
@@ -16,7 +16,7 @@
                         <label for="">Status</label>
                         <select class="form-control" v-model="filterApplicationStatus">
                             <option value="all">All</option>
-                            <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
+                            <option v-for="status in application_statuses" :value="status.code" :key="status.code">{{ status.description }}</option>
                         </select>
                     </div>
                 </div>
@@ -530,24 +530,22 @@ export default {
 
             });
         },
-        fetchFilterLists: function(){
+        fetchFilterLists: async function(){
             let vm = this;
 
             // Application Types
-            fetch(api_endpoints.application_types_dict+'?apply_page=False').then((response) => {
-                vm.application_types = response.body
-            },(error) => {
-            })
+            let res = await fetch(api_endpoints.application_types_dict+'?apply_page=False')
+            let data = await res.json()
+            vm.application_types = data
 
             // Application Statuses
-            fetch(api_endpoints.application_statuses_dict).then((response) => {
-                if (vm.is_internal){
-                    vm.application_statuses = response.body.internal_statuses
-                } else {
-                    vm.application_statuses = response.body.external_statuses
-                }
-            },(error) => {
-            })
+            res = await fetch(api_endpoints.application_statuses_dict)
+            data = await res.json()
+            if (vm.is_internal){
+                vm.application_statuses = data.internal_statuses
+            } else {
+                vm.application_statuses = data.external_statuses
+            }
         },
         addEventListeners: function(){
             let vm = this
