@@ -36,6 +36,8 @@ from django.core.cache import cache
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
 from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
+
+from leaseslicensing.components.main.related_item import get_related_items, RelatedItemsSerializer
 from leaseslicensing.components.proposals.utils import (
     save_proponent_data,
     save_assessor_data,
@@ -2355,7 +2357,8 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def assessor_save(self, request, *args, **kwargs):
         instance = self.get_object()
         save_assessor_data(instance, request, self)
-        return redirect(reverse("external"))
+        # return redirect(reverse("external"))
+        return Response({})
 
     @detail_route(methods=["post"], detail=True)
     @basic_exception_handler
@@ -2450,6 +2453,14 @@ class ProposalViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
+
+    @detail_route(methods=["get"], detail=True)
+    @basic_exception_handler
+    def get_related_items(self, request, *args, **kwargs):
+        proposal = self.get_object()
+        related_items = get_related_items(proposal)
+        serializer = RelatedItemsSerializer(related_items, many=True)
+        return Response(serializer.data)
 
 
 class ReferralViewSet(viewsets.ModelViewSet):

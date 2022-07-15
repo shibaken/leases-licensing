@@ -283,8 +283,12 @@ export default {
         },
     },
   created: async function(){
-      const response = await this.$http.get(helpers.add_endpoint_json(api_endpoints.approvals,this.$route.params.approval_id));
-      this.approval = Object.assign({}, response.body);
+      //const response = await this.$http.get(helpers.add_endpoint_json(api_endpoints.approvals,this.$route.params.approval_id));
+      const response = await fetch(helpers.add_endpoint_json(api_endpoints.approvals,this.$route.params.approval_id))
+      const resData = await response.json()
+      console.log({resData})
+      //this.approval = Object.assign({}, response.body);
+      this.approval = Object.assign({}, resData);
       this.approval.applicant_id = response.body.applicant_id;
       if (this.approval.submitter.postal_address == null){ this.approval.submitter.postal_address = {}; }
       await this.$nextTick(() => {

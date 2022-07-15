@@ -136,13 +136,13 @@
                                 <template v-if="assessment_for_assessor_other.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
-                                <template v-for="question in assessment_for_assessor_other">  <!-- There is only one assessor assessment -->
+                                <template v-for="question in assessment_for_assessor_other" :key="question.id">  <!-- There is only one assessor assessment -->
                                     <ChecklistQuestion :question="question" />
                                 </template>
 
-                                <template v-for="assessment in assessments_for_referrals_other"> <!-- There can be multiple referral assessments -->
+                                <template v-for="assessment in assessments_for_referrals_other" :key="assessment.id"> <!-- There can be multiple referral assessments -->
                                     <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
-                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                    <template v-for="question in assessment.answers" :key="question.id"> <!-- per question -->
                                         <ChecklistQuestion :question="question" />
                                     </template>
                                 </template>
@@ -154,13 +154,13 @@
                                 <template v-if="assessment_for_assessor_deed_poll.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
-                                <template v-for="question in assessment_for_assessor_deed_poll">  <!-- There is only one assessor assessment -->
+                                <template v-for="question in assessment_for_assessor_deed_poll" :key="question.id">  <!-- There is only one assessor assessment -->
                                     <ChecklistQuestion :question="question" />
                                 </template>
 
-                                <template v-for="assessment in assessments_for_referrals_deed_poll"> <!-- There can be multiple referral assessments -->
+                                <template v-for="assessment in assessments_for_referrals_deed_poll" :key="assessment.id"> <!-- There can be multiple referral assessments -->
                                     <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
-                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                    <template v-for="question in assessment.answers" :key="question.id"> <!-- per question -->
                                         <ChecklistQuestion :question="question" />
                                     </template>
                                 </template>
@@ -172,28 +172,33 @@
                                 <template v-if="assessment_for_assessor_additional_documents.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
-                                <template v-for="question in assessment_for_assessor_additional_documents">  <!-- There is only one assessor assessment -->
+                                <template v-for="question in assessment_for_assessor_additional_documents" :key="question.id">  <!-- There is only one assessor assessment -->
                                     <ChecklistQuestion :question="question" />
                                 </template>
 
-                                <template v-for="assessment in assessments_for_referrals_additional_documents"> <!-- There can be multiple referral assessments -->
+                                <template v-for="assessment in assessments_for_referrals_additional_documents" :key="assessment.id"> <!-- There can be multiple referral assessments -->
                                     <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
-                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                    <template v-for="question in assessment.answers" :key="question.id"> <!-- per question -->
                                         <ChecklistQuestion :question="question" />
                                     </template>
                                 </template>
                             </CollapsibleQuestions>
 
                             <strong>Select one or more documents that need to be provided by the applicant:</strong>
-                            <template v-show="select2AppliedToAdditionalDocumentTypes">
+                            <div v-show="select2AppliedToAdditionalDocumentTypes">
                                 <select class="form-select" ref="select_additional_document_types"></select>
-                            </template>
+                            </div>
                         </template>
 
                         <!-- Inserted into the slot on the form.vue: Related Items -->
                         <template v-slot:slot_section_related_items>
                             <FormSection :formCollapse="false" label="Related Items" Index="related_items">
-                                Related Items table here
+                                <datatable
+                                    ref="related_items_datatable"
+                                    :id="related_items_datatable_id"
+                                    :dtOptions="datatable_options"
+                                    :dtHeaders="datatable_headers"
+                                />
                             </FormSection>
                         </template>
 
@@ -274,6 +279,7 @@ export default {
             addressBody: 'addressBody'+vm._uid,
             contactsBody: 'contactsBody'+vm._uid,
             siteLocations: 'siteLocations'+vm._uid,
+            related_items_datatable_id: 'related_items_datatable' + vm._uid,
             defaultKey: "aho",
             "proposal": null,
             "loading": [],
@@ -371,6 +377,102 @@ export default {
 
     },
     computed: {
+        column_lodgement_number: function(){
+            return {
+                data: 'identifier',
+                //name: 'lodgement_number',
+                orderable: false,
+                searchable: false,
+                visible: true,
+                //'render': function(row, type, full){
+                //}
+            }
+        },
+        column_type: function(){
+            return {
+                data: 'model_name',
+                //name: 'type',
+                orderable: false,
+                searchable: false,
+                visible: true,
+                //'render': function(row, type, full){
+                //}
+            }
+        },
+        column_description: function(){
+            return {
+                data: 'descriptor',
+                //name: 'descriptor',
+                orderable: false,
+                searchable: false,
+                visible: true,
+                //'render': function(row, type, full){
+                //}
+            }
+        },
+        column_action: function(){
+            return {
+                data: 'action_url',
+                //name: 'action',
+                orderable: false,
+                searchable: false,
+                visible: true,
+                //'render': function(row, type, full){
+                //}
+            }
+        },
+        datatable_options: function(){
+            let vm = this
+            let columns = [
+                vm.column_lodgement_number,
+                vm.column_type,
+                vm.column_description,
+                vm.column_action,
+            ]
+            return {
+                autoWidth: false,
+                language: {
+                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                },
+                responsive: true,
+                //serverSide: true,
+                searching: true,
+                ordering: true,
+                order: [[0, 'desc']],
+                ajax: {
+                    "url": '/api/proposal/' + vm.proposal.id + '/get_related_items/',
+                    "dataSrc": "",
+
+                    // adding extra GET params for Custom filtering
+                    "data": function ( d ) {
+                        /*
+                        d.filter_application_type = vm.filterApplicationType
+                        d.filter_application_status = vm.filterApplicationStatus
+                        d.filter_applicant = vm.filterApplicant
+                        d.level = vm.level
+                        */
+                    }
+                },
+                dom: 'lBfrtip',
+                buttons:[ ],
+                columns: columns,
+                processing: true,
+                initComplete: function(settings, json) {
+                    console.log('in initComplete')
+                    console.log({settings})
+                    console.log({json})
+                },
+            }
+        },
+        datatable_headers: function(){
+            return [
+                //'id',
+                'Number',
+                'Type',
+                'Description',
+                'Action',
+            ]
+        },
         requirementsKey: function() {
             const req = "proposal_requirements_" + this.uuid;
             return req;
@@ -728,9 +830,6 @@ export default {
         applySelect2ToAdditionalDocumentTypes: function(option_data){
             let vm = this
 
-            console.log('in applySelect2ToAdditionalDocumentTypes')
-            console.log(this.$refs.select_additional_document_types)
-
             if (!vm.select2AppliedToAdditionalDocumentTypes){
                 $(vm.$refs.select_additional_document_types).select2({
                     "theme": "bootstrap-5",
@@ -805,19 +904,32 @@ export default {
             let vm = this;
             vm.checkAssessorData();
             try {
-                const swal_result = await swal({
+                new swal({
                     title: "Complete Referral",
                     text: "Are you sure you want to complete this referral?",
                     type: "question",
                     showCancelButton: true,
                     confirmButtonText: 'Submit'
+                }).then(async (result) => {
+                    if (result.isConfirmed){
+                        const res_save_data = await fetch(
+                            vm.complete_referral_url, 
+                            {
+                                body: JSON.stringify({'proposal': this.proposal}), 
+                                method: 'POST', 
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                            }
+                        )
+                        this.$router.push({ name: 'internal-dashboard' })
+                    }
                 })
-                const res_save_data = await fetch(vm.complete_referral_url, { body: {'proposal': JSON.stringify(this.proposal)}, method: 'POST', })
-                this.$router.push({ name: 'internal-dashboard' })
             } catch (err) {
-                swal(
+                new swal(
                     'Referral Error',
-                    helpers.apiVueResourceError(error),
+                    helpers.apiVueResourceError(err),
                     'error'
                 )
             }
@@ -832,16 +944,15 @@ export default {
                     payload['proposal_geometry'] = this.$refs.application_form.$refs.component_map.getJSONFeatures();
                 }
                 const res = await fetch(vm.proposal_form_url, { body: JSON.stringify(payload), method: 'POST' })
-                console.log('aho4')
 
                 if(res.ok){
-                    swal({
+                    await new swal({
                         title: 'Saved',
                         text: 'Your proposal has been saved',
                         type: 'success',
                     })
                 } else {
-                    swal({
+                    await new swal({
                         title: "Please fix following errors before saving",
                         text: err.bodyText,
                         type:'error',
@@ -885,7 +996,6 @@ export default {
             return s.replace(/[,;]/g, '\n');
         },
         proposedDecline: function(){
-            console.log('in proposedDecline')
             this.uuid++;
             //this.$refs.proposed_decline.decline = this.proposal.proposaldeclineddetails != null ? Object.assign({}, this.proposal.proposaldeclineddetails): {};
             this.$nextTick(() => {
@@ -900,7 +1010,6 @@ export default {
             });
         },
         issueProposal:function(){
-            console.log('in issueProposal')
             //this.$refs.proposed_approval.approval = helpers.copyObject(this.proposal.proposed_issuance_approval);
 
             //save approval level comment before opening 'issue approval' modal
@@ -937,7 +1046,6 @@ export default {
 
         },
         declineProposal:function(){
-            console.log('in declineProposal')
             this.$refs.proposed_decline.decline = this.proposal.proposaldeclineddetails != null ? helpers.copyObject(this.proposal.proposaldeclineddetails): {};
             this.$refs.proposed_decline.isModalOpen = true;
         },
@@ -992,6 +1100,7 @@ export default {
             }
         },
         assignRequestUser: async function(){
+            let vm = this
             console.log('in assignRequestUser')
             try {
                 const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/assign_request_user')))
@@ -1015,6 +1124,7 @@ export default {
             });
         },
         assignTo: async function(){
+            let vm = this
             console.log('in assignTo')
             let unassign = true;
             let data = {};
@@ -1047,7 +1157,7 @@ export default {
             }
             else{
                 try {
-                    const response = fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id+'/unassign')))
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id+'/unassign')))
                     const responseData = await response.json()
                     this.proposal = Object.assign({}, responseData);
                     this.updateAssignedOfficerSelect();
@@ -1201,7 +1311,6 @@ export default {
         },
         fetchAdditionalDocumentTypesDict: async function(){
             const response = await fetch('/api/additional_document_types_dict')
-            console.log(response)
             const resData = await response.json()
             this.applySelect2ToAdditionalDocumentTypes(resData)
         },
