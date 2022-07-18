@@ -51,6 +51,15 @@ class AdditionalDocumentTypeAdmin(admin.ModelAdmin):
     list_filter = ("enabled",)
 
 
+# @admin.register(models.ProposalAssessmentAnswer)
+# class ProposalAssessmentAnswerAdmin(admin.ModelAdmin):
+#     list_display = [
+#         "checklist_question",
+#         "answer_yes_no",
+#         "answer_text",
+#     ]
+
+
 @admin.register(models.Proposal)
 # class ProposalAdmin(VersionAdmin):
 class ProposalAdmin(admin.ModelAdmin):
