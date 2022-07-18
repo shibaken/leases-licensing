@@ -1631,14 +1631,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
             proposal=self, referral=referral
         )
         if created:
-            list_type = (
+            for_referral_or_assessor = (
                 SectionChecklist.LIST_TYPE_REFERRAL
                 if referral
                 else SectionChecklist.LIST_TYPE_ASSESSOR
             )
             section_checklists = SectionChecklist.objects.filter(
                 application_type=self.application_type,
-                list_type=list_type,
+                list_type=for_referral_or_assessor,
                 enabled=True,
             )
             for section_checklist in section_checklists:
@@ -4086,10 +4086,6 @@ class SectionChecklist(RevisionedMixin):
 
 
 class ChecklistQuestion(RevisionedMixin):
-    TYPE_CHOICES = (
-        ("assessor_list", "Assessor Checklist"),
-        ("referral_list", "Referral Checklist"),
-    )
     ANSWER_TYPE_CHOICES = (("yes_no", "Yes/No type"), ("free_text", "Free text type"))
     text = models.TextField()  # This is question text
     answer_type = models.CharField(
