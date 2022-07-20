@@ -35,8 +35,6 @@ module.exports = {
     return error_str;
   },
     apiVueResourceError: function(resp){
-        console.log('in apiVueResourceError')
-        console.log(resp)
         var error_str = '';
         var text = null;
         if (resp.status === 400) {
