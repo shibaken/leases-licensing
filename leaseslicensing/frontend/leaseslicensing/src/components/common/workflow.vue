@@ -584,7 +584,7 @@ export default {
         },
         fetchDeparmentUsers: async function(){
             this.loading.push('Loading Department Users');
-		
+
             try {
                 const response  = await fetch(api_endpoints.department_users)
                 const resData = await response.json()
@@ -594,29 +594,67 @@ export default {
                 this.loading.splice('Loading Department Users',1);
             }
         },
+        assessor_send_referral: async function(){
+            let response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals, (this.proposal.id + '/assesor_send_referral')), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'email':this.selected_referral, 'text': this.referral_text }),
+            })
+
+            if (response.ok){
+                let json = await response.json()
+                return json
+            }
+
+            throw new Error(response.status)
+
+        },
+        assessor_save: async function(){
+            let vm = this
+            let response = await fetch(this.proposal_form_url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'proposal': vm.proposal }), 
+            })
+
+            if (response.ok){
+                let json = await response.json()
+                return json
+            }
+
+            throw new Error(response.status)
+        },
         sendReferral: async function(){
             let vm = this
             this.checkAssessorData();
             //let formData = new FormData(vm.form);
             this.sendingReferral = true;
             try {
-                const res = await fetch(this.proposal_form_url, {
-                    method: 'POST',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-                    body: JSON.stringify({'proposal': vm.proposal}), 
+                swal.fire({
+                    title: "Send to referral",
+                    text: "Are you sure you want to send to referral?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: 'Send to referral',
+                    //confirmButtonColor:'#dc3545'
+                }).then(async result => {
+                    if (result.isConfirmed){
+                        // When Yes
+                        vm.assessor_save()
+                        vm.assessor_send_referral()
+                    } else if (result.isDenied){
+                        // When No (This is not Cancel)
+                    } else {
+                        // When cancel
+                        // Do nothing
+                    }
                 })
-                const resData = await res.json()
-                let data = {'email':this.selected_referral, 'text': this.referral_text}
-                this.sendingReferral = true;
-                const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals, (this.proposal.id + '/assesor_send_referral')), 
-                { 
-                    body: JSON.stringify(data),
-                    method: 'POST',
-                })
-                this.sendingReferral = false;
                     //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
                     /* 
                     // Don't use this endpoint
@@ -630,6 +668,7 @@ export default {
                     }
                     */
             } catch (error) {
+                this.sendingReferral = false;
                 new swal(
                     'Referral Error',
                     helpers.apiVueResourceError(error),
