@@ -79,7 +79,7 @@
                                         </select>
                                         <template v-if='!sendingReferral'>
                                             <template v-if="selected_referral">
-                                                <label class="control-label pull-left"  for="Name">Comments</label>
+                                                <label class="control-label pull-left" for="Name">Comments</label>
                                                 <textarea class="form-control comments_to_referral" name="name" v-model="referral_text"></textarea>
                                                 <div class="text-end">
                                                     <a v-if="canLimitedAction" @click.prevent="sendReferral()" class="actionBtn">Send</a>
@@ -633,8 +633,6 @@ export default {
         sendReferral: async function(){
             let vm = this
             this.checkAssessorData();
-            //let formData = new FormData(vm.form);
-            this.sendingReferral = true;
             try {
                 swal.fire({
                     title: "Send to referral",
@@ -646,8 +644,15 @@ export default {
                 }).then(async result => {
                     if (result.isConfirmed){
                         // When Yes
-                        vm.assessor_save()
-                        vm.assessor_send_referral()
+                        vm.sendingReferral = true;
+                        await vm.assessor_save()
+                        await vm.assessor_send_referral()
+                        vm.selected_referral = ''
+                        vm.referral_text = ''
+
+                        $(vm.$refs.department_users).val(null).trigger('change')
+
+                        vm.sendingReferral = false;
                     } else if (result.isDenied){
                         // When No (This is not Cancel)
                     } else {
