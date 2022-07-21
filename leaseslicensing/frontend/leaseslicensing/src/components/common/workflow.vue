@@ -629,7 +629,7 @@ export default {
             }
         },
         */
-        send_referral: async function(){
+        performSendReferral: async function(){
             let vm = this
             vm.sendingReferral = true;
             let my_headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }
@@ -680,40 +680,31 @@ export default {
         sendReferral: async function(){
             let vm = this
             this.checkAssessorData();
-            try {
-                swal.fire({
-                    title: "Send to referral",
-                    text: "Are you sure you want to send to referral?",
-                    type: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: 'Send to referral',
-                    //confirmButtonColor:'#dc3545'
-                }).then(async result => {
-                    if (result.isConfirmed){
-                        // When Yes
-                        await vm.send_referral()
-                    }
-                })
-                    //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
-                    /* 
-                    // Don't use this endpoint
-                    $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
-                    vm.selected_referral = '';
-                    vm.referral_text = '';
-                    },
-                    error => {
-                        $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
-                        vm.sendingReferral = false;
-                    }
-                    */
-            } catch (error) {
-                this.sendingReferral = false;
-                new swal(
-                    'Referral Error',
-                    helpers.apiVueResourceError(error),
-                    'error'
-                )
+            swal.fire({
+                title: "Send to referral",
+                text: "Are you sure you want to send to referral?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Send to referral',
+                //confirmButtonColor:'#dc3545'
+            }).then(async result => {
+                if (result.isConfirmed){
+                    // When Yes
+                    await vm.performSendReferral()
+                }
+            })
+            //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
+            /* 
+            // Don't use this endpoint
+            $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
+            vm.selected_referral = '';
+            vm.referral_text = '';
+            },
+            error => {
+                $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
+                vm.sendingReferral = false;
             }
+            */
         },
         remindReferral: async function(r){
             try {
