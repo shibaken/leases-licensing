@@ -14,7 +14,7 @@ module.exports = {
     compliance_statuses_dict:"/api/compliance_statuses_dict",
 
     referrals:"/api/referrals.json",
-    department_users: '/api/department_users',
+    //department_users: '/api/department_users',
 
     profile: '/api/profile',
     submitter_profile: '/api/submitter_profile',
@@ -23,6 +23,7 @@ module.exports = {
     organisation_requests: '/api/organisation_requests.json',
     organisation_contacts: '/api/organisation_contacts.json',
     organisation_access_group_members: '/api/organisation_access_group_members',
+    users_api: '/api/users',
     users: '/api/users.json',
     filtered_users: '/api/filtered_users',
     countries: '/api/countries',
