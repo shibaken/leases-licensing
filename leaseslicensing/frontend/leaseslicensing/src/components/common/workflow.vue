@@ -23,7 +23,7 @@
                                     class="form-control"
                                     v-model="proposal.assigned_approver"
                                     @change="assignTo()">
-                                    <option v-for="member in proposal.allowed_assessors" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
+                                    <option v-for="member in proposal.allowed_assessors" :value="member.id" :key="member.id">{{ member.first_name }} {{ member.last_name }}</option>
                                 </select>
                                 <div class="text-end">
                                     <a v-if="canAssess && proposal.assigned_approver != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
@@ -35,8 +35,9 @@
                                     :disabled="!canAction"
                                     class="form-control"
                                     v-model="proposal.assigned_officer"
-                                    @change="assignTo()">
-                                    <option v-for="member in proposal.allowed_assessors" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
+                                    @change="assignTo()"
+                                >
+                                    <option v-for="member in proposal.allowed_assessors" :value="member.id" :key="member.id">{{ member.first_name }} {{ member.last_name }}</option>
                                 </select>
                                 <div class="text-end">
                                     <a v-if="canAssess && proposal.assigned_officer != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
@@ -73,13 +74,17 @@
                                 <div class="col-sm-12">
                                     <strong>Referrals</strong><br/>
                                     <div class="form-group">
-                                        <select :disabled="!canLimitedAction" ref="department_users" class="form-control">
+                                        <select 
+                                            :disabled="!canLimitedAction" 
+                                            ref="department_users" 
+                                            class="form-control"
+                                        >
                                             <option value="null"></option>
-                                            <option v-for="user in department_users" :value="user.email">{{user.name}}</option>
+                                            <option v-for="user in department_users" :value="user.email" :key="user.id">{{user.name}}</option>
                                         </select>
                                         <template v-if='!sendingReferral'>
                                             <template v-if="selected_referral">
-                                                <label class="control-label pull-left"  for="Name">Comments</label>
+                                                <label class="control-label pull-left" for="Name">Comments</label>
                                                 <textarea class="form-control comments_to_referral" name="name" v-model="referral_text"></textarea>
                                                 <div class="text-end">
                                                     <a v-if="canLimitedAction" @click.prevent="sendReferral()" class="actionBtn">Send</a>
@@ -510,6 +515,7 @@ export default {
         },
         initialiseSelects: function(){
             let vm = this;
+            /*
             $(vm.$refs.department_users).select2({
                 "theme": "bootstrap-5",
                 allowClear: true,
@@ -523,7 +529,34 @@ export default {
                 var selected = $(e.currentTarget);
                 vm.selected_referral = ''
             });
-            vm.initialiseAssignedOfficerSelect();
+            */
+            $(vm.$refs.department_users).select2({
+                minimumInputLength: 2,
+                "theme": "bootstrap-5",
+                allowClear: true,
+                placeholder:"Select Referrer",
+                ajax: {
+                    url: api_endpoints.users_api + '/get_department_users/',
+                    dataType: 'json',
+                    data: function(params) {
+                        var query = {
+                            term: params.term,
+                            type: 'public',
+                        }
+                        return query;
+                    },
+                },
+            })
+            .on("select2:select", function (e) {
+                var selected = $(e.currentTarget);
+                //vm.selected_referral = selected.val();
+                let data = e.params.data.id;
+                vm.selected_referral = data;
+            })
+            .on("select2:unselect",function (e) {
+                var selected = $(e.currentTarget);
+                vm.selected_referral = null;
+            })
         },
         initialiseAssignedOfficerSelect:function(reinit=false){
             let vm = this;
@@ -559,7 +592,7 @@ export default {
                     vm.proposal.assigned_officer = null;
                 }
                 vm.assignTo();
-            });
+            })
         },
         updateAssignedOfficerSelect:function(selected_user){
             let vm = this;
@@ -582,9 +615,10 @@ export default {
                 vm.updateAssignedOfficerSelect();
             });
         },
+        /*
         fetchDeparmentUsers: async function(){
             this.loading.push('Loading Department Users');
-		
+
             try {
                 const response  = await fetch(api_endpoints.department_users)
                 const resData = await response.json()
@@ -594,29 +628,73 @@ export default {
                 this.loading.splice('Loading Department Users',1);
             }
         },
+        */
+        assessor_send_referral: async function(){
+            let response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals, (this.proposal.id + '/assesor_send_referral')), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'email':this.selected_referral, 'text': this.referral_text }),
+            })
+
+            if (response.ok){
+                let json = await response.json()
+                return json
+            }
+
+            throw new Error(response.status)
+
+        },
+        assessor_save: async function(){
+            let vm = this
+            let response = await fetch(this.proposal_form_url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'proposal': vm.proposal }), 
+            })
+
+            if (response.ok){
+                let json = await response.json()
+                return json
+            }
+
+            throw new Error(response.status)
+        },
         sendReferral: async function(){
             let vm = this
             this.checkAssessorData();
-            //let formData = new FormData(vm.form);
-            this.sendingReferral = true;
             try {
-                const res = await fetch(this.proposal_form_url, {
-                    method: 'POST',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-                    body: JSON.stringify({'proposal': vm.proposal}), 
+                swal.fire({
+                    title: "Send to referral",
+                    text: "Are you sure you want to send to referral?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: 'Send to referral',
+                    //confirmButtonColor:'#dc3545'
+                }).then(async result => {
+                    if (result.isConfirmed){
+                        // When Yes
+                        vm.sendingReferral = true;
+                        await vm.assessor_save()
+                        await vm.assessor_send_referral()
+                        vm.selected_referral = ''
+                        vm.referral_text = ''
+
+                        $(vm.$refs.department_users).val(null).trigger('change')
+
+                        vm.sendingReferral = false;
+                    } else if (result.isDenied){
+                        // When No (This is not Cancel)
+                    } else {
+                        // When cancel
+                        // Do nothing
+                    }
                 })
-                const resData = await res.json()
-                let data = {'email':this.selected_referral, 'text': this.referral_text}
-                this.sendingReferral = true;
-                const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals, (this.proposal.id + '/assesor_send_referral')), 
-                { 
-                    body: JSON.stringify(data),
-                    method: 'POST',
-                })
-                this.sendingReferral = false;
                     //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
                     /* 
                     // Don't use this endpoint
@@ -630,6 +708,7 @@ export default {
                     }
                     */
             } catch (error) {
+                this.sendingReferral = false;
                 new swal(
                     'Referral Error',
                     helpers.apiVueResourceError(error),
@@ -741,12 +820,13 @@ export default {
         },
     },
     created: function(){
-        this.fetchDeparmentUsers()
+        //this.fetchDeparmentUsers()
     },
     mounted: function(){
         let vm = this
         this.$nextTick(() => {
-            vm.initialiseSelects();
+            vm.initialiseSelects()
+            vm.initialiseAssignedOfficerSelect()
         })
     },
 }
