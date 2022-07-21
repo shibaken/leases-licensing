@@ -7,25 +7,26 @@ from django.core.cache import cache
 from django.db import connection
 from django.db.models import Q
 from django.contrib.gis.geos import GEOSGeometry
+from ledger_api_client.models import EmailUser
 from rest_framework import serializers
 
 from leaseslicensing.components.main.serializers import EmailUserROSerializerForReferral
 
 
-def retrieve_department_users():
-    # try:
-    #     res = requests.get('{}/api/users?minimal'.format(settings.CMS_URL), auth=(settings.LEDGER_USER, settings.LEDGER_PASS), verify=False)
-    #     res.raise_for_status()
-    #     cache.set('department_users', json.loads(res.content).get('objects'), 10800)
-    # except:
-    #     raise
-    dep_users = (
-        EmailUserRO.objects.filter(Q(email__endswith="@dbca.wa.gov.au"))
-        .exclude(Q(first_name=""), Q(last_name=""))
-        .order_by("first_name")
-    )
-    serialiser = EmailUserROSerializerForReferral(dep_users, many=True)
-    return serialiser.data
+#def retrieve_department_users():
+#    # try:
+#    #     res = requests.get('{}/api/users?minimal'.format(settings.CMS_URL), auth=(settings.LEDGER_USER, settings.LEDGER_PASS), verify=False)
+#    #     res.raise_for_status()
+#    #     cache.set('department_users', json.loads(res.content).get('objects'), 10800)
+#    # except:
+#    #     raise
+#    dep_users = (
+#        EmailUserRO.objects.filter(Q(email__endswith="@dbca.wa.gov.au"))
+#        .exclude(Q(first_name=""), Q(last_name=""))
+#        .order_by("first_name")
+#    )
+#    serialiser = EmailUserROSerializerForReferral(dep_users, many=True)
+#    return serialiser.data
 
 
 def handle_validation_error(e):
@@ -42,21 +43,26 @@ def handle_validation_error(e):
             raise
 
 
+# def get_department_user(email):
+#     try:
+#         res = requests.get(
+#             "{}/api/users?email={}".format(settings.CMS_URL, email),
+#             auth=(settings.LEDGER_USER, settings.LEDGER_PASS),
+#             verify=False,
+#         )
+#         res.raise_for_status()
+#         data = json.loads(res.content).get("objects")
+#         if len(data) > 0:
+#             return data[0]
+#         else:
+#             return None
+#     except:
+#         raise
 def get_department_user(email):
-    try:
-        res = requests.get(
-            "{}/api/users?email={}".format(settings.CMS_URL, email),
-            auth=(settings.LEDGER_USER, settings.LEDGER_PASS),
-            verify=False,
-        )
-        res.raise_for_status()
-        data = json.loads(res.content).get("objects")
-        if len(data) > 0:
-            return data[0]
-        else:
-            return None
-    except:
-        raise
+    if (EmailUser.objects.filter(email__iexact=email.strip()) and 
+            EmailUser.objects.get(email__iexact=email.strip()).is_staff):
+        return True
+    return False
 
 
 def to_local_tz(_date):
