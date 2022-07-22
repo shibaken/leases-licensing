@@ -139,97 +139,12 @@
                             <strong>Action</strong>
                         </div>
 
-                        <div class="" v-if="display_action_enter_conditions">
-                            <button
-                                class="btn btn-primary w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="switchStatus('with_assessor_conditions')"
-                            >Enter Conditions</button>
-                        </div>
-
-                        <div class="" v-if="display_action_complete_referral">
-                            <button
-                                class="btn btn-primary w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="completeReferral()"
-                            >Complete Referral</button>
-                        </div>
-
-                        <div class="" v-if="display_action_request_amendment">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="amendmentRequest()"
-                            >Request Amendment</button>
-                        </div>
-
-                        <div class="" v-if="display_action_propose_decline">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="proposedDecline()"
-                            >Propose Decline</button>
-                        </div>
-
-                        <div class="" v-if="display_action_require_das">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="requireDas()"
-                            >Require DAS</button>
-                        </div>
-
-                        <div class="" v-if="display_action_complete_editing">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="completeEditing()"
-                            >Complete Editing</button>
-                        </div>
-
-                        <div class="" v-if="display_action_back_to_application">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="switchStatus('with_assessor')"
-                            >Back To Application</button>
-                        </div>
-
-                        <div class="" v-if="display_action_propose_approve">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="proposedApproval()"
-                            >Propose Approve</button>
-                        </div>
-
-                        <div class="" v-if="display_action_back_to_assessor">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="switchStatus('with_assessor')"
-                            >Back To Assessor</button>
-                        </div>
-
-                        <div class="" v-if="display_action_approve">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                @click.prevent="issueProposal()"
-                            >Approve</button>
-                        </div>
-
-                        <div class="" v-if="display_action_decline">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                @click.prevent="declineProposal()"
-                            >Decline</button>
-                        </div>
                         <template v-for="configuration in configurations_for_buttons" :key="configuration.key">
-                            <template v-if="show_hide_button(configuration)">
-                                <button 
-                                    class="btn btn-primary  w-75 my-1"
-                                >{{ configuration.button_title }}</button>
-                            </template>
+                            <button 
+                                v-if="show_hide_button(configuration)"
+                                class="btn btn-primary  w-75 my-1"
+                                @click.prevent="configuration.function_when_clicked"
+                            >{{ configuration.button_title }}</button>
                         </template>
                     </div>
                 </div>
@@ -250,140 +165,6 @@ export default {
         let PS = constants.PROPOSAL_STATUS
         let ROLES = constants.ROLES
 
-        let conf_buttons = [
-            {
-                'key': 'enter_conditions',
-                'button_title': 'Enter Conditions',
-                'registration_of_interest': [],  // No conditions for registration_of_interest
-                'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
-                'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,],
-            },
-            {
-                'key': 'complete_referral',
-                'button_title': 'Complete Referral',
-                'registration_of_interest': [PS.WITH_REFERRAL,],
-                'lease_licence': [PS.WITH_REFERRAL,],
-                'roles_allowed': [ROLES.REFERRAL,],
-            },
-            {
-                'key': 'request_amendment',
-                'button_title': 'Request Amendment',
-                'registration_of_interest': [PS.WITH_ASSESSOR,],
-                'lease_licence': [PS.WITH_ASSESSOR,],
-                'roles_allowed': [ROLES.ASSESSOR,]
-            },
-            {
-                'key': 'propose_decline',
-                'button_title': 'Propose Decline',
-                'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
-                'lease_licence': [PS.WITH_ASSESSOR,],
-                'roles_allowed': [ROLES.ASSESSOR,],
-            },
-            {
-                'key': 'back_to_application',
-                'button_title': 'Back to Application',
-                'registration_of_interest': [],  // No conditions for the registration_of_interest
-                'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
-                'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,]
-            },
-            {
-                'key': 'propose_approve',
-                'button_title': 'Propose Approve',
-                'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
-                'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
-                'roles_allowed': [ROLES.ASSESSOR,]
-            },
-            {
-                'key': 'back_to_assessor',
-                'button_title': 'Back to Assessor',
-                'registration_of_interest': [PS.WITH_APPROVER,],
-                'lease_licence': [PS.WITH_APPROVER,],
-                'roles_allowed': [ROLES.APPROVER,]
-            },
-            {
-                'key': 'approve',
-                'button_title': 'Approve',
-                'registration_of_interest': [PS.WITH_APPROVER,],
-                'lease_licence': [PS.WITH_APPROVER,],
-                'roles_allowed': [ROLES.APPROVER,]
-            },
-            {
-                'key': 'decline',
-                'button_title': 'Decline',
-                'registration_of_interest': [PS.WITH_APPROVER],
-                'lease_licence': [PS.WITH_APPROVER,],
-                'roles_allowed': [ROLES.APPROVER,]
-            },
-            {
-                'key': 'require_das',
-                'button_title': 'Require DAS',
-                'registration_of_interest': [],
-                'lease_licence': [PS.WITH_ASSESSOR],
-                'roles_allowed': [ROLES.ASSESSOR,]
-            },
-            {
-                'key': 'complete_editing',
-                'button_title': 'DAS',
-                'registration_of_interest': [],
-                'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
-                'roles_allowed': [ROLES.ASSESSOR,]
-            },
-        ]
-
-        class ActionButton{
-            constructor(id, condition){
-                this._id = id
-                this._condition = condition
-            }
-
-            get_allowed_ids(key_name){
-                let me = this
-
-                let displayable_status_ids = me._condition[key_name].map(a_status => {
-                    if (a_status.hasOwnProperty('ID'))
-                        return a_status.ID
-                    else if (a_status.hasOwnProperty('id'))
-                        return a_status.id
-                    else if (a_status.hasOwnProperty('Id'))
-                        return a_status.Id
-                    else
-                        return a_status
-                })
-
-                return displayable_status_ids
-            }
-
-            absorb_type_difference(processing_status_id){
-                let ret_value = ''
-
-                if(processing_status_id.hasOwnProperty('ID'))
-                    ret_value = processing_status_id.ID
-                else if(processing_status_id.hasOwnProperty('id'))
-                    ret_value = processing_status_id.id
-                else if(processing_status_id.hasOwnProperty('Id'))
-                    ret_value = processing_status_id.Id
-                else
-                    ret_value = processing_status_id.toLowerCase()
-
-                return ret_value
-            }
-
-            displayable(application_type, processing_status_id, accessing_user_roles){
-                let me = this
-                if (vm.debug)
-                    return true
-
-                let displayable_status_ids = me.get_allowed_ids(application_type)
-                let displayable_role_ids = me.get_allowed_ids('roles_allowed')
-                let my_processing_status_id = me.absorb_type_difference(processing_status_id)
-
-                let status_allowed = displayable_status_ids.includes(my_processing_status_id)
-                let intersection = displayable_role_ids.filter(x => accessing_user_roles.includes(x));
-
-                return status_allowed && intersection.length > 0
-            }
-        }
-
         return {
             showingProposal: false,
             showingRequirements: false,
@@ -394,19 +175,102 @@ export default {
             selected_referral: '',
             referral_text: '',
             sendingReferral: false,
-            buttons: (function(){
-                let button_array = {}
-                conf_buttons.forEach(item => {
-                    console.log(item)
-                    button_array[item.key] = new ActionButton(item.key, {
-                        'registration_of_interest': item.registration_of_interest,
-                        'lease_licence': item.lease_licence,
-                        'roles_allowed': item.roles_allowed,
-                    })
-                })
-                return button_array
-            })(),
-            configurations_for_buttons: conf_buttons,
+            configurations_for_buttons: [
+                {
+                    'key': 'enter_conditions',
+                    'button_title': 'Enter Conditions',
+                    'registration_of_interest': [],  // No conditions for registration_of_interest
+                    'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
+                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                    'function_when_clicked': function(){
+                        vm.switchStatus('with_assessor_conditions')
+                    }
+                },
+                {
+                    'key': 'complete_referral',
+                    'button_title': 'Complete Referral',
+                    'registration_of_interest': [PS.WITH_REFERRAL,],
+                    'lease_licence': [PS.WITH_REFERRAL,],
+                    'roles_allowed': [ROLES.REFERRAL,],
+                    'function_when_clicked': vm.completeReferral,
+                },
+                {
+                    'key': 'request_amendment',
+                    'button_title': 'Request Amendment',
+                    'registration_of_interest': [PS.WITH_ASSESSOR,],
+                    'lease_licence': [PS.WITH_ASSESSOR,],
+                    'roles_allowed': [ROLES.ASSESSOR,],
+                    'function_when_clicked': vm.amendmentRequest,
+                },
+                {
+                    'key': 'propose_decline',
+                    'button_title': 'Propose Decline',
+                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
+                    'lease_licence': [PS.WITH_ASSESSOR,],
+                    'roles_allowed': [ROLES.ASSESSOR,],
+                    'function_when_clicked': vm.proposedDecline,
+                },
+                {
+                    'key': 'back_to_application',
+                    'button_title': 'Back to Application',
+                    'registration_of_interest': [],  // No conditions for the registration_of_interest
+                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
+                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                    'function_when_clicked': function(){
+                        vm.switchStatus('with_assessor')
+                    }
+                },
+                {
+                    'key': 'propose_approve',
+                    'button_title': 'Propose Approve',
+                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
+                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
+                    'roles_allowed': [ROLES.ASSESSOR,],
+                    'function_when_clicked': vm.proposedApproval,
+                },
+                {
+                    'key': 'back_to_assessor',
+                    'button_title': 'Back to Assessor',
+                    'registration_of_interest': [PS.WITH_APPROVER,],
+                    'lease_licence': [PS.WITH_APPROVER,],
+                    'roles_allowed': [ROLES.APPROVER,],
+                    'function_when_clicked': function(){
+                        vm.switchStatus('with_assessor')
+                    }
+                },
+                {
+                    'key': 'approve',
+                    'button_title': 'Approve',
+                    'registration_of_interest': [PS.WITH_APPROVER,],
+                    'lease_licence': [PS.WITH_APPROVER,],
+                    'roles_allowed': [ROLES.APPROVER,],
+                    'function_when_clicked': vm.issueApproval,
+                },
+                {
+                    'key': 'decline',
+                    'button_title': 'Decline',
+                    'registration_of_interest': [PS.WITH_APPROVER],
+                    'lease_licence': [PS.WITH_APPROVER,],
+                    'roles_allowed': [ROLES.APPROVER,],
+                    'function_when_clicked': vm.declineProposal,
+                },
+                {
+                    'key': 'require_das',
+                    'button_title': 'Require DAS',
+                    'registration_of_interest': [],
+                    'lease_licence': [PS.WITH_ASSESSOR],
+                    'roles_allowed': [ROLES.ASSESSOR,],
+                    'function_when_clicked': vm.requireDas,
+                },
+                {
+                    'key': 'complete_editing',
+                    'button_title': 'Complete Editing',
+                    'registration_of_interest': [],
+                    'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
+                    'roles_allowed': [ROLES.ASSESSOR,],
+                    'function_when_clicked': vm.completeEditing,
+                },
+            ]
         }
     },
     props: {
@@ -847,7 +711,6 @@ export default {
             this.$emit('toggleRequirements', this.showingRequirements)
         },
         switchStatus: function(value){
-            console.log('aho')
             this.$emit('switchStatus', value)
         },
         amendmentRequest: function(){
@@ -862,8 +725,8 @@ export default {
         proposedApproval: function(){
             this.$emit('proposedApproval')
         },
-        issueProposal: function(){
-            this.$emit('issueProposal')
+        issueApproval: function(){
+            this.$emit('issueApproval')
         },
         declineProposal: function(){
             this.$emit('declineProposal')
