@@ -548,7 +548,7 @@ export default {
                 },
             })
             .on("select2:select", function (e) {
-                var selected = $(e.currentTarget);
+                //var selected = $(e.currentTarget);
                 //vm.selected_referral = selected.val();
                 let data = e.params.data.id;
                 vm.selected_referral = data;
@@ -629,92 +629,82 @@ export default {
             }
         },
         */
-        assessor_send_referral: async function(){
-            let response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals, (this.proposal.id + '/assesor_send_referral')), {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 'email':this.selected_referral, 'text': this.referral_text }),
-            })
-
-            if (response.ok){
-                let json = await response.json()
-                return json
-            }
-
-            throw new Error(response.status)
-
-        },
-        assessor_save: async function(){
+        performSendReferral: async function(){
             let vm = this
-            let response = await fetch(this.proposal_form_url, {
+            vm.sendingReferral = true;
+            let my_headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+
+            fetch(vm.proposal_form_url, {
                 method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
+                headers: my_headers,
                 body: JSON.stringify({ 'proposal': vm.proposal }), 
             })
-
-            if (response.ok){
-                let json = await response.json()
-                return json
-            }
-
-            throw new Error(response.status)
+            .then(res => {
+                // Handle the promise of the 1st fetch
+                if (res.ok){
+                    // Return Promise which will be handled at the next then()
+                    return fetch(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), {
+                        method: 'POST',
+                        headers: my_headers,
+                        body: JSON.stringify({ 'email':vm.selected_referral, 'text': vm.referral_text }),
+                    })
+                } else {
+                    // 400s or 500s error
+                    return Promise.reject(res.statusText)  // This will be caught at the catch() below
+                }
+            })
+            .then(res => {
+                // Handle the promise of the 2nd fetch
+                if (res.ok){
+                    // All done.  Do nothing
+                } else {
+                    // 400s or 500s error
+                    return Promise.reject(res.statusText)  // This will be caught at the catch() below
+                }
+            })
+            .catch(err => { 
+                console.log({err})
+                swal.fire({
+                    title: err,
+                    text: "Failed to send referral.  Please contact your administrator.",
+                    type: "warning",
+                })
+            })
+            .finally(() => {
+                vm.sendingReferral = false;
+                vm.selected_referral = ''
+                vm.referral_text = ''
+                $(vm.$refs.department_users).val(null).trigger('change')
+            })
         },
         sendReferral: async function(){
             let vm = this
             this.checkAssessorData();
-            try {
-                swal.fire({
-                    title: "Send to referral",
-                    text: "Are you sure you want to send to referral?",
-                    type: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: 'Send to referral',
-                    //confirmButtonColor:'#dc3545'
-                }).then(async result => {
-                    if (result.isConfirmed){
-                        // When Yes
-                        vm.sendingReferral = true;
-                        await vm.assessor_save()
-                        await vm.assessor_send_referral()
-                        vm.selected_referral = ''
-                        vm.referral_text = ''
-
-                        $(vm.$refs.department_users).val(null).trigger('change')
-
-                        vm.sendingReferral = false;
-                    } else if (result.isDenied){
-                        // When No (This is not Cancel)
-                    } else {
-                        // When cancel
-                        // Do nothing
-                    }
-                })
-                    //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
-                    /* 
-                    // Don't use this endpoint
-                    $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
-                    vm.selected_referral = '';
-                    vm.referral_text = '';
-                    },
-                    error => {
-                        $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
-                        vm.sendingReferral = false;
-                    }
-                    */
-            } catch (error) {
-                this.sendingReferral = false;
-                new swal(
-                    'Referral Error',
-                    helpers.apiVueResourceError(error),
-                    'error'
-                )
+            swal.fire({
+                title: "Send to referral",
+                text: "Are you sure you want to send to referral?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Send to referral',
+                //confirmButtonColor:'#dc3545'
+            }).then(async result => {
+                if (result.isConfirmed){
+                    // When Yes
+                    await vm.performSendReferral()
+                }
+            })
+            //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
+            /* 
+            // Don't use this endpoint
+            $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
+            vm.selected_referral = '';
+            vm.referral_text = '';
+            },
+            error => {
+                $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
+                vm.sendingReferral = false;
             }
+            */
         },
         remindReferral: async function(r){
             try {
