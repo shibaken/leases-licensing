@@ -1,5 +1,5 @@
 module.exports = {
-	APPLICATION_TYPE: {
+	APPLICATION_TYPES: {
 		REGISTRATION_OF_INTEREST: 'registration_of_interest',
 		LEASE_LICENCE: 'lease_licence',
 	},

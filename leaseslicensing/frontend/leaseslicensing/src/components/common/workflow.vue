@@ -74,9 +74,9 @@
                                 <div class="col-sm-12">
                                     <strong>Referrals</strong><br/>
                                     <div class="form-group">
-                                        <select 
-                                            :disabled="!canLimitedAction" 
-                                            ref="department_users" 
+                                        <select
+                                            :disabled="!canLimitedAction"
+                                            ref="department_users"
                                             class="form-control"
                                         >
                                             <option value="null"></option>
@@ -120,11 +120,11 @@
                                         </tr>
                                     </table>
 
-                                    <MoreReferrals 
-                                        @refreshFromResponse="refreshFromResponse" 
-                                        :proposal="proposal" 
-                                        :canAction="canLimitedAction" 
-                                        :isFinalised="isFinalised" 
+                                    <MoreReferrals
+                                        @refreshFromResponse="refreshFromResponse"
+                                        :proposal="proposal"
+                                        :canAction="canLimitedAction"
+                                        :isFinalised="isFinalised"
                                         :referral_url="referralListURL"
                                     />
                                 </div>
@@ -140,7 +140,7 @@
                         </div>
 
                         <template v-for="configuration in configurations_for_buttons" :key="configuration.key">
-                            <button 
+                            <button
                                 v-if="show_hide_button(configuration)"
                                 class="btn btn-primary  w-75 my-1"
                                 @click.prevent="configuration.function_when_clicked"
@@ -162,6 +162,7 @@ export default {
     data: function() {
         let vm = this;
 
+        let APPLICATION_TYPE = constants.APPLICATION_TYPES
         let PS = constants.PROPOSAL_STATUS
         let ROLES = constants.ROLES
 
@@ -180,11 +181,24 @@ export default {
                     'key': 'enter_conditions',
                     'button_title': 'Enter Conditions',
                     'registration_of_interest': [],  // No conditions for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
-                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                    //'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
+                    //'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,],
                     'function_when_clicked': function(){
                         vm.switchStatus('with_assessor_conditions')
-                    }
+                    },
+                    'condition_to_display': {
+                        [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                            // When application type is 'registration_of_interest'
+                            // No conditions to display this button
+                        },
+                        [APPLICATION_TYPE.LEASE_LICENCE]: {
+                            // When application type is 'lease_licence'
+                            // When proposal status is 'with_assessor', 'assessor'/'referral' can see this button
+                            [PS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                            // When proposal status is 'with_referral', 'assessor'/'referral' can see this button
+                            [PS.WITH_REFERRAL.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                        }
+                    },
                 },
                 {
                     'key': 'complete_referral',
@@ -338,39 +352,6 @@ export default {
 
             return !this.isFinalised && this.canAction
         },
-        display_action_complete_referral: function(){
-            return this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_request_amendment: function(){
-            return this.buttons['request_amendment'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_enter_conditions: function(){
-            return this.buttons['enter_conditions'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_propose_decline: function(){
-            return this.buttons['propose_decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_back_to_application: function(){
-            return this.buttons['back_to_application'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_propose_approve: function(){
-            return this.buttons['propose_approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_require_das: function(){
-            return this.buttons['require_das'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_complete_editing: function(){
-            return this.buttons['complete_editing'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_back_to_assessor: function(){
-            return this.buttons['back_to_assessor'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_approve: function(){
-            return this.buttons['approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_decline: function(){
-            return this.buttons['decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
     },
     filters: {
         formatDate: function(data){
@@ -409,6 +390,7 @@ export default {
             return ret_value
         },
         displayable: function(item, application_type, processing_status_id, accessing_user_roles){
+            console.log('aho')
             let me = this
 
             let displayable_status_ids = me.get_allowed_ids(item[application_type])
@@ -574,7 +556,7 @@ export default {
                 let res = await fetch(vm.proposal_form_url, {
                     method: 'POST',
                     headers: my_headers,
-                    body: JSON.stringify({ 'proposal': vm.proposal }), 
+                    body: JSON.stringify({ 'proposal': vm.proposal }),
                 })
                 if (!res.ok)
                     throw new Error(res.statusText)  // 400s or 500s error
@@ -587,7 +569,7 @@ export default {
                 })
                 if (!res.ok)
                     throw new Error(res.statusText)  // 400s or 500s error
-            } catch(err){ 
+            } catch(err){
                 swal.fire({
                     title: err,
                     text: "Failed to send referral.  Please contact your administrator.",
@@ -617,7 +599,7 @@ export default {
                 }
             })
             //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
-            /* 
+            /*
             // Don't use this endpoint
             $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
             vm.selected_referral = '';
