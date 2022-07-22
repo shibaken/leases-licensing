@@ -2355,7 +2355,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @renderer_classes((JSONRenderer,))
     @basic_exception_handler
     def assessor_save(self, request, *args, **kwargs):
-        # return HttpResponseBadRequest  # For debug
         instance = self.get_object()
         save_assessor_data(instance, request, self)
         # return redirect(reverse("external"))

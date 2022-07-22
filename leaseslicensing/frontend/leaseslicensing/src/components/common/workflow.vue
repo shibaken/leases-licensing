@@ -302,7 +302,7 @@ export default {
             },
         ]
 
-        class Button{
+        class ActionButton{
             constructor(id, condition){
                 this._id = id
                 this._condition = condition
@@ -377,7 +377,7 @@ export default {
                 let button_array = {}
                 conf_buttons.forEach(dict => {
                     for (let [key, value] of Object.entries(dict)) {
-                        button_array[key] = new Button(key, value)
+                        button_array[key] = new ActionButton(key, value)
                     }
                 })
                 return button_array
@@ -634,49 +634,85 @@ export default {
             vm.sendingReferral = true;
             let my_headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }
 
-            fetch(vm.proposal_form_url, {
-                method: 'POST',
-                headers: my_headers,
-                body: JSON.stringify({ 'proposal': vm.proposal }), 
-            })
-            .then(res => {
-                // Handle the promise of the 1st fetch
-                if (res.ok){
-                    // Return Promise which will be handled at the next then()
-                    return fetch(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), {
-                        method: 'POST',
-                        headers: my_headers,
-                        body: JSON.stringify({ 'email':vm.selected_referral, 'text': vm.referral_text }),
-                    })
-                } else {
-                    // 400s or 500s error
-                    return Promise.reject(res.statusText)  // This will be caught at the catch() below
-                }
-            })
-            .then(res => {
-                // Handle the promise of the 2nd fetch
-                if (res.ok){
-                    // All done.  Do nothing
-                } else {
-                    // 400s or 500s error
-                    return Promise.reject(res.statusText)  // This will be caught at the catch() below
-                }
-            })
-            .catch(err => { 
-                console.log({err})
+            try {
+                // Save proposal
+                let res = await fetch(vm.proposal_form_url, {
+                    method: 'POST',
+                    headers: my_headers,
+                    body: JSON.stringify({ 'proposal': vm.proposal }), 
+                })
+                if (!res.ok)
+                    throw new Error(res.statusText)  // 400s or 500s error
+
+                // Send to referral
+                res = await fetch(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), {
+                    method: 'POST',
+                    headers: my_headers,
+                    body: JSON.stringify({ 'email':vm.selected_referral, 'text': vm.referral_text }),
+                })
+                if (!res.ok)
+                    throw new Error(res.statusText)  // 400s or 500s error
+            } catch(err){ 
                 swal.fire({
                     title: err,
                     text: "Failed to send referral.  Please contact your administrator.",
                     type: "warning",
                 })
-            })
-            .finally(() => {
+            } finally {
                 vm.sendingReferral = false;
                 vm.selected_referral = ''
                 vm.referral_text = ''
                 $(vm.$refs.department_users).val(null).trigger('change')
-            })
+            }
         },
+        //performSendReferral: async function(){
+        //    let vm = this
+        //    vm.sendingReferral = true;
+        //    let my_headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+
+        //    fetch(vm.proposal_form_url, {
+        //        method: 'POST',
+        //        headers: my_headers,
+        //        body: JSON.stringify({ 'proposal': vm.proposal }), 
+        //    })
+        //    .then(res => {
+        //        // Handle the promise of the 1st fetch
+        //        if (res.ok){
+        //            // Return Promise which will be handled at the next then()
+        //            return fetch(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), {
+        //                method: 'POST',
+        //                headers: my_headers,
+        //                body: JSON.stringify({ 'email':vm.selected_referral, 'text': vm.referral_text }),
+        //            })
+        //        } else {
+        //            // 400s or 500s error
+        //            return Promise.reject(res.statusText)  // This will be caught at the catch() below
+        //        }
+        //    })
+        //    .then(res => {
+        //        // Handle the promise of the 2nd fetch
+        //        if (res.ok){
+        //            // All done.  Do nothing
+        //        } else {
+        //            // 400s or 500s error
+        //            return Promise.reject(res.statusText)  // This will be caught at the catch() below
+        //        }
+        //    })
+        //    .catch(err => { 
+        //        console.log({err})
+        //        swal.fire({
+        //            title: err,
+        //            text: "Failed to send referral.  Please contact your administrator.",
+        //            type: "warning",
+        //        })
+        //    })
+        //    .finally(() => {
+        //        vm.sendingReferral = false;
+        //        vm.selected_referral = ''
+        //        vm.referral_text = ''
+        //        $(vm.$refs.department_users).val(null).trigger('change')
+        //    })
+        //},
         sendReferral: async function(){
             let vm = this
             this.checkAssessorData();
