@@ -224,6 +224,13 @@
                                 @click.prevent="declineProposal()"
                             >Decline</button>
                         </div>
+                        <template v-for="configuration in configurations_for_buttons" :key="configuration.key">
+                            <template v-if="show_hide_button(configuration)">
+                                <button 
+                                    class="btn btn-primary  w-75 my-1"
+                                >{{ configuration.button_title }}</button>
+                            </template>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -242,63 +249,84 @@ export default {
 
         let PS = constants.PROPOSAL_STATUS
         let ROLES = constants.ROLES
-        let conf_buttons = [ // List the statuses for which the button is to be displayed
+
+        let conf_buttons = [
             {
-                'enter_conditions': {
-                    'registration_of_interest': [],  // No conditions for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
-                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,]
-                },
-                'complete_referral': {
-                    'registration_of_interest': [PS.WITH_REFERRAL,],
-                    'lease_licence': [PS.WITH_REFERRAL,],
-                    'roles_allowed': [ROLES.REFERRAL,],
-                },
-                'request_amendment': {
-                    'registration_of_interest': [PS.WITH_ASSESSOR,],
-                    'lease_licence': [PS.WITH_ASSESSOR,],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-                'propose_decline': {
-                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR,],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-                'back_to_application': {
-                    'registration_of_interest': [],  // No conditions for the registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
-                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,]
-                },
-                'propose_approve': {
-                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-                'back_to_assessor': {
-                    'registration_of_interest': [PS.WITH_APPROVER,],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,]
-                },
-                'approve': {
-                    'registration_of_interest': [PS.WITH_APPROVER,],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,]
-                },
-                'decline': {
-                    'registration_of_interest': [PS.WITH_APPROVER],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,]
-                },
-                'require_das': {
-                    'registration_of_interest': [],
-                    'lease_licence': [PS.WITH_ASSESSOR],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-                'complete_editing': {
-                    'registration_of_interest': [],
-                    'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
+                'key': 'enter_conditions',
+                'button_title': 'Enter Conditions',
+                'registration_of_interest': [],  // No conditions for registration_of_interest
+                'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
+                'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,],
+            },
+            {
+                'key': 'complete_referral',
+                'button_title': 'Complete Referral',
+                'registration_of_interest': [PS.WITH_REFERRAL,],
+                'lease_licence': [PS.WITH_REFERRAL,],
+                'roles_allowed': [ROLES.REFERRAL,],
+            },
+            {
+                'key': 'request_amendment',
+                'button_title': 'Request Amendment',
+                'registration_of_interest': [PS.WITH_ASSESSOR,],
+                'lease_licence': [PS.WITH_ASSESSOR,],
+                'roles_allowed': [ROLES.ASSESSOR,]
+            },
+            {
+                'key': 'propose_decline',
+                'button_title': 'Propose Decline',
+                'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
+                'lease_licence': [PS.WITH_ASSESSOR,],
+                'roles_allowed': [ROLES.ASSESSOR,],
+            },
+            {
+                'key': 'back_to_application',
+                'button_title': 'Back to Application',
+                'registration_of_interest': [],  // No conditions for the registration_of_interest
+                'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
+                'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,]
+            },
+            {
+                'key': 'propose_approve',
+                'button_title': 'Propose Approve',
+                'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
+                'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
+                'roles_allowed': [ROLES.ASSESSOR,]
+            },
+            {
+                'key': 'back_to_assessor',
+                'button_title': 'Back to Assessor',
+                'registration_of_interest': [PS.WITH_APPROVER,],
+                'lease_licence': [PS.WITH_APPROVER,],
+                'roles_allowed': [ROLES.APPROVER,]
+            },
+            {
+                'key': 'approve',
+                'button_title': 'Approve',
+                'registration_of_interest': [PS.WITH_APPROVER,],
+                'lease_licence': [PS.WITH_APPROVER,],
+                'roles_allowed': [ROLES.APPROVER,]
+            },
+            {
+                'key': 'decline',
+                'button_title': 'Decline',
+                'registration_of_interest': [PS.WITH_APPROVER],
+                'lease_licence': [PS.WITH_APPROVER,],
+                'roles_allowed': [ROLES.APPROVER,]
+            },
+            {
+                'key': 'require_das',
+                'button_title': 'Require DAS',
+                'registration_of_interest': [],
+                'lease_licence': [PS.WITH_ASSESSOR],
+                'roles_allowed': [ROLES.ASSESSOR,]
+            },
+            {
+                'key': 'complete_editing',
+                'button_title': 'DAS',
+                'registration_of_interest': [],
+                'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
+                'roles_allowed': [ROLES.ASSESSOR,]
             },
         ]
 
@@ -349,13 +377,6 @@ export default {
                 let displayable_role_ids = me.get_allowed_ids('roles_allowed')
                 let my_processing_status_id = me.absorb_type_difference(processing_status_id)
 
-                /*
-                console.log('---------' + me._id + '--------------')
-                console.log(displayable_status_ids)
-                console.log(displayable_role_ids)
-                console.log(my_processing_status_id)
-                */
-
                 let status_allowed = displayable_status_ids.includes(my_processing_status_id)
                 let intersection = displayable_role_ids.filter(x => accessing_user_roles.includes(x));
 
@@ -375,13 +396,17 @@ export default {
             sendingReferral: false,
             buttons: (function(){
                 let button_array = {}
-                conf_buttons.forEach(dict => {
-                    for (let [key, value] of Object.entries(dict)) {
-                        button_array[key] = new ActionButton(key, value)
-                    }
+                conf_buttons.forEach(item => {
+                    console.log(item)
+                    button_array[item.key] = new ActionButton(item.key, {
+                        'registration_of_interest': item.registration_of_interest,
+                        'lease_licence': item.lease_licence,
+                        'roles_allowed': item.roles_allowed,
+                    })
                 })
                 return button_array
-            })()
+            })(),
+            configurations_for_buttons: conf_buttons,
         }
     },
     props: {
@@ -489,6 +514,51 @@ export default {
         }
     },
     methods: {
+        get_allowed_ids: function(ids){
+            let me = this
+
+            let displayable_status_ids = ids.map(a_status => {
+                if (a_status.hasOwnProperty('ID'))
+                    return a_status.ID
+                else if (a_status.hasOwnProperty('id'))
+                    return a_status.id
+                else if (a_status.hasOwnProperty('Id'))
+                    return a_status.Id
+                else
+                    return a_status
+            })
+
+            return displayable_status_ids
+        },
+        absorb_type_difference: function(processing_status_id){
+            let ret_value = ''
+
+            if(processing_status_id.hasOwnProperty('ID'))
+                ret_value = processing_status_id.ID
+            else if(processing_status_id.hasOwnProperty('id'))
+                ret_value = processing_status_id.id
+            else if(processing_status_id.hasOwnProperty('Id'))
+                ret_value = processing_status_id.Id
+            else
+                ret_value = processing_status_id.toLowerCase()
+
+            return ret_value
+        },
+        displayable: function(item, application_type, processing_status_id, accessing_user_roles){
+            let me = this
+
+            let displayable_status_ids = me.get_allowed_ids(item[application_type])
+            let displayable_role_ids = me.get_allowed_ids(item['roles_allowed'])
+            let my_processing_status_id = me.absorb_type_difference(processing_status_id)
+
+            let status_allowed = displayable_status_ids.includes(my_processing_status_id)
+            let intersection = displayable_role_ids.filter(x => accessing_user_roles.includes(x));
+
+            return status_allowed && intersection.length > 0
+        },
+        show_hide_button: function(configuration){
+            return this.displayable(configuration, this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
+        },
         completeEditing: function(){
         },
         requireDas: function(){
@@ -631,10 +701,11 @@ export default {
         */
         performSendReferral: async function(){
             let vm = this
-            vm.sendingReferral = true;
             let my_headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }
 
             try {
+                vm.sendingReferral = true;
+
                 // Save proposal
                 let res = await fetch(vm.proposal_form_url, {
                     method: 'POST',
@@ -665,54 +736,6 @@ export default {
                 $(vm.$refs.department_users).val(null).trigger('change')
             }
         },
-        //performSendReferral: async function(){
-        //    let vm = this
-        //    vm.sendingReferral = true;
-        //    let my_headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }
-
-        //    fetch(vm.proposal_form_url, {
-        //        method: 'POST',
-        //        headers: my_headers,
-        //        body: JSON.stringify({ 'proposal': vm.proposal }), 
-        //    })
-        //    .then(res => {
-        //        // Handle the promise of the 1st fetch
-        //        if (res.ok){
-        //            // Return Promise which will be handled at the next then()
-        //            return fetch(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), {
-        //                method: 'POST',
-        //                headers: my_headers,
-        //                body: JSON.stringify({ 'email':vm.selected_referral, 'text': vm.referral_text }),
-        //            })
-        //        } else {
-        //            // 400s or 500s error
-        //            return Promise.reject(res.statusText)  // This will be caught at the catch() below
-        //        }
-        //    })
-        //    .then(res => {
-        //        // Handle the promise of the 2nd fetch
-        //        if (res.ok){
-        //            // All done.  Do nothing
-        //        } else {
-        //            // 400s or 500s error
-        //            return Promise.reject(res.statusText)  // This will be caught at the catch() below
-        //        }
-        //    })
-        //    .catch(err => { 
-        //        console.log({err})
-        //        swal.fire({
-        //            title: err,
-        //            text: "Failed to send referral.  Please contact your administrator.",
-        //            type: "warning",
-        //        })
-        //    })
-        //    .finally(() => {
-        //        vm.sendingReferral = false;
-        //        vm.selected_referral = ''
-        //        vm.referral_text = ''
-        //        $(vm.$refs.department_users).val(null).trigger('change')
-        //    })
-        //},
         sendReferral: async function(){
             let vm = this
             this.checkAssessorData();
@@ -824,6 +847,7 @@ export default {
             this.$emit('toggleRequirements', this.showingRequirements)
         },
         switchStatus: function(value){
+            console.log('aho')
             this.$emit('switchStatus', value)
         },
         amendmentRequest: function(){
