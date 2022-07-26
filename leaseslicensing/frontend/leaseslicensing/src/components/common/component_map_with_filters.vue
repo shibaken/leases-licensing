@@ -159,8 +159,8 @@ export default {
             constants.PROPOSAL_STATUS.DISCARDED,
         ]
         const conf_types = [
-            constants.APPLICATION_TYPE.REGISTRATION_OF_INTEREST,
-            constants.APPLICATION_TYPE.LEASE_LICENCE,
+            constants.APPLICATION_TYPES.REGISTRATION_OF_INTEREST,
+            constants.APPLICATION_TYPES.LEASE_LICENCE,
         ]
         class MainManager {
             constructor(){

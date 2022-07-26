@@ -4140,7 +4140,7 @@ class ProposalAssessment(RevisionedMixin):
 
     @property
     def referral_assessment(self):
-        # When referral exists, self is for referral otherwise for assessor
+        # When self.referral != null, this assessment is for referral, otherwise this assessment is for assessor.
         return True if self.referral else False
 
 

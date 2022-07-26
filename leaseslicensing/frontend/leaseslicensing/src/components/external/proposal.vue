@@ -380,7 +380,7 @@ export default {
         const res = await fetch(url, { body: JSON.stringify(payload), method: 'POST' });
         if (res.ok) {
             if (withConfirm) {
-                swal(
+                swal.fire(
                     'Saved',
                     'Your application has been saved',
                     'success'

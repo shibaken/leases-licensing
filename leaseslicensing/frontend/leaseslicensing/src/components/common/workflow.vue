@@ -74,9 +74,9 @@
                                 <div class="col-sm-12">
                                     <strong>Referrals</strong><br/>
                                     <div class="form-group">
-                                        <select 
-                                            :disabled="!canLimitedAction" 
-                                            ref="department_users" 
+                                        <select
+                                            :disabled="!canLimitedAction"
+                                            ref="department_users"
                                             class="form-control"
                                         >
                                             <option value="null"></option>
@@ -120,11 +120,11 @@
                                         </tr>
                                     </table>
 
-                                    <MoreReferrals 
-                                        @refreshFromResponse="refreshFromResponse" 
-                                        :proposal="proposal" 
-                                        :canAction="canLimitedAction" 
-                                        :isFinalised="isFinalised" 
+                                    <MoreReferrals
+                                        @refreshFromResponse="refreshFromResponse"
+                                        :proposal="proposal"
+                                        :canAction="canLimitedAction"
+                                        :isFinalised="isFinalised"
                                         :referral_url="referralListURL"
                                     />
                                 </div>
@@ -139,91 +139,13 @@
                             <strong>Action</strong>
                         </div>
 
-                        <div class="" v-if="display_action_enter_conditions">
+                        <template v-for="configuration in configurations_for_buttons" :key="configuration.key">
                             <button
-                                class="btn btn-primary w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="switchStatus('with_assessor_conditions')"
-                            >Enter Conditions</button>
-                        </div>
-
-                        <div class="" v-if="display_action_complete_referral">
-                            <button
-                                class="btn btn-primary w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="completeReferral()"
-                            >Complete Referral</button>
-                        </div>
-
-                        <div class="" v-if="display_action_request_amendment">
-                            <button
+                                v-if="configuration.function_to_show_hide()"
                                 class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="amendmentRequest()"
-                            >Request Amendment</button>
-                        </div>
-
-                        <div class="" v-if="display_action_propose_decline">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="proposedDecline()"
-                            >Propose Decline</button>
-                        </div>
-
-                        <div class="" v-if="display_action_require_das">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="requireDas()"
-                            >Require DAS</button>
-                        </div>
-
-                        <div class="" v-if="display_action_complete_editing">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="completeEditing()"
-                            >Complete Editing</button>
-                        </div>
-
-                        <div class="" v-if="display_action_back_to_application">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="switchStatus('with_assessor')"
-                            >Back To Application</button>
-                        </div>
-
-                        <div class="" v-if="display_action_propose_approve">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="proposedApproval()"
-                            >Propose Approve</button>
-                        </div>
-
-                        <div class="" v-if="display_action_back_to_assessor">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                :disabled="can_user_edit"
-                                @click.prevent="switchStatus('with_assessor')"
-                            >Back To Assessor</button>
-                        </div>
-
-                        <div class="" v-if="display_action_approve">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                @click.prevent="issueProposal()"
-                            >Approve</button>
-                        </div>
-
-                        <div class="" v-if="display_action_decline">
-                            <button
-                                class="btn btn-primary  w-75 my-1"
-                                @click.prevent="declineProposal()"
-                            >Decline</button>
-                        </div>
+                                @click.prevent="configuration.function_when_clicked"
+                            >{{ configuration.button_title }}</button>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -240,128 +162,9 @@ export default {
     data: function() {
         let vm = this;
 
-        let PS = constants.PROPOSAL_STATUS
+        let APPLICATION_TYPE = constants.APPLICATION_TYPES
+        let PROPOSAL_STATUS = constants.PROPOSAL_STATUS
         let ROLES = constants.ROLES
-        let conf_buttons = [ // List the statuses for which the button is to be displayed
-            {
-                'enter_conditions': {
-                    'registration_of_interest': [],  // No conditions for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
-                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,]
-                },
-                'complete_referral': {
-                    'registration_of_interest': [PS.WITH_REFERRAL,],
-                    'lease_licence': [PS.WITH_REFERRAL,],
-                    'roles_allowed': [ROLES.REFERRAL,],
-                },
-                'request_amendment': {
-                    'registration_of_interest': [PS.WITH_ASSESSOR,],
-                    'lease_licence': [PS.WITH_ASSESSOR,],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-                'propose_decline': {
-                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR,],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-                'back_to_application': {
-                    'registration_of_interest': [],  // No conditions for the registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
-                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,]
-                },
-                'propose_approve': {
-                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-                'back_to_assessor': {
-                    'registration_of_interest': [PS.WITH_APPROVER,],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,]
-                },
-                'approve': {
-                    'registration_of_interest': [PS.WITH_APPROVER,],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,]
-                },
-                'decline': {
-                    'registration_of_interest': [PS.WITH_APPROVER],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,]
-                },
-                'require_das': {
-                    'registration_of_interest': [],
-                    'lease_licence': [PS.WITH_ASSESSOR],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-                'complete_editing': {
-                    'registration_of_interest': [],
-                    'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
-                    'roles_allowed': [ROLES.ASSESSOR,]
-                },
-            },
-        ]
-
-        class ActionButton{
-            constructor(id, condition){
-                this._id = id
-                this._condition = condition
-            }
-
-            get_allowed_ids(key_name){
-                let me = this
-
-                let displayable_status_ids = me._condition[key_name].map(a_status => {
-                    if (a_status.hasOwnProperty('ID'))
-                        return a_status.ID
-                    else if (a_status.hasOwnProperty('id'))
-                        return a_status.id
-                    else if (a_status.hasOwnProperty('Id'))
-                        return a_status.Id
-                    else
-                        return a_status
-                })
-
-                return displayable_status_ids
-            }
-
-            absorb_type_difference(processing_status_id){
-                let ret_value = ''
-
-                if(processing_status_id.hasOwnProperty('ID'))
-                    ret_value = processing_status_id.ID
-                else if(processing_status_id.hasOwnProperty('id'))
-                    ret_value = processing_status_id.id
-                else if(processing_status_id.hasOwnProperty('Id'))
-                    ret_value = processing_status_id.Id
-                else
-                    ret_value = processing_status_id.toLowerCase()
-
-                return ret_value
-            }
-
-            displayable(application_type, processing_status_id, accessing_user_roles){
-                let me = this
-                if (vm.debug)
-                    return true
-
-                let displayable_status_ids = me.get_allowed_ids(application_type)
-                let displayable_role_ids = me.get_allowed_ids('roles_allowed')
-                let my_processing_status_id = me.absorb_type_difference(processing_status_id)
-
-                /*
-                console.log('---------' + me._id + '--------------')
-                console.log(displayable_status_ids)
-                console.log(displayable_role_ids)
-                console.log(my_processing_status_id)
-                */
-
-                let status_allowed = displayable_status_ids.includes(my_processing_status_id)
-                let intersection = displayable_role_ids.filter(x => accessing_user_roles.includes(x));
-
-                return status_allowed && intersection.length > 0
-            }
-        }
 
         return {
             showingProposal: false,
@@ -373,15 +176,203 @@ export default {
             selected_referral: '',
             referral_text: '',
             sendingReferral: false,
-            buttons: (function(){
-                let button_array = {}
-                conf_buttons.forEach(dict => {
-                    for (let [key, value] of Object.entries(dict)) {
-                        button_array[key] = new ActionButton(key, value)
+            configurations_for_buttons: [
+                {
+                    'key': 'enter_conditions',
+                    'button_title': 'Enter Conditions',
+                    'function_when_clicked': () => {
+                        vm.switchStatus('with_assessor_conditions')
+                    },
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                // When application type is 'lease_licence'
+                                // When proposal status is 'with_assessor', 'assessor'/'referral' can see this button
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                                // When proposal status is 'with_referral', 'assessor'/'referral' can see this button
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+
+                        return show
                     }
-                })
-                return button_array
-            })()
+                },
+                {
+                    'key': 'complete_referral',
+                    'button_title': 'Complete Referral',
+                    'function_when_clicked': vm.completeReferral,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.REFERRAL,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.REFERRAL,],
+                            }
+                        }
+                        let show1 = vm.check_role_conditions(condition_to_display)
+
+                        let show2 = false
+                        for (let assessment of vm.proposal.referral_assessments){
+                            if (assessment.answerable_by_accessing_user)
+                                show2 = true
+                        }
+
+                        return show1 && show2
+                    }
+                },
+                {
+                    'key': 'request_amendment',
+                    'button_title': 'Request Amendment',
+                    'function_when_clicked': vm.amendmentRequest,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+                {
+                    'key': 'propose_decline',
+                    'button_title': 'Propose Decline',
+                    'function_when_clicked': vm.proposedDecline,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+                {
+                    'key': 'back_to_application',
+                    'button_title': 'Back to Application',
+                    'function_when_clicked': function(){
+                        vm.switchStatus('with_assessor')
+                    },
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,, ROLES.REFERRAL,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+                {
+                    'key': 'propose_approve',
+                    'button_title': 'Propose Approve',
+                    'function_when_clicked': vm.proposedApproval,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+                {
+                    'key': 'back_to_assessor',
+                    'button_title': 'Back to Assessor',
+                    'function_when_clicked': function(){
+                        vm.switchStatus('with_assessor')
+                    },
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+                {
+                    'key': 'approve',
+                    'button_title': 'Approve',
+                    'function_when_clicked': vm.issueApproval,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+                {
+                    'key': 'decline',
+                    'button_title': 'Decline',
+                    'function_when_clicked': vm.declineProposal,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+                {
+                    'key': 'require_das',
+                    'button_title': 'Require DAS',
+                    'function_when_clicked': vm.requireDas,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+                {
+                    'key': 'complete_editing',
+                    'button_title': 'Complete Editing',
+                    'function_when_clicked': vm.completeEditing,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
+                },
+            ]
         }
     },
     props: {
@@ -449,39 +440,6 @@ export default {
 
             return !this.isFinalised && this.canAction
         },
-        display_action_complete_referral: function(){
-            return this.buttons['complete_referral'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_request_amendment: function(){
-            return this.buttons['request_amendment'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_enter_conditions: function(){
-            return this.buttons['enter_conditions'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_propose_decline: function(){
-            return this.buttons['propose_decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_back_to_application: function(){
-            return this.buttons['back_to_application'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_propose_approve: function(){
-            return this.buttons['propose_approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_require_das: function(){
-            return this.buttons['require_das'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_complete_editing: function(){
-            return this.buttons['complete_editing'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_back_to_assessor: function(){
-            return this.buttons['back_to_assessor'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_approve: function(){
-            return this.buttons['approve'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
-        display_action_decline: function(){
-            return this.buttons['decline'].displayable(this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
-        },
     },
     filters: {
         formatDate: function(data){
@@ -489,6 +447,48 @@ export default {
         }
     },
     methods: {
+        check_role_conditions: function(condition_to_display){
+            let condition = false
+            if (this.proposal.application_type.name in condition_to_display){
+                if (this.proposal.processing_status_id in condition_to_display[this.proposal.application_type.name]){
+                    let roles = condition_to_display[this.proposal.application_type.name][this.proposal.processing_status_id]
+                    const intersection = roles.filter(role => this.proposal.accessing_user_roles.includes(role.ID));
+                    if (intersection.length > 0)
+                        condition = true
+                }
+            }
+            return condition
+        },
+        get_allowed_ids: function(ids){
+            let me = this
+
+            let displayable_status_ids = ids.map(a_status => {
+                if (a_status.hasOwnProperty('ID'))
+                    return a_status.ID
+                else if (a_status.hasOwnProperty('id'))
+                    return a_status.id
+                else if (a_status.hasOwnProperty('Id'))
+                    return a_status.Id
+                else
+                    return a_status
+            })
+
+            return displayable_status_ids
+        },
+        absorb_type_difference: function(processing_status_id){
+            let ret_value = ''
+
+            if(processing_status_id.hasOwnProperty('ID'))
+                ret_value = processing_status_id.ID
+            else if(processing_status_id.hasOwnProperty('id'))
+                ret_value = processing_status_id.id
+            else if(processing_status_id.hasOwnProperty('Id'))
+                ret_value = processing_status_id.Id
+            else
+                ret_value = processing_status_id.toLowerCase()
+
+            return ret_value
+        },
         completeEditing: function(){
         },
         requireDas: function(){
@@ -631,15 +631,16 @@ export default {
         */
         performSendReferral: async function(){
             let vm = this
-            vm.sendingReferral = true;
             let my_headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }
 
             try {
+                vm.sendingReferral = true;
+
                 // Save proposal
                 let res = await fetch(vm.proposal_form_url, {
                     method: 'POST',
                     headers: my_headers,
-                    body: JSON.stringify({ 'proposal': vm.proposal }), 
+                    body: JSON.stringify({ 'proposal': vm.proposal }),
                 })
                 if (!res.ok)
                     throw new Error(res.statusText)  // 400s or 500s error
@@ -652,7 +653,7 @@ export default {
                 })
                 if (!res.ok)
                     throw new Error(res.statusText)  // 400s or 500s error
-            } catch(err){ 
+            } catch(err){
                 swal.fire({
                     title: err,
                     text: "Failed to send referral.  Please contact your administrator.",
@@ -665,54 +666,6 @@ export default {
                 $(vm.$refs.department_users).val(null).trigger('change')
             }
         },
-        //performSendReferral: async function(){
-        //    let vm = this
-        //    vm.sendingReferral = true;
-        //    let my_headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }
-
-        //    fetch(vm.proposal_form_url, {
-        //        method: 'POST',
-        //        headers: my_headers,
-        //        body: JSON.stringify({ 'proposal': vm.proposal }), 
-        //    })
-        //    .then(res => {
-        //        // Handle the promise of the 1st fetch
-        //        if (res.ok){
-        //            // Return Promise which will be handled at the next then()
-        //            return fetch(helpers.add_endpoint_json(api_endpoints.proposals, (vm.proposal.id + '/assesor_send_referral')), {
-        //                method: 'POST',
-        //                headers: my_headers,
-        //                body: JSON.stringify({ 'email':vm.selected_referral, 'text': vm.referral_text }),
-        //            })
-        //        } else {
-        //            // 400s or 500s error
-        //            return Promise.reject(res.statusText)  // This will be caught at the catch() below
-        //        }
-        //    })
-        //    .then(res => {
-        //        // Handle the promise of the 2nd fetch
-        //        if (res.ok){
-        //            // All done.  Do nothing
-        //        } else {
-        //            // 400s or 500s error
-        //            return Promise.reject(res.statusText)  // This will be caught at the catch() below
-        //        }
-        //    })
-        //    .catch(err => { 
-        //        console.log({err})
-        //        swal.fire({
-        //            title: err,
-        //            text: "Failed to send referral.  Please contact your administrator.",
-        //            type: "warning",
-        //        })
-        //    })
-        //    .finally(() => {
-        //        vm.sendingReferral = false;
-        //        vm.selected_referral = ''
-        //        vm.referral_text = ''
-        //        $(vm.$refs.department_users).val(null).trigger('change')
-        //    })
-        //},
         sendReferral: async function(){
             let vm = this
             this.checkAssessorData();
@@ -730,7 +683,7 @@ export default {
                 }
             })
             //this.proposal = response.body;  // <== Mutating props... Is this fine??? // 20220509 - no, it is not
-            /* 
+            /*
             // Don't use this endpoint
             $(vm.$refs.department_users).val(null).trigger("change");  // Unselect referral
             vm.selected_referral = '';
@@ -838,8 +791,8 @@ export default {
         proposedApproval: function(){
             this.$emit('proposedApproval')
         },
-        issueProposal: function(){
-            this.$emit('issueProposal')
+        issueApproval: function(){
+            this.$emit('issueApproval')
         },
         declineProposal: function(){
             this.$emit('declineProposal')
