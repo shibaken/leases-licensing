@@ -389,7 +389,7 @@ export default {
             vm.savingProposal=false;
             //this.$refs.application_form.incrementComponentMapKey();
             const resData = await res.json()
-            this.proposal = resData;
+            this.proposal = Object.assign({}, resData);
             this.$nextTick(async () => {
                 this.$refs.application_form.incrementComponentMapKey();
             });
@@ -538,7 +538,21 @@ export default {
             return;
         }
         try {
-            const res = await this.save(false, this.proposal_submit_url);
+            //const res = await this.save(false, this.proposal_submit_url);
+            await this.save(false, this.proposal_submit_url);
+            this.$nextTick(() => {
+                const lodgementDate = new Date(this.proposal.lodgement_date)
+                this.$router.push({
+                    name: 'submit-proposal',
+                    params: {
+                        proposal_id: this.proposal.id,
+                        lodgement_number: this.proposal.lodgement_number,
+                        lodgement_date: lodgementDate.toLocaleDateString("en-AU"),
+                        application_type_text: this.proposal.application_type.confirmation_text
+                    },
+                });
+            })
+            /*
             if (res.ok) {
                 // change this to confirmation page
                 this.$router.push({
@@ -546,6 +560,7 @@ export default {
                     params: {proposal: this.proposal},
                 });
             }
+            */
         } catch(err) {
             console.log(err)
             await swal.fire({
