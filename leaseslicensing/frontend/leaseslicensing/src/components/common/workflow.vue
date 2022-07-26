@@ -141,7 +141,7 @@
 
                         <template v-for="configuration in configurations_for_buttons" :key="configuration.key">
                             <button
-                                v-if="show_hide_button(configuration)"
+                                v-if="configuration.function_to_show_hide()"
                                 class="btn btn-primary  w-75 my-1"
                                 @click.prevent="configuration.function_when_clicked"
                             >{{ configuration.button_title }}</button>
@@ -163,7 +163,7 @@ export default {
         let vm = this;
 
         let APPLICATION_TYPE = constants.APPLICATION_TYPES
-        let PS = constants.PROPOSAL_STATUS
+        let PROPOSAL_STATUS = constants.PROPOSAL_STATUS
         let ROLES = constants.ROLES
 
         return {
@@ -180,109 +180,197 @@ export default {
                 {
                     'key': 'enter_conditions',
                     'button_title': 'Enter Conditions',
-                    'registration_of_interest': [],  // No conditions for registration_of_interest
-                    //'lease_licence': [PS.WITH_ASSESSOR, PS.WITH_REFERRAL,],
-                    //'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,],
-                    'function_when_clicked': function(){
+                    'function_when_clicked': () => {
                         vm.switchStatus('with_assessor_conditions')
                     },
-                    'condition_to_display': {
-                        [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
-                            // When application type is 'registration_of_interest'
-                            // No conditions to display this button
-                        },
-                        [APPLICATION_TYPE.LEASE_LICENCE]: {
-                            // When application type is 'lease_licence'
-                            // When proposal status is 'with_assessor', 'assessor'/'referral' can see this button
-                            [PS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
-                            // When proposal status is 'with_referral', 'assessor'/'referral' can see this button
-                            [PS.WITH_REFERRAL.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                // When application type is 'lease_licence'
+                                // When proposal status is 'with_assessor', 'assessor'/'referral' can see this button
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                                // When proposal status is 'with_referral', 'assessor'/'referral' can see this button
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                            }
                         }
-                    },
+                        let show = vm.check_role_conditions(condition_to_display)
+
+                        return show
+                    }
                 },
                 {
                     'key': 'complete_referral',
                     'button_title': 'Complete Referral',
-                    'registration_of_interest': [PS.WITH_REFERRAL,],
-                    'lease_licence': [PS.WITH_REFERRAL,],
-                    'roles_allowed': [ROLES.REFERRAL,],
                     'function_when_clicked': vm.completeReferral,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.REFERRAL,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.REFERRAL,],
+                            }
+                        }
+                        let show1 = vm.check_role_conditions(condition_to_display)
+
+                        let show2 = false
+                        for (let assessment of vm.proposal.referral_assessments){
+                            if (assessment.answerable_by_accessing_user)
+                                show2 = true
+                        }
+
+                        return show1 && show2
+                    }
                 },
                 {
                     'key': 'request_amendment',
                     'button_title': 'Request Amendment',
-                    'registration_of_interest': [PS.WITH_ASSESSOR,],
-                    'lease_licence': [PS.WITH_ASSESSOR,],
-                    'roles_allowed': [ROLES.ASSESSOR,],
                     'function_when_clicked': vm.amendmentRequest,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
                 },
                 {
                     'key': 'propose_decline',
                     'button_title': 'Propose Decline',
-                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR,],
-                    'roles_allowed': [ROLES.ASSESSOR,],
                     'function_when_clicked': vm.proposedDecline,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
                 },
                 {
                     'key': 'back_to_application',
                     'button_title': 'Back to Application',
-                    'registration_of_interest': [],  // No conditions for the registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
-                    'roles_allowed': [ROLES.ASSESSOR, ROLES.REFERRAL,],
                     'function_when_clicked': function(){
                         vm.switchStatus('with_assessor')
+                    },
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,, ROLES.REFERRAL,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
                     }
                 },
                 {
                     'key': 'propose_approve',
                     'button_title': 'Propose Approve',
-                    'registration_of_interest': [PS.WITH_ASSESSOR, PS.WITH_ASSESSOR_CONDITIONS,], // There should not be with_assessor_conditions status for registration_of_interest
-                    'lease_licence': [PS.WITH_ASSESSOR_CONDITIONS,],
-                    'roles_allowed': [ROLES.ASSESSOR,],
                     'function_when_clicked': vm.proposedApproval,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
                 },
                 {
                     'key': 'back_to_assessor',
                     'button_title': 'Back to Assessor',
-                    'registration_of_interest': [PS.WITH_APPROVER,],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,],
                     'function_when_clicked': function(){
                         vm.switchStatus('with_assessor')
+                    },
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
                     }
                 },
                 {
                     'key': 'approve',
                     'button_title': 'Approve',
-                    'registration_of_interest': [PS.WITH_APPROVER,],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,],
                     'function_when_clicked': vm.issueApproval,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
                 },
                 {
                     'key': 'decline',
                     'button_title': 'Decline',
-                    'registration_of_interest': [PS.WITH_APPROVER],
-                    'lease_licence': [PS.WITH_APPROVER,],
-                    'roles_allowed': [ROLES.APPROVER,],
                     'function_when_clicked': vm.declineProposal,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            },
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
                 },
                 {
                     'key': 'require_das',
                     'button_title': 'Require DAS',
-                    'registration_of_interest': [],
-                    'lease_licence': [PS.WITH_ASSESSOR],
-                    'roles_allowed': [ROLES.ASSESSOR,],
                     'function_when_clicked': vm.requireDas,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
                 },
                 {
                     'key': 'complete_editing',
                     'button_title': 'Complete Editing',
-                    'registration_of_interest': [],
-                    'lease_licence': [PS.APPROVED_EDITING_INVOICING,],
-                    'roles_allowed': [ROLES.ASSESSOR,],
                     'function_when_clicked': vm.completeEditing,
+                    'function_to_show_hide': () => {
+                        let condition_to_display = {
+                            [APPLICATION_TYPE.LEASE_LICENCE]: {
+                                [PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID]: [ROLES.ASSESSOR,],
+                            }
+                        }
+                        let show = vm.check_role_conditions(condition_to_display)
+                        return show
+                    }
                 },
             ]
         }
@@ -359,6 +447,18 @@ export default {
         }
     },
     methods: {
+        check_role_conditions: function(condition_to_display){
+            let condition = false
+            if (this.proposal.application_type.name in condition_to_display){
+                if (this.proposal.processing_status_id in condition_to_display[this.proposal.application_type.name]){
+                    let roles = condition_to_display[this.proposal.application_type.name][this.proposal.processing_status_id]
+                    const intersection = roles.filter(role => this.proposal.accessing_user_roles.includes(role.ID));
+                    if (intersection.length > 0)
+                        condition = true
+                }
+            }
+            return condition
+        },
         get_allowed_ids: function(ids){
             let me = this
 
@@ -388,22 +488,6 @@ export default {
                 ret_value = processing_status_id.toLowerCase()
 
             return ret_value
-        },
-        displayable: function(item, application_type, processing_status_id, accessing_user_roles){
-            console.log('aho')
-            let me = this
-
-            let displayable_status_ids = me.get_allowed_ids(item[application_type])
-            let displayable_role_ids = me.get_allowed_ids(item['roles_allowed'])
-            let my_processing_status_id = me.absorb_type_difference(processing_status_id)
-
-            let status_allowed = displayable_status_ids.includes(my_processing_status_id)
-            let intersection = displayable_role_ids.filter(x => accessing_user_roles.includes(x));
-
-            return status_allowed && intersection.length > 0
-        },
-        show_hide_button: function(configuration){
-            return this.displayable(configuration, this.proposal.application_type.name, this.proposal.processing_status_id, this.proposal.accessing_user_roles)
         },
         completeEditing: function(){
         },

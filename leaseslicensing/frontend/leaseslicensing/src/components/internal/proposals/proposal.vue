@@ -82,13 +82,13 @@
                                 <template v-if="assessment_for_assessor_map.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
-                                <template v-for="question in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
+                                <template v-for="question in assessment_for_assessor_map" :key="question.id">  <!-- There is only one assessor assessment -->
                                     <ChecklistQuestion :question="question" />
                                 </template>
 
-                                <template v-for="assessment in assessments_for_referrals_map"> <!-- There can be multiple referral assessments -->
+                                <template v-for="assessment in assessments_for_referrals_map" :key="assessment.id"> <!-- There can be multiple referral assessments -->
                                     <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
-                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                    <template v-for="question in assessment.answers" :key="question.id"> <!-- per question -->
                                         <ChecklistQuestion :question="question" />
                                     </template>
                                 </template>
