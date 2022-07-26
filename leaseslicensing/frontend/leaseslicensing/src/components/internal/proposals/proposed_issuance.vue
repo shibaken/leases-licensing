@@ -275,9 +275,8 @@ export default {
                         })
                         this.issuingApproval = false;
                         this.close();
-                        this.$emit('refreshFromResponse',response);
+                        //this.$emit('refreshFromResponse',response);
                         this.$router.push({ path: '/internal' }); //Navigate to dashboard page after Propose issue.
-
                     } catch (error) {
                         this.errors = true;
                         this.issuingApproval = false;
@@ -292,7 +291,8 @@ export default {
                         })
                         this.issuingApproval = false;
                         this.close();
-                        this.$emit('refreshFromResponse',response);
+                        //this.$emit('refreshFromResponse',response);
+                        this.$router.push({ path: '/internal' }); //Navigate to dashboard page after Propose issue.
                     } catch (error) {
                         this.errors = true;
                         this.issuingApproval = false;
