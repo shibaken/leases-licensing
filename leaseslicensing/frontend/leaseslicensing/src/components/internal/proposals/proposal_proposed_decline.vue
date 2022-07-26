@@ -38,11 +38,11 @@
                     </form>
                 </div>
             </div>
-            <div slot="footer">
+            <!--div slot="footer">
                 <button type="button" v-if="decliningProposal" disabled class="btn btn-light" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
                 <button type="button" v-else class="btn btn-light" @click="ok">Ok</button>
                 <button type="button" class="btn btn-light" @click="cancel">Cancel</button>
-            </div>
+            </div-->
         </modal>
     </div>
 </template>
@@ -155,38 +155,42 @@ export default {
         },
         sendData:function(){
             console.log('in sendData')
-            let vm = this;
-            vm.errors = false;
+            this.errors = false;
             this.decline.reason = this.$refs.decline_reason.detailsText;
-            let decline = JSON.parse(JSON.stringify(vm.decline));
-            vm.decliningProposal = true;
-            this.$nextTick(() => {
+            let decline = JSON.parse(JSON.stringify(this.decline));
+            this.decliningProposal = true;
+            this.$nextTick(async () => {
                 //if (vm.processing_status != 'With Approver'){
-                if (vm.callFinalDecline){
-                    vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id + '/final_decline'), JSON.stringify(decline), {
-                            emulateJSON:true,
-                        }).then((response)=>{
-                            vm.decliningProposal = false;
-                            vm.close();
-                            vm.$emit('refreshFromResponse',response);
-                        },(error)=>{
-                            vm.errors = true;
-                            vm.decliningProposal = false;
-                            vm.errorString = helpers.apiVueResourceError(error);
-                        });
+                if (this.callFinalDecline){
+                    try {
+                        await fetch(helpers.add_endpoint_json(api_endpoints.proposal, this.proposal.id + '/final_decline'), {
+                            body: JSON.stringify(decline),
+                            method: 'POST',
+                        })
+                        this.decliningProposal = false;
+                        this.close();
+                        //this.$emit('refreshFromResponse',response);
+                        this.$router.push({ path: '/internal' }); //Navigate to dashboard page after Propose issue.
+                    } catch(error) {
+                        this.errors = true;
+                        this.decliningProposal = false;
+                        this.errorString = helpers.apiVueResourceError(error);
+                    }
                 } else {
-                    vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id + '/proposed_decline'), JSON.stringify(decline), {
-                            emulateJSON:true,
-                        }).then((response)=>{
-                            vm.decliningProposal = false;
-                            vm.close();
-                            vm.$emit('refreshFromResponse',response);
-                            vm.$router.push({ path: '/internal' }); //Navigate to dashboard after propose decline.
-                        },(error)=>{
-                            vm.errors = true;
-                            vm.decliningProposal = false;
-                            vm.errorString = helpers.apiVueResourceError(error);
-                        });
+                    try {
+                        await fetch(helpers.add_endpoint_json(api_endpoints.proposal, this.proposal.id + '/proposed_decline'), {
+                                body: JSON.stringify(decline),
+                                method: 'POST',
+                            })
+                        this.decliningProposal = false;
+                        this.close();
+                        //this.$emit('refreshFromResponse',response);
+                        this.$router.push({ path: '/internal' }); //Navigate to dashboard after propose decline.
+                    } catch(error) {
+                        this.errors = true;
+                        this.decliningProposal = false;
+                        this.errorString = helpers.apiVueResourceError(error);
+                    }
                 }
             });
         },
