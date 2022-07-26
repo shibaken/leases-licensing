@@ -626,6 +626,7 @@ def save_geometry(instance, request, viewset):
 
 
 def proposal_submit(proposal, request):
+    #import ipdb; ipdb.set_trace()
     with transaction.atomic():
         if proposal.can_user_edit:
             proposal.submitter = request.user.id
@@ -677,7 +678,7 @@ def proposal_submit(proposal, request):
             #        except ProposalAssessmentAnswer.DoesNotExist:
             #            chk_instance=ProposalAssessmentAnswer.objects.create(question=chk, assessment=assessor_assessment)
 
-            # return proposal
+            return proposal
 
         else:
             raise ValidationError("You can't edit this proposal at this moment")
