@@ -82,13 +82,13 @@
                                 <template v-if="assessment_for_assessor_map.length > 0">
                                     <div class="assessment_title">Assessor</div>
                                 </template>
-                                <template v-for="question in assessment_for_assessor_map">  <!-- There is only one assessor assessment -->
+                                <template v-for="question in assessment_for_assessor_map" :key="question.id">  <!-- There is only one assessor assessment -->
                                     <ChecklistQuestion :question="question" />
                                 </template>
 
-                                <template v-for="assessment in assessments_for_referrals_map"> <!-- There can be multiple referral assessments -->
+                                <template v-for="assessment in assessments_for_referrals_map" :key="assessment.id"> <!-- There can be multiple referral assessments -->
                                     <div class="assessment_title">Referral: {{ assessment.referral_fullname }}</div>
-                                    <template v-for="question in assessment.answers"> <!-- per question -->
+                                    <template v-for="question in assessment.answers" :key="question.id"> <!-- per question -->
                                         <ChecklistQuestion :question="question" />
                                     </template>
                                 </template>
@@ -550,10 +550,10 @@ export default {
             return `/api/proposal/${this.proposal.id}/complete_referral.json`
         },
         isRegistrationOfInterest: function(){
-            return this.proposal.application_type.name === constants.APPLICATION_TYPE.REGISTRATION_OF_INTEREST ? true : false
+            return this.proposal.application_type.name === constants.APPLICATION_TYPES.REGISTRATION_OF_INTEREST ? true : false
         },
         isLeaseLicence: function(){
-            return this.proposal.application_type.name === constants.APPLICATION_TYPE.LEASE_LICENCE ? true : false
+            return this.proposal.application_type.name === constants.APPLICATION_TYPES.LEASE_LICENCE ? true : false
         },
         assessment_for_assessor_map: function(){
             try {
@@ -913,10 +913,10 @@ export default {
                 }).then(async (result) => {
                     if (result.isConfirmed){
                         const res_save_data = await fetch(
-                            vm.complete_referral_url, 
+                            vm.complete_referral_url,
                             {
-                                body: JSON.stringify({'proposal': this.proposal}), 
-                                method: 'POST', 
+                                body: JSON.stringify({'proposal': this.proposal}),
+                                method: 'POST',
                                 headers: {
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json'
@@ -1177,7 +1177,7 @@ export default {
                 let formData = new FormData(vm.form);
                 let data = {'status': new_status, 'approver_comment': vm.approver_comment}
                 try {
-                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (this.proposal.id + '/switch_status')), 
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (this.proposal.id + '/switch_status')),
                     {
                         body: JSON.stringify(data),
                         method: 'POST',
@@ -1225,7 +1225,7 @@ export default {
             } else {
                 let data = {'status': new_status, 'approver_comment': this.approver_comment}
                 try {
-                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (this.proposal.id + '/switch_status')), 
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, (this.proposal.id + '/switch_status')),
                     {
                         body: JSON.stringify(data),
                         method: 'POST',
