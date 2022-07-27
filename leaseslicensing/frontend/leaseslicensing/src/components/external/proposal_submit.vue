@@ -16,11 +16,12 @@
                         <table>
                             <tr>
                                 <td><strong>Reference number:</strong></td>
-                                <td>{{proposal.lodgement_number}}</td>
+                                <td>{{ proposal.lodgement_number }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Date / Time:</strong></td>
-                                <td> {{proposal.lodgement_date|formatDate}}</td>
+                                <!--td> {{proposal.lodgement_date|formatDate}}</td-->
+                                <td> {{ proposal.lodgement_date }}</td>
                             </tr>
                         </table>
                       </div>
@@ -37,6 +38,7 @@
     </div>
 </template>
 <script>
+/*
 import Vue from 'vue'
 import {
   api_endpoints,
@@ -44,9 +46,9 @@ import {
 }
 from '@/utils/hooks'
 import utils from './utils'
+*/
 export default {
   data: function() {
-    let vm = this;
     return {
         "proposal": {},
     }
@@ -56,7 +58,8 @@ export default {
   computed: {
     applicationType: function() {
       //return this.proposal && this.proposal.id ? this.proposal.application_type.name_display : '';
-      return this.proposal && this.proposal.id ? this.proposal.application_type.confirmation_text : '';
+      //return this.proposal && this.proposal.id ? this.proposal.application_type.confirmation_text : '';
+      return this.proposal.application_type_text;
     },
     isProposal: function(){
       return this.proposal && this.proposal.id ? true : false;
@@ -64,18 +67,23 @@ export default {
   },
   methods: {
   },
+    /*
   filters:{
         formatDate: function(data){
             return data ? moment(data).format('DD/MM/YYYY HH:mm:ss'): '';
         }
   },
+  */
   mounted: function() {
-    let vm = this;
-    vm.form = document.forms.new_proposal;
+    //let vm = this;
+    //vm.form = document.forms.new_proposal;
   },
   beforeRouteEnter: function(to, from, next) {
     next(vm => {
-        vm.proposal = to.params.proposal;
+        vm.proposal.lodgement_date = to.params.lodgement_date;
+        vm.proposal.id = to.params.proposal_id;
+        vm.proposal.lodgement_number = to.params.lodgement_number;
+        vm.proposal.application_type_text = to.params.application_type_text;
     })
   }
 }
