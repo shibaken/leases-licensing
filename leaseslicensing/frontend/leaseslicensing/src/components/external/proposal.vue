@@ -374,17 +374,20 @@ export default {
             payload.proposal.risk_factors_text = this.$refs.application_form.$refs.lease_licence.$refs.risk_factors_text.detailsText;
             payload.proposal.legislative_requirements_text = this.$refs.application_form.$refs.lease_licence.$refs.legislative_requirements_text.detailsText;
         }
+        payload.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+        /*
         if (this.$refs.application_form.componentMapOn) {
             payload.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
         }
+        */
         const res = await fetch(url, { body: JSON.stringify(payload), method: 'POST' });
         if (res.ok) {
             if (withConfirm) {
-                swal(
-                    'Saved',
-                    'Your application has been saved',
-                    'success'
-                );
+                await swal.fire({
+                    title: 'Saved',
+                    text: 'Your application has been saved',
+                    icon: 'success'
+                });
             };
             vm.savingProposal=false;
             //this.$refs.application_form.incrementComponentMapKey();
@@ -396,7 +399,7 @@ export default {
             return resData;
         } else {
             const err = await res.json()
-            swal.fire({
+            await swal.fire({
                 title: "Please fix following errors before saving",
                 //text: err.bodyText,
                 text: JSON.stringify(err),

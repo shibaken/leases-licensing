@@ -70,8 +70,6 @@
                           ref="component_map"
                           :is_internal="is_internal"
                           :is_external="is_external"
-                          :key="componentMapKey"
-                          v-if="componentMapOn"
                           @featuresDisplayed="updateTableByFeatures"
                           :can_modify="can_modify"
                           :display_at_time_of_submitted="show_col_status_when_submitted"
@@ -239,8 +237,10 @@ import Confirmation from '@/components/common/confirmation.vue'
                 can_modify: true,
                 show_col_status_when_submitted: true,
                 //component_map_key: '',
+                /*
                 componentMapKey: 0,
                 componentMapOn: false,
+                */
                 values:null,
                 profile: {},
                 uuid: 0,
@@ -312,13 +312,11 @@ import Confirmation from '@/components/common/confirmation.vue'
                 this.componentMapKey++;
             },
             toggleComponentMapOn: function() {
-                this.incrementComponentMapKey()
-                this.componentMapOn = true;
-                /*
+                //this.incrementComponentMapKey()
+                //this.componentMapOn = true;
                 this.$nextTick(() => {
                     this.$refs.component_map.forceMapRefresh();
                 });
-                */
             },
             updateTableByFeatures: function() {
             },
