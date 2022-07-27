@@ -8,7 +8,7 @@
                 <div class="row">
                     <form class="form-horizontal" name="approvalForm">
                         <VueAlert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></VueAlert>
-                        <div class="col-sm-12">
+                        <div class="col-sm-12" v-if="registrationOfInterest">
                             <div class="form-group">
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
@@ -80,6 +80,9 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-sm-12" v-if="leaseLicence">
+                            stuff
+                        </div>
                     </form>
                 </div>
             </div>
@@ -148,6 +151,7 @@ export default {
             isModalOpen:false,
             form:null,
             approval: {},
+            approvalTypes: [],
             state: 'proposed_approval',
             issuingApproval: false,
             validation_form: null,
@@ -199,7 +203,16 @@ export default {
         preview_licence_url: function() {
           return (this.proposal_id) ? `/preview/licence-pdf/${this.proposal_id}` : '';
         },
-
+        registrationOfInterest: function(){
+            if (this.proposal && this.proposal.application_type.name === 'registration_of_interest') {
+                return true;
+            }
+        },
+        leaseLicence: function(){
+            if (this.proposal && this.proposal.application_type.name === 'lease_licence') {
+                return true;
+            }
+        },
     },
     methods:{
         preview:function () {
@@ -260,6 +273,15 @@ export default {
             this.contact = await response.json(); 
             this.isModalOpen = true;
         },
+        fetchApprovalTypes: async function(){
+            this.approvalTypes = []
+            const response = await fetch(api_endpoints.approval_types_dict);
+            const returnedApprovalTypes = await response.json()
+            for (let approvalType of returnedApprovalTypes) {
+                this.approvalTypes.push(approvalType)
+            }
+        },
+
         sendData: async function(){
             this.errors = false;
             //let approval = JSON.parse(JSON.stringify(vm.approval));
@@ -306,6 +328,7 @@ export default {
         let vm =this;
         vm.form = document.forms.approvalForm;
         this.approval = Object.assign({}, this.proposal.proposed_issuance_approval);
+        this.fetchApprovalTypes()
         //vm.addFormValidations();
         this.$nextTick(()=>{
             if (this.approval.decision) {
