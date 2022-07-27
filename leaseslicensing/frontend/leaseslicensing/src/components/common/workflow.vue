@@ -214,9 +214,12 @@ export default {
                         let show1 = vm.check_role_conditions(condition_to_display)
 
                         let show2 = false
-                        for (let assessment of vm.proposal.referral_assessments){
-                            if (assessment.answerable_by_accessing_user)
-                                show2 = true
+                        if (vm.proposal.referral_assessments){
+                            for (let assessment of vm.proposal.referral_assessments){
+                                console.log({assessment})
+                                if (assessment.answerable_by_accessing_user)
+                                    show2 = true
+                            }
                         }
 
                         return show1 && show2
