@@ -186,9 +186,9 @@ class ApplicationType(models.Model):
     def confirmation_text(self):
         text = ""
         if self.name == "registration_of_interest":
-            text = "registration of interest"
+            text = "Registration of Interest"
         if self.name == "lease_licence":
-            text = "lease or licence"
+            text = "Lease or Licence"
         return text
 
     def __str__(self):
