@@ -81,7 +81,43 @@
                             </div>
                         </div>
                         <div class="col-sm-12" v-if="leaseLicence">
-                            stuff
+                            <div class="form-group">
+                                <div class="row modal-input-row">
+                                    <div class="col-sm-3">
+                                        <label class="control-label pull-left" for="approvalType">Approval Type</label>
+                                    </div>
+                                    <div class="col-sm-9" v-if="processing_status == 'With Approver'">
+                                        Approval Type
+                                    </div>
+                                    <div class="col-sm-9" v-else>
+                                        <select 
+                                            ref="approvalType"
+                                            class="form-control"
+                                            v-model="selectedApprovalType"
+                                        >
+                                            <option value="null"></option>
+                                            <option v-for="atype in approvalTypes" :value="atype" :key="atype.name">{{atype.name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row modal-input-row">
+                                    <div class="col-sm-3">
+                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Details</label>
+                                        <label v-else class="control-label pull-left"  for="Name">Proposed Details</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <!--textarea name="approval_details" class="form-control" style="width:70%;" v-model="approval.details"></textarea-->
+                                        <RichText
+                                        :proposalData="approval.details"
+                                        ref="approval_details"
+                                        id="approval_details"
+                                        :can_view_richtext_src=true
+                                        :key="selectedApprovalTypeName"
+                                        :placeholder_text="selectedApprovalTypeDetailsPlaceholder"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -145,13 +181,13 @@ export default {
         },
     },
     data:function () {
-        let vm = this;
         return {
             selectedDecision: null,
             isModalOpen:false,
             form:null,
             approval: {},
             approvalTypes: [],
+            selectedApprovalType: {},
             state: 'proposed_approval',
             issuingApproval: false,
             validation_form: null,
@@ -176,6 +212,16 @@ export default {
         }
     },
     computed: {
+        selectedApprovalTypeName: function() {
+            if (this.selectedApprovalType) {
+                return this.selectedApprovalType.name
+            }
+        },
+        selectedApprovalTypeDetailsPlaceholder: function() {
+            if (this.selectedApprovalType) {
+                return this.selectedApprovalType.details_placeholder
+            }
+        },
         showError: function() {
             var vm = this;
             return vm.errors;
