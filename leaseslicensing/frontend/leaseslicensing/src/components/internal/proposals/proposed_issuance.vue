@@ -100,10 +100,46 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Commencement</label>
+                                        <label v-else class="control-label pull-left"  for="Name">Commencement</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group date" ref="start_date" style="width: 70%;">
+                                            <input type="text" class="form-control" name="start_date" placeholder="DD/MM/YYYY" v-model="approval.start_date">
+                                            <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
+                                            <!--span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar"></span>
+                                            </span-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" v-show="showstartDateError">
+                                    <alert  class="col-sm-12" type="danger"><strong>{{startDateErrorString}}</strong></alert>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Expiry</label>
+                                        <label v-else class="control-label pull-left"  for="Name">Expiry</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group date" ref="due_date" style="width: 70%;margin-bottom: 1rem">
+                                            <input type="text" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="approval.expiry_date" :readonly="is_amendment">
+                                            <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
+                                            <!--span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar"></span>
+                                            </span-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" v-show="showtoDateError">
+                                    <alert  class="col-sm-12" type="danger"><strong>{{toDateErrorString}}</strong></alert>
+                                </div>
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
                                         <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Details</label>
-                                        <label v-else class="control-label pull-left"  for="Name">Proposed Details</label>
+                                        <label v-else class="control-label pull-left"  for="Name">Details</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <!--textarea name="approval_details" class="form-control" style="width:70%;" v-model="approval.details"></textarea-->
