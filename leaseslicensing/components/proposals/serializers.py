@@ -269,6 +269,8 @@ class ReferralSimpleSerializer(serializers.ModelSerializer):
 class ProposalAssessmentSerializer(serializers.ModelSerializer):
     section_answers = serializers.SerializerMethodField()
     referral = ReferralSimpleSerializer()
+    answerable_by_accessing_user = serializers.SerializerMethodField()
+    belongs_to_accessing_user = serializers.SerializerMethodField()
 
     class Meta:
         model = ProposalAssessment
@@ -279,39 +281,52 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
             "referral_assessment",
             "referral",
             "section_answers",
+            "answerable_by_accessing_user",
+            "belongs_to_accessing_user",
         )
+
+    def get_answerable_by_accessing_user(self, proposal_assessment):
+        request = self.context.get("request")
+        answerable_by_accessing_user = False
+        belongs_to_accessing_user = self.get_belongs_to_accessing_user(proposal_assessment)
+        if not belongs_to_accessing_user:
+            return False
+
+        if proposal_assessment.referral:
+            if request.user.is_authenticated and proposal_assessment.referral.referral == request.user.id:
+                if proposal_assessment.proposal.processing_status == Proposal.PROCESSING_STATUS_WITH_REFERRAL:
+                    if not proposal_assessment.completed:
+                        answerable_by_accessing_user = True
+        else:
+            if request.user.is_authenticated and is_assessor(request.user.id):
+                if proposal_assessment.proposal.processing_status == Proposal.PROCESSING_STATUS_WITH_ASSESSOR:
+                    if not proposal_assessment.completed:
+                        answerable_by_accessing_user = True
+
+        return answerable_by_accessing_user
+
+    def get_belongs_to_accessing_user(self, proposal_assessment):
+        request = self.context.get("request")
+
+        assessment_belongs_to_accessing_user = False
+        if proposal_assessment.referral:
+            # This assessment is for referrals
+            if request.user.is_authenticated and proposal_assessment.referral.referral == request.user.id:
+                # This assessment is for the accessing user
+                assessment_belongs_to_accessing_user = True
+        else:
+            # This assessment is for assessors
+            if request.user.is_authenticated and is_assessor(request.user.id):
+                assessment_belongs_to_accessing_user = True
+
+        return assessment_belongs_to_accessing_user
 
     def get_section_answers(self, proposal_assessment):
         ret_dict = {}
         request = self.context.get("request")
 
-        assessment_belongs_to_accessing_user = False
-        assessment_answerable_by_accessing_user_now = False
-        if proposal_assessment.referral:
-            # This assessment is for referrals
-            if (
-                request.user.is_authenticated
-                and proposal_assessment.referral.referral == request.user.id
-            ):
-                # This assessment is for the accessing user
-                assessment_belongs_to_accessing_user = True
-                if (
-                    proposal_assessment.proposal.processing_status
-                    == Proposal.PROCESSING_STATUS_WITH_REFERRAL
-                ):
-                    # When the proposal is in 'with_referral' status, the user can answer
-                    assessment_answerable_by_accessing_user_now = True
-        else:
-            # This assessment is for assessors
-            if request.user.is_authenticated and is_assessor(request.user.id):
-                # This assessment is for the accessing user
-                assessment_belongs_to_accessing_user = True
-                if (
-                    proposal_assessment.proposal.processing_status
-                    == Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-                ):
-                    # When the proposal is in 'with_assessor' status, the user can answer
-                    assessment_answerable_by_accessing_user_now = True
+        assessment_belongs_to_accessing_user = self.get_belongs_to_accessing_user(proposal_assessment)
+        assessment_answerable_by_accessing_user_now = self.get_answerable_by_accessing_user(proposal_assessment)
 
         # Retrieve all the SectionChecklist objects used for this ProposalAssessment
         section_checklists_used = SectionChecklist.objects.filter(
@@ -1029,11 +1044,15 @@ class InternalProposalSerializer(BaseProposalSerializer):
 
 
 class ProposalUserActionSerializer(serializers.ModelSerializer):
-    who = serializers.CharField(source="who.get_full_name")
+    # who = serializers.CharField(source="who.get_full_name")
+    who = serializers.SerializerMethodField()
 
     class Meta:
         model = ProposalUserAction
         fields = "__all__"
+
+    def get_who(self, proposal_user_action):
+        return 'TODO'
 
 
 class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
