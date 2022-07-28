@@ -1,38 +1,34 @@
 <template lang="html">
     <div class="container" >
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="row">
-                    <div v-if="isProposal" class="col-sm-offset-3 col-sm-6 borderDecoration">
-                      <div class="form-para">
-                          <strong>Confirmation</strong>
-                      </div>
-                      <div class="form-para">
-                          <strong>Your application for a {{ applicationType }} has been successfully submitted.</strong>
-                      </div>
-                        <!-- <strong>Your application for a commercial operations licence has been successfully submitted.</strong>
-                        <br/> -->
-                      <div class="form-para">
-                        <table>
-                            <tr>
-                                <td><strong>Reference number:</strong></td>
-                                <td>{{ proposal.lodgement_number }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Date / Time:</strong></td>
-                                <!--td> {{proposal.lodgement_date|formatDate}}</td-->
-                                <td> {{ proposal.lodgement_date }}</td>
-                            </tr>
-                        </table>
-                      </div>
-                        <!--label>You will receive a notification email if there is any incomplete information or documents missing from the application.</label-->
-                        <router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary pull-right">Back to Dashboard</router-link>
-                    </div>
-                    <div v-else class="col-sm-offset-3 col-sm-6 borderDecoration">
-                        <strong>Sorry it looks like there isn't any application currently in your session.</strong>
-                        <br /><router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary pull-right">Back to Dashboard</router-link>
-                    </div>
-                </div>
+        <div class="row d-flex justify-content-center">
+            <div v-if="isProposal" class="col-sm-6 borderDecoration">
+              <div class="form-para">
+                  <strong>Confirmation</strong>
+              </div>
+              <div class="form-para">
+                  <strong>Your application for a {{ applicationType }} has been successfully submitted.</strong>
+              </div>
+                <!-- <strong>Your application for a commercial operations licence has been successfully submitted.</strong>
+                <br/> -->
+              <div class="form-para">
+                <table>
+                    <tr>
+                        <td><strong>Reference number:</strong></td>
+                        <td>{{ proposal.lodgement_number }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Date / Time:</strong></td>
+                        <!--td> {{proposal.lodgement_date|formatDate}}</td-->
+                        <td> {{ proposal.lodgement_date }}</td>
+                    </tr>
+                </table>
+              </div>
+                <!--label>You will receive a notification email if there is any incomplete information or documents missing from the application.</label-->
+                <router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary pull-right">Back to Dashboard</router-link>
+            </div>
+            <div v-else class="col-sm-offset-3 col-sm-6 borderDecoration">
+                <strong>Sorry it looks like there isn't any application currently in your session.</strong>
+                <br /><router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary pull-right">Back to Dashboard</router-link>
             </div>
         </div>
     </div>
