@@ -10,7 +10,7 @@
                         <strong>Communications</strong><br/>
                         <div class="row">
                             <div class="col-sm-5">
-                                <a tabindex="2" ref="showCommsBtn" class="actionBtn">Show</a>
+                                <a tabindex="2" ref="showCommsBtn" @click.prevent="" class="actionBtn">Show</a>
                             </div>
                             <template v-if="!disable_add_entry">
                                 <div class="col-sm-1">
@@ -24,7 +24,7 @@
                     </div>
                     <div class="col-sm-12 top-buffer-s">
                         <strong>Actions</strong><br/>
-                        <a tabindex="2" ref="showActionBtn" class="actionBtn">Show</a>
+                        <a tabindex="2" ref="showActionBtn" @click.prevent="" class="actionBtn">Show</a>
                     </div>
                 </div>
             </div>
@@ -32,12 +32,15 @@
         <AddCommLog ref="add_comm" :url="comms_add_url"/>
     </div>
 </template>
+
 <script>
 import AddCommLog from './add_comm_log.vue'
 import {
     api_endpoints,
     helpers
 }from '@/utils/hooks'
+import { v4 as uuid } from 'uuid';
+
 export default {
     name: 'CommsLogSection',
     props: {
@@ -61,6 +64,7 @@ export default {
     data() {
         let vm = this;
         return {
+            uuid: uuid(),
             dateFormat: 'DD/MM/YYYY HH:mm:ss',
             actionsTable: null,
             popoversInitialised: false,
@@ -76,7 +80,7 @@ export default {
                     "<'row'<'col-sm-5'l><'col-sm-6'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-                processing:true,
+                processing: true,
                 ajax: {
                     "url": vm.logs_url,
                     "dataSrc": '',
@@ -84,14 +88,17 @@ export default {
                 order: [],
                 columns:[
                     {
+                        title: 'Who',
                         data:"who",
                         orderable: false
                     },
                     {
+                        title: 'What',
                         data:"what",
                         orderable: false
                     },
                     {
+                        title: 'When',
                         data:"when",
                         orderable: false,
                         mRender:function(data,type,full){
@@ -332,27 +339,88 @@ export default {
     methods:{
         initialiseCommLogs: function(vm_uid,ref,datatable_options,table){
             let vm = this;
-            let commsLogId = 'comms-log-table'+vm_uid;
+            let commsLogId = 'comms-log-table' + vm_uid;
             let popover_name = 'popover-'+ vm._uid+'-comms';
-            $(ref).popover({
-                content: function() {
-                    return `
-                    <table id="${commsLogId}" class="hover table table-striped table-bordered dt-responsive " cellspacing="0" width="100%">
-                    </table>`
-                },
-                sanitize:false,
+            //$(ref).popover({
+            //    content: function() {
+            //        return `
+            //        <table id="${commsLogId}" class="hover table table-striped table-bordered dt-responsive " cellspacing="0" width="100%">
+            //        </table>`
+            //    },
+            //    sanitize:false,
+            //    html: true,
+            //    title: 'Communications Log',
+            //    container: 'body',
+            //    placement: 'right',
+            //    trigger: "click",
+            //    template: `<div class="popover ${popover_name}" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>`,
+            //}).on('inserted.bs.popover', function () {
+            //    table = $('#'+commsLogId).DataTable(datatable_options);
+
+            //    // activate popover when table is drawn.
+            //    table.on('draw.dt', function () {
+            //        var $tablePopover = $(this).find('[data-toggle="popover"]');
+            //        if ($tablePopover.length > 0) {
+            //            $tablePopover.popover();
+            //            // the next line prevents from scrolling up to the top after clicking on the popover.
+            //            $($tablePopover).on('click', function (e) {
+            //                e.preventDefault();
+            //                return true;
+            //            });
+            //        }
+            //    });
+            //}).on('shown.bs.popover', function () {
+            //    var el = ref;
+            //    var popoverheight = parseInt($('.'+popover_name).height());
+
+            //    var popover_bounding_top = parseInt($('.'+popover_name)[0].getBoundingClientRect().top);
+            //    var popover_bounding_bottom = parseInt($('.'+popover_name)[0].getBoundingClientRect().bottom);
+
+            //    var el_bounding_top = parseInt($(el)[0].getBoundingClientRect().top);
+            //    var el_bounding_bottom = parseInt($(el)[0].getBoundingClientRect().top);
+
+            //    var diff = el_bounding_top - popover_bounding_top;
+
+            //    var position = parseInt($('.'+popover_name).position().top);
+            //    var pos2 = parseInt($(el).position().top) - 5;
+
+            //    var x = diff + 5;
+            //    $('.'+popover_name).children('.arrow').css('top', x + 'px');
+            //});
+
+        },
+        initialiseActionLogs: function(datatable_options, table){
+            // this.initialiseActionLogs(this._uid, this.$refs.showActionBtn, this.actionsDtOptions, this.actionsTable);
+            // To allow table elements (ref: https://getbootstrap.com/docs/5.1/getting-started/javascript/#sanitizer)
+            var myDefaultAllowList = bootstrap.Tooltip.Default.allowList
+            myDefaultAllowList.table = []
+
+            let vm = this;
+            //let actionLogId = 'actions-log-table' + vm_uid;
+            //let popover_name = 'popover-'+ vm_uid + '-logs';
+            let actionLogId = 'actions-log-table' + vm.uuid;
+            let popover_name = 'popover-'+ vm.uuid + '-logs';
+            let popover_elem = $(vm.$refs.showActionBtn)[0]
+            let my_content = '<table id="' + actionLogId + '" class="hover table table-striped table-bordered dt-responsive" cellspacing="0" width="100%"></table>'
+            let my_template = '<div class="popover ' + popover_name +'" role="tooltip"><div class="popover-arrow" style="top:110px;"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>'
+
+            new bootstrap.Popover(popover_elem, {
                 html: true,
-                title: 'Communications Log',
+                content: my_content,
+                template: my_template,
+                title: 'Action logs',
                 container: 'body',
                 placement: 'right',
-                trigger: "click",
-                template: `<div class="popover ${popover_name}" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>`,
-            }).on('inserted.bs.popover', function () {
-                table = $('#'+commsLogId).DataTable(datatable_options);
+                // trigger: "click focus",
+                trigger: "click focus",
+            }) 
+            popover_elem.addEventListener('inserted.bs.popover', () => {
+                // when the popover template has been added to the DOM
+                console.log('inserted.bs.popover')
+                table = $('#' + actionLogId).DataTable(datatable_options);
 
-                // activate popover when table is drawn.
                 table.on('draw.dt', function () {
-                    var $tablePopover = $(this).find('[data-toggle="popover"]');
+                    var $tablePopover = $(this).find('[data-bs-toggle="popover"]');
                     if ($tablePopover.length > 0) {
                         $tablePopover.popover();
                         // the next line prevents from scrolling up to the top after clicking on the popover.
@@ -361,9 +429,13 @@ export default {
                             return true;
                         });
                     }
-                });
-            }).on('shown.bs.popover', function () {
-                var el = ref;
+                })
+            })
+            popover_elem.addEventListener('shown.bs.popover', () => {
+                // when the popover has been made visible to the user
+                console.log('shown.bs.popover')
+                //var el = ref;
+                let el = vm.$refs.showActionBtn
                 var popoverheight = parseInt($('.'+popover_name).height());
 
                 var popover_bounding_top = parseInt($('.'+popover_name)[0].getBoundingClientRect().top);
@@ -379,59 +451,56 @@ export default {
 
                 var x = diff + 5;
                 $('.'+popover_name).children('.arrow').css('top', x + 'px');
-            });
+            })
 
-        },
-        initialiseActionLogs: function(vm_uid,ref,datatable_options,table){
-            let vm = this;
-            let actionLogId = 'actions-log-table'+vm_uid;
-            let popover_name = 'popover-'+ vm._uid+'-logs';
-            $(ref).popover({
-                content: function() {
-                    return `
-                    <table id="${actionLogId}" class="hover table table-striped table-bordered dt-responsive" cellspacing="0" width="100%">
-                        <thead>
-                            <tr>
-                                <th>Who</th>
-                                <th>What</th>
-                                <th>When</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>`
-                },
-                sanitize:false,
-                html: true,
-                title: 'Action Log',
-                container: 'body',
-                placement: 'right',
-                trigger: "click",
-                template: `<div class="popover ${popover_name}" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>`,
-            }).on('inserted.bs.popover', function () {
-                table = $('#'+actionLogId).DataTable(datatable_options);
-            }).on('shown.bs.popover', function () {
-                var el = ref;
-                var popoverheight = parseInt($('.'+popover_name).height());
+            //$(ref).popover({
+            //    content: function() {
+            //        return `
+            //        <table id="${actionLogId}" class="hover table table-striped table-bordered dt-responsive" cellspacing="0" width="100%">
+            //            <thead>
+            //                <tr>
+            //                    <th>Who</th>
+            //                    <th>What</th>
+            //                    <th>When</th>
+            //                </tr>
+            //            </thead>
+            //            <tbody>
+            //            </tbody>
+            //        </table>`
+            //    },
+            //    sanitize:false,
+            //    html: true,
+            //    title: 'Action Log',
+            //    container: 'body',
+            //    placement: 'right',
+            //    trigger: "click",
+            //    template: `<div class="popover ${popover_name}" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>`,
+            //})
+            //.on('inserted.bs.popover', function () {
+            //    table = $('#'+actionLogId).DataTable(datatable_options);
+            //}).on('shown.bs.popover', function () {
+            //    var el = ref;
+            //    var popoverheight = parseInt($('.'+popover_name).height());
 
-                var popover_bounding_top = parseInt($('.'+popover_name)[0].getBoundingClientRect().top);
-                var popover_bounding_bottom = parseInt($('.'+popover_name)[0].getBoundingClientRect().bottom);
+            //    var popover_bounding_top = parseInt($('.'+popover_name)[0].getBoundingClientRect().top);
+            //    var popover_bounding_bottom = parseInt($('.'+popover_name)[0].getBoundingClientRect().bottom);
 
-                var el_bounding_top = parseInt($(el)[0].getBoundingClientRect().top);
-                var el_bounding_bottom = parseInt($(el)[0].getBoundingClientRect().top);
+            //    var el_bounding_top = parseInt($(el)[0].getBoundingClientRect().top);
+            //    var el_bounding_bottom = parseInt($(el)[0].getBoundingClientRect().top);
 
-                var diff = el_bounding_top - popover_bounding_top;
+            //    var diff = el_bounding_top - popover_bounding_top;
 
-                var position = parseInt($('.'+popover_name).position().top);
-                var pos2 = parseInt($(el).position().top) - 5;
+            //    var position = parseInt($('.'+popover_name).position().top);
+            //    var pos2 = parseInt($(el).position().top) - 5;
 
-                var x = diff + 5;
-                $('.'+popover_name).children('.arrow').css('top', x + 'px');
-            });
+            //    var x = diff + 5;
+            //    $('.'+popover_name).children('.arrow').css('top', x + 'px');
+            //});
         },
         initialisePopovers: function(){
             if (!this.popoversInitialised){
-                this.initialiseActionLogs(this._uid,this.$refs.showActionBtn,this.actionsDtOptions,this.actionsTable);
+                console.log(this._uid)
+                this.initialiseActionLogs(this.actionsDtOptions, this.actionsTable);
                 this.initialiseCommLogs('-internal-proposal-'+this._uid,this.$refs.showCommsBtn,this.commsDtOptions,this.commsTable);
                 this.popoversInitialised = true;
             }
@@ -443,7 +512,7 @@ export default {
     mounted: function(){
         let vm = this;
         this.$nextTick(() => {
-            //vm.initialisePopovers();
+            vm.initialisePopovers();
         });
     }
 }
