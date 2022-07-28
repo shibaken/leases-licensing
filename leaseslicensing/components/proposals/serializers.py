@@ -1044,11 +1044,15 @@ class InternalProposalSerializer(BaseProposalSerializer):
 
 
 class ProposalUserActionSerializer(serializers.ModelSerializer):
-    who = serializers.CharField(source="who.get_full_name")
+    # who = serializers.CharField(source="who.get_full_name")
+    who = serializers.SerializerMethodField()
 
     class Meta:
         model = ProposalUserAction
         fields = "__all__"
+
+    def get_who(self, proposal_user_action):
+        return 'TODO'
 
 
 class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
