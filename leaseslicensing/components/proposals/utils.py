@@ -499,18 +499,16 @@ def save_referral_data(proposal, request, referral_completed=False):
             )
 
             # Save checklist answers
-            if (
-                "referral_assessments" in proposal_data
-                and proposal_data["referral_assessments"]
-            ):
+            if "referral_assessments" in proposal_data and proposal_data["referral_assessments"]:
                 for assessment in proposal_data["referral_assessments"]:
                     # For each assessment
                     if assessment["referral"]["referral"]["id"] == request.user.id:
                         # When this assessment is for the accessing user
                         for section, answers in assessment["section_answers"].items():
                             # Save answers
-                            for answer_dict in answers:
-                                answer_obj = _save_answer_dict(answer_dict)
+                            if not assessment['completed']:
+                                for answer_dict in answers:
+                                    answer_obj = _save_answer_dict(answer_dict)
                         if referral_completed:
                             # Make this assessment completed
                             assessment = ProposalAssessment.objects.get(
