@@ -185,6 +185,11 @@ urlpatterns = [
         name="get-approval-statuses-dict",
     ),
     url(
+        r"^api/approval_types_dict$",
+        approval_api.GetApprovalTypesDict.as_view(),
+        name="get-approval-types-dict",
+    ),
+    url(
         r"^api/compliance_statuses_dict$",
         compliances_api.GetComplianceStatusesDict.as_view(),
         name="get-compliance-statuses-dict",
