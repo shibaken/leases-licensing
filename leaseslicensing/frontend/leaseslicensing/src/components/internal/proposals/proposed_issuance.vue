@@ -8,7 +8,7 @@
                 <div class="row">
                     <form class="form-horizontal" name="approvalForm">
                         <VueAlert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></VueAlert>
-                        <div class="col-sm-12">
+                        <div class="col-sm-12" v-if="registrationOfInterest">
                             <div class="form-group">
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
@@ -80,6 +80,81 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-sm-12" v-if="leaseLicence">
+                            <div class="form-group">
+                                <div class="row modal-input-row">
+                                    <div class="col-sm-3">
+                                        <label class="control-label pull-left" for="approvalType">Approval Type</label>
+                                    </div>
+                                    <div class="col-sm-9" v-if="processing_status == 'With Approver'">
+                                        Approval Type
+                                    </div>
+                                    <div class="col-sm-9" v-else>
+                                        <select 
+                                            ref="approvalType"
+                                            class="form-control"
+                                            v-model="selectedApprovalType"
+                                        >
+                                            <option value="null"></option>
+                                            <option v-for="atype in approvalTypes" :value="atype" :key="atype.name">{{atype.name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Commencement</label>
+                                        <label v-else class="control-label pull-left"  for="Name">Commencement</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group date" ref="start_date" style="width: 70%;">
+                                            <input type="text" class="form-control" name="start_date" placeholder="DD/MM/YYYY" v-model="approval.start_date">
+                                            <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
+                                            <!--span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar"></span>
+                                            </span-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" v-show="showstartDateError">
+                                    <alert  class="col-sm-12" type="danger"><strong>{{startDateErrorString}}</strong></alert>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Expiry</label>
+                                        <label v-else class="control-label pull-left"  for="Name">Expiry</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group date" ref="due_date" style="width: 70%;margin-bottom: 1rem">
+                                            <input type="text" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="approval.expiry_date" :readonly="is_amendment">
+                                            <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
+                                            <!--span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar"></span>
+                                            </span-->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" v-show="showtoDateError">
+                                    <alert  class="col-sm-12" type="danger"><strong>{{toDateErrorString}}</strong></alert>
+                                </div>
+                                <div class="row modal-input-row">
+                                    <div class="col-sm-3">
+                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Details</label>
+                                        <label v-else class="control-label pull-left"  for="Name">Details</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <!--textarea name="approval_details" class="form-control" style="width:70%;" v-model="approval.details"></textarea-->
+                                        <RichText
+                                        :proposalData="approval.details"
+                                        ref="approval_details"
+                                        id="approval_details"
+                                        :can_view_richtext_src=true
+                                        :key="selectedApprovalTypeName"
+                                        :placeholder_text="selectedApprovalTypeDetailsPlaceholder"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -142,12 +217,13 @@ export default {
         },
     },
     data:function () {
-        let vm = this;
         return {
             selectedDecision: null,
             isModalOpen:false,
             form:null,
             approval: {},
+            approvalTypes: [],
+            selectedApprovalType: {},
             state: 'proposed_approval',
             issuingApproval: false,
             validation_form: null,
@@ -172,6 +248,16 @@ export default {
         }
     },
     computed: {
+        selectedApprovalTypeName: function() {
+            if (this.selectedApprovalType) {
+                return this.selectedApprovalType.name
+            }
+        },
+        selectedApprovalTypeDetailsPlaceholder: function() {
+            if (this.selectedApprovalType) {
+                return this.selectedApprovalType.details_placeholder
+            }
+        },
         showError: function() {
             var vm = this;
             return vm.errors;
@@ -199,7 +285,16 @@ export default {
         preview_licence_url: function() {
           return (this.proposal_id) ? `/preview/licence-pdf/${this.proposal_id}` : '';
         },
-
+        registrationOfInterest: function(){
+            if (this.proposal && this.proposal.application_type.name === 'registration_of_interest') {
+                return true;
+            }
+        },
+        leaseLicence: function(){
+            if (this.proposal && this.proposal.application_type.name === 'lease_licence') {
+                return true;
+            }
+        },
     },
     methods:{
         preview:function () {
@@ -260,6 +355,15 @@ export default {
             this.contact = await response.json(); 
             this.isModalOpen = true;
         },
+        fetchApprovalTypes: async function(){
+            this.approvalTypes = []
+            const response = await fetch(api_endpoints.approval_types_dict);
+            const returnedApprovalTypes = await response.json()
+            for (let approvalType of returnedApprovalTypes) {
+                this.approvalTypes.push(approvalType)
+            }
+        },
+
         sendData: async function(){
             this.errors = false;
             //let approval = JSON.parse(JSON.stringify(vm.approval));
@@ -306,6 +410,7 @@ export default {
         let vm =this;
         vm.form = document.forms.approvalForm;
         this.approval = Object.assign({}, this.proposal.proposed_issuance_approval);
+        this.fetchApprovalTypes()
         //vm.addFormValidations();
         this.$nextTick(()=>{
             if (this.approval.decision) {
