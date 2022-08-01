@@ -162,11 +162,11 @@ export default {
                                 result = '<span>' + truncated + '</span>',
                                 popTemplate = _.template('<a href="#" ' +
                                     'role="button" ' +
-                                    'data-toggle="popover" ' +
+                                    'data-bs-toggle="popover" ' +
                                     'data-trigger="click" ' +
                                     'data-placement="top auto"' +
                                     'data-html="true" ' +
-                                    'data-content="<%= text %>" ' +
+                                    'data-bs-content="<%= text %>" ' +
                                     '>more</a>');
                             if (_.endsWith(truncated, ellipsis)) {
                                 result += popTemplate({
@@ -177,9 +177,10 @@ export default {
                             return result;
                         },
                         'createdCell': function (cell) {
+                            console.log('in createdCell of TO')
                             //TODO why this is not working?
                             // the call to popover is done in the 'draw' event
-                            $(cell).popover();
+                            //$(cell).popover();
                         }
                     },
                     {
@@ -196,11 +197,11 @@ export default {
                                 result = '<span>' + truncated + '</span>',
                                 popTemplate = _.template('<a href="#" ' +
                                     'role="button" ' +
-                                    'data-toggle="popover" ' +
+                                    'data-bs-toggle="popover" ' +
                                     'data-trigger="click" ' +
                                     'data-placement="top auto"' +
                                     'data-html="true" ' +
-                                    'data-content="<%= text %>" ' +
+                                    'data-bs-content="<%= text %>" ' +
                                     '>more</a>');
                             if (_.endsWith(truncated, ellipsis)) {
                                 result += popTemplate({
@@ -210,13 +211,13 @@ export default {
 
                             return result;
                         },
-                        /*
+                        
                         'createdCell': function (cell) {
+                            console.log('in createdCell of CC')
                             //TODO why this is not working?
                             // the call to popover is done in the 'draw' event
-                            $(cell).popover();
+                            //$(cell).popover();
                         }
-                        */
                     },
                     {
                         title: 'From',
@@ -236,11 +237,11 @@ export default {
                                 result = '<span>' + truncated + '</span>',
                                 popTemplate = _.template('<a href="#" ' +
                                     'role="button" ' +
-                                    'data-toggle="popover" ' +
+                                    'data-bs-toggle="popover" ' +
                                     'data-trigger="click" ' +
                                     'data-placement="top auto"' +
                                     'data-html="true" ' +
-                                    'data-content="<%= text %>" ' +
+                                    'data-bs-content="<%= text %>" ' +
                                     '>more</a>');
                             if (_.endsWith(truncated, ellipsis)) {
                                 result += popTemplate({
@@ -250,13 +251,12 @@ export default {
 
                             return result;
                         },
-                        /*
                         'createdCell': function (cell) {
+                            console.log('in createdCell of Subject/Desc')
                             //TODO why this is not working?
                             // the call to popover is done in the 'draw' event
-                            $(cell).popover();
+                            //$(cell).popover();
                         }
-                        */
                     },
                     {
                         title: 'Text',
@@ -271,11 +271,11 @@ export default {
                                 result = '<span>' + truncated + '</span>',
                                 popTemplate = _.template('<a href="#" ' +
                                     'role="button" ' +
-                                    'data-toggle="popover" ' +
+                                    'data-bs-toggle="popover" ' +
                                     'data-trigger="click" ' +
                                     'data-placement="top auto"' +
                                     'data-html="true" ' +
-                                    'data-content="<%= text %>" ' +
+                                    'data-bs-content="<%= text %>" ' +
                                     '>more</a>');
                             if (_.endsWith(truncated, ellipsis)) {
                                 result += popTemplate({
@@ -285,13 +285,12 @@ export default {
 
                             return result;
                         },
-                        /*
                         'createdCell': function (cell) {
+                            console.log('in createdCell of Text')
                             //TODO why this is not working?
                             // the call to popover is done in the 'draw' event
-                            $(cell).popover();
+                            //$(cell).popover();
                         }
-                        */
                     },
                     {
                         title: 'Documents',
@@ -371,16 +370,23 @@ export default {
                 // when the popover template has been added to the DOM
                 vm.commsTable = $('#' + commsLogId).DataTable(vm.commsDtOptions);
 
-                vm.commsTable.on('draw.dt', function () {
-                    var $tablePopover = $(this).find('[data-bs-toggle="popover"]');
-                    if ($tablePopover.length > 0) {
-                        $tablePopover.popover();
-                        // the next line prevents from scrolling up to the top after clicking on the popover.
-                        $($tablePopover).on('click', function (e) {
-                            e.preventDefault();
-                            return true;
-                        });
-                    }
+                //vm.commsTable.on('draw.dt', function () {
+                vm.commsTable.on('draw', function () { // Draw event - fired once the table has completed a draw.
+                    //var $tablePopover = $(this).find('[data-bs-toggle="popover"]');
+                    //if ($tablePopover.length > 0) {
+                    //    //$tablePopover.popover();
+                    //    new bootstrap.Popover($tablePopover)
+                    //    // the next line prevents from scrolling up to the top after clicking on the popover.
+                    //    $($tablePopover).on('click', function (e) {
+                    //        e.preventDefault();
+                    //        return true;
+                    //    });
+                    //}
+
+                    var popoverTriggerList = [].slice.call(document.querySelectorAll('#' + commsLogId + ' [data-bs-toggle="popover"]'))
+                    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                        return new bootstrap.Popover(popoverTriggerEl)
+                    })
                 })
             })
             popover_elem.addEventListener('shown.bs.popover', () => {
@@ -468,16 +474,21 @@ export default {
                 // when the popover template has been added to the DOM
                 vm.actionsTable = $('#' + actionLogId).DataTable(this.actionsDtOptions);
 
-                vm.actionsTable.on('draw.dt', function () {
-                    var $tablePopover = $(this).find('[data-bs-toggle="popover"]');
-                    if ($tablePopover.length > 0) {
-                        $tablePopover.popover();
-                        // the next line prevents from scrolling up to the top after clicking on the popover.
-                        $($tablePopover).on('click', function (e) {
-                            e.preventDefault();
-                            return true;
-                        });
-                    }
+                //vm.actionsTable.on('draw.dt', function () {
+                vm.actionsTable.on('draw', function () {
+                    //var $tablePopover = $(this).find('[data-bs-toggle="popover"]');
+                    //if ($tablePopover.length > 0) {
+                    //    $tablePopover.popover();
+                    //    // the next line prevents from scrolling up to the top after clicking on the popover.
+                    //    $($tablePopover).on('click', function (e) {
+                    //        e.preventDefault();
+                    //        return true;
+                    //    });
+                    //}
+                    var popoverTriggerList = [].slice.call(document.querySelectorAll('#' + actionLogId + ' [data-bs-toggle="popover"]'))
+                    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                        return new bootstrap.Popover(popoverTriggerEl)
+                    })
                 })
             })
             popover_elem.addEventListener('shown.bs.popover', () => {
