@@ -1026,6 +1026,19 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=["POST"], detail=True)
     @renderer_classes((JSONRenderer,))
     @basic_exception_handler
+    def process_proposed_approval_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(
+            request, instance, document_type="proposed_approval_document"
+        )
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=["POST"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
     def process_supporting_document(self, request, *args, **kwargs):
         instance = self.get_object()
         returned_data = process_generic_document(
@@ -2065,9 +2078,10 @@ class ProposalViewSet(viewsets.ModelViewSet):
     )
     def proposed_approval(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = ProposedApprovalSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance.proposed_approval(request, serializer.validated_data)
+        #serializer = ProposedApprovalSerializer(data=request.data)
+        #serializer.is_valid(raise_exception=True)
+        #instance.proposed_approval(request, serializer.validated_data)
+        instance.proposed_approval(request, request.data)
         # serializer = InternalProposalSerializer(instance,context={'request':request})
         serializer_class = self.internal_serializer_class()
         serializer = serializer_class(instance, context={"request": request})
