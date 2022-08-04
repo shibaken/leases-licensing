@@ -87,7 +87,11 @@ class GetApprovalTypesDict(views.APIView):
     def get(self, request, format=None):
         data = cache.get("approval_types_dict")
         if not data:
-            approval_types_dict = [{"name": t.name, "details_placeholder": t.details_placeholder} for t in ApprovalType.objects.all()]
+            approval_types_dict = [{
+                "id": t.id, 
+                "name": t.name, 
+                "details_placeholder": t.details_placeholder
+                } for t in ApprovalType.objects.all()]
             cache.set(
                 "approval_types_dict",
                 approval_types_dict,
