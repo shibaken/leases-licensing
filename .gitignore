@@ -75,6 +75,8 @@ docs/_build/
 target/
 .idea/
 
+.vscode/
+
 # Eclipse project files
 /.pydevproject
 /.project
