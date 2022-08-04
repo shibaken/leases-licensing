@@ -47,6 +47,10 @@ export default {
                     "url": this.referral_url,
                     "dataSrc": '',
                 },
+                dom:
+                    "<'row'<'col-sm-4'l><'col-sm-8'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
                 columns:[
                     {
                         title: 'Sent On',
