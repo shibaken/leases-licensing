@@ -2,6 +2,7 @@ from django.conf import settings
 from ledger_api_client.ledger_models import (
     EmailUserRO as EmailUser,
 )
+from leaseslicensing.components.approvals import email
 from leaseslicensing.components.main.models import ApplicationType
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.proposals.models import (
@@ -1044,7 +1045,6 @@ class InternalProposalSerializer(BaseProposalSerializer):
 
 
 class ProposalUserActionSerializer(serializers.ModelSerializer):
-    # who = serializers.CharField(source="who.get_full_name")
     who = serializers.SerializerMethodField()
 
     class Meta:
@@ -1052,7 +1052,9 @@ class ProposalUserActionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_who(self, proposal_user_action):
-        return 'TODO'
+        email_user = retrieve_email_user(proposal_user_action.who)
+        fullname = email_user.get_full_name()
+        #return fullname
 
 
 class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
