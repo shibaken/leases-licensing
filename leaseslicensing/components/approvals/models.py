@@ -21,6 +21,7 @@ from django.db.models import Q
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.main.models import RevisionedMixin
 from leaseslicensing import exceptions
+from leaseslicensing.components.main.related_item import RelatedItem
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.proposals.models import (
     Proposal,
@@ -751,6 +752,24 @@ class Approval(RevisionedMixin):
                 )
             except:
                 raise
+
+    @property
+    def as_related_item(self):
+        related_item = RelatedItem(
+            identifier=self.related_item_identifier,
+            model_name=self._meta.verbose_name,
+            descriptor=self.related_item_descriptor,
+            action_url='<a href=/internal/approval/{} target="_blank">Open</a>'.format(self.id)
+        )
+        return related_item
+
+    @property
+    def related_item_identifier(self):
+        return self.lodgement_number
+
+    @property
+    def related_item_descriptor(self):
+        return '(return descriptor)'
 
 
 class PreviewTempApproval(Approval):
