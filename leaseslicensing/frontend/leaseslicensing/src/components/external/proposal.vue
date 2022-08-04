@@ -51,17 +51,17 @@
                 <div v-if="proposal && !proposal.readonly" class="container">
                     <div class="col-md-12 text-end">
                         <button v-if="saveExitProposal" type="button" class="btn btn-primary" disabled>
-                            Save and Exit&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                            Save and Exit&nbsp;<i class="fa-solid fa-spinner fa-spin"></i>
                         </button>
                         <input v-else type="button" @click.prevent="save_exit" class="btn btn-primary" value="Save and Exit" :disabled="savingProposal || paySubmitting"/>
 
                         <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
-                            Save and Continue&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                            Save and Continue&nbsp;<i class="fa-solid fa-spinner fa-spin"></i>
                         </button>
                         <input v-else type="button" @click.prevent="save" class="btn btn-primary" value="Save and Continue" :disabled="saveExitProposal || paySubmitting"/>
 
                         <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>
-                            {{ submitText }}&nbsp; <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                            {{ submitText }}&nbsp; <i class="fa-solid fa-spinner fa-spin"></i>
                         </button>
 
                         <input v-else

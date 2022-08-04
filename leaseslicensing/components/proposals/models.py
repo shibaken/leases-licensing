@@ -17,6 +17,7 @@ from django.db.models import JSONField, Max, Min
 from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.conf import settings
+from rest_framework import serializers
 
 # from ledger.accounts.models import OrganisationAddress
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
@@ -773,6 +774,27 @@ class ExclusiveUseDocument(Document):
         verbose_name = "Application Document"
 
 
+class ProposedApprovalDocument(Document):
+    proposal = models.ForeignKey(
+        "Proposal", related_name="proposed_approval_documents", on_delete=models.CASCADE
+    )
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255, null=True, blank=True)
+    can_delete = models.BooleanField(
+        default=True
+    )  # after initial submit prevent document from being deleted
+    can_hide = models.BooleanField(
+        default=False
+    )  # after initial submit, document cannot be deleted but can be hidden
+    hidden = models.BooleanField(
+        default=False
+    )  # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = "leaseslicensing"
+        verbose_name = "Proposed Approval Document"
+
+
 class ProposalDocument(Document):
     proposal = models.ForeignKey(
         "Proposal", related_name="supporting_documents", on_delete=models.CASCADE
@@ -1222,6 +1244,16 @@ class Proposal(DirtyFieldsMixin, models.Model):
             email_user = retrieve_email_user(self.submitter)
 
         return email_user
+
+    @property
+    def registration_of_interests(self):
+        if self.application_type == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
+            return True
+
+    @property
+    def lease_licence(self):
+        if self.application_type == APPLICATION_TYPE_LEASE_LICENCE:
+            return True
 
     @property
     def applicant_email(self):
@@ -2159,9 +2191,11 @@ class Proposal(DirtyFieldsMixin, models.Model):
     def proposed_approval(self, request, details):
         with transaction.atomic():
             try:
-                print(details)
+                non_field_errors = []
+                # User check
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
+                # Processing status check
                 if not (
                     (
                         self.application_type.name
@@ -2176,6 +2210,25 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     )
                 ):
                     raise ValidationError("You cannot propose for approval")
+                # Input validation check
+                if not details.get("details"):
+                    non_field_errors.append("You must add details text")
+                if (self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and 
+                        not details.get("decision")):
+                    non_field_errors.append("You must choose a decision radio button")
+                elif self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+                    if not details.get("approval_type"):
+                        non_field_errors.append("You must select an Approval Type")
+                    if not details.get("start_date"):
+                        non_field_errors.append("You must select a Start Date")
+                    if not details.get("expiry_date"):
+                        non_field_errors.append("You must select an Expiry Date")
+                if non_field_errors:
+                    print("non_field_errors")
+                    print(non_field_errors)
+                    #raise serializers.ValidationError(json.dumps(non_field_errors))
+                    raise serializers.ValidationError(non_field_errors)
+
                 self.proposed_issuance_approval = {
                     "details": details.get("details"),
                     "cc_email": details.get("cc_email"),
@@ -2193,7 +2246,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     ProposalUserAction.ACTION_PROPOSED_APPROVAL.format(self.id), request
                 )
                 # Log entry for organisation
-                applicant_field = getattr(self, self.applicant_field)
+                #applicant_field = getattr(self, self.applicant_field)
                 # applicant_field.log_user_action(ProposalUserAction.ACTION_PROPOSED_APPROVAL.format(self.id),request)
 
                 send_approver_approve_email_notification(request, self)
