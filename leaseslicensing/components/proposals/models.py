@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from dataclasses import field
 
 import json
 import os
@@ -24,6 +25,7 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from ledger_api_client.country_models import Country
 from ledger_api_client.managed_models import SystemGroup
 from leaseslicensing import exceptions
+from leaseslicensing.components.main.related_item import RelatedItem
 from leaseslicensing.components.main.utils import get_department_user
 from leaseslicensing.components.organisations.models import (
     Organisation,
@@ -1100,7 +1102,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         choices=REVIEW_STATUS_CHOICES,
         default=REVIEW_STATUS_CHOICES[0][0],
     )
-    competitive_process = models.ForeignKey('CompetitiveProcess', null=True, blank=True, on_delete=models.SET_NULL)
+    competitive_process = models.ForeignKey('CompetitiveProcess', null=True, blank=True, on_delete=models.SET_NULL, related_name='proposals')
     approval = models.ForeignKey(
         "leaseslicensing.Approval", null=True, blank=True, on_delete=models.SET_NULL
     )
@@ -2846,6 +2848,61 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 # proposal.save()
             return proposal
 
+    def get_related_items(self, **kwargs):
+        # When self is Proposal
+        #     the registration of interest
+        #           generated_proposal (ForeignKey)
+        #           related_name="originating_proposal" (reverse)
+        #     the competitive process (ForeignKey)
+        #     the licence/lease (approval(ForeignKey))
+        # When self is Approval
+        #     the original registration of interest (if any)
+        #     the original competitive process (if any)
+        #     the application
+        #     any amendment application
+        #     any renewal application
+        return_list = []
+        count = 0
+        field_competitive_process = None
+        all_fields = self._meta.get_fields()
+        for a_field in all_fields:
+            if a_field.name in ['generated_proposal', 'originating_proposal', 'competitive_process', 'approval',]:
+                if a_field.is_relation:
+                    if a_field.many_to_many:
+                        pass
+                    elif a_field.many_to_one:  # foreign key
+                        field_objects = [getattr(self, a_field.name),]
+                    elif a_field.one_to_many:  # reverse foreign key
+                        field_objects = a_field.related_model.objects.filter(**{a_field.remote_field.name: self})
+                    elif a_field.one_to_one:
+                        pass
+                for field_object in field_objects:
+                    if field_object:
+                        related_item = field_object.as_related_item
+                        return_list.append(related_item)
+
+        # serializer = RelatedItemsSerializer(return_list, many=True)
+        # return serializer.data
+        return return_list
+
+    @property
+    def as_related_item(self):
+        related_item = RelatedItem(
+            identifier=self.related_item_identifier,
+            model_name=self._meta.verbose_name,
+            descriptor=self.related_item_descriptor,
+            action_url='<a href=/internal/proposal/{} target="_blank">Open</a>'.format(self.id)
+        )
+        return related_item
+
+    @property
+    def related_item_identifier(self):
+        return self.lodgement_number
+
+    @property
+    def related_item_descriptor(self):
+        return '(return descriptor)'
+
 
 class ProposalAdditionalDocumentType(models.Model):
     proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE)
@@ -3044,9 +3101,45 @@ class ProposalRequest(models.Model):
 
 
 class CompetitiveProcess(models.Model):
+    prefix = 'CP'
+    lodgement_number = models.CharField(max_length=9, blank=True, default="")
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name = "Competitive Process"
+        verbose_name_plural = "Competitive Processes"
+
+    @property
+    def next_lodgement_number(self):
+        try:
+            ids = [int(i) for i in CompetitiveProcess.objects.all().values_list('lodgement_number', flat=True) if i]
+            return max(ids) + 1 if ids else 1
+        except Exception as e:
+            print(e)
+
+    def save(self, *args, **kwargs):
+        super(CompetitiveProcess, self).save(*args, **kwargs)
+        if self.lodgement_number == '':
+            self.lodgement_number = self.prefix + '{:07d}'.format(self.next_lodgement_number)
+            self.save()
+
+    @property
+    def as_related_item(self):
+        related_item = RelatedItem(
+            identifier=self.related_item_identifier,
+            model_name=self._meta.verbose_name,
+            descriptor=self.related_item_descriptor,
+            action_url='<a href=/internal/competitive_process/{} target="_blank">Open</a>'.format(self.id)
+        )
+        return related_item
+
+    @property
+    def related_item_identifier(self):
+        return self.lodgement_number
+
+    @property
+    def related_item_descriptor(self):
+        return '(return descriptor)'
 
 
 class ComplianceRequest(ProposalRequest):
