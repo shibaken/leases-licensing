@@ -3049,7 +3049,19 @@ class ProposalRequest(models.Model):
 
 class CompetitiveProcess(models.Model):
     prefix = 'CP'
+    STATUS_IN_PROGRESS = "in_progress"
+    STATUS_DISCARDED = "discarded"
+    STATUS_COMPLETED_APPLICATION = "completed_application"
+    STATUS_COMPLETED_DECLINED = "completed_declined"
+    STATUS_CHOICES = (
+        (STATUS_IN_PROGRESS, "In Progress"), 
+        (STATUS_DISCARDED, "Discarded"),
+        (STATUS_COMPLETED_APPLICATION, "Completed (Application)"),
+        (STATUS_COMPLETED_DECLINED, "Completed (Declined)"),
+    )
+
     lodgement_number = models.CharField(max_length=9, blank=True, default="")
+    status = models.CharField("Status", max_length=30, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0],)
 
     class Meta:
         app_label = "leaseslicensing"
