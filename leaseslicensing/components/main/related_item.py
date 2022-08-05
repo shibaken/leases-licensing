@@ -24,20 +24,3 @@ class RelatedItemsSerializer(serializers.Serializer):
     # weak_link = serializers.BooleanField()
     # comment = serializers.CharField()
 
-
-def get_related_items(entity, **kwargs):
-    related_item = RelatedItem(
-        model_name='model_name1',
-        identifier='identifier1',
-        descriptor='descriptor1',
-        action_url='action_url1',
-    )
-    related_item2 = RelatedItem(
-        model_name='model_name2',
-        identifier='identifier2',
-        descriptor='descriptor2',
-        action_url='action_url2',
-    )
-    # serializer = RelatedItemsSerializer(return_list, many=True)
-    # return serializer.data
-    return [related_item, related_item2,]
