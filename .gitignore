@@ -75,6 +75,7 @@ docs/_build/
 target/
 .idea/
 
+# VSCode
 .vscode/
 
 # Eclipse project files

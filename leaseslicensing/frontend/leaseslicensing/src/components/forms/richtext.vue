@@ -28,7 +28,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 
 export default {
     //props:["type","name","id", "field_data","isRequired","help_text","label","readonly", "help_text_url", "can_view_richtext_src"],
-    props:["id", "name", "proposalData", "isRequired", "label", "readonly", "can_view_richtext_src"],
+    props: ["id", "name", "proposalData", "isRequired", "label", "readonly", "can_view_richtext_src", "placeholder_text"],
     //components: {CommentBlock, HelpText, HelpTextUrl},
     data(){
         let vm = this;
@@ -54,6 +54,7 @@ export default {
             */
             editorConfig: {
                 language: 'en',
+                placeholder: vm.placeholder_text,
             },
             detailsText: '',
             editor: ClassicEditor,
