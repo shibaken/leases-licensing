@@ -7,7 +7,7 @@
                         <label for="">Type</label>
                         <select class="form-control" v-model="filterApplicationType">
                             <option value="all">All</option>
-                            <option v-for="type in application_types" :value="type.code" :key="type.code">{{ type.description }}</option>
+                            <option v-for="type in application_types" :value="type.id" :key="type.id">{{ type.text }}</option>
                         </select>
                     </div>
                 </div>
@@ -535,8 +535,9 @@ export default {
             let vm = this;
 
             // Application Types
-            let res = await fetch(api_endpoints.application_types_dict+'?apply_page=False')
+            let res = await fetch(api_endpoints.application_types_dict+'?apply_page=False&for_filter=true')
             let data = await res.json()
+            console.log({data})
             vm.application_types = data
 
             // Application Statuses
