@@ -87,10 +87,7 @@
                                     <div class="col-sm-3">
                                         <label class="control-label pull-left" for="approvalType">Approval Type</label>
                                     </div>
-                                    <div class="col-sm-9" v-if="processing_status == 'With Approver'">
-                                        Approval Type
-                                    </div>
-                                    <div class="col-sm-9" v-else>
+                                    <div class="col-sm-9">
                                         <select 
                                             ref="approvalType"
                                             class="form-control"
@@ -443,15 +440,22 @@ export default {
             });
         },
    },
-   created:function () {
+   created: async function () {
         let vm =this;
         vm.form = document.forms.approvalForm;
         this.approval = Object.assign({}, this.proposal.proposed_issuance_approval);
-        this.fetchApprovalTypes()
+        await this.fetchApprovalTypes();
         //vm.addFormValidations();
         this.$nextTick(()=>{
             if (this.approval.decision) {
                 this.selectedDecision = this.approval.decision;
+            }
+            if (this.approval.approval_type) {
+                for (let atype of this.approvalTypes) {
+                    if (atype.id === this.approval.approval_type) {
+                        this.selectedApprovalType = atype;
+                    }
+                }
             }
         });
    }
