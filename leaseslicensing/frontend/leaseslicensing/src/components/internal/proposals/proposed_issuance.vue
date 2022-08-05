@@ -87,10 +87,7 @@
                                     <div class="col-sm-3">
                                         <label class="control-label pull-left" for="approvalType">Approval Type</label>
                                     </div>
-                                    <div class="col-sm-9" v-if="processing_status == 'With Approver'">
-                                        Approval Type
-                                    </div>
-                                    <div class="col-sm-9" v-else>
+                                    <div class="col-sm-9">
                                         <select 
                                             ref="approvalType"
                                             class="form-control"
