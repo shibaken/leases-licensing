@@ -2226,16 +2226,25 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     if not details.get("expiry_date"):
                         non_field_errors.append("You must select an Expiry Date")
                 if non_field_errors:
-                    print("non_field_errors")
-                    print(non_field_errors)
-                    #raise serializers.ValidationError(json.dumps(non_field_errors))
                     raise serializers.ValidationError(non_field_errors)
 
-                self.proposed_issuance_approval = {
-                    "details": details.get("details"),
-                    "cc_email": details.get("cc_email"),
-                    "decision": details.get("decision"),
-                }
+                # Store proposed approval values
+                if self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
+                    self.proposed_issuance_approval = {
+                        "details": details.get("details"),
+                        "cc_email": details.get("cc_email"),
+                        "decision": details.get("decision"),
+                    }
+                elif self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+                    #start_date = details.get('start_date').strftime('%d/%m/%Y') if details.get('start_date') else None
+                    #expiry_date = details.get('expiry_date').strftime('%d/%m/%Y') if details.get('expiry_date') else None
+                    self.proposed_issuance_approval = {
+                        "approval_type": details.get("approval_type"),
+                        "cc_email": details.get("cc_email"),
+                        "details": details.get("details"),
+                        'start_date' : details.get("start_date"),
+                        'expiry_date' : details.get("expiry_date"),
+                    }
                 self.proposed_decline_status = False
                 approver_comment = ""
                 self.move_to_status(
