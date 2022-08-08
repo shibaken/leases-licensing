@@ -1080,7 +1080,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         choices=REVIEW_STATUS_CHOICES,
         default=REVIEW_STATUS_CHOICES[0][0],
     )
-    competitive_process = models.ForeignKey('CompetitiveProcess', null=True, blank=True, on_delete=models.SET_NULL, related_name='proposals')
+    competitive_process = models.OneToOneField('CompetitiveProcess', null=True, blank=True, on_delete=models.SET_NULL, related_name='generating_proposal')
     approval = models.ForeignKey(
         "leaseslicensing.Approval", null=True, blank=True, on_delete=models.SET_NULL
     )
