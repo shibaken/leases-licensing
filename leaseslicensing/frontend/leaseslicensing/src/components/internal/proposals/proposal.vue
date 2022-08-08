@@ -35,7 +35,7 @@
                     @amendmentRequest="amendmentRequest"
                     @proposedDecline="proposedDecline"
                     @proposedApproval="proposedApproval"
-                    @issueProposal="issueProposal"
+                    @issueApproval="issueApproval"
                     @declineProposal="declineProposal"
                     @assignRequestUser="assignRequestUser"
                     @assignTo="assignTo"
@@ -1009,7 +1009,7 @@ export default {
                 this.$refs.proposed_approval.isModalOpen = true;
             });
         },
-        issueProposal:function(){
+        issueApproval: function(){
             //this.$refs.proposed_approval.approval = helpers.copyObject(this.proposal.proposed_issuance_approval);
 
             //save approval level comment before opening 'issue approval' modal

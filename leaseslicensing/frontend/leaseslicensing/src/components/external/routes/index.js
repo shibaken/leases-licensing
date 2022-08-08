@@ -18,7 +18,7 @@ export default
     name: 'external-dashboard',
     children: [
         {
-            path: '/external',
+            path: '/external/',
             component: ExternalDashboard,
             name: 'external-dashboard'
         },

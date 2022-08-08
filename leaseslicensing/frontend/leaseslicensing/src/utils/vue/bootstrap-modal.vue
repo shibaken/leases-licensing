@@ -27,7 +27,7 @@
                 </div>
             </div>
         </div>
-        <div class="modal-backdrop in"></div>
+        <div class="modal-backdrop show"></div>
     </div>
 </template>
 

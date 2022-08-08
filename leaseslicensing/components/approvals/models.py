@@ -87,6 +87,17 @@ class ApprovalDocument(Document):
         app_label = "leaseslicensing"
 
 
+class ApprovalType(RevisionedMixin):
+    name = models.CharField(max_length=200, unique=True)
+    details_placeholder = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        app_label = "leaseslicensing"
+
+    def __str__(self):
+        return self.name
+
+
 # class Approval(models.Model):
 class Approval(RevisionedMixin):
     APPROVAL_STATUS_CURRENT = "current"
