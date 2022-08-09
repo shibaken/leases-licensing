@@ -25,6 +25,7 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from ledger_api_client.country_models import Country
 from ledger_api_client.managed_models import SystemGroup
 from leaseslicensing import exceptions
+from leaseslicensing.components.competitive_processes.models import CompetitiveProcess
 from leaseslicensing.components.main.related_item import RelatedItem
 from leaseslicensing.components.main.utils import get_department_user
 from leaseslicensing.components.organisations.models import (
@@ -1102,7 +1103,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         choices=REVIEW_STATUS_CHOICES,
         default=REVIEW_STATUS_CHOICES[0][0],
     )
-    competitive_process = models.OneToOneField('CompetitiveProcess', null=True, blank=True, on_delete=models.SET_NULL, related_name='generating_proposal')
+    competitive_process = models.OneToOneField(CompetitiveProcess, null=True, blank=True, on_delete=models.SET_NULL, related_name='generating_proposal')
     approval = models.ForeignKey(
         "leaseslicensing.Approval", null=True, blank=True, on_delete=models.SET_NULL
     )
@@ -3108,59 +3109,6 @@ class ProposalRequest(models.Model):
     class Meta:
         app_label = "leaseslicensing"
 
-
-class CompetitiveProcess(models.Model):
-    prefix = 'CP'
-    STATUS_IN_PROGRESS = "in_progress"
-    STATUS_DISCARDED = "discarded"
-    STATUS_COMPLETED_APPLICATION = "completed_application"
-    STATUS_COMPLETED_DECLINED = "completed_declined"
-    STATUS_CHOICES = (
-        (STATUS_IN_PROGRESS, "In Progress"), 
-        (STATUS_DISCARDED, "Discarded"),
-        (STATUS_COMPLETED_APPLICATION, "Completed (Application)"),
-        (STATUS_COMPLETED_DECLINED, "Completed (Declined)"),
-    )
-
-    lodgement_number = models.CharField(max_length=9, blank=True, default="")
-    status = models.CharField("Status", max_length=30, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0],)
-
-    class Meta:
-        app_label = "leaseslicensing"
-        verbose_name = "Competitive Process"
-        verbose_name_plural = "Competitive Processes"
-
-    @property
-    def next_lodgement_number(self):
-        try:
-            ids = [int(i) for i in CompetitiveProcess.objects.all().values_list('lodgement_number', flat=True) if i]
-            return max(ids) + 1 if ids else 1
-        except Exception as e:
-            print(e)
-
-    def save(self, *args, **kwargs):
-        super(CompetitiveProcess, self).save(*args, **kwargs)
-        if self.lodgement_number == '':
-            self.lodgement_number = self.prefix + '{:07d}'.format(self.next_lodgement_number)
-            self.save()
-
-    @property
-    def as_related_item(self):
-        related_item = RelatedItem(
-            identifier=self.related_item_identifier,
-            model_name=self._meta.verbose_name,
-            descriptor=self.related_item_descriptor,
-            action_url='<a href=/internal/competitive_process/{} target="_blank">Open</a>'.format(self.id)
-        )
-        return related_item
-
-    @property
-    def related_item_identifier(self):
-        return self.lodgement_number
-
-    @property
-    def related_item_descriptor(self):
-        return '(return descriptor)'
 
 
 class ComplianceRequest(ProposalRequest):

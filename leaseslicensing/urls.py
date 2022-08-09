@@ -24,6 +24,7 @@ from leaseslicensing.components.main import api as main_api
 from leaseslicensing.components.bookings import api as booking_api
 from leaseslicensing.components.proposals import api as proposal_api
 from leaseslicensing.components.approvals import api as approval_api
+from leaseslicensing.components.competitive_processes import api as competitive_process_api
 from leaseslicensing.components.compliances import api as compliances_api
 from ledger_api_client.urls import urlpatterns as ledger_patterns
 from leaseslicensing.management.default_data_manager import DefaultDataManager
@@ -36,6 +37,7 @@ router.register(r"proposal", proposal_api.ProposalViewSet)
 router.register(r"proposal_submit", proposal_api.ProposalSubmitViewSet)
 router.register(r"proposal_paginated", proposal_api.ProposalPaginatedViewSet)
 router.register(r"approval_paginated", approval_api.ApprovalPaginatedViewSet)
+router.register(r"competitive_process_paginated", competitive_process_api.CompetitiveProcessPaginatedViewSet)
 router.register(r"booking_paginated", booking_api.BookingPaginatedViewSet)
 router.register(r"compliance_paginated", compliances_api.CompliancePaginatedViewSet)
 router.register(r"referrals", proposal_api.ReferralViewSet)
