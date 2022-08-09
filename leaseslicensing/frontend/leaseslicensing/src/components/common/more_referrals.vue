@@ -47,6 +47,10 @@ export default {
                     "url": this.referral_url,
                     "dataSrc": '',
                 },
+                dom:
+                    "<'row'<'col-sm-4'l><'col-sm-8'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
                 columns:[
                     {
                         title: 'Sent On',
@@ -217,7 +221,6 @@ export default {
             popover_elem.addEventListener('inserted.bs.popover', function () {
                 console.log('in inserted.bs.popover')
 
-                let table_jelem = $('#'+table_id)
                 vm.table = $('#'+table_id).DataTable(vm.datatable_options);
 
                 // activate popover when table is drawn.
@@ -252,18 +255,18 @@ export default {
                 console.log('in shown.bs.popover')
 
                 var el = vm.$refs.showRef;
-                var popoverheight = parseInt($('.'+popover_name).height());
+                // var popoverheight = parseInt($('.'+popover_name).height());
 
                 var popover_bounding_top = parseInt($('.'+popover_name)[0].getBoundingClientRect().top);
-                var popover_bounding_bottom = parseInt($('.'+popover_name)[0].getBoundingClientRect().bottom);
+                // var popover_bounding_bottom = parseInt($('.'+popover_name)[0].getBoundingClientRect().bottom);
 
                 var el_bounding_top = parseInt($(el)[0].getBoundingClientRect().top);
-                var el_bounding_bottom = parseInt($(el)[0].getBoundingClientRect().top);
+                // var el_bounding_bottom = parseInt($(el)[0].getBoundingClientRect().top);
 
                 var diff = el_bounding_top - popover_bounding_top;
 
-                var position = parseInt($('.'+popover_name).position().top);
-                var pos2 = parseInt($(el).position().top) - 5;
+                // var position = parseInt($('.'+popover_name).position().top);
+                // var pos2 = parseInt($(el).position().top) - 5;
 
                 var x = diff + 5;
                 $('.'+popover_name).children('.arrow').css('top', x + 'px');

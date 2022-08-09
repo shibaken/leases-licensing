@@ -1,11 +1,11 @@
 from django.conf import settings
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address, EmailUserRO
 from leaseslicensing.components.proposals.serializers import (
     ProposalSerializer,
     InternalProposalSerializer,
     ProposalParkSerializer,
 )
-from leaseslicensing.components.main.serializers import ApplicationTypeSerializer
+from leaseslicensing.components.main.serializers import ApplicationTypeSerializer, EmailUserROSerializerForReferral
 from leaseslicensing.components.approvals.models import (
     Approval,
     ApprovalLogEntry,
@@ -143,6 +143,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
     is_assessor = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
     requirement_docs = serializers.SerializerMethodField()
+    submitter = serializers.SerializerMethodField()
 
     class Meta:
         model = Approval
@@ -186,6 +187,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
             "is_assessor",
             "is_approver",
             "requirement_docs",
+            "submitter",
         )
         # the serverSide functionality of datatables is such that only columns that have field 'data' defined are requested from the serializer. We
         # also require the following additional fields for some of the mRender functions
@@ -218,7 +220,12 @@ class ApprovalSerializer(serializers.ModelSerializer):
             "is_assessor",
             "is_approver",
             "requirement_docs",
+            "submitter",
         )
+
+    def get_submitter(self, obj):
+        user = EmailUserRO.objects.get(id=obj.submitter)
+        return EmailUserSerializer(user).data
 
     def get_linked_applications(self, obj):
         return obj.linked_applications

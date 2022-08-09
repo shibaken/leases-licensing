@@ -180,7 +180,8 @@ export default {
                 },
                 */
                 initComplete: function() {
-                    vm.enablePopovers();
+                    //vm.enablePopovers();
+                    helpers.enablePopovers()
                     //console.log($('#' + vm.datatableId).DataTable());
                     vm.addTableListeners();
                 },
@@ -308,12 +309,12 @@ export default {
         moveDown(id) {
             this.sendDirection(id,'down');
         },
-        enablePopovers: function() {
-            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-                let popover = new bootstrap.Popover(popoverTriggerEl)
-            })
-        },
+        //enablePopovers: function() {
+        //    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        //    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        //        let popover = new bootstrap.Popover(popoverTriggerEl)
+        //    })
+        //},
     },
     mounted: function(){
         let vm = this;

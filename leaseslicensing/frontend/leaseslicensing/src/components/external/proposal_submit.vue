@@ -1,42 +1,41 @@
 <template lang="html">
     <div class="container" >
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="row">
-                    <div v-if="isProposal" class="col-sm-offset-3 col-sm-6 borderDecoration">
-                      <div class="form-para">
-                          <strong>Confirmation</strong>
-                      </div>
-                      <div class="form-para">
-                          <strong>Your application for a {{ applicationType }} has been successfully submitted.</strong>
-                      </div>
-                        <!-- <strong>Your application for a commercial operations licence has been successfully submitted.</strong>
-                        <br/> -->
-                      <div class="form-para">
-                        <table>
-                            <tr>
-                                <td><strong>Reference number:</strong></td>
-                                <td>{{proposal.lodgement_number}}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Date / Time:</strong></td>
-                                <td> {{proposal.lodgement_date|formatDate}}</td>
-                            </tr>
-                        </table>
-                      </div>
-                        <!--label>You will receive a notification email if there is any incomplete information or documents missing from the application.</label-->
-                        <router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary pull-right">Back to Dashboard</router-link>
-                    </div>
-                    <div v-else class="col-sm-offset-3 col-sm-6 borderDecoration">
-                        <strong>Sorry it looks like there isn't any application currently in your session.</strong>
-                        <br /><router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary pull-right">Back to Dashboard</router-link>
-                    </div>
-                </div>
+        <div class="row d-flex justify-content-center">
+            <div v-if="isProposal" class="col-sm-6 borderDecoration">
+              <div class="form-para">
+                  <strong>Confirmation</strong>
+              </div>
+              <div class="form-para">
+                  <strong>Your application for a {{ applicationType }} has been successfully submitted.</strong>
+              </div>
+                <!-- <strong>Your application for a commercial operations licence has been successfully submitted.</strong>
+                <br/> -->
+              <div class="form-para">
+                <table>
+                    <tr>
+                        <td><strong>Reference number:</strong></td>
+                        <td>{{ proposal.lodgement_number }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Date / Time:</strong></td>
+                        <!--td> {{proposal.lodgement_date|formatDate}}</td-->
+                        <td> {{ proposal.lodgement_date }}</td>
+                    </tr>
+                </table>
+              </div>
+                <!--label>You will receive a notification email if there is any incomplete information or documents missing from the application.</label-->
+                <router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary pull-right">Back to Dashboard</router-link>
+            </div>
+            <div v-else class="col-sm-offset-3 col-sm-6 borderDecoration">
+                <strong>Sorry it looks like there isn't any application currently in your session.</strong>
+                <br />
+                <a href="/external/" class="router-link-active btn btn-primary pull-right" data-v-5da83b51="" style="margin-top: 15px;">Back to Dashboard</a>
             </div>
         </div>
     </div>
 </template>
 <script>
+/*
 import Vue from 'vue'
 import {
   api_endpoints,
@@ -44,9 +43,9 @@ import {
 }
 from '@/utils/hooks'
 import utils from './utils'
+*/
 export default {
   data: function() {
-    let vm = this;
     return {
         "proposal": {},
     }
@@ -56,7 +55,8 @@ export default {
   computed: {
     applicationType: function() {
       //return this.proposal && this.proposal.id ? this.proposal.application_type.name_display : '';
-      return this.proposal && this.proposal.id ? this.proposal.application_type.confirmation_text : '';
+      //return this.proposal && this.proposal.id ? this.proposal.application_type.confirmation_text : '';
+      return this.proposal.application_type_text;
     },
     isProposal: function(){
       return this.proposal && this.proposal.id ? true : false;
@@ -64,18 +64,23 @@ export default {
   },
   methods: {
   },
+    /*
   filters:{
         formatDate: function(data){
             return data ? moment(data).format('DD/MM/YYYY HH:mm:ss'): '';
         }
   },
+  */
   mounted: function() {
-    let vm = this;
-    vm.form = document.forms.new_proposal;
+    //let vm = this;
+    //vm.form = document.forms.new_proposal;
   },
   beforeRouteEnter: function(to, from, next) {
     next(vm => {
-        vm.proposal = to.params.proposal;
+        vm.proposal.lodgement_date = to.params.lodgement_date;
+        vm.proposal.id = to.params.proposal_id;
+        vm.proposal.lodgement_number = to.params.lodgement_number;
+        vm.proposal.application_type_text = to.params.application_type_text;
     })
   }
 }

@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+
+import logging
 import re
 
 import json
@@ -19,6 +21,7 @@ from django.db.models import Q
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from leaseslicensing.components.main.models import RevisionedMixin
 from leaseslicensing import exceptions
+from leaseslicensing.components.main.related_item import RelatedItem
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.proposals.models import (
     Proposal,
@@ -44,6 +47,8 @@ from leaseslicensing.utils import search_keys, search_multiple_keys
 from leaseslicensing.helpers import is_customer
 
 # from leaseslicensing.components.approvals.email import send_referral_email_notification
+
+logger = logging.getLogger(__name__)
 
 
 def update_approval_doc_filename(instance, filename):
@@ -80,6 +85,17 @@ class ApprovalDocument(Document):
 
     class Meta:
         app_label = "leaseslicensing"
+
+
+class ApprovalType(RevisionedMixin):
+    name = models.CharField(max_length=200, unique=True)
+    details_placeholder = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        app_label = "leaseslicensing"
+
+    def __str__(self):
+        return self.name
 
 
 # class Approval(models.Model):
@@ -335,10 +351,18 @@ class Approval(RevisionedMixin):
         return self.current_proposal.allowed_assessors
 
     def is_assessor(self, user):
-        return self.current_proposal.is_assessor(user)
+        if self.current_proposal:
+            return self.current_proposal.is_assessor(user)
+        else:
+            logger.warning('Approval {} does not have current_proposal'.format(self.lodgement_number))
+            return False
 
     def is_approver(self, user):
-        return self.current_proposal.is_approver(user)
+        if self.current_proposal:
+            return self.current_proposal.is_approver(user)
+        else:
+            logger.warning('Approval {} does not have current_proposal'.format(self.lodgement_number))
+            return False
 
     @property
     def is_issued(self):
@@ -397,16 +421,19 @@ class Approval(RevisionedMixin):
 
     @property
     def requirement_docs(self):
-        requirement_ids = (
-            self.current_proposal.requirements.all()
-            .exclude(is_deleted=True)
-            .values_list("id", flat=True)
-        )
-        if requirement_ids:
-            req_doc = RequirementDocument.objects.filter(
-                requirement__in=requirement_ids, visible=True
+        if self.current_proposal:
+            requirement_ids = (
+                self.current_proposal.requirements.all()
+                .exclude(is_deleted=True)
+                .values_list("id", flat=True)
             )
-            return req_doc
+            if requirement_ids:
+                req_doc = RequirementDocument.objects.filter(
+                    requirement__in=requirement_ids, visible=True
+                )
+                return req_doc
+        else:
+            logger.warning('Approval {} does not have current_proposal'.format(self.lodgement_number))
         return None
 
     #    @property
@@ -736,6 +763,24 @@ class Approval(RevisionedMixin):
                 )
             except:
                 raise
+
+    @property
+    def as_related_item(self):
+        related_item = RelatedItem(
+            identifier=self.related_item_identifier,
+            model_name=self._meta.verbose_name,
+            descriptor=self.related_item_descriptor,
+            action_url='<a href=/internal/approval/{} target="_blank">Open</a>'.format(self.id)
+        )
+        return related_item
+
+    @property
+    def related_item_identifier(self):
+        return self.lodgement_number
+
+    @property
+    def related_item_descriptor(self):
+        return '(return descriptor)'
 
 
 class PreviewTempApproval(Approval):

@@ -94,8 +94,8 @@ def send_referral_email_notification(referral, recipients, request, reminder=Fal
     )
     url = request.build_absolute_uri(
         reverse(
-            "internal-referral-detail",
-            kwargs={"proposal_pk": referral.proposal.id, "referral_pk": referral.id},
+            "internal-proposal-detail",
+            kwargs={ "proposal_pk": referral.proposal.id },
         )
     )
 

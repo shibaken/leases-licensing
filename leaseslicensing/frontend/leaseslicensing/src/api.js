@@ -9,12 +9,13 @@ module.exports = {
     fee_configurations: "/api/fee_configurations",
     approval_types_dict:"/api/approval_types_dict",
     approval_statuses_dict:"/api/approval_statuses_dict",
+    approval_types_dict:"/api/approval_types_dict",
     payment_system_id: "/api/payment_system_id",
     fee_seasons_dict:"/api/fee_seasons_dict",
     compliance_statuses_dict:"/api/compliance_statuses_dict",
 
     referrals:"/api/referrals.json",
-    department_users: '/api/department_users',
+    //department_users: '/api/department_users',
 
     profile: '/api/profile',
     submitter_profile: '/api/submitter_profile',
@@ -23,6 +24,7 @@ module.exports = {
     organisation_requests: '/api/organisation_requests.json',
     organisation_contacts: '/api/organisation_contacts.json',
     organisation_access_group_members: '/api/organisation_access_group_members',
+    users_api: '/api/users',
     users: '/api/users.json',
     filtered_users: '/api/filtered_users',
     countries: '/api/countries',
@@ -30,6 +32,7 @@ module.exports = {
     proposals:"/api/proposal.json",
     proposals_paginated_list: '/api/proposal_paginated', // both for external and internal
     approvals_paginated_list: '/api/approval_paginated',
+    competitive_processes_paginated_list: '/api/competitive_process_paginated',
     compliances_paginated_external: '/api/compliance_paginated/list_external',
     compliances:"/api/compliances.json",
     proposal: '/api/proposal/',

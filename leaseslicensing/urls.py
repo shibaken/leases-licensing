@@ -24,6 +24,7 @@ from leaseslicensing.components.main import api as main_api
 from leaseslicensing.components.bookings import api as booking_api
 from leaseslicensing.components.proposals import api as proposal_api
 from leaseslicensing.components.approvals import api as approval_api
+from leaseslicensing.components.competitive_processes import api as competitive_process_api
 from leaseslicensing.components.compliances import api as compliances_api
 from ledger_api_client.urls import urlpatterns as ledger_patterns
 from leaseslicensing.management.default_data_manager import DefaultDataManager
@@ -36,6 +37,7 @@ router.register(r"proposal", proposal_api.ProposalViewSet)
 router.register(r"proposal_submit", proposal_api.ProposalSubmitViewSet)
 router.register(r"proposal_paginated", proposal_api.ProposalPaginatedViewSet)
 router.register(r"approval_paginated", approval_api.ApprovalPaginatedViewSet)
+router.register(r"competitive_process_paginated", competitive_process_api.CompetitiveProcessPaginatedViewSet)
 router.register(r"booking_paginated", booking_api.BookingPaginatedViewSet)
 router.register(r"compliance_paginated", compliances_api.CompliancePaginatedViewSet)
 router.register(r"referrals", proposal_api.ReferralViewSet)
@@ -66,11 +68,11 @@ router.register(r"map_layers", main_api.MapLayerViewSet)
 api_patterns = [
     url(r"^api/profile$", users_api.GetProfile.as_view(), name="get-profile"),
     url(r"^api/countries$", users_api.GetCountries.as_view(), name="get-countries"),
-    url(
-        r"^api/department_users$",
-        users_api.DepartmentUserList.as_view(),
-        name="department-users-list",
-    ),
+    # url(
+    #     r"^api/department_users$",
+    #     users_api.DepartmentUserList.as_view(),
+    #     name="department-users-list",
+    # ),
     url(
         r"^api/filtered_users$",
         users_api.UserListFilterView.as_view(),
@@ -183,6 +185,11 @@ urlpatterns = [
         r"^api/approval_statuses_dict$",
         approval_api.GetApprovalStatusesDict.as_view(),
         name="get-approval-statuses-dict",
+    ),
+    url(
+        r"^api/approval_types_dict$",
+        approval_api.GetApprovalTypesDict.as_view(),
+        name="get-approval-types-dict",
     ),
     url(
         r"^api/compliance_statuses_dict$",

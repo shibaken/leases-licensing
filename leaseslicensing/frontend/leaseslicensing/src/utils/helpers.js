@@ -35,8 +35,6 @@ module.exports = {
     return error_str;
   },
     apiVueResourceError: function(resp){
-        console.log('in apiVueResourceError')
-        console.log(resp)
         var error_str = '';
         var text = null;
         if (resp.status === 400) {
@@ -202,4 +200,13 @@ module.exports = {
             let popover = new bootstrap.Popover(popoverTriggerEl)
         })
     },
+    parseFetchError: async function(response) {
+        let errorString = ''
+        const resData = await response.json()
+        for (let i=0; i<resData.length; i++) {
+            errorString += (resData[i] + "<br>")
+        }
+        console.log(errorString)
+        return errorString
+    }
 };

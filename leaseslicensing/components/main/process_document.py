@@ -57,6 +57,8 @@ def process_generic_document(request, instance, document_type=None, *args, **kwa
                 documents_qs = instance.deed_poll_documents
             elif document_type == "supporting_document":
                 documents_qs = instance.supporting_documents
+            elif document_type == "proposed_approval_document":
+                documents_qs = instance.proposed_approval_documents
             elif document_type == "exclusive_use_document":
                 documents_qs = instance.exclusive_use_documents
             elif document_type == "long_term_use_document":
@@ -149,6 +151,8 @@ def delete_document(request, instance, comms_instance, document_type, input_name
             document = instance.documents.get(id=document_id)
         elif document_type == "supporting_document":
             document = instance.supporting_documents.get(id=document_id)
+        elif document_type == "proposed_approval_document":
+            document = instance.proposed_approval_documents.get(id=document_id)
         elif document_type == "exclusive_use_document":
             document = instance.exclusive_use_documents.get(id=document_id)
         elif document_type == "long_term_use_document":
@@ -221,6 +225,7 @@ def cancel_document(request, instance, comms_instance, document_type, input_name
     if document_type in [
         "deed_poll_document",
         "supporting_document",
+        "proposed_approval_document",
         "exclusive_use_document",
         "long_term_use_document",
         "consistent_purpose_document",
@@ -276,6 +281,11 @@ def save_document(request, instance, comms_instance, document_type, input_name=N
             path_format_string = "{}/proposals/{}/deed_poll_documents/{}"
         elif document_type == "supporting_document":
             document = instance.supporting_documents.get_or_create(
+                input_name=input_name, name=filename
+            )[0]
+            path_format_string = "{}/proposals/{}/proposed_approval_documents/{}"
+        elif document_type == "proposed_approval_document":
+            document = instance.proposed_approval_documents.get_or_create(
                 input_name=input_name, name=filename
             )[0]
             path_format_string = "{}/proposals/{}/supporting_documents/{}"

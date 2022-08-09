@@ -13,13 +13,18 @@
                         </div>
                         <div class="col-sm-12">
                             <div class="form-group">
-                                <div class="row">
+                                <div class="row" style="margin-bottom: 10px">
                                     <div class="col-sm-3">
                                         <label class="control-label pull-left"  for="Name">Requirement</label>
                                     </div>
-                                    <div class="col-sm-9" v-if="requirement.standard">
+                                    <div class="col-sm-7" v-if="requirement.standard">
                                         <div>
-                                            <select class="form-control" ref="standard_req" name="standard_requirement" v-model="requirement.standard_requirement" style="width:70%">
+                                            <select 
+                                                class="form-control" 
+                                                ref="standard_req" 
+                                                name="standard_requirement" 
+                                                v-model="requirement.standard_requirement" 
+                                                style="width:70%;margin-bottom: 10px">
                                                 <!--option v-for="r in requirements" :value="r.id" v-model="requirement.standard_requirement">{{r.code}} {{r.text}}</option-->
                                                 <option v-for="r in requirements" :value="r.id">{{r.code}} {{r.text}}</option>
                                             </select>
@@ -35,8 +40,11 @@
                                     <div class="col-sm-3">
                                         <label class="control-label pull-left"  for="Name">Due Date</label>
                                     </div>
-                                    <div class="col-sm-4">
+                                    <div class="col-sm-3">
                                         <input type="date" id="due_date" ref="due_date" v-model="requirement.due_date" class="form-control">
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <i class="bi bi-calendar3 ms-1" style="font-size=2rem"></i>
                                     </div>
                                 </div>
                             </div>
@@ -83,7 +91,7 @@
                     </form>
                 </div>
             </div>
-            <div slot="footer">
+            <!--div slot="footer">
                 <template v-if="requirement.id">
                     <button type="button" v-if="updatingRequirement" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinnner fa-spin"></i> Updating</button>
                     <button type="button" v-else class="btn btn-default" @click="ok">Update</button>
@@ -93,7 +101,7 @@
                     <button type="button" v-else class="btn btn-default" @click="ok">Add</button>
                 </template>
                 <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
-            </div>
+            </div-->
         </modal>
     </div>
 </template>

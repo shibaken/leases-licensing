@@ -51,17 +51,17 @@
                 <div v-if="proposal && !proposal.readonly" class="container">
                     <div class="col-md-12 text-end">
                         <button v-if="saveExitProposal" type="button" class="btn btn-primary" disabled>
-                            Save and Exit&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                            Save and Exit&nbsp;<i class="fa-solid fa-spinner fa-spin"></i>
                         </button>
                         <input v-else type="button" @click.prevent="save_exit" class="btn btn-primary" value="Save and Exit" :disabled="savingProposal || paySubmitting"/>
 
                         <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
-                            Save and Continue&nbsp;<i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                            Save and Continue&nbsp;<i class="fa-solid fa-spinner fa-spin"></i>
                         </button>
                         <input v-else type="button" @click.prevent="save" class="btn btn-primary" value="Save and Continue" :disabled="saveExitProposal || paySubmitting"/>
 
                         <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>
-                            {{ submitText }}&nbsp; <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                            {{ submitText }}&nbsp; <i class="fa-solid fa-spinner fa-spin"></i>
                         </button>
 
                         <input v-else
@@ -374,29 +374,32 @@ export default {
             payload.proposal.risk_factors_text = this.$refs.application_form.$refs.lease_licence.$refs.risk_factors_text.detailsText;
             payload.proposal.legislative_requirements_text = this.$refs.application_form.$refs.lease_licence.$refs.legislative_requirements_text.detailsText;
         }
+        payload.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+        /*
         if (this.$refs.application_form.componentMapOn) {
             payload.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
         }
+        */
         const res = await fetch(url, { body: JSON.stringify(payload), method: 'POST' });
         if (res.ok) {
             if (withConfirm) {
-                swal(
-                    'Saved',
-                    'Your application has been saved',
-                    'success'
-                );
+                await swal.fire({
+                    title: 'Saved',
+                    text: 'Your application has been saved',
+                    icon: 'success'
+                });
             };
             vm.savingProposal=false;
             //this.$refs.application_form.incrementComponentMapKey();
             const resData = await res.json()
-            this.proposal = resData;
+            this.proposal = Object.assign({}, resData);
             this.$nextTick(async () => {
                 this.$refs.application_form.incrementComponentMapKey();
             });
             return resData;
         } else {
             const err = await res.json()
-            swal.fire({
+            await swal.fire({
                 title: "Please fix following errors before saving",
                 //text: err.bodyText,
                 text: JSON.stringify(err),
@@ -538,7 +541,21 @@ export default {
             return;
         }
         try {
-            const res = await this.save(false, this.proposal_submit_url);
+            //const res = await this.save(false, this.proposal_submit_url);
+            await this.save(false, this.proposal_submit_url);
+            this.$nextTick(() => {
+                const lodgementDate = new Date(this.proposal.lodgement_date)
+                this.$router.push({
+                    name: 'submit-proposal',
+                    params: {
+                        proposal_id: this.proposal.id,
+                        lodgement_number: this.proposal.lodgement_number,
+                        lodgement_date: lodgementDate.toLocaleDateString("en-AU"),
+                        application_type_text: this.proposal.application_type.confirmation_text
+                    },
+                });
+            })
+            /*
             if (res.ok) {
                 // change this to confirmation page
                 this.$router.push({
@@ -546,6 +563,7 @@ export default {
                     params: {proposal: this.proposal},
                 });
             }
+            */
         } catch(err) {
             console.log(err)
             await swal.fire({

@@ -450,8 +450,6 @@ def save_proponent_data(instance, request, viewset, parks=None, trails=None):
 def save_proponent_data_registration_of_interest(instance, request, viewset):
     # proposal
     proposal_data = request.data.get("proposal") if request.data.get("proposal") else {}
-    print("proposal_data")
-    print(proposal_data)
     serializer = SaveRegistrationOfInterestSerializer(
         instance,
         data=proposal_data,
@@ -501,18 +499,16 @@ def save_referral_data(proposal, request, referral_completed=False):
             )
 
             # Save checklist answers
-            if (
-                "referral_assessments" in proposal_data
-                and proposal_data["referral_assessments"]
-            ):
+            if "referral_assessments" in proposal_data and proposal_data["referral_assessments"]:
                 for assessment in proposal_data["referral_assessments"]:
                     # For each assessment
                     if assessment["referral"]["referral"]["id"] == request.user.id:
                         # When this assessment is for the accessing user
                         for section, answers in assessment["section_answers"].items():
                             # Save answers
-                            for answer_dict in answers:
-                                answer_obj = _save_answer_dict(answer_dict)
+                            if not assessment['completed']:
+                                for answer_dict in answers:
+                                    answer_obj = _save_answer_dict(answer_dict)
                         if referral_completed:
                             # Make this assessment completed
                             assessment = ProposalAssessment.objects.get(
@@ -628,6 +624,7 @@ def save_geometry(instance, request, viewset):
 
 
 def proposal_submit(proposal, request):
+    #import ipdb; ipdb.set_trace()
     with transaction.atomic():
         if proposal.can_user_edit:
             proposal.submitter = request.user.id
@@ -679,7 +676,7 @@ def proposal_submit(proposal, request):
             #        except ProposalAssessmentAnswer.DoesNotExist:
             #            chk_instance=ProposalAssessmentAnswer.objects.create(question=chk, assessment=assessor_assessment)
 
-            # return proposal
+            return proposal
 
         else:
             raise ValidationError("You can't edit this proposal at this moment")

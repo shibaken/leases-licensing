@@ -7,7 +7,7 @@ from six.moves.urllib.parse import urlparse
 from wsgiref.util import FileWrapper
 from django.db.models import Q, Min
 from django.db import transaction, connection
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -36,6 +36,8 @@ from django.core.cache import cache
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
 from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
+
+from leaseslicensing.components.main.related_item import RelatedItemsSerializer
 from leaseslicensing.components.proposals.utils import (
     save_proponent_data,
     save_assessor_data,
@@ -1024,6 +1026,19 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=["POST"], detail=True)
     @renderer_classes((JSONRenderer,))
     @basic_exception_handler
+    def process_proposed_approval_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(
+            request, instance, document_type="proposed_approval_document"
+        )
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=["POST"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
     def process_supporting_document(self, request, *args, **kwargs):
         instance = self.get_object()
         returned_data = process_generic_document(
@@ -1819,8 +1834,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
             save_proponent_data(instance, request, self)
             # return redirect(reverse('external'))
-            proposal_submit(instance, request)
-            instance.save()
+            instance = proposal_submit(instance, request)
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
         except serializers.ValidationError:
@@ -2064,9 +2078,10 @@ class ProposalViewSet(viewsets.ModelViewSet):
     )
     def proposed_approval(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = ProposedApprovalSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance.proposed_approval(request, serializer.validated_data)
+        #serializer = ProposedApprovalSerializer(data=request.data)
+        #serializer.is_valid(raise_exception=True)
+        #instance.proposed_approval(request, serializer.validated_data)
+        instance.proposed_approval(request, request.data)
         # serializer = InternalProposalSerializer(instance,context={'request':request})
         serializer_class = self.internal_serializer_class()
         serializer = serializer_class(instance, context={"request": request})
@@ -2355,7 +2370,8 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def assessor_save(self, request, *args, **kwargs):
         instance = self.get_object()
         save_assessor_data(instance, request, self)
-        return redirect(reverse("external"))
+        # return redirect(reverse("external"))
+        return Response({})
 
     @detail_route(methods=["post"], detail=True)
     @basic_exception_handler
@@ -2450,6 +2466,14 @@ class ProposalViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
+
+    @detail_route(methods=["get"], detail=True)
+    @basic_exception_handler
+    def get_related_items(self, request, *args, **kwargs):
+        proposal = self.get_object()
+        related_items = proposal.get_related_items()
+        serializer = RelatedItemsSerializer(related_items, many=True)
+        return Response(serializer.data)
 
 
 class ReferralViewSet(viewsets.ModelViewSet):
