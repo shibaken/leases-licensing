@@ -7,7 +7,7 @@
                         <label for="">Status</label>
                         <select class="form-control" v-model="filterApplicationStatus">
                             <option value="all">All</option>
-                            <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
+                            <option v-for="status in application_statuses" :value="status.id">{{ status.text }}</option>
                         </select>
                     </div>
                 </div>
@@ -109,7 +109,6 @@ export default {
             filterCompetitiveProcessCreatedTo: sessionStorage.getItem('filterCompetitiveProcessCreatedTo') ? sessionStorage.getItem('filterCompetitiveProcessCreatedTo') : '',
 
             // filtering options
-            application_types: [],
             application_statuses: [],
 
             // Filters toggle
@@ -379,7 +378,7 @@ export default {
 
                     // adding extra GET params for Custom filtering
                     "data": function ( d ) {
-                        d.filter_application_status = vm.filterApplicationStatus
+                        d.filter_status = vm.filterApplicationStatus
                         d.filter_competitive_process_created_from = vm.filterCompetitiveProcessCreatedFrom
                         d.filter_competitive_process_created_to = vm.filterCompetitiveProcessCreatedTo
                         d.level = vm.level
@@ -469,24 +468,22 @@ export default {
 
             });
         },
-        fetchFilterLists: function(){
+        fetchFilterLists: async function(){
             let vm = this;
 
-            // Application Types
-            fetch(api_endpoints.application_types_dict+'?apply_page=False').then((response) => {
-                vm.application_types = response.body
-            },(error) => {
-            })
+            try {
+                const res = await fetch(api_endpoints.competitive_process_statuses_dict)
+                if (!res.ok)
+                    throw new Error(res.statusText)  // 400s or 500s error
 
-            // Application Statuses
-            fetch(api_endpoints.application_statuses_dict).then((response) => {
-                if (vm.is_internal){
-                    vm.application_statuses = response.body.internal_statuses
-                } else {
-                    vm.application_statuses = response.body.external_statuses
-                }
-            },(error) => {
-            })
+                let aho = await res.json()
+                console.log({aho})
+                vm.application_statuses = aho
+            } catch(err){
+
+            } finally {
+
+            }
         },
         addEventListeners: function(){
             let vm = this

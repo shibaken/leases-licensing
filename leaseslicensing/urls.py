@@ -179,6 +179,11 @@ urlpatterns = [
         proposal_api.GetApplicationStatusesDict.as_view(),
         name="get-application-statuses-dict",
     ),
+    url(
+        r"^api/competitive_process_statuses_dict$",
+        competitive_process_api.GetCompetitiveProcessStatusesDict.as_view(),
+        name="get-competitive-process-statuses-dict",
+    ),
     # Approval type should point to Approval.current_proposal.application_type
     # url(r'^api/approval_types_dict$', approval_api.GetApprovalTypeDict.as_view(), name='get-approval-type-dict'),
     url(

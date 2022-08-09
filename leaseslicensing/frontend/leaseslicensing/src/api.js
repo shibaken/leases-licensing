@@ -3,6 +3,7 @@ module.exports = {
     application_types:"/api/application_types",
     application_types_dict:"/api/application_types_dict",
     application_statuses_dict:"/api/application_statuses_dict",
+    competitive_process_statuses_dict: "/api/competitive_process_statuses_dict",
     applicants_dict: "/api/applicants_dict",
     person_lookup:"/api/person_lookup",
     company_names:"/api/company_names",
