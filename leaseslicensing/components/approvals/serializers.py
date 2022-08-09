@@ -5,7 +5,7 @@ from leaseslicensing.components.proposals.serializers import (
     InternalProposalSerializer,
     ProposalParkSerializer,
 )
-from leaseslicensing.components.main.serializers import ApplicationTypeSerializer, EmailUserROSerializerForReferral
+from leaseslicensing.components.main.serializers import ApplicationTypeSerializer, EmailUserROSerializerForReferral, EmailUserSerializer
 from leaseslicensing.components.approvals.models import (
     Approval,
     ApprovalLogEntry,
@@ -15,12 +15,6 @@ from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer
 from leaseslicensing.components.proposals.serializers import ProposalSerializer
 from rest_framework import serializers
-
-
-class EmailUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EmailUser
-        fields = ("id", "email", "first_name", "last_name", "title", "organisation")
 
 
 class ApprovalPaymentSerializer(serializers.ModelSerializer):
