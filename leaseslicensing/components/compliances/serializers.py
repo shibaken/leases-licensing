@@ -9,11 +9,7 @@ from leaseslicensing.components.compliances.models import (
 )
 from rest_framework import serializers
 
-
-class EmailUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EmailUser
-        fields = ("id", "email", "first_name", "last_name", "title", "organisation")
+from leaseslicensing.components.main.serializers import EmailUserSerializer
 
 
 class ComplianceSerializer(serializers.ModelSerializer):

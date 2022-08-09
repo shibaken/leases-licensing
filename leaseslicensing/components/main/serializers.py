@@ -156,3 +156,22 @@ class EmailUserROSerializerForReferral(serializers.ModelSerializer):
 
     def get_name(self, user):
         return user.get_full_name()
+
+
+class EmailUserSerializer(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EmailUser
+        fields = (
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "title",
+            "organisation",
+            "fullname",
+        )
+
+    def get_fullname(self, obj):
+        return "{} {}".format(obj.first_name, obj.last_name)

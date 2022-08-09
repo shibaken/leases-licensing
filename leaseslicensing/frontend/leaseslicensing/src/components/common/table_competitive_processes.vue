@@ -7,7 +7,7 @@
                         <label for="">Status</label>
                         <select class="form-control" v-model="filterApplicationStatus">
                             <option value="all">All</option>
-                            <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
+                            <option v-for="status in application_statuses" :value="status.id">{{ status.text }}</option>
                         </select>
                     </div>
                 </div>
@@ -109,7 +109,6 @@ export default {
             filterCompetitiveProcessCreatedTo: sessionStorage.getItem('filterCompetitiveProcessCreatedTo') ? sessionStorage.getItem('filterCompetitiveProcessCreatedTo') : '',
 
             // filtering options
-            application_types: [],
             application_statuses: [],
 
             // Filters toggle
@@ -190,76 +189,67 @@ export default {
         },
         column_id: function(){
             return {
-                // 1. ID
                 data: "id",
+                name: 'id',
                 orderable: false,
                 searchable: false,
                 visible: false,
-                'render': function(row, type, full){
-                    return full.id
-                }
+                // 'render': function(row, type, full){
+                //     return full.id
+                // },
             }
         },
         column_lodgement_number: function(){
             return {
-                // 2. Lodgement Number
-                data: "id",
+                data: "lodgement_number",
+                name: 'lodgement_number',
                 orderable: true,
                 searchable: true,
                 visible: true,
-                'render': function(row, type, full){
-                    if (full.migrated){
-                        return full.lodgement_number + ' (M)'
-                    } else {
-                        return full.lodgement_number
-                    }
-                },
-                name: 'lodgement_number',
+                // 'render': function(row, type, full){
+                //     return full.lodgement_number
+                // },
             }
         },
         column_registration_of_interest: function(){
             return {
-                data: "id",
+                data: "registration_of_interest",
+                name: 'registration_of_interest',
                 orderable: true,
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
-                    return 'roi(todo)'
+                    if (full.registration_of_interest){
+                        return full.registration_of_interest.lodgement_number
+                    } else {
+                        return ''
+                    }
                 },
-                name: 'registration_of_interest',
             }
         },
         column_status: function(){
             let vm = this
             return {
-                // 5. Status
-                data: "id",
+                data: 'status',
+                name: 'status',
                 orderable: true,
                 searchable: false,
                 visible: true,
-                'render': function(row, type, full){
-                    if (vm.is_internal){
-                        return full.processing_status
-                    }
-                    return full.customer_status
-                }
+                // 'render': function(row, type, full){
+                //     return full.status
+                // }
             }
         },
         column_created_on: function(){
             return {
                 // 6. Lodged
-                data: "id",
+                data: "created_at",
+                name: 'created_at',
                 orderable: true,
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
-                    if (full.lodgement_date){
-                        return moment(full.lodgement_date).format('DD/MM/YYYY')
-                    }
-                    return ''
-                    */
-                    return full.id
+                    return moment(full.created_at).format('DD/MM/YYYY')
                 }
             }
         },
@@ -306,30 +296,24 @@ export default {
                     }
                     return links;
                     */
-                    return full.id
+                    return 'TODO'
                 }
             }
         },
         column_assigned_to: function(){
             return {
-                data: "id",
+                data: "assigned_officer",
+                // name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
                 orderable: true,
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
-                    let ret_str = ''
                     if (full.assigned_officer){
-                        ret_str += full.assigned_officer
+                        return full.assigned_officer.fullname
+                    } else {
+                        return ''
                     }
-                    if (full.assigned_approver){
-                        ret_str += full.assigned_approver
-                    }
-                    return ret_str
-                    */
-                    return full.id
                 },
-                name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
             }
         },
         datatable_options: function(){
@@ -389,14 +373,12 @@ export default {
                 serverSide: true,
                 searching: search,
                 ajax: {
-                    //"url": api_endpoints.proposals_paginated_list + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,
-                    "url": api_endpoints.proposals_paginated_list + '?format=datatables',
+                    "url": api_endpoints.competitive_processes_paginated_list + '?format=datatables',
                     "dataSrc": 'data',
 
                     // adding extra GET params for Custom filtering
                     "data": function ( d ) {
-                        d.filter_application_type = vm.filterApplicationType
-                        d.filter_application_status = vm.filterApplicationStatus
+                        d.filter_status = vm.filterApplicationStatus
                         d.filter_competitive_process_created_from = vm.filterCompetitiveProcessCreatedFrom
                         d.filter_competitive_process_created_to = vm.filterCompetitiveProcessCreatedTo
                         d.level = vm.level
@@ -486,24 +468,22 @@ export default {
 
             });
         },
-        fetchFilterLists: function(){
+        fetchFilterLists: async function(){
             let vm = this;
 
-            // Application Types
-            fetch(api_endpoints.application_types_dict+'?apply_page=False').then((response) => {
-                vm.application_types = response.body
-            },(error) => {
-            })
+            try {
+                const res = await fetch(api_endpoints.competitive_process_statuses_dict)
+                if (!res.ok)
+                    throw new Error(res.statusText)  // 400s or 500s error
 
-            // Application Statuses
-            fetch(api_endpoints.application_statuses_dict).then((response) => {
-                if (vm.is_internal){
-                    vm.application_statuses = response.body.internal_statuses
-                } else {
-                    vm.application_statuses = response.body.external_statuses
-                }
-            },(error) => {
-            })
+                let aho = await res.json()
+                console.log({aho})
+                vm.application_statuses = aho
+            } catch(err){
+
+            } finally {
+
+            }
         },
         addEventListeners: function(){
             let vm = this
