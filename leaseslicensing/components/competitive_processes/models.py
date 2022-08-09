@@ -1,4 +1,5 @@
-from django.db import models, transaction
+from django.db import models
+from ledger_api_client.ledger_models import EmailUserRO
 
 from leaseslicensing.components.main.related_item import RelatedItem
 
@@ -18,6 +19,8 @@ class CompetitiveProcess(models.Model):
 
     lodgement_number = models.CharField(max_length=9, blank=True, default="")
     status = models.CharField("Status", max_length=30, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0],)
+    # assigned_officer = models.ForeignKey(EmailUserRO, null=True, blank=True, on_delete=models.SET_NULL)
+    assigned_officer = models.IntegerField(null=True, blank=True)  # EmailUserRO
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     modified_at = models.DateTimeField(auto_now=True, null=True)
 
