@@ -297,7 +297,7 @@ export default {
                     }
                     return links;
                     */
-                    return full.id
+                    return 'TODO'
                 }
             }
         },
@@ -309,7 +309,11 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    return full.assigned_officer.fullname
+                    if (full.assigned_officer){
+                        return full.assigned_officer.fullname
+                    } else {
+                        return ''
+                    }
                 },
             }
         },
@@ -333,7 +337,7 @@ export default {
                     vm.column_status,
                     vm.column_created_on,
                     vm.column_assigned_to,
-                    // vm.column_action,
+                    vm.column_action,
                 ]
                 search = true
                 buttons = [
