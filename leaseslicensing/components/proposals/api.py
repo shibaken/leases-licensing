@@ -37,7 +37,7 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
 from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 
-from leaseslicensing.components.main.related_item import get_related_items, RelatedItemsSerializer
+from leaseslicensing.components.main.related_item import RelatedItemsSerializer
 from leaseslicensing.components.proposals.utils import (
     save_proponent_data,
     save_assessor_data,
@@ -2471,7 +2471,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def get_related_items(self, request, *args, **kwargs):
         proposal = self.get_object()
-        related_items = get_related_items(proposal)
+        related_items = proposal.get_related_items()
         serializer = RelatedItemsSerializer(related_items, many=True)
         return Response(serializer.data)
 

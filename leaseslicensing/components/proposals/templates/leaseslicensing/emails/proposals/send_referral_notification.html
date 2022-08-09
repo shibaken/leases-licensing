@@ -4,9 +4,9 @@
     {% if reminder %}
         <p>This is a reminder for a referral for Application <strong>{{proposal.lodgement_number}}</strong> that has been sent to you:</p>
     {% else %}
-        <p>A referral for Application <strong>A{{proposal.id}}</strong> has been sent to you:</p>
+        <p>A Registration of Interest <strong>{{ proposal.lodgement_number }}</strong> is ready for your advice.</p>
         <p>Comments: {{comments}}</p>
     {% endif %}
-    <p>You can access this referral using the following link:</p>
-    <a href="{{url}}">Access Referral</a>
+    <p>You can access this Registration of Interest using the following link:</p>
+    <a href="{{ url }}">Access Registration of Interest</a>
 {%  endblock %}
