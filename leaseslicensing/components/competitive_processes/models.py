@@ -2,6 +2,7 @@ from django.db import models
 from ledger_api_client.ledger_models import EmailUserRO
 
 from leaseslicensing.components.main.related_item import RelatedItem
+from leaseslicensing.ledger_api_utils import retrieve_email_user
 
 
 class CompetitiveProcess(models.Model):
@@ -19,8 +20,7 @@ class CompetitiveProcess(models.Model):
 
     lodgement_number = models.CharField(max_length=9, blank=True, default="")
     status = models.CharField("Status", max_length=30, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0],)
-    # assigned_officer = models.ForeignKey(EmailUserRO, null=True, blank=True, on_delete=models.SET_NULL)
-    assigned_officer = models.IntegerField(null=True, blank=True)  # EmailUserRO
+    assigned_officer_id = models.IntegerField(null=True, blank=True)  # EmailUserRO
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     modified_at = models.DateTimeField(auto_now=True, null=True)
 
@@ -30,11 +30,28 @@ class CompetitiveProcess(models.Model):
         verbose_name_plural = "Competitive Processes"
 
     @property
-    def registration_of_interest(self):
+    def generated_from_registration_of_interest(self):
         if self.generating_proposal:
+            return True
+        return False
+
+    @property
+    def registration_of_interest(self):
+        if self.generated_from_registration_of_interest:
             return self.generating_proposal
-        else:
-            return None
+        return None
+
+    @property
+    def is_assigned(self):
+        if self.assigned_officer_id:
+            return True
+        return False
+
+    @property
+    def assigned_officer(self):
+        if self.is_assigned:
+            return retrieve_email_user(self.assigned_officer_id)
+        return None
 
     @property
     def next_lodgement_number(self):

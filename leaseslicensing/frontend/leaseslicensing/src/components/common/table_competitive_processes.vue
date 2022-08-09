@@ -303,24 +303,14 @@ export default {
         },
         column_assigned_to: function(){
             return {
-                data: "id",
+                data: "assigned_officer",
+                // name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
                 orderable: true,
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    /*
-                    let ret_str = ''
-                    if (full.assigned_officer){
-                        ret_str += full.assigned_officer
-                    }
-                    if (full.assigned_approver){
-                        ret_str += full.assigned_approver
-                    }
-                    return ret_str
-                    */
-                    return full.id
+                    return full.assigned_officer.fullname
                 },
-                name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
             }
         },
         datatable_options: function(){
@@ -342,7 +332,7 @@ export default {
                     vm.column_registration_of_interest,
                     vm.column_status,
                     vm.column_created_on,
-                    // vm.column_assigned_to,
+                    vm.column_assigned_to,
                     // vm.column_action,
                 ]
                 search = true
