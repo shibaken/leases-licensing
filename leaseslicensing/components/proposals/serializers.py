@@ -2,7 +2,6 @@ from django.conf import settings
 from ledger_api_client.ledger_models import (
     EmailUserRO as EmailUser,
 )
-from leaseslicensing.components.approvals import email
 from leaseslicensing.components.main.models import ApplicationType
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.proposals.models import (
@@ -15,7 +14,6 @@ from leaseslicensing.components.proposals.models import (
     ProposalStandardRequirement,
     ProposalDeclinedDetails,
     AmendmentRequest,
-    AmendmentReason,
     ProposalApplicantDetails,
     QAOfficerReferral,
     ProposalOtherDetails,
@@ -29,12 +27,11 @@ from leaseslicensing.components.proposals.models import (
 )
 from leaseslicensing.components.main.serializers import (
     CommunicationLogEntrySerializer,
-    ApplicationTypeSerializer,
+    ApplicationTypeSerializer, EmailUserSerializer,
 )
 from leaseslicensing.components.organisations.serializers import OrganisationSerializer
 from leaseslicensing.components.users.serializers import (
     UserAddressSerializer,
-    DocumentSerializer,
 )
 from rest_framework import serializers
 from django.db.models import Q
@@ -87,25 +84,6 @@ class ProposalTypeSerializer(serializers.ModelSerializer):
 
     def get_activities(self, obj):
         return obj.activities.names()
-
-
-class EmailUserSerializer(serializers.ModelSerializer):
-    fullname = serializers.SerializerMethodField()
-
-    class Meta:
-        model = EmailUser
-        fields = (
-            "id",
-            "email",
-            "first_name",
-            "last_name",
-            "title",
-            "organisation",
-            "fullname",
-        )
-
-    def get_fullname(self, obj):
-        return "{} {}".format(obj.first_name, obj.last_name)
 
 
 class EmailUserAppViewSerializer(serializers.ModelSerializer):
