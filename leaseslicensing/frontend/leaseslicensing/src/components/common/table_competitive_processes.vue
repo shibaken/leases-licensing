@@ -78,6 +78,7 @@
 import datatable from '@/utils/vue/datatable.vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
+import { v4 as uuid } from 'uuid'
 
 export default {
     name: 'TableCompetitiveProcesses',
@@ -101,7 +102,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'applications-datatable-' + vm._uid,
+            datatable_id: uuid(),
 
             // selected values for filtering
             filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
@@ -194,9 +195,10 @@ export default {
                 orderable: false,
                 searchable: false,
                 visible: false,
-                // 'render': function(row, type, full){
-                //     return full.id
-                // },
+                'render': function(row, type, full){
+                    console.log({full})
+                    return full.id
+                },
             }
         },
         column_lodgement_number: function(){
@@ -257,7 +259,7 @@ export default {
             let vm = this
             return {
                 // 8. Action
-                data: "id",
+                data: "action",
                 orderable: true,
                 searchable: false,
                 visible: true,
@@ -274,24 +276,6 @@ export default {
                             } else {
                                 links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
                             }
-                        }
-                    }
-                    if (vm.is_external){
-                        if (full.can_user_edit) {
-                            links +=  `<a href='/external/proposal/${full.id}'>Continue</a><br/>`;
-                            links +=  `<a href='#${full.id}' data-discard-proposal='${full.id}'>Discard</a><br/>`;
-                        }
-                        else if (full.can_user_view) {
-                            links +=  `<a href='/external/proposal/${full.id}'>View</a><br/>`;
-                        }
-                        for (let invoice of full.invoices){
-                            console.log(invoice.payment_status.toLowerCase())
-                            if (invoice.payment_status.toLowerCase() === 'unpaid' || invoice.payment_status.toLowerCase() === 'partially paid'){
-                                links +=  `<a href='/application_fee_existing/${full.id}'>Pay</a>`
-                            }
-                        }
-                        if (full.document_upload_url){
-                            links +=  `<a href='${full.document_upload_url}'>Upload Documents</a>`
                         }
                     }
                     return links;
@@ -364,9 +348,9 @@ export default {
                 language: {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
-                rowCallback: function (row, proposal){
+                rowCallback: function (row, competitive_process){
                     let row_jq = $(row)
-                    row_jq.attr('id', 'proposal_id_' + proposal.id)
+                    row_jq.attr('id', 'competitive_process_id_' + competitive_process.id)
                     row_jq.children().first().addClass(vm.td_expand_class_name)
                 },
                 responsive: true,
@@ -399,6 +383,9 @@ export default {
         }
     },
     methods: {
+        createNewCompetitiveProcess: function() {
+            console.log('in createNewCompetitiveProcess')
+        },
         adjust_table_width: function(){
             this.$refs.application_datatable.vmDataTable.columns.adjust()
             this.$refs.application_datatable.vmDataTable.responsive.recalc()
@@ -434,10 +421,30 @@ export default {
         //    return details
         //},
         expandCollapseFilters: function(){
-            console.log('expandCollapseFilters')
             this.filters_expanded = !this.filters_expanded
         },
         new_competitive_process_clicked: function(){
+            let vm = this
+            swal.fire({
+                title: "Create New Competitive Process",
+                text: "Are you sure you want to create new competitive process?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Create New Competitive Process',
+                // confirmButtonColor:'#dc3545'
+            }).then(async result => {
+                if (result.isConfirmed){
+                    // When Yes
+                    await vm.createNewCompetitiveProcess()
+                    vm.datatable_id = uuid()
+                    // this.$router.push({ name: 'apply_proposal' })
+
+                } else if (result.isDenied){
+                    // When No
+                } else {
+                    // When cancel
+                }
+            })
             //this.$router.push({
             //    name: 'apply_proposal'
             //})
@@ -477,7 +484,6 @@ export default {
                     throw new Error(res.statusText)  // 400s or 500s error
 
                 let aho = await res.json()
-                console.log({aho})
                 vm.application_statuses = aho
             } catch(err){
 
@@ -535,7 +541,8 @@ export default {
 
                 // Retrieve id from the id of the <tr>
                 let tr_id = tr.attr('id')
-                let proposal_id = tr_id.replace('proposal_id_', '')
+                let competitive_process_id = tr_id.replace('competitive_process_id_', '')
+                console.log({competitive_process_id})
 
                 let first_td = tr.children().first()
                 if(first_td.hasClass(vm.td_expand_class_name)){

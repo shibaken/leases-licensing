@@ -2,6 +2,7 @@ from django.db import models
 from ledger_api_client.ledger_models import EmailUserRO
 
 from leaseslicensing.components.main.related_item import RelatedItem
+from leaseslicensing.helpers import is_internal
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 
 
@@ -84,3 +85,13 @@ class CompetitiveProcess(models.Model):
     @property
     def related_item_descriptor(self):
         return '(return descriptor)'
+
+    def can_user_view(self, user):
+        if is_internal(user):  # TODO: confirm this condition
+            return True
+        return False
+
+    def can_user_process(self, user):
+        if self.assigned_officer == user:  # TODO: confirm this condition
+            return True
+        return False

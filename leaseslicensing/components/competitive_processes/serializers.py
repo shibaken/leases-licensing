@@ -18,6 +18,9 @@ class ListCompetitiveProcessSerializer(serializers.ModelSerializer):
     registration_of_interest = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     assigned_officer = serializers.SerializerMethodField()
+    site = serializers.SerializerMethodField()
+    group = serializers.SerializerMethodField()
+    action = serializers.SerializerMethodField()
 
     class Meta:
         model = CompetitiveProcess
@@ -28,6 +31,9 @@ class ListCompetitiveProcessSerializer(serializers.ModelSerializer):
             'status',
             'created_at',
             'assigned_officer',
+            'site',
+            'group',
+            'action',
         )
 
     def get_registration_of_interest(self, obj):
@@ -44,3 +50,19 @@ class ListCompetitiveProcessSerializer(serializers.ModelSerializer):
             return EmailUserSerializer(obj.assigned_officer).data
         else:
             return ''
+
+    def get_site(self, obj):
+        return '(TODO: site)'
+
+    def get_group(self, obj):
+        return '(TODO: group)'
+
+    def get_action(self, obj):
+        request = self.context.get("request")
+        user = request.user
+        can_view = obj.can_user_view(user)
+        can_process = obj.can_user_process(user)
+        return {
+            'can_view': can_view,
+            'can_process': can_process
+        }

@@ -56,9 +56,7 @@ class CompetitiveProcessPaginatedViewSet(viewsets.ModelViewSet):
         qs = qs.distinct()
         self.paginator.page_size = qs.count()
         result_page = self.paginator.paginate_queryset(qs, request)
-        serializer = ListCompetitiveProcessSerializer(
-            result_page, context={"request": request}, many=True
-        )
+        serializer = ListCompetitiveProcessSerializer(result_page, context={"request": request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
 
 
