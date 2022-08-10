@@ -236,7 +236,6 @@ class GetApplicationTypeDescriptions(views.APIView):
             data = cache.get("application_type_descriptions")
         return Response(data)
 
-
 class GetApplicationStatusesDict(views.APIView):
     renderer_classes = [
         JSONRenderer,
