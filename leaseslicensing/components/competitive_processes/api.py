@@ -9,6 +9,7 @@ from leaseslicensing.components.competitive_processes.models import CompetitiveP
 from leaseslicensing.components.competitive_processes.serializers import ListCompetitiveProcessSerializer
 from leaseslicensing.helpers import is_internal
 
+
 class CompetitiveProcessFilterBackend(DatatablesFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
@@ -25,6 +26,16 @@ class CompetitiveProcessFilterBackend(DatatablesFilterBackend):
             filter_competitive_process_created_to = datetime.strptime(filter_competitive_process_created_to, "%Y-%m-%d")
             queryset = queryset.filter(created_at__lte=filter_competitive_process_created_to)
 
+        fields = self.get_fields(request)
+        ordering = self.get_ordering(request, view, fields)
+        queryset = queryset.order_by(*ordering)
+        if len(ordering):
+            queryset = queryset.order_by(*ordering)
+
+        queryset = super(CompetitiveProcessFilterBackend, self).filter_queryset(
+            request, queryset, view
+        )
+        # setattr(view, "_datatables_total_count", total_count)
         return queryset
 
 class CompetitiveProcessPaginatedViewSet(viewsets.ModelViewSet):

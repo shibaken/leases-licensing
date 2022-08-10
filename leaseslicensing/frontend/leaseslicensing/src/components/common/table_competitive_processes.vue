@@ -214,7 +214,7 @@ export default {
         column_registration_of_interest: function(){
             return {
                 data: "registration_of_interest",
-                name: 'registration_of_interest',
+                name: 'generating_proposal__lodgement_number',
                 orderable: true,
                 searchable: true,
                 visible: true,
@@ -303,7 +303,7 @@ export default {
         column_assigned_to: function(){
             return {
                 data: "assigned_officer",
-                // name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
+                // name: 'assigned_officer__first_name, assigned_officer__last_name',  // This functionality does not simply work due to the separation of EmailUser information.
                 orderable: true,
                 searchable: false,
                 visible: true,
