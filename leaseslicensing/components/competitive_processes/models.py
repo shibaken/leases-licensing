@@ -6,7 +6,17 @@ from leaseslicensing.helpers import is_internal
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 
 
+class CompetitiveProcessManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('generating_proposal')
+
+
 class CompetitiveProcess(models.Model):
+    """A class to represent a custom process"""
+
+    objects = CompetitiveProcessManager()
+
     prefix = 'CP'
     STATUS_IN_PROGRESS = "in_progress"
     STATUS_DISCARDED = "discarded"
