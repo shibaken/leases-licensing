@@ -40,8 +40,9 @@ class CompetitiveProcess(models.Model):
 
     @property
     def generated_from_registration_of_interest(self):
-        if self.generating_proposal:
-            return True
+        if hasattr(self, 'generating_proposal'):
+            if self.generating_proposal:
+                return True
         return False
 
     @property
@@ -59,7 +60,7 @@ class CompetitiveProcess(models.Model):
     @property
     def next_lodgement_number(self):
         try:
-            ids = [int(i) for i in CompetitiveProcess.objects.all().values_list('lodgement_number', flat=True) if i]
+            ids = [int(i.lstrip(self.prefix)) for i in CompetitiveProcess.objects.all().values_list('lodgement_number', flat=True) if i]
             return max(ids) + 1 if ids else 1
         except Exception as e:
             print(e)
