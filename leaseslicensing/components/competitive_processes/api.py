@@ -38,6 +38,7 @@ class CompetitiveProcessFilterBackend(DatatablesFilterBackend):
         # setattr(view, "_datatables_total_count", total_count)
         return queryset
 
+
 class CompetitiveProcessPaginatedViewSet(viewsets.ModelViewSet):
     queryset = CompetitiveProcess.objects.none()
     serializer_class = ListCompetitiveProcessSerializer

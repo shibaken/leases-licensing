@@ -31,16 +31,18 @@ class CompetitiveProcess(models.Model):
         verbose_name_plural = "Competitive Processes"
 
     @property
+    def site(self):
+        return 'site_name'
+
+    @property
+    def group(self):
+        return 'group_name'
+
+    @property
     def generated_from_registration_of_interest(self):
         if self.generating_proposal:
             return True
         return False
-
-    @property
-    def registration_of_interest(self):
-        if self.generated_from_registration_of_interest:
-            return self.generating_proposal
-        return None
 
     @property
     def is_assigned(self):
