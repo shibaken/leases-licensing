@@ -42,8 +42,13 @@ class CompetitiveProcessFilterBackend(DatatablesFilterBackend):
 
 class CompetitiveProcessViewSet(viewsets.ModelViewSet):
     queryset = CompetitiveProcess.objects.none()
-    serializer_class = ListCompetitiveProcessSerializer
     filter_backends = (CompetitiveProcessFilterBackend,)
+
+    def get_serializer_class(self):
+        """ Configure serializers to use """
+        if self.action == 'list':
+            return ListCompetitiveProcessSerializer
+        return CompetitiveProcessSerializer
 
     def get_queryset(self):
         if is_internal(self.request):
@@ -58,13 +63,8 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
         qs = qs.distinct()
         self.paginator.page_size = qs.count()
         result_page = self.paginator.paginate_queryset(qs, request)
-        serializer = ListCompetitiveProcessSerializer(result_page, context={"request": request}, many=True)
+        serializer = self.get_serializer(result_page, context={"request": request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
-
-    def create(self, request, *args, **kwargs):
-        serializer = CompetitiveProcessSerializer(data={})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
 
 
 class GetCompetitiveProcessStatusesDict(views.APIView):
