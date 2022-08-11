@@ -68,6 +68,7 @@
                     :id="datatable_id"
                     :dtOptions="datatable_options"
                     :dtHeaders="datatable_headers"
+                    :key="datatable_key"
                 />
             </div>
         </div>
@@ -103,6 +104,7 @@ export default {
         let vm = this;
         return {
             datatable_id: uuid(),
+            datatable_key: uuid(),
 
             // selected values for filtering
             filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
@@ -195,10 +197,6 @@ export default {
                 orderable: false,
                 searchable: false,
                 visible: false,
-                'render': function(row, type, full){
-                    console.log({full})
-                    return full.id
-                },
             }
         },
         column_lodgement_number: function(){
@@ -208,9 +206,6 @@ export default {
                 orderable: true,
                 searchable: true,
                 visible: true,
-                // 'render': function(row, type, full){
-                //     return full.lodgement_number
-                // },
             }
         },
         column_registration_of_interest: function(){
@@ -222,7 +217,7 @@ export default {
                 visible: true,
                 'render': function(row, type, full){
                     if (full.registration_of_interest){
-                        return full.registration_of_interest.lodgement_number
+                        return '<a href="' + api_endpoints.proposal + full.registration_of_interest.id + '">' + full.registration_of_interest.lodgement_number + '</a>'
                     } else {
                         return ''
                     }
@@ -237,14 +232,10 @@ export default {
                 orderable: true,
                 searchable: false,
                 visible: true,
-                // 'render': function(row, type, full){
-                //     return full.status
-                // }
             }
         },
         column_created_on: function(){
             return {
-                // 6. Lodged
                 data: "created_at",
                 name: 'created_at',
                 orderable: true,
@@ -284,7 +275,7 @@ export default {
                     let links = '';
                     if (vm.is_internal){
                         if (full.can_accessing_user_view){
-                            links += '<a href="#">View</a>'
+                            links += '<a href="' + api_endpoints.competitive_process + '/' + full.id + '">View</a>'
                         }
                         if (full.can_accessing_user_process){
                             links += '<a href="#">Process</a>'
@@ -350,7 +341,7 @@ export default {
                 serverSide: true,
                 searching: search,
                 ajax: {
-                    "url": api_endpoints.competitive_processes_paginated_list + '?format=datatables',
+                    "url": api_endpoints.competitive_process + '?format=datatables',
                     "dataSrc": 'data',
 
                     // adding extra GET params for Custom filtering
@@ -376,8 +367,8 @@ export default {
         }
     },
     methods: {
-        createNewCompetitiveProcess: function() {
-            console.log('in createNewCompetitiveProcess')
+        createNewCompetitiveProcess: async function() {
+            const res = await fetch('/api/competitive_process/', { method: 'POST' })
         },
         adjust_table_width: function(){
             this.$refs.competitive_process_datatable.vmDataTable.columns.adjust()
@@ -429,7 +420,7 @@ export default {
                 if (result.isConfirmed){
                     // When Yes
                     await vm.createNewCompetitiveProcess()
-                    vm.datatable_id = uuid()
+                    vm.datatable_key = uuid()
                     // this.$router.push({ name: 'apply_proposal' })
 
                 } else if (result.isDenied){

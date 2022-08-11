@@ -16,6 +16,13 @@ class RegistrationOfInterestSerializer(serializers.ModelSerializer):
         )
 
 
+class CompetitiveProcessSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CompetitiveProcess
+        fields = '__all__'
+
+
 class ListCompetitiveProcessSerializer(serializers.ModelSerializer):
     registration_of_interest = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()

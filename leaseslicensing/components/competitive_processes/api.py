@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
 
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess
-from leaseslicensing.components.competitive_processes.serializers import ListCompetitiveProcessSerializer
+from leaseslicensing.components.competitive_processes.serializers import ListCompetitiveProcessSerializer, \
+    CompetitiveProcessSerializer
 from leaseslicensing.helpers import is_internal
 
 
@@ -39,7 +40,7 @@ class CompetitiveProcessFilterBackend(DatatablesFilterBackend):
         return queryset
 
 
-class CompetitiveProcessPaginatedViewSet(viewsets.ModelViewSet):
+class CompetitiveProcessViewSet(viewsets.ModelViewSet):
     queryset = CompetitiveProcess.objects.none()
     serializer_class = ListCompetitiveProcessSerializer
     filter_backends = (CompetitiveProcessFilterBackend,)
@@ -59,6 +60,11 @@ class CompetitiveProcessPaginatedViewSet(viewsets.ModelViewSet):
         result_page = self.paginator.paginate_queryset(qs, request)
         serializer = ListCompetitiveProcessSerializer(result_page, context={"request": request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = CompetitiveProcessSerializer(data={})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
 
 class GetCompetitiveProcessStatusesDict(views.APIView):
