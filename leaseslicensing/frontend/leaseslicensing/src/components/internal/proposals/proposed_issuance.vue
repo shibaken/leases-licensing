@@ -98,6 +98,22 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="row modal-input-row">
+                                    <div class="col-sm-3">
+                                        <label class="control-label pull-left" for="approvalSubType">Approval Sub Type</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <select 
+                                            ref="approvalSubType"
+                                            class="form-control"
+                                            v-model="selectedApprovalSubType"
+                                        >
+                                            <option value="null"></option>
+                                            <option v-for="atype in approvalSubTypes" :value="atype" :key="atype.name">{{atype.name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Commencement</label>
