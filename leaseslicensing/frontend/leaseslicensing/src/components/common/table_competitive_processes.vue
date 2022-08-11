@@ -275,10 +275,10 @@ export default {
                     let links = '';
                     if (vm.is_internal){
                         if (full.can_accessing_user_view){
-                            links += '<a href="' + api_endpoints.competitive_process + '/' + full.id + '">View</a>'
+                            links += '<a href="/internal/competitive_process/' + full.id + '">View</a>'
                         }
                         if (full.can_accessing_user_process){
-                            links += '<a href="#">Process</a>'
+                            links += '<a href="/internal/competitive_process/' + full.id + '">Process</a>'
                         }
                     }
                     return links;

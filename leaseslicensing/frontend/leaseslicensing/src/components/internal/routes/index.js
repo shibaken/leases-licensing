@@ -12,6 +12,7 @@ import PersonDetail from '@/components/internal/person/person_detail.vue'
 import Compliance from '../compliances/access.vue'
 import Reports from '@/components/reports/reports.vue'
 import Approval from '@/components/internal/approvals/approval.vue'
+import CompetitiveProcess from '@/components/internal/competitive_process/competitive_process.vue'
 
 export default
 {
@@ -84,6 +85,11 @@ export default
             path: 'proposal/:proposal_id',
             component: Proposal,
             name: 'internal-proposal',
+        },
+        {
+            path: 'competitive_process/:competitive_process_id',
+            component: CompetitiveProcess,
+            name: 'internal-competitive-process',
         },
     ]
 }
