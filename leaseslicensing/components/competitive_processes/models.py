@@ -2,10 +2,21 @@ from django.db import models
 from ledger_api_client.ledger_models import EmailUserRO
 
 from leaseslicensing.components.main.related_item import RelatedItem
+from leaseslicensing.helpers import is_internal
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 
 
+class CompetitiveProcessManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('generating_proposal')
+
+
 class CompetitiveProcess(models.Model):
+    """A class to represent a custom process"""
+
+    objects = CompetitiveProcessManager()
+
     prefix = 'CP'
     STATUS_IN_PROGRESS = "in_progress"
     STATUS_DISCARDED = "discarded"
@@ -30,16 +41,19 @@ class CompetitiveProcess(models.Model):
         verbose_name_plural = "Competitive Processes"
 
     @property
-    def generated_from_registration_of_interest(self):
-        if self.generating_proposal:
-            return True
-        return False
+    def site(self):
+        return 'site_name'
 
     @property
-    def registration_of_interest(self):
-        if self.generated_from_registration_of_interest:
-            return self.generating_proposal
-        return None
+    def group(self):
+        return 'group_name'
+
+    @property
+    def generated_from_registration_of_interest(self):
+        if hasattr(self, 'generating_proposal'):
+            if self.generating_proposal:
+                return True
+        return False
 
     @property
     def is_assigned(self):
@@ -56,7 +70,7 @@ class CompetitiveProcess(models.Model):
     @property
     def next_lodgement_number(self):
         try:
-            ids = [int(i) for i in CompetitiveProcess.objects.all().values_list('lodgement_number', flat=True) if i]
+            ids = [int(i.lstrip(self.prefix)) for i in CompetitiveProcess.objects.all().values_list('lodgement_number', flat=True) if i]
             return max(ids) + 1 if ids else 1
         except Exception as e:
             print(e)
@@ -84,3 +98,13 @@ class CompetitiveProcess(models.Model):
     @property
     def related_item_descriptor(self):
         return '(return descriptor)'
+
+    def can_user_view(self, user):
+        if is_internal(user):  # TODO: confirm this condition
+            return True
+        return False
+
+    def can_user_process(self, user):
+        if self.assigned_officer == user:  # TODO: confirm this condition
+            return True
+        return False

@@ -64,10 +64,11 @@
         <div class="row">
             <div class="col-lg-12">
                 <datatable
-                    ref="application_datatable"
+                    ref="competitive_process_datatable"
                     :id="datatable_id"
                     :dtOptions="datatable_options"
                     :dtHeaders="datatable_headers"
+                    :key="datatable_key"
                 />
             </div>
         </div>
@@ -78,6 +79,7 @@
 import datatable from '@/utils/vue/datatable.vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
+import { v4 as uuid } from 'uuid'
 
 export default {
     name: 'TableCompetitiveProcesses',
@@ -101,7 +103,8 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'applications-datatable-' + vm._uid,
+            datatable_id: uuid(),
+            datatable_key: uuid(),
 
             // selected values for filtering
             filterApplicationStatus: sessionStorage.getItem('filterApplicationStatus') ? sessionStorage.getItem('filterApplicationStatus') : 'all',
@@ -135,17 +138,17 @@ export default {
     },
     watch: {
         filterApplicationStatus: function() {
-            this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            this.$refs.competitive_process_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterApplicationStatus', this.filterApplicationStatus);
         },
         filterCompetitiveProcessCreatedFrom: function() {
             console.log('filterCompetitiveProcessCreatedFrom changed')
-            this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            this.$refs.competitive_process_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterCompetitiveProcessCreatedFrom', this.filterCompetitiveProcessCreatedFrom);
         },
         filterCompetitiveProcessCreatedTo: function() {
             console.log('filterCompetitiveProcessCreatedTo changed')
-            this.$refs.application_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            this.$refs.competitive_process_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
             sessionStorage.setItem('filterCompetitiveProcessCreatedTo', this.filterCompetitiveProcessCreatedTo);
         },
         filterApplied: function(){
@@ -157,7 +160,7 @@ export default {
     },
     computed: {
         number_of_columns: function() {
-            let num =  this.$refs.application_datatable.vmDataTable.columns(':visible').nodes().length;
+            let num =  this.$refs.competitive_process_datatable.vmDataTable.columns(':visible').nodes().length;
             return num
         },
         filterApplied: function(){
@@ -194,9 +197,6 @@ export default {
                 orderable: false,
                 searchable: false,
                 visible: false,
-                // 'render': function(row, type, full){
-                //     return full.id
-                // },
             }
         },
         column_lodgement_number: function(){
@@ -206,21 +206,18 @@ export default {
                 orderable: true,
                 searchable: true,
                 visible: true,
-                // 'render': function(row, type, full){
-                //     return full.lodgement_number
-                // },
             }
         },
         column_registration_of_interest: function(){
             return {
                 data: "registration_of_interest",
-                name: 'registration_of_interest',
+                name: 'generating_proposal__lodgement_number',
                 orderable: true,
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
                     if (full.registration_of_interest){
-                        return full.registration_of_interest.lodgement_number
+                        return '<a href="' + api_endpoints.proposal + full.registration_of_interest.id + '">' + full.registration_of_interest.lodgement_number + '</a>'
                     } else {
                         return ''
                     }
@@ -235,14 +232,10 @@ export default {
                 orderable: true,
                 searchable: false,
                 visible: true,
-                // 'render': function(row, type, full){
-                //     return full.status
-                // }
             }
         },
         column_created_on: function(){
             return {
-                // 6. Lodged
                 data: "created_at",
                 name: 'created_at',
                 orderable: true,
@@ -253,57 +246,10 @@ export default {
                 }
             }
         },
-        column_action: function(){
-            let vm = this
-            return {
-                // 8. Action
-                data: "id",
-                orderable: true,
-                searchable: false,
-                visible: true,
-                'render': function(row, type, full){
-                    /*
-                    let links = '';
-                    if (vm.is_internal){
-                        if (vm.debug){
-                            links +=  `<a href='/internal/proposal/${full.id}'>Process</a><br/>`;
-                            links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
-                        } else {
-                            if(full.assessor_process){
-                                links +=  `<a href='/internal/proposal/${full.id}'>Process</a><br/>`;
-                            } else {
-                                links +=  `<a href='/internal/proposal/${full.id}'>View</a><br/>`;
-                            }
-                        }
-                    }
-                    if (vm.is_external){
-                        if (full.can_user_edit) {
-                            links +=  `<a href='/external/proposal/${full.id}'>Continue</a><br/>`;
-                            links +=  `<a href='#${full.id}' data-discard-proposal='${full.id}'>Discard</a><br/>`;
-                        }
-                        else if (full.can_user_view) {
-                            links +=  `<a href='/external/proposal/${full.id}'>View</a><br/>`;
-                        }
-                        for (let invoice of full.invoices){
-                            console.log(invoice.payment_status.toLowerCase())
-                            if (invoice.payment_status.toLowerCase() === 'unpaid' || invoice.payment_status.toLowerCase() === 'partially paid'){
-                                links +=  `<a href='/application_fee_existing/${full.id}'>Pay</a>`
-                            }
-                        }
-                        if (full.document_upload_url){
-                            links +=  `<a href='${full.document_upload_url}'>Upload Documents</a>`
-                        }
-                    }
-                    return links;
-                    */
-                    return 'TODO'
-                }
-            }
-        },
         column_assigned_to: function(){
             return {
                 data: "assigned_officer",
-                // name: 'assigned_officer__first_name, assigned_officer__last_name, assigned_approver__first_name, assigned_approver__last_name',
+                // name: 'assigned_officer__first_name, assigned_officer__last_name',  // This functionality does not simply work due to the separation of EmailUser information.
                 orderable: true,
                 searchable: false,
                 visible: true,
@@ -314,6 +260,30 @@ export default {
                         return ''
                     }
                 },
+            }
+        },
+        column_action: function(){
+            let vm = this
+            return {
+                // 8. Action
+                // data: "action",
+                data: null,
+                orderable: true,
+                searchable: false,
+                visible: true,
+                'render': function(row, type, full){
+                    console.log({full})
+                    let links = '';
+                    if (vm.is_internal){
+                        if (full.can_accessing_user_view){
+                            links += '<a href="/internal/competitive_process/' + full.id + '">View</a>'
+                        }
+                        if (full.can_accessing_user_process){
+                            links += '<a href="/internal/competitive_process/' + full.id + '">Process</a>'
+                        }
+                    }
+                    return links;
+                }
             }
         },
         datatable_options: function(){
@@ -364,16 +334,15 @@ export default {
                 language: {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
-                rowCallback: function (row, proposal){
+                rowCallback: function (row, competitive_process){
                     let row_jq = $(row)
-                    row_jq.attr('id', 'proposal_id_' + proposal.id)
                     row_jq.children().first().addClass(vm.td_expand_class_name)
                 },
                 responsive: true,
                 serverSide: true,
                 searching: search,
                 ajax: {
-                    "url": api_endpoints.competitive_processes_paginated_list + '?format=datatables',
+                    "url": api_endpoints.competitive_process + '?format=datatables',
                     "dataSrc": 'data',
 
                     // adding extra GET params for Custom filtering
@@ -399,9 +368,12 @@ export default {
         }
     },
     methods: {
+        createNewCompetitiveProcess: async function() {
+            const res = await fetch('/api/competitive_process/', { method: 'POST' })
+        },
         adjust_table_width: function(){
-            this.$refs.application_datatable.vmDataTable.columns.adjust()
-            this.$refs.application_datatable.vmDataTable.responsive.recalc()
+            this.$refs.competitive_process_datatable.vmDataTable.columns.adjust()
+            this.$refs.competitive_process_datatable.vmDataTable.responsive.recalc()
         },
         collapsible_component_mounted: function(){
             this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
@@ -434,10 +406,30 @@ export default {
         //    return details
         //},
         expandCollapseFilters: function(){
-            console.log('expandCollapseFilters')
             this.filters_expanded = !this.filters_expanded
         },
         new_competitive_process_clicked: function(){
+            let vm = this
+            swal.fire({
+                title: "Create New Competitive Process",
+                text: "Are you sure you want to create new competitive process?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Create New Competitive Process',
+                // confirmButtonColor:'#dc3545'
+            }).then(async result => {
+                if (result.isConfirmed){
+                    // When Yes
+                    await vm.createNewCompetitiveProcess()
+                    vm.datatable_key = uuid()
+                    // this.$router.push({ name: 'apply_proposal' })
+
+                } else if (result.isDenied){
+                    // When No
+                } else {
+                    // When cancel
+                }
+            })
             //this.$router.push({
             //    name: 'apply_proposal'
             //})
@@ -460,8 +452,8 @@ export default {
                         'Your application has been discarded',
                         'success'
                     )
-                    //vm.$refs.application_datatable.vmDataTable.ajax.reload();
-                    vm.$refs.application_datatable.vmDataTable.draw();
+                    //vm.$refs.competitive_process_datatable.vmDataTable.ajax.reload();
+                    vm.$refs.competitive_process_datatable.vmDataTable.draw();
                 }, (error) => {
                 });
             },(error) => {
@@ -477,7 +469,6 @@ export default {
                     throw new Error(res.statusText)  // 400s or 500s error
 
                 let aho = await res.json()
-                console.log({aho})
                 vm.application_statuses = aho
             } catch(err){
 
@@ -487,7 +478,7 @@ export default {
         },
         addEventListeners: function(){
             let vm = this
-            vm.$refs.application_datatable.vmDataTable.on('click', 'a[data-discard-proposal]', function(e) {
+            vm.$refs.competitive_process_datatable.vmDataTable.on('click', 'a[data-discard-proposal]', function(e) {
                 e.preventDefault();
                 let id = $(this).attr('data-discard-proposal');
                 vm.discardProposal(id)
@@ -522,7 +513,7 @@ export default {
             //});
 
             // Listener for thr row
-            vm.$refs.application_datatable.vmDataTable.on('click', 'td', function(e) {
+            vm.$refs.competitive_process_datatable.vmDataTable.on('click', 'td', function(e) {
                 let td_link = $(this)
 
                 if (!(td_link.hasClass(vm.td_expand_class_name) || td_link.hasClass(vm.td_collapse_class_name))){
@@ -533,16 +524,23 @@ export default {
                 // Get <tr> element as jQuery object
                 let tr = td_link.closest('tr')
 
-                // Retrieve id from the id of the <tr>
-                let tr_id = tr.attr('id')
-                let proposal_id = tr_id.replace('proposal_id_', '')
+                // Get full data of this row
+                let $row = vm.$refs.competitive_process_datatable.vmDataTable.row(tr)
+                let full_data = $row.data()
+                console.log({full_data})
 
                 let first_td = tr.children().first()
                 if(first_td.hasClass(vm.td_expand_class_name)){
                     // Expand
 
                     // If we don't need to retrieve the data from the server, follow the code below
-                    let contents = 'Display whatever you want'
+                    let elem_group = '<div>Group: ' + full_data.group + '</div>'
+                    let elem_site = '<div>Site: ' + full_data.site + '</div>'
+                    let elem_applicant = ''
+                    if (full_data.registration_of_interest){
+                        elem_applicant = '<div>Applicant: ' + full_data.registration_of_interest.relevant_applicant_name + '</div>'
+                    }
+                    let contents = elem_group + elem_site + elem_applicant
                     let details_elem = $('<tr class="' + vm.expandable_row_class_name +'"><td colspan="' + vm.number_of_columns + '">' + contents + '</td></tr>')
                     details_elem.hide()
                     details_elem.insertAfter(tr)
