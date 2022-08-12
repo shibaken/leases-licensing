@@ -66,6 +66,11 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(result_page, context={"request": request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
 
+    def retrieve(self, request, *args, **kwargs):
+        competitive_process = self.get_object()
+        serializer = self.get_serializer(competitive_process, context={'request': request})
+        return Response(serializer.data)
+
 
 class GetCompetitiveProcessStatusesDict(views.APIView):
     renderer_classes = [
