@@ -126,6 +126,23 @@ class UserFilterSerializer(serializers.ModelSerializer):
         return obj.get_full_name()
 
 
+class UserSerializerSimple(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EmailUser
+        fields = (
+            "id",
+            "last_name",
+            "first_name",
+            "email",
+            "full_name"
+        )
+
+    def get_full_name(self, obj):
+        return obj.get_full_name()
+
+
 class UserSerializer(serializers.ModelSerializer):
     # leaseslicensing_organisations = serializers.SerializerMethodField()
     residential_address = UserAddressSerializer()
