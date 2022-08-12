@@ -38,7 +38,7 @@ from datetime import datetime, timedelta, date
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from leaseslicensing.components.proposals.models import Proposal, ApplicationType
-from leaseslicensing.components.approvals.models import Approval, ApprovalDocument, ApprovalType
+from leaseslicensing.components.approvals.models import Approval, ApprovalDocument, ApprovalType, ApprovalSubType
 from leaseslicensing.components.approvals.serializers import (
     ApprovalSerializer,
     ApprovalCancellationSerializer,
@@ -95,11 +95,32 @@ class GetApprovalTypesDict(views.APIView):
             cache.set(
                 "approval_types_dict",
                 approval_types_dict,
-                #[{"code": i[0], "description": i[1]} for i in Approval.STATUS_CHOICES],
                 settings.LOV_CACHE_TIMEOUT,
             )
             data = cache.get("approval_types_dict")
         return Response(data)
+
+
+class GetApprovalSubTypesDict(views.APIView):
+    renderer_classes = [
+        JSONRenderer,
+    ]
+
+    def get(self, request, format=None):
+        data = cache.get("approval_sub_types_dict")
+        if not data:
+            approval_sub_types_dict = [{
+                "id": t.id, 
+                "name": t.name
+            } for t in ApprovalSubType.objects.all()]
+            cache.set(
+                "approval_sub_types_dict",
+                approval_sub_types_dict,
+                settings.LOV_CACHE_TIMEOUT,
+            )
+            data = cache.get("approval_sub_types_dict")
+        return Response(data)
+
 
 
 class GetApprovalStatusesDict(views.APIView):
