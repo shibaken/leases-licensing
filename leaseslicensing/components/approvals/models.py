@@ -100,6 +100,16 @@ class ApprovalSubType(RevisionedMixin):
 class ApprovalType(RevisionedMixin):
     name = models.CharField(max_length=200, unique=True)
     details_placeholder = models.CharField(max_length=200, blank=True)
+    approval_type_document_types = models.ManyToManyField("ApprovalTypeDocumentType")
+    class Meta:
+        app_label = "leaseslicensing"
+
+    def __str__(self):
+        return self.name
+
+
+class ApprovalTypeDocumentType(RevisionedMixin):
+    name = models.CharField(max_length=200, unique=True)
 
     class Meta:
         app_label = "leaseslicensing"

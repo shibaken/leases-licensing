@@ -194,6 +194,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <hr>
                         </div>
                     </form>
                 </div>
