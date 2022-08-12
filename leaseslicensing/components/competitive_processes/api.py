@@ -6,8 +6,10 @@ from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
 
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess
-from leaseslicensing.components.competitive_processes.serializers import ListCompetitiveProcessSerializer
+from leaseslicensing.components.competitive_processes.serializers import ListCompetitiveProcessSerializer, \
+    CompetitiveProcessSerializer
 from leaseslicensing.helpers import is_internal
+
 
 class CompetitiveProcessFilterBackend(DatatablesFilterBackend):
 
@@ -25,12 +27,28 @@ class CompetitiveProcessFilterBackend(DatatablesFilterBackend):
             filter_competitive_process_created_to = datetime.strptime(filter_competitive_process_created_to, "%Y-%m-%d")
             queryset = queryset.filter(created_at__lte=filter_competitive_process_created_to)
 
+        fields = self.get_fields(request)
+        ordering = self.get_ordering(request, view, fields)
+        queryset = queryset.order_by(*ordering)
+        if len(ordering):
+            queryset = queryset.order_by(*ordering)
+
+        queryset = super(CompetitiveProcessFilterBackend, self).filter_queryset(
+            request, queryset, view
+        )
+        # setattr(view, "_datatables_total_count", total_count)
         return queryset
 
-class CompetitiveProcessPaginatedViewSet(viewsets.ModelViewSet):
+
+class CompetitiveProcessViewSet(viewsets.ModelViewSet):
     queryset = CompetitiveProcess.objects.none()
-    serializer_class = ListCompetitiveProcessSerializer
     filter_backends = (CompetitiveProcessFilterBackend,)
+
+    def get_serializer_class(self):
+        """ Configure serializers to use """
+        if self.action == 'list':
+            return ListCompetitiveProcessSerializer
+        return CompetitiveProcessSerializer
 
     def get_queryset(self):
         if is_internal(self.request):
@@ -45,9 +63,7 @@ class CompetitiveProcessPaginatedViewSet(viewsets.ModelViewSet):
         qs = qs.distinct()
         self.paginator.page_size = qs.count()
         result_page = self.paginator.paginate_queryset(qs, request)
-        serializer = ListCompetitiveProcessSerializer(
-            result_page, context={"request": request}, many=True
-        )
+        serializer = self.get_serializer(result_page, context={"request": request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
 
 

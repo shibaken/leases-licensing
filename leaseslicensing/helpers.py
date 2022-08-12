@@ -90,14 +90,26 @@ def is_in_organisation_contacts(request, organisation):
     )
 
 
-def is_departmentUser(request):
+def is_departmentUser(user):
     # return request.user.is_authenticated and is_model_backend(request) and in_dbca_domain(request)
-    return request.user.is_authenticated and request.user.is_staff
+    try:
+        return user.is_authenticated and user.is_staff
+    except AttributeError as e:
+        #  user is probably Request type
+        return user.user.is_authenticated and user.user.is_staff
+    except Exception as e:
+        raise
 
 
-def is_customer(request):
+def is_customer(user):
     # return request.user.is_authenticated and is_email_auth_backend(request)
-    return request.user.is_authenticated and not request.user.is_staff
+    try:
+        return user.is_authenticated and not user.is_staff
+    except AttributeError as e:
+        # user is probably Request type
+        return user.user.is_authenticated and not user.user.is_staff
+    except Exception as e:
+        raise
 
 
 def is_internal(request):

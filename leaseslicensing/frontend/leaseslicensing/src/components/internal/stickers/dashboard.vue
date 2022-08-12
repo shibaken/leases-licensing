@@ -19,7 +19,7 @@ import FormSection from "@/components/forms/section_toggle.vue"
 import StickersTable from "@/components/common/table_stickers.vue"
 import ModalDetails from "@/components/common/sticker_replacement_modal.vue"
 import { api_endpoints, helpers } from '@/utils/hooks'
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 
 export default {
     name: 'InternalStickersDashboard',

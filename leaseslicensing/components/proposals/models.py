@@ -1201,6 +1201,28 @@ class Proposal(DirtyFieldsMixin, models.Model):
             self.save()
 
     @property
+    def relevant_applicant(self):
+        if self.ind_applicant:
+            return retrieve_email_user(self.ind_applicant)
+        elif self.org_applicant:
+            return self.org_applicant
+        elif self.proxy_applicant:
+            return retrieve_email_user(self.proxy_applicant)
+        else:
+            return retrieve_email_user(self.submitter)
+
+    @property
+    def relevant_applicant_name(self):
+        relevant_applicant = self.relevant_applicant
+        if isinstance(relevant_applicant, EmailUser):
+            # ind_applicant/proxy_applicant/submitter
+            return relevant_applicant.get_full_name()
+        else:
+            # Organisation
+            return relevant_applicant.name
+
+
+    @property
     def can_create_final_approval(self):
         return (
             self.fee_paid
