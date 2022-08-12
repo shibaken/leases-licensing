@@ -266,6 +266,8 @@ export default {
             approval: {},
             approvalTypes: [],
             selectedApprovalType: {},
+            approvalSubTypes: [],
+            selectedApprovalSubType: {},
             state: 'proposed_approval',
             issuingApproval: false,
             validation_form: null,
@@ -400,7 +402,7 @@ export default {
         },
         fetchContact: async function(id){
             const response = await fetch(api_endpoints.contact(id));
-            this.contact = await response.json(); 
+            this.contact = await response.json();
             this.isModalOpen = true;
         },
         fetchApprovalTypes: async function(){
@@ -411,7 +413,14 @@ export default {
                 this.approvalTypes.push(approvalType)
             }
         },
-
+        fetchApprovalSubTypes: async function(){
+            this.approvalSubTypes = []
+            const response = await fetch(api_endpoints.approval_sub_types_dict);
+            const returnedApprovalSubTypes = await response.json()
+            for (let approvalSubType of returnedApprovalSubTypes) {
+                this.approvalSubTypes.push(approvalSubType)
+            }
+        },
         sendData: async function(){
             this.errors = false;
             this.issuingApproval = true;
@@ -422,6 +431,7 @@ export default {
             } else if (this.leaseLicence) {
                 this.approval.details = this.$refs.lease_licence_details.detailsText;
                 this.approval.approval_type = this.selectedApprovalType ? this.selectedApprovalType.id : null;
+                this.approval.approval_sub_type = this.selectedApprovalSubType ? this.selectedApprovalSubType.id : null;
             }
             this.$nextTick(async () => {
                 if (this.state == 'proposed_approval'){
@@ -461,15 +471,25 @@ export default {
         vm.form = document.forms.approvalForm;
         this.approval = Object.assign({}, this.proposal.proposed_issuance_approval);
         await this.fetchApprovalTypes();
+        await this.fetchApprovalSubTypes();
         //vm.addFormValidations();
         this.$nextTick(()=>{
             if (this.approval.decision) {
                 this.selectedDecision = this.approval.decision;
             }
+            // Approval Type
             if (this.approval.approval_type) {
                 for (let atype of this.approvalTypes) {
                     if (atype.id === this.approval.approval_type) {
                         this.selectedApprovalType = atype;
+                    }
+                }
+            }
+            // Approval Sub Type
+            if (this.approval.approval_sub_type) {
+                for (let atype of this.approvalSubTypes) {
+                    if (atype.id === this.approval.approval_sub_type) {
+                        this.selectedApprovalSubType = atype;
                     }
                 }
             }

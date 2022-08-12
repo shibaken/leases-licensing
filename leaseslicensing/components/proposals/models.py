@@ -2263,6 +2263,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     #expiry_date = details.get('expiry_date').strftime('%d/%m/%Y') if details.get('expiry_date') else None
                     self.proposed_issuance_approval = {
                         "approval_type": details.get("approval_type"),
+                        "approval_sub_type": details.get("approval_sub_type"),
                         "cc_email": details.get("cc_email"),
                         "details": details.get("details"),
                         'start_date' : details.get("start_date"),
