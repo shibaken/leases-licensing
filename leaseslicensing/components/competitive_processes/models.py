@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.gis.db.models.fields import PolygonField
+
 from ledger_api_client.ledger_models import EmailUserRO
 
 from leaseslicensing.components.main.related_item import RelatedItem
@@ -108,3 +110,17 @@ class CompetitiveProcess(models.Model):
         if self.assigned_officer == user:  # TODO: confirm this condition
             return True
         return False
+
+
+class CompetitiveProcessGeometry(models.Model):
+    competitive_process = models.ForeignKey(
+        CompetitiveProcess, on_delete=models.CASCADE, related_name="competitive_process_geometries"
+    )
+    polygon = PolygonField(srid=4326, blank=True, null=True)
+    # intersects = models.BooleanField(default=False)
+    # copied_from = models.ForeignKey(
+        # "self", on_delete=models.SET_NULL, blank=True, null=True
+    # )
+
+    class Meta:
+        app_label = "leaseslicensing"
