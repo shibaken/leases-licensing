@@ -2,6 +2,7 @@ from rest_framework import serializers
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.main.serializers import EmailUserSerializer
+from leaseslicensing.components.users.serializers import UserSerializerSimple
 
 
 class RegistrationOfInterestSerializer(serializers.ModelSerializer):
@@ -16,14 +17,7 @@ class RegistrationOfInterestSerializer(serializers.ModelSerializer):
         )
 
 
-class CompetitiveProcessSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CompetitiveProcess
-        fields = '__all__'
-
-
-class ListCompetitiveProcessSerializer(serializers.ModelSerializer):
+class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
     registration_of_interest = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     assigned_officer = serializers.SerializerMethodField()
@@ -85,3 +79,56 @@ class ListCompetitiveProcessSerializer(serializers.ModelSerializer):
             return can_process
         except:
             return False
+
+
+class ListCompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
+
+    class Meta:
+        model = CompetitiveProcess
+        fields = (
+            'id',
+            'lodgement_number',
+            'registration_of_interest',
+            'status',
+            'created_at',
+            'assigned_officer',
+            'site',
+            'group',
+            'can_accessing_user_view',
+            'can_accessing_user_process',
+        )
+        # additional data to be returned for datatable
+        # fields listed here should be listed 'fields' above, otherwise not returned
+        datatables_always_serialize = (
+            'group',
+            'site',
+            'can_accessing_user_view',
+            'can_accessing_user_process',
+        )
+
+
+class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
+    accessing_user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CompetitiveProcess
+        fields = (
+            'id',
+            'lodgement_number',
+            'registration_of_interest',
+            'status',
+            'created_at',
+            'assigned_officer',
+            'site',
+            'group',
+            'can_accessing_user_view',
+            'can_accessing_user_process',
+            'accessing_user',
+        )
+
+    def get_accessing_user(self, obj):
+        user = self.context.get("request").user
+        serializer = UserSerializerSimple(user)
+        return serializer.data
+
+
