@@ -1,9 +1,15 @@
+import uuid
 from django.db import models
+from django.db.models import Q
 from django.contrib.gis.db.models.fields import PolygonField
 
 from ledger_api_client.ledger_models import EmailUserRO
+from leaseslicensing import settings
+from leaseslicensing.components import competitive_processes
+from leaseslicensing.components.main.models import Document
 
 from leaseslicensing.components.main.related_item import RelatedItem
+from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.helpers import is_internal
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 
@@ -11,7 +17,9 @@ from leaseslicensing.ledger_api_utils import retrieve_email_user
 class CompetitiveProcessManager(models.Manager):
 
     def get_queryset(self):
-        return super().get_queryset().select_related('generating_proposal')
+        return super().get_queryset().select_related(
+            'generating_proposal',
+        )
 
 
 class CompetitiveProcess(models.Model):
@@ -114,7 +122,9 @@ class CompetitiveProcess(models.Model):
 
 class CompetitiveProcessGeometry(models.Model):
     competitive_process = models.ForeignKey(
-        CompetitiveProcess, on_delete=models.CASCADE, related_name="competitive_process_geometries"
+        CompetitiveProcess, 
+        on_delete=models.CASCADE, 
+        related_name="competitive_process_geometries"
     )
     polygon = PolygonField(srid=4326, blank=True, null=True)
     # intersects = models.BooleanField(default=False)
@@ -122,5 +132,107 @@ class CompetitiveProcessGeometry(models.Model):
         # "self", on_delete=models.SET_NULL, blank=True, null=True
     # )
 
+    class Meta:
+        app_label = "leaseslicensing"
+
+
+class CompetitiveProcessParty(models.Model):
+    competitive_process = models.ForeignKey(
+        CompetitiveProcess, 
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE, 
+        related_name="competitive_process_parties"
+    )
+    party_person = models.IntegerField(null=True, blank=True)  # EmailUserRO
+    party_organisation = models.ForeignKey(
+        Organisation,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    invited_at = models.DateField(null=True, blank=True)
+    removed_at = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    modified_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        app_label = "leaseslicensing"
+        ordering = ['invited_at']
+        constraints = [
+            models.CheckConstraint(
+                # Either party_person or party_organisation must be None
+                check=Q(party_person=None, party_organisation__isnull=False) | Q(party_person__isnull=False, party_organisation=None),
+                name='either_one_null',
+            )
+        ]
+    
+    @property
+    def is_person(self):
+        if self.party_person:
+            return True
+        return False
+
+    @property
+    def is_organisation(self):
+        if self.party_organisation:
+            return True
+        return False
+
+
+class PartyDetail(models.Model):
+    competitive_processes_party = models.ForeignKey(
+        CompetitiveProcessParty, 
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="party_details"
+    )
+    detail = models.TextField(blank=True)
+    created_by = models.IntegerField(null=True, blank=True)  # EmailUserRO
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    modified_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        app_label = "leaseslicensing"
+        ordering = ['created_at']
+
+
+def update_party_detail_doc_filename(instance, filename):
+    return '{}/competitive_process/{}/{}'.format(
+        settings.MEDIA_APP_DIR, 
+        instance.party_detail.competitive_process_party.competitive_process.id,
+        uuid.uuid4()
+    )
+    # if instance.party_detail.competitive_process_party.is_person:
+    #     party_folder_name = 'party_person'
+    #     party_id = instance.party_detail.competitive_process_party.party_person
+    # elif instance.party_detail.competitive_process_party.is_organisation:
+    #     party_folder_name = 'party_organisation'
+    #     party_id = instance.party_detail.competitive_process_party.party_organisation.id
+    # else:
+    #     party_folder_name = 'unsure_party'
+    #     party_id = 'unsuer_id'
+        
+    # return "{}/competitive_process/{}/{}/{}/detail/{}/{}".format(
+        # settings.MEDIA_APP_DIR, 
+        # instance.party_detail.competitive_process_party.competitive_process.id,
+        # party_folder_name,
+        # party_id,
+        # instance.party_detail.id,
+        # filename,
+    # )
+# 
+
+class PartyDetailDocument(Document):
+    party_detail = models.ForeignKey(
+        PartyDetail, 
+        null=True, 
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='party_detail_documents'
+    )
+    _file = models.FileField(upload_to=update_party_detail_doc_filename, max_length=512)
+    
     class Meta:
         app_label = "leaseslicensing"
