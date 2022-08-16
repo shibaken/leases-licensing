@@ -17,8 +17,15 @@ from leaseslicensing.ledger_api_utils import retrieve_email_user
 class CompetitiveProcessManager(models.Manager):
 
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'generating_proposal',
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'generating_proposal',
+            )
+            .prefetch_related(
+                'competitive_process_parties',
+            )
         )
 
 
@@ -144,7 +151,7 @@ class CompetitiveProcessParty(models.Model):
         on_delete=models.CASCADE, 
         related_name="competitive_process_parties"
     )
-    party_person = models.IntegerField(null=True, blank=True)  # EmailUserRO
+    party_person_id = models.IntegerField(null=True, blank=True)  # EmailUserRO
     party_organisation = models.ForeignKey(
         Organisation,
         blank=True,
@@ -162,16 +169,23 @@ class CompetitiveProcessParty(models.Model):
         constraints = [
             models.CheckConstraint(
                 # Either party_person or party_organisation must be None
-                check=Q(party_person=None, party_organisation__isnull=False) | Q(party_person__isnull=False, party_organisation=None),
+                check=Q(party_person_id=None, party_organisation__isnull=False) | Q(party_person_id__isnull=False, party_organisation=None),
                 name='either_one_null',
             )
         ]
     
     @property
     def is_person(self):
-        if self.party_person:
+        if self.party_person_id:
             return True
         return False
+    
+    @property
+    def party_person(self):
+        if self.party_person_id:
+            person = retrieve_email_user(self.party_person_id)
+            return person
+        return None
 
     @property
     def is_organisation(self):
