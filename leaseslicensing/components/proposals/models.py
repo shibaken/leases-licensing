@@ -819,85 +819,6 @@ class ProposalDocument(Document):
         verbose_name = "Application Document"
 
 
-class OnHoldDocument(Document):
-    proposal = models.ForeignKey(
-        "Proposal", related_name="onhold_documents", on_delete=models.CASCADE
-    )
-    _file = models.FileField(upload_to=update_onhold_doc_filename, max_length=512)
-    input_name = models.CharField(max_length=255, null=True, blank=True)
-    can_delete = models.BooleanField(
-        default=True
-    )  # after initial submit prevent document from being deleted
-    visible = models.BooleanField(
-        default=True
-    )  # to prevent deletion on file system, hidden and still be available in history
-
-    def delete(self):
-        if self.can_delete:
-            return super(ProposalDocument, self).delete()
-
-
-# Documents on Activities(land)and Activities(Marine) tab for T-Class related to required document questions
-class ProposalRequiredDocument(Document):
-    proposal = models.ForeignKey(
-        "Proposal", related_name="required_documents", on_delete=models.CASCADE
-    )
-    _file = models.FileField(
-        upload_to=update_proposal_required_doc_filename, max_length=512
-    )
-    input_name = models.CharField(max_length=255, null=True, blank=True)
-    can_delete = models.BooleanField(
-        default=True
-    )  # after initial submit prevent document from being deleted
-    required_doc = models.ForeignKey(
-        "RequiredDocument", related_name="proposals", on_delete=models.CASCADE
-    )
-    can_hide = models.BooleanField(
-        default=False
-    )  # after initial submit, document cannot be deleted but can be hidden
-    hidden = models.BooleanField(
-        default=False
-    )  # after initial submit prevent document from being deleted
-
-    def delete(self):
-        if self.can_delete:
-            return super(ProposalRequiredDocument, self).delete()
-        logger.info(
-            "Cannot delete existing document object after Application has been submitted (including document submitted before Application pushback to status Draft): {}".format(
-                self.name
-            )
-        )
-
-    class Meta:
-        app_label = "leaseslicensing"
-
-
-class QAOfficerDocument(Document):
-    proposal = models.ForeignKey(
-        "Proposal", related_name="qaofficer_documents", on_delete=models.CASCADE
-    )
-    _file = models.FileField(upload_to=update_qaofficer_doc_filename, max_length=512)
-    input_name = models.CharField(max_length=255, null=True, blank=True)
-    can_delete = models.BooleanField(
-        default=True
-    )  # after initial submit prevent document from being deleted
-    visible = models.BooleanField(
-        default=True
-    )  # to prevent deletion on file system, hidden and still be available in history
-
-    def delete(self):
-        if self.can_delete:
-            return super(QAOfficerDocument, self).delete()
-        logger.info(
-            "Cannot delete existing document object after Application has been submitted (including document submitted before Application pushback to status Draft): {}".format(
-                self.name
-            )
-        )
-
-    class Meta:
-        app_label = "leaseslicensing"
-
-
 class ReferralDocument(Document):
     referral = models.ForeignKey(
         "Referral", related_name="referral_documents", on_delete=models.CASCADE
@@ -2297,6 +2218,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     self.proposed_issuance_approval = {
                         "approval_type": details.get("approval_type"),
                         "approval_sub_type": details.get("approval_sub_type"),
+                        "approval_type_document_type": details.get("approval_type_document_type"),
                         "cc_email": details.get("cc_email"),
                         "details": details.get("details"),
                         'start_date' : details.get("start_date"),
@@ -4346,87 +4268,6 @@ class ProposalAssessmentAnswer(RevisionedMixin):
         app_label = "leaseslicensing"
         verbose_name = "Assessment answer"
         verbose_name_plural = "Assessment answers"
-
-
-class QAOfficerReferral(RevisionedMixin):
-    SENT_CHOICES = ((1, "Sent From Assessor"), (2, "Sent From Referral"))
-    PROCESSING_STATUS_CHOICES = (
-        ("with_qaofficer", "Awaiting"),
-        ("recalled", "Recalled"),
-        ("completed", "Completed"),
-    )
-    lodged_on = models.DateTimeField(auto_now_add=True)
-    proposal = models.ForeignKey(
-        Proposal, related_name="qaofficer_referrals", on_delete=models.CASCADE
-    )
-    # sent_by = models.ForeignKey(EmailUser,related_name='assessor_qaofficer_referrals', on_delete=models.CASCADE)
-    sent_by = models.IntegerField()  # EmailUserRO
-    # qaofficer = models.ForeignKey(EmailUser, null=True, blank=True, related_name='qaofficers', on_delete=models.SET_NULL)
-    qaofficer = models.IntegerField()  # EmailUserRO
-    qaofficer_group = models.ForeignKey(
-        QAOfficerGroup,
-        null=True,
-        blank=True,
-        related_name="qaofficer_groups",
-        on_delete=models.SET_NULL,
-    )
-    linked = models.BooleanField(default=False)
-    sent_from = models.SmallIntegerField(
-        choices=SENT_CHOICES, default=SENT_CHOICES[0][0]
-    )
-    processing_status = models.CharField(
-        "Processing Status",
-        max_length=30,
-        choices=PROCESSING_STATUS_CHOICES,
-        default=PROCESSING_STATUS_CHOICES[0][0],
-    )
-    text = models.TextField(blank=True)  # Assessor text
-    qaofficer_text = models.TextField(blank=True)
-    document = models.ForeignKey(
-        QAOfficerDocument,
-        blank=True,
-        null=True,
-        related_name="qaofficer_referral_document",
-        on_delete=models.SET_NULL,
-    )
-
-    class Meta:
-        app_label = "leaseslicensing"
-        ordering = ("-lodged_on",)
-
-    def __str__(self):
-        return "Application {} - QA Officer referral {}".format(
-            self.proposal.id, self.id
-        )
-
-    # Methods
-    @property
-    def latest_qaofficer_referrals(self):
-        return QAOfficer.objects.filter(sent_by=self.qaofficer, proposal=self.proposal)[
-            :2
-        ]
-
-    # Properties
-    @property
-    def title(self):
-        return self.proposal.title
-
-    @property
-    def applicant(self):
-        return self.proposal.applicant.name
-
-    @property
-    def can_be_processed(self):
-        return self.processing_status == "with_qa_officer"
-
-    def can_asses(self):
-        return self.can_be_processed and self.proposal.is_qa_officer()
-
-
-# @receiver(pre_delete, sender=Proposal)
-# def delete_documents(sender, instance, *args, **kwargs):
-#    for document in instance.documents.all():
-#        document.delete()
 
 
 def clone_proposal_with_status_reset(original_proposal):
