@@ -15,7 +15,6 @@ from leaseslicensing.components.proposals.models import (
     ProposalDeclinedDetails,
     AmendmentRequest,
     ProposalApplicantDetails,
-    QAOfficerReferral,
     ProposalOtherDetails,
     ChecklistQuestion,
     ProposalAssessmentAnswer,
@@ -112,25 +111,6 @@ class ProposalApplicantDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProposalApplicantDetails
         fields = ("id", "first_name")
-
-
-class QAOfficerReferralSerializer(serializers.ModelSerializer):
-    processing_status = serializers.SerializerMethodField(read_only=True)
-    sent_by = serializers.SerializerMethodField(read_only=True)
-    qaofficer = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = QAOfficerReferral
-        fields = "__all__"
-
-    def get_processing_status(self, obj):
-        return obj.get_processing_status_display()
-
-    def get_sent_by(self, obj):
-        return obj.sent_by.get_full_name() if obj.sent_by else ""
-
-    def get_qaofficer(self, obj):
-        return obj.qaofficer.get_full_name() if obj.qaofficer else ""
 
 
 class ProposalOtherDetailsSerializer(serializers.ModelSerializer):
@@ -366,7 +346,6 @@ class BaseProposalSerializer(serializers.ModelSerializer):
             "can_officer_process",
             # 'allowed_assessors',
             # 'is_qa_officer',
-            # 'qaofficer_referrals',
             # 'pending_amendment_request',
             # 'is_amendment_proposal',
             # tab field models
@@ -478,10 +457,6 @@ class ListProposalSerializer(BaseProposalSerializer):
     review_status = serializers.SerializerMethodField(read_only=True)
     customer_status = serializers.SerializerMethodField(read_only=True)
     assigned_officer = serializers.SerializerMethodField(read_only=True)
-
-    # application_type = serializers.CharField(source='application_type.name', read_only=True)
-    qaofficer_referrals = QAOfficerReferralSerializer(many=True)
-    # fee_invoice_url = serializers.SerializerMethodField()
     allowed_assessors = EmailUserSerializer(many=True)
     accessing_user_can_process = serializers.SerializerMethodField()
 
@@ -513,7 +488,6 @@ class ListProposalSerializer(BaseProposalSerializer):
             "can_officer_process",
             "allowed_assessors",
             "proposal_type",
-            "qaofficer_referrals",
             # 'is_qa_officer',
             #'fee_invoice_url',
             #'fee_invoice_reference',
@@ -824,7 +798,6 @@ class InternalProposalSerializer(BaseProposalSerializer):
     allowed_assessors = EmailUserSerializer(many=True)
     approval_level_document = serializers.SerializerMethodField()
     # application_type = serializers.CharField(source='application_type.name', read_only=True)
-    # qaofficer_referrals = QAOfficerReferralSerializer(many=True)
     # reversion_ids = serializers.SerializerMethodField()
     assessor_assessment = ProposalAssessmentSerializer(read_only=True)
     referral_assessments = ProposalAssessmentSerializer(read_only=True, many=True)
