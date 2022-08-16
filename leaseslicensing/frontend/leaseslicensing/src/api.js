@@ -9,6 +9,7 @@ module.exports = {
     company_names:"/api/company_names",
     fee_configurations: "/api/fee_configurations",
     approval_types_dict:"/api/approval_types_dict",
+    approval_sub_types_dict:"/api/approval_sub_types_dict",
     approval_statuses_dict:"/api/approval_statuses_dict",
     approval_types_dict:"/api/approval_types_dict",
     payment_system_id: "/api/payment_system_id",
