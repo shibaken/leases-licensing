@@ -941,6 +941,39 @@ class RequirementDocument(Document):
             return super(RequirementDocument, self).delete()
 
 
+class LeaseLicenceApprovalDocument(Document):
+    proposal = models.ForeignKey(
+        "Proposal",
+        related_name="lease_licence_approval_documents",
+        on_delete=models.CASCADE
+    )
+    approval_type = models.ForeignKey(
+        "leaseslicensing.ApprovalType",
+        related_name="lease_licence_approval_documents",
+        on_delete=models.CASCADE
+    )
+    approval_type_document_type = models.ForeignKey(
+        "leaseslicensing.ApprovalTypeDocumentType",
+        related_name="lease_licence_approval_documents",
+        on_delete=models.CASCADE
+    )
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255, null=True, blank=True)
+    can_delete = models.BooleanField(
+        default=True
+    )  # after initial submit prevent document from being deleted
+    can_hide = models.BooleanField(
+        default=False
+    )  # after initial submit, document cannot be deleted but can be hidden
+    hidden = models.BooleanField(
+        default=False
+    )  # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = "leaseslicensing"
+        verbose_name = "Proposed Approval Document"
+
+
 class ProposalApplicantDetails(models.Model):
     first_name = models.CharField(max_length=24, blank=True, default="")
 
@@ -2263,6 +2296,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     #expiry_date = details.get('expiry_date').strftime('%d/%m/%Y') if details.get('expiry_date') else None
                     self.proposed_issuance_approval = {
                         "approval_type": details.get("approval_type"),
+                        "approval_sub_type": details.get("approval_sub_type"),
                         "cc_email": details.get("cc_email"),
                         "details": details.get("details"),
                         'start_date' : details.get("start_date"),
