@@ -2576,13 +2576,26 @@ class ProposalStandardRequirementViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ProposalStandardRequirement.objects.all()
     serializer_class = ProposalStandardRequirementSerializer
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        search = request.GET.get("search")
-        if search:
-            queryset = queryset.filter(text__icontains=search)
+    @list_route(
+        methods=[
+            "POST",
+        ],
+        detail=False,
+    )
+    def application_type_standard_requirements(self, request, *args, **kwargs):
+        application_type_id = request.data.get("application_type_id")
+        queryset = ProposalStandardRequirement.objects.filter(application_type__id=application_type_id)
+        print(queryset)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    #def list(self, request, *args, **kwargs):
+    #    queryset = self.get_queryset()
+    #    search = request.GET.get("search")
+    #    if search:
+    #        queryset = queryset.filter(text__icontains=search)
+    #    serializer = self.get_serializer(queryset, many=True)
+    #    return Response(serializer.data)
 
 
 class AmendmentRequestViewSet(viewsets.ModelViewSet):

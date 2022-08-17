@@ -40,6 +40,7 @@ module.exports = {
     proposal: '/api/proposal/',
     approvals: '/api/approvals/',
     proposal_standard_requirements:"/api/proposal_standard_requirements.json",
+    //proposal_standard_requirements:"/api/proposal_standard_requirements/application_type_standard_requirements/",
     proposal_requirements:"/api/proposal_requirements.json",
     proposal_by_uuid: '/api/proposal_by_uuid/',
     temporary_document: '/api/temporary_document/',
