@@ -4,13 +4,14 @@
             <div class="container-fluid">
                 <div class="row">
                     <form class="form-horizontal" name="declineForm">
-                        <VueAlert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></VueAlert>
+                        <!--VueAlert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></VueAlert-->
+                        <VueAlert :show.sync="showError" type="danger"><strong v-html="errorString"></strong></VueAlert>
                         <div class="col-sm-12">
                             <div class="form-group">
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
-                                        <label v-if=check_status() class="control-label"  for="Name">Details</label>
-                                        <label v-else class="control-label"  for="Name">Provide Reason for the proposed decline </label>
+                                        <label class="control-label"  for="Name">Details</label>
+                                        <!--label v-else class="control-label"  for="Name">Provide Reason for the proposed decline </label-->
                                     </div>
                                     <div class="col-sm-9">
                                         <RichText
@@ -24,10 +25,27 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <div class="row question-row" style="margin-bottom: 10px">
+                                    <div class="col-sm-3">
+                                        <label for="proposed_decline_documents">File</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <FileField 
+                                            ref="proposed_decline_documents"
+                                            name="proposed_decline_documents"
+                                            id="proposed_decline_documents"
+                                            :isRepeatable="true"
+                                            :documentActionUrl="proposedDeclineDocumentsUrl"
+                                            :replace_button_by_text="true"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
-                                        <label v-if=check_status() class="control-label"  for="Name">CC email</label>
-                                        <label v-else class="control-label"  for="Name">Proposed CC email</label>
+                                        <label class="control-label"  for="Name">CC email</label>
+                                        <!--label v-else class="control-label"  for="Name">Proposed CC email</label-->
                                     </div>
                                     <div class="col-sm-9">
                                         <input type="text" style="width: 70%;" class="form-control" name="cc_email" v-model="decline.cc_email"/>
@@ -52,13 +70,15 @@
 import modal from '@vue-utils/bootstrap-modal.vue'
 import VueAlert from '@vue-utils/alert.vue'
 import RichText from '@/components/forms/richtext.vue'
+import FileField from '@/components/forms/filefield_immediate.vue'
 import { helpers, api_endpoints, constants } from "@/utils/hooks.js"
 export default {
     name:'Decline-Proposal',
     components:{
         modal,
         VueAlert,
-        RichText
+        RichText,
+        FileField,
     },
     props:{
         proposal: {
@@ -93,6 +113,12 @@ export default {
         }
     },
     computed: {
+        proposedDeclineDocumentsUrl: function() {
+            return helpers.add_endpoint_join(
+                api_endpoints.proposal,
+                this.proposal.id + '/process_proposed_decline_document/'
+                )
+        },
         proposalId: function() {
             if (this.proposal) {
                 return this.proposal.id;
@@ -103,7 +129,7 @@ export default {
             return vm.errors;
         },
         title: function(){
-            return this.processing_status == 'With Approver' ? 'Decline': 'Proposed Decline';
+            return this.processing_status == 'With Approver' ? 'Decline': 'Propose to Decline';
         },
         callFinalDecline: function() {
             let callFinalDecline = false
@@ -121,6 +147,17 @@ export default {
             */
             return callFinalDecline
         },
+        registrationOfInterest: function(){
+            if (this.proposal && this.proposal.application_type.name === 'registration_of_interest') {
+                return true;
+            }
+        },
+        leaseLicence: function(){
+            if (this.proposal && this.proposal.application_type.name === 'lease_licence') {
+                return true;
+            }
+        },
+
     },
     methods:{
         ok:function () {
@@ -162,34 +199,37 @@ export default {
             this.$nextTick(async () => {
                 //if (vm.processing_status != 'With Approver'){
                 if (this.callFinalDecline){
-                    try {
-                        await fetch(helpers.add_endpoint_json(api_endpoints.proposal, this.proposal.id + '/final_decline'), {
-                            body: JSON.stringify(decline),
-                            method: 'POST',
-                        })
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, this.proposal.id + '/final_decline'), {
+                        body: JSON.stringify(decline),
+                        method: 'POST',
+                    })
+
+                    if (response.ok) {
                         this.decliningProposal = false;
                         this.close();
                         //this.$emit('refreshFromResponse',response);
                         this.$router.push({ path: '/internal' }); //Navigate to dashboard page after Propose issue.
-                    } catch(error) {
+                    } else {
                         this.errors = true;
                         this.decliningProposal = false;
-                        this.errorString = helpers.apiVueResourceError(error);
+                        //this.errorString = helpers.apiVueResourceError(error);
+                        this.errorString = await helpers.parseFetchError(response)
                     }
                 } else {
-                    try {
-                        await fetch(helpers.add_endpoint_json(api_endpoints.proposal, this.proposal.id + '/proposed_decline'), {
-                                body: JSON.stringify(decline),
-                                method: 'POST',
-                            })
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal, this.proposal.id + '/proposed_decline'), {
+                            body: JSON.stringify(decline),
+                            method: 'POST',
+                        })
+                    if (response.ok) {
                         this.decliningProposal = false;
                         this.close();
                         //this.$emit('refreshFromResponse',response);
                         this.$router.push({ path: '/internal' }); //Navigate to dashboard after propose decline.
-                    } catch(error) {
+                    } else {
                         this.errors = true;
                         this.decliningProposal = false;
-                        this.errorString = helpers.apiVueResourceError(error);
+                        //this.errorString = helpers.apiVueResourceError(error);
+                        this.errorString = await helpers.parseFetchError(response)
                     }
                 }
             });

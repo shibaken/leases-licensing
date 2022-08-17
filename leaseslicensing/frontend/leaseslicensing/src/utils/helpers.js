@@ -203,8 +203,14 @@ module.exports = {
     parseFetchError: async function(response) {
         let errorString = ''
         const resData = await response.json()
-        for (let i=0; i<resData.length; i++) {
-            errorString += (resData[i] + "<br>")
+        console.log(resData)
+        if (Array.isArray(resData)) {
+            for (let i=0; i<resData.length; i++) {
+                errorString += (resData[i] + "<br>")
+            }
+        } else {
+            // Stringify obj
+            errorString = JSON.stringify(resData);
         }
         console.log(errorString)
         return errorString

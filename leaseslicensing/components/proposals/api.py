@@ -1168,6 +1168,19 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=["POST"], detail=True)
     @renderer_classes((JSONRenderer,))
     @basic_exception_handler
+    def process_proposed_decline_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(
+            request, instance, document_type="proposed_decline_document"
+        )
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=["POST"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
     def process_lease_licence_approval_document(self, request, *args, **kwargs):
         instance = self.get_object()
         returned_data = process_generic_document(
@@ -1840,9 +1853,9 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def proposed_decline(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = PropedDeclineSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            instance.proposed_decline(request, serializer.validated_data)
+            #serializer = PropedDeclineSerializer(data=request.data)
+            #serializer.is_valid(raise_exception=True)
+            instance.proposed_decline(request, request.data)
             # serializer = InternalProposalSerializer(instance,context={'request':request})
             serializer_class = self.internal_serializer_class()
             serializer = serializer_class(instance, context={"request": request})
