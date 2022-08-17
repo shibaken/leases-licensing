@@ -1,8 +1,9 @@
 from rest_framework import serializers
-from leaseslicensing.components.competitive_processes.models import CompetitiveProcess, CompetitiveProcessParty
+from leaseslicensing.components.competitive_processes.models import CompetitiveProcess, CompetitiveProcessLogEntry, CompetitiveProcessParty, CompetitiveProcessUserAction
+from leaseslicensing.ledger_api_utils import retrieve_email_user
 from ..organisations.serializers import OrganisationSerializer
 from leaseslicensing.components.proposals.models import Proposal
-from leaseslicensing.components.main.serializers import EmailUserSerializer
+from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer, EmailUserSerializer
 from leaseslicensing.components.users.serializers import UserSerializerSimple
 
 
@@ -167,3 +168,26 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
         return serializer.data
 
 
+class CompetitiveProcessLogEntrySerializer(CommunicationLogEntrySerializer):
+    documents = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CompetitiveProcessLogEntry
+        fields = "__all__"
+        read_only_fields = ("customer",)
+
+    def get_documents(self, obj):
+        return [[d.name, d._file.url] for d in obj.documents.all()]
+
+
+class CompetitiveProcessUserActionSerializer(serializers.ModelSerializer):
+    who = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CompetitiveProcessUserAction
+        fields = "__all__"
+
+    def get_who(self, proposal_user_action):
+        email_user = retrieve_email_user(proposal_user_action.who)
+        fullname = email_user.get_full_name()
+        #return fullname
