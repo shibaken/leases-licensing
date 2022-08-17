@@ -6,7 +6,7 @@ from django.contrib.gis.db.models.fields import PolygonField
 from ledger_api_client.ledger_models import EmailUserRO
 from leaseslicensing import settings
 from leaseslicensing.components import competitive_processes
-from leaseslicensing.components.main.models import Document
+from leaseslicensing.components.main.models import CommunicationsLogEntry, Document, UserAction
 
 from leaseslicensing.components.main.related_item import RelatedItem
 from leaseslicensing.components.organisations.models import Organisation
@@ -250,3 +250,39 @@ class PartyDetailDocument(Document):
     
     class Meta:
         app_label = "leaseslicensing"
+
+
+class CompetitiveProcessLogEntry(CommunicationsLogEntry):
+    competitive_process = models.ForeignKey(
+        CompetitiveProcess, related_name="comms_logs", on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return "{} - {}".format(self.reference, self.subject)
+
+    class Meta:
+        app_label = "leaseslicensing"
+
+    def save(self, **kwargs):
+        # save the competitive process id if the reference not provided
+        if not self.reference:
+            self.reference = self.competitive_process.id
+        super().save(**kwargs)
+
+
+class CompetitiveProcessUserAction(UserAction):
+    ACTION_CREATE_CUSTOMER_ = "Create customer {}"
+    ACTION_LINK_PARK = "Link park {} to application {}"
+
+    competitive_process = models.ForeignKey(
+        CompetitiveProcess, related_name="action_logs", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        app_label = "leaseslicensing"
+        ordering = ("-when",)
+
+    @classmethod
+    def log_action(cls, competitive_process, action, user):
+        return cls.objects.create(competitive_processes=competitive_process, who=user, what=str(action))
+
