@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.db import transaction
 from rest_framework import viewsets
 from rest_framework import viewsets, views
 from rest_framework.renderers import JSONRenderer
@@ -6,9 +7,15 @@ from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
 
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess
-from leaseslicensing.components.competitive_processes.serializers import ListCompetitiveProcessSerializer, \
+from leaseslicensing.components.competitive_processes.serializers import CompetitiveProcessLogEntrySerializer, CompetitiveProcessUserActionSerializer, ListCompetitiveProcessSerializer, \
     CompetitiveProcessSerializer
 from leaseslicensing.helpers import is_internal
+from rest_framework.decorators import (
+    action as detail_route,
+    renderer_classes,
+    parser_classes,
+)
+from leaseslicensing.components.main.decorators import basic_exception_handler
 
 
 class CompetitiveProcessFilterBackend(DatatablesFilterBackend):
@@ -70,6 +77,46 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
         competitive_process = self.get_object()
         serializer = self.get_serializer(competitive_process, context={'request': request})
         return Response(serializer.data)
+
+    @detail_route(methods=["GET",], detail=True,)
+    @basic_exception_handler
+    def action_log(self, request, *args, **kwargs):
+        instance = self.get_object()
+        qs = instance.action_logs.all()
+        serializer = CompetitiveProcessUserActionSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=["GET",], detail=True,)
+    @basic_exception_handler
+    def comms_log(self, request, *args, **kwargs):
+        instance = self.get_object()
+        qs = instance.comms_logs.all()
+        serializer = CompetitiveProcessLogEntrySerializer(qs, many=True)
+        return Response(serializer.data)
+
+    @detail_route(methods=["POST",], detail=True,)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def add_comms_log(self, request, *args, **kwargs):
+        with transaction.atomic():
+            instance = self.get_object()
+            mutable = request.data._mutable
+            request.data._mutable = True
+            request.data["proposal"] = "{}".format(instance.id)
+            request.data["staff"] = "{}".format(request.user.id)
+            request.data._mutable = mutable
+            serializer = CompetitiveProcessLogEntrySerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            comms = serializer.save()
+            # Save the files
+            for f in request.FILES:
+                document = comms.documents.create()
+                document.name = str(request.FILES[f])
+                document._file = request.FILES[f]
+                document.save()
+            # End Save Documents
+
+            return Response(serializer.data)
 
 
 class GetCompetitiveProcessStatusesDict(views.APIView):
