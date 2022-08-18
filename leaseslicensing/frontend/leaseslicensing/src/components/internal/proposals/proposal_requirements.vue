@@ -2,10 +2,16 @@
     <div>
         <FormSection :formCollapse="false" label="Conditions" Index="conditions">
             <form class="form-horizontal" action="index.html" method="post">
-                <div class="col-sm-12">
-                    <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Condition</button>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary float-end">Add Condition</button>
+                    </div>
                 </div>
-                <datatable ref="requirements_datatable" :id="datatableId" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <datatable ref="requirements_datatable" :id="datatableId" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
+                    </div>
+                </div>
             </form>
 
             <RequirementDetail
@@ -53,7 +59,8 @@ export default {
                     "dataSrc": ''
                 },
                 order: [],
-                dom: 'lBfrtip',
+                //dom: 'lBfrtip',
+                dom: '<"top"fB>rt<"bottom"ip><"clear"l>',
                 buttons:[
                 'excel', 'csv', ], //'copy'
                 columns: [
@@ -203,7 +210,8 @@ export default {
     },
     computed:{
         datatableId: function() {
-            return 'requirements-datatable-' + this._uid;
+            //return 'requirements-datatable-' + this._uid;
+            return 'requirements-datatable';
         },
         hasAssessorMode(){
             return this.proposal.assessor_mode.has_assessor_mode;
