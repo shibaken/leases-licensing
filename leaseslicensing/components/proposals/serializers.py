@@ -1149,6 +1149,7 @@ class ProposalRequirementSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "due_date",
+            "reminder_date",
             "free_requirement",
             "standard_requirement",
             "standard",
