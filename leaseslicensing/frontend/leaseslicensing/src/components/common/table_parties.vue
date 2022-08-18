@@ -29,6 +29,7 @@ export default {
     name: 'TableParties',
     props: {
         level: '',
+        competitive_process_parties: [],
     },
     data() {
         let vm = this;
@@ -40,14 +41,73 @@ export default {
     components: {
         datatable,
     },
+    created: function(){
+    },
     computed: {
-        column_id: function(){
+        column_id: () => {
             return {
                 data: "id",
                 name: 'id',
                 orderable: false,
                 searchable: false,
                 visible: false,
+                'render': function(row, type, full){
+                    console.log(full)
+                    return full.id
+                }
+            }
+        },
+        column_name: () => {
+            return {
+                data: null,
+                'render': function(row, type, full){
+                    if (full.is_person)
+                        return full.party_person.fullname
+                    return ''
+                }
+            }
+        },
+        column_organisation: () => {
+            return {
+                data: null,
+                'render': function(row, type, full){
+                    if (full.is_organisation)
+                        return full.party_organisation.name
+                    return ''
+                }
+            }
+        },
+        column_phone: () => {
+            return {
+                data: null,
+                'render': function(row, type, full){
+                    return '(phone)'
+                }
+            }
+        },
+        column_mobile: () => {
+            return {
+                data: null,
+                'render': function(row, type, full){
+                    return '(mobile)'
+                }
+            }
+
+        },
+        column_email: () => {
+            return {
+                data: null,
+                'render': function(row, type, full){
+                    return '(email)'
+                }
+            }
+        },
+        column_action: () => {
+            return {
+                data: null,
+                'render': function(row, type, full){
+                    return '(action)'
+                }
             }
         },
         is_external: function() {
@@ -70,12 +130,12 @@ export default {
             if(vm.is_internal){
                 columns = [
                     vm.column_id,
-                    // vm.column_name,
-                    // vm.column_organisation,
-                    // vm.column_phone,
-                    // vm.column_mobile,
-                    // vm.column_email,
-                    // vm.column_action,
+                    vm.column_name,
+                    vm.column_organisation,
+                    vm.column_phone,
+                    vm.column_mobile,
+                    vm.column_email,
+                    vm.column_action,
                 ]
                 search = true
             }
@@ -90,15 +150,17 @@ export default {
                     row_jq.children().first().addClass(vm.td_expand_class_name)
                 },
                 responsive: true,
-                serverSide: true,
+                serverSide: false,
+                data: vm.competitive_process_parties,
                 searching: search,
-                ajax: {
-                    "url": api_endpoints.competitive_process + '?format=datatables',
-                    "dataSrc": 'data',
-                },
+                // ajax: {
+                //     "url": api_endpoints.competitive_process + '?format=datatables',
+                //     "dataSrc": 'data',
+                // },
                 dom: "<'d-flex align-items-center'<'me-auto'l>f>" +
                      "<'row'<'col-sm-12'tr>>" +
-                     "<'d-flex align-items-center'<'me-auto'i>p>",
+                    //  "<'d-flex align-items-center'<'me-auto'i>p>",
+                     "<'d-flex align-items-center'<'me-auto'i>>",
                 columns: columns,
                 processing: true,
                 initComplete: function() {
@@ -108,9 +170,9 @@ export default {
         }
     },
     methods: {
-        add_party_clicked: function(){
+        add_party_clicked: () => {
 
-        }
+        },
     }
 }
 </script>

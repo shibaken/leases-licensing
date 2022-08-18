@@ -56,12 +56,27 @@
                         <FormSection :formCollapse="false" label="Parties" Index="parties">
                             <TableParties 
                                 level=internal
+                                :competitive_process_parties="competitive_process.competitive_process_parties"
                             />
                         </FormSection>
                     </div>
                     <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                         <FormSection :formCollapse="false" label="Map" Index="map">
+                        <!--
 
+                            <ComponentMap
+                                ref="component_map"
+                                :is_internal=true
+                                :is_external=false
+                                @featuresDisplayed="updateTableByFeatures"
+                                :can_modify="can_modify"
+                                :display_at_time_of_submitted="show_col_status_when_submitted"
+                                @featureGeometryUpdated="featureGeometryUpdated"
+                                @popupClosed="popupClosed"
+                                :proposal="competitive_process"
+                                :readonly="readonly"
+                            />
+                        -->
                         </FormSection>
                     </div>
                     <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
@@ -92,13 +107,16 @@ import CommsLogs from '@common-utils/comms_logs.vue'
 import Workflow from '@common-utils/workflow_competitive_process.vue'
 import FormSection from '@/components/forms/section_toggle.vue'
 import TableParties from '@common-utils/table_parties'
+import ComponentMap from '@/components/common/component_map.vue'
 
 export default {
     name: 'CompetitiveProcess',
     data: function() {
         let vm = this;
         return {
-            competitive_process: null
+            competitive_process: null,
+            can_modify: true,
+            show_col_status_when_submitted: true,
         }
     },
     components: {
@@ -106,6 +124,7 @@ export default {
         Workflow,
         TableParties,
         FormSection,
+        ComponentMap,
     },
     created: function(){
         this.fetchCompetitiveProcess()
@@ -113,7 +132,21 @@ export default {
     mounted: function(){
 
     },
+    computed: {
+        readonly: function(){
+
+        },
+   },
     methods: {
+        updateTableByFeatures: function() {
+
+        },
+        featureGeometryUpdated: function() {
+
+        },
+        popupClosed: function() {
+
+        },
         issueComplete: function(){
             console.log('in issueComplete')
         },
