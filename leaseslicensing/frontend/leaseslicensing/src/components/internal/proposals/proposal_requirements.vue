@@ -12,6 +12,7 @@
                 ref="requirement_detail"
                 :proposal_id="proposal.id"
                 :requirements="requirements"
+                :selectedRequirement="selectedRequirement"
                 @updateRequirements="updatedRequirements"
                 :key="uuid"
             />
@@ -38,6 +39,7 @@ export default {
         return {
             uuid: 0,
             panelBody: "proposal-requirements-"+vm._uid,
+            selectedRequirement: {},
             requirements: [],
             requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
             requirement_options:{
@@ -249,13 +251,16 @@ export default {
             }
         },
         editRequirement: async function(_id){
-            console.log(_id)
             const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id));
             if (response.ok) {
-                this.$refs.requirement_detail.requirement = await response.json();
-                this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
-                response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
-                this.addRequirement();
+                const resData = await response.json();
+                this.selectedRequirement = Object.assign({}, resData);
+                //this.$refs.requirement_detail.requirement = Object.assign({}, resData);
+                //this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
+                //response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
+                this.$nextTick(() => {
+                    this.addRequirement();
+                });
             } else {
                 console.log("error");
             }

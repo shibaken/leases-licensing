@@ -3971,6 +3971,7 @@ class ProposalRequirement(RevisionedMixin):
         Proposal, related_name="requirements", on_delete=models.CASCADE
     )
     due_date = models.DateField(null=True, blank=True)
+    reminder_date = models.DateField(null=True, blank=True)
     recurrence = models.BooleanField(default=False)
     recurrence_pattern = models.SmallIntegerField(
         choices=RECURRENCE_PATTERNS, default=1

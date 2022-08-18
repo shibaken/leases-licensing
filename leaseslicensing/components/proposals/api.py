@@ -2554,7 +2554,8 @@ class ProposalRequirementViewSet(viewsets.ModelViewSet):
             # serializer = self.get_serializer(data= json.loads(request.data.get('data')))
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            instance = serializer.save()
+            serializer.save()
+            #instance = serializer.save()
             # TODO: requirements documents in LL?
             # instance.add_documents(request)
             return Response(serializer.data)
