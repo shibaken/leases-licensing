@@ -130,7 +130,7 @@
                                     </div>
                                 </div>
                                 <div class="row" v-show="showstartDateError">
-                                    <alert  class="col-sm-12" type="danger"><strong>{{startDateErrorString}}</strong></alert>
+                                    <VueAlert  class="col-sm-12" type="danger"><strong>{{startDateErrorString}}</strong></VueAlert>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-3">
@@ -139,7 +139,7 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group date" ref="due_date" style="width: 70%;margin-bottom: 1rem">
-                                            <input type="date" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="approval.expiry_date" :readonly="is_amendment">
+                                            <input type="date" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="approval.expiry_date">
                                             <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
                                             <!--span class="input-group-addon">
                                                 <span class="glyphicon glyphicon-calendar"></span>
@@ -148,7 +148,7 @@
                                     </div>
                                 </div>
                                 <div class="row" v-show="showtoDateError">
-                                    <alert  class="col-sm-12" type="danger"><strong>{{toDateErrorString}}</strong></alert>
+                                    <VueAlert  class="col-sm-12" type="danger"><strong>{{toDateErrorString}}</strong></VueAlert>
                                 </div>
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
@@ -174,7 +174,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <FileField 
-                                            :readonly="readonly"
                                             ref="proposed_approval_documents"
                                             name="proposed_approval_documents"
                                             id="proposed_approval_documents"
@@ -195,6 +194,31 @@
                                 </div>
                             </div>
                             <hr>
+                            <div class="form-group" v-if="selectedApprovalTypeExists">
+                                <div class="row modal-input-row">
+                                    <div class="col-sm-12">
+                                    Select zero or more documents that need to be attached as part of the approval of this application
+                                    </div>
+                                </div>
+                                <div v-for="docType in selectedApprovalDocumentTypes">
+                                    <div class="row modal-input-row">
+                                        <div class="col-sm-3">
+                                            <label class="control-label pull-left" for="approvalTypeDocumentTypes">{{docType.name}}</label>
+                                        </div>
+                                        <div class="col-sm-9">
+                                            <FileField 
+                                                :name="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
+                                                :id="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
+                                                :approval_type="selectedApprovalType.id"
+                                                :approval_type_document_type="docType.id"
+                                                :isRepeatable="true"
+                                                :documentActionUrl="leaseLicenceApprovalDocumentsUrl"
+                                                :replace_button_by_text="true"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -293,11 +317,27 @@ export default {
         }
     },
     computed: {
+        selectedApprovalTypeExists: function() {
+            if (this.selectedApprovalType && this.selectedApprovalType.id) {
+                return true;
+            }
+        },
+        leaseLicenceApprovalDocumentsUrl: function() {
+            return helpers.add_endpoint_join(
+                api_endpoints.proposal,
+                this.proposal.id + '/process_lease_licence_approval_document/'
+                )
+        },
         proposedApprovalDocumentsUrl: function() {
             return helpers.add_endpoint_join(
                 api_endpoints.proposal,
                 this.proposal.id + '/process_proposed_approval_document/'
                 )
+        },
+        selectedApprovalDocumentTypes: function() {
+            if (this.selectedApprovalType) {
+                return this.selectedApprovalType.approval_type_document_types;
+            }
         },
         selectedApprovalTypeName: function() {
             if (this.selectedApprovalType) {

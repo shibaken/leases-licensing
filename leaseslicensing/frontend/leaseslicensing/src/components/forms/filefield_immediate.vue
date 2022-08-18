@@ -84,7 +84,15 @@ export default {
         text_string: {
             type: String,
             default: 'Attach Document'
-        }
+        },
+        approval_type: {
+            type: Number,
+            required: false
+        },
+        approval_type_document_type: {
+            type: Number,
+            required: false
+        },
     },
     data:function(){
         return {
@@ -294,6 +302,8 @@ export default {
                     formData.append('temporary_document_collection_id', this.temporary_document_collection_id);
                 }
                 formData.append('input_name', this.name);
+                formData.append('approval_type', this.approval_type);
+                formData.append('approval_type_document_type', this.approval_type_document_type);
                 formData.append('filename', e.target.files[0].name);
                 formData.append('_file', this.uploadFile(e));
                 formData.append('csrfmiddlewaretoken', this.csrf_token);
