@@ -90,8 +90,16 @@ class GetApprovalTypesDict(views.APIView):
             approval_types_dict = [{
                 "id": t.id, 
                 "name": t.name, 
-                "details_placeholder": t.details_placeholder
-                } for t in ApprovalType.objects.all()]
+                "details_placeholder": t.details_placeholder,
+                "approval_type_document_types":
+                [
+                    {
+                        "id": doc_type.id,
+                        "name": doc_type.name
+                    }
+                    for doc_type in t.approval_type_document_types.all()
+                ]
+            } for t in ApprovalType.objects.all()]
             cache.set(
                 "approval_types_dict",
                 approval_types_dict,

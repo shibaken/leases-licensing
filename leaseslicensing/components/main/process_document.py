@@ -5,6 +5,7 @@ import traceback
 from django.conf import settings
 
 from leaseslicensing.components.proposals.models import Proposal
+from leaseslicensing.components.approvals.models import ApprovalType, ApprovalTypeDocumentType
 
 
 def process_generic_document(request, instance, document_type=None, *args, **kwargs):
@@ -113,7 +114,22 @@ def process_generic_document(request, instance, document_type=None, *args, **kwa
                 documents_qs = instance.legislative_requirements_documents
             elif document_type == "shapefile_document":
                 documents_qs = instance.shapefile_documents
+            elif document_type == "lease_licence_approval_document":
+                documents_qs = instance.lease_licence_approval_documents
+                returned_file_data = [
+                    dict(
+                        file=d._file.url,
+                        id=d.id,
+                        name=d.name,
+                        approval_type=d.approval_type.id,
+                        approval_type_document_type=d.approval_type_document_type.id
+                    )
+                    for d in documents_qs.filter(input_name=input_name)
+                    if d._file
+                ]
+                return {"filedata": returned_file_data}
 
+            # default file attributes
             returned_file_data = [
                 dict(
                     file=d._file.url,
@@ -205,6 +221,8 @@ def delete_document(request, instance, comms_instance, document_type, input_name
             document = instance.legislative_requirements_documents.get(id=document_id)
         elif document_type == "shapefile_document":
             document = instance.shapefile_documents.get(id=document_id)
+        elif document_type == "lease_licence_approval_document":
+            document = instance.lease_licence_approval_documents.get(id=document_id)
 
     # comms_log doc store delete
     elif comms_instance and "document_id" in request.data:
@@ -252,8 +270,11 @@ def cancel_document(request, instance, comms_instance, document_type, input_name
         "key_milestones_document",
         "risk_factors_document",
         "legislative_requirements_document",
+        "lease_licence_approval_document"
     ]:
-        document_id = request.data.get("document_id")
+        pass
+        #document_id = request.data.get("document_id")
+    # TODO: check this logic
     if comms_instance:
         document_list = comms_instance.documents.all()
     else:
@@ -423,6 +444,16 @@ def save_document(request, instance, comms_instance, document_type, input_name=N
                 input_name=input_name, name=filename
             )[0]
             path_format_string = "{}/proposals/{}/shapefile_documents/{}"
+        elif document_type == "lease_licence_approval_document":
+            approval_type = request.data.get("approval_type")
+            approval_type_document_type = request.data.get("approval_type_document_type")
+            document = instance.lease_licence_approval_documents.get_or_create(
+                input_name=input_name,
+                name=filename,
+                approval_type=ApprovalType.objects.get(id=approval_type),
+                approval_type_document_type=ApprovalTypeDocumentType.objects.get(id=approval_type_document_type)
+            )[0]
+            path_format_string = "{}/proposals/{}/lease_licence_approval_documents/{}"
 
         path = default_storage.save(
             path_format_string.format(settings.MEDIA_APP_DIR, instance.id, filename),
@@ -477,19 +508,3 @@ def save_default_document_obj(instance, temp_document):
     document._file = path
     document.save()
 
-
-def save_vessel_registration_document_obj(instance, temp_document):
-    document = instance.vessel_registration_documents.get_or_create(
-        input_name="vessel_registration_document", name=temp_document.name
-    )[0]
-    path = default_storage.save(
-        "{}/{}/documents/{}".format(
-            instance._meta.model_name,
-            instance.id,
-            temp_document.name,
-        ),
-        temp_document._file,
-    )
-
-    document._file = path
-    document.save()

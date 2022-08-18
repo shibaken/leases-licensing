@@ -71,8 +71,6 @@ from leaseslicensing.components.proposals.models import (
     ProposalDocument,
     Referral,
     ReferralRecipientGroup,
-    QAOfficerGroup,
-    QAOfficerReferral,
     ProposalRequirement,
     ProposalStandardRequirement,
     AmendmentRequest,
@@ -94,7 +92,6 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalLogEntrySerializer,
     DTReferralSerializer,
     ReferralSerializer,
-    QAOfficerReferralSerializer,
     ReferralProposalSerializer,
     ProposalRequirementSerializer,
     ProposalStandardRequirementSerializer,
@@ -565,68 +562,6 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
         self.paginator.page_size = qs.count()
         result_page = self.paginator.paginate_queryset(qs, request)
         serializer = DTReferralSerializer(
-            result_page, context={"request": request}, many=True
-        )
-        return self.paginator.get_paginated_response(serializer.data)
-
-    @list_route(
-        methods=[
-            "GET",
-        ],
-        detail=False,
-    )
-    def qaofficer_info(self, request, *args, **kwargs):
-        """
-        Used by the internal dashboard
-
-        http://localhost:8499/api/proposal_paginated/qaofficer_internal/?format=datatables&draw=1&length=2
-        """
-        qa_officers = (
-            QAOfficerGroup.objects.get(default=True)
-            .members.all()
-            .values_list("email", flat=True)
-        )
-        if request.user.email in qa_officers:
-            return Response({"QA_Officer": True})
-        else:
-            return Response({"QA_Officer": False})
-
-    @list_route(
-        methods=[
-            "GET",
-        ],
-        detail=False,
-    )
-    def qaofficer_internal(self, request, *args, **kwargs):
-        """
-        Used by the internal dashboard
-
-        http://localhost:8499/api/proposal_paginated/qaofficer_internal/?format=datatables&draw=1&length=2
-        """
-        qa_officers = (
-            QAOfficerGroup.objects.get(default=True)
-            .members.all()
-            .values_list("email", flat=True)
-        )
-        if request.user.email not in qa_officers:
-            return self.paginator.get_paginated_response([])
-
-        qs = self.get_queryset()
-        qs = qs.filter(qaofficer_referrals__gt=0)
-        # qs = self.filter_queryset(self.request, qs, self)
-        qs = self.filter_queryset(qs)
-
-        # on the internal organisations dashboard, filter the Proposal/Approval/Compliance datatables by applicant/organisation
-        applicant_id = request.GET.get("org_id")
-        if applicant_id:
-            qs = qs.filter(org_applicant_id=applicant_id)
-        submitter_id = request.GET.get("submitter_id", None)
-        if submitter_id:
-            qs = qs.filter(submitter_id=submitter_id)
-
-        self.paginator.page_size = qs.count()
-        result_page = self.paginator.paginate_queryset(qs, request)
-        serializer = ListProposalSerializer(
             result_page, context={"request": request}, many=True
         )
         return self.paginator.get_paginated_response(serializer.data)
@@ -1232,262 +1167,16 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=["POST"], detail=True)
     @renderer_classes((JSONRenderer,))
-    def process_document(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            action = request.POST.get("action")
-            section = request.POST.get("input_name")
-            if action == "list" and "input_name" in request.POST:
-                pass
-
-            elif action == "delete" and "document_id" in request.POST:
-                document_id = request.POST.get("document_id")
-                document = instance.documents.get(id=document_id)
-
-                if (
-                    document._file
-                    and os.path.isfile(document._file.path)
-                    and document.can_delete
-                ):
-                    os.remove(document._file.path)
-
-                document.delete()
-                instance.save(
-                    version_comment="Approval File Deleted: {}".format(document.name)
-                )  # to allow revision to be added to reversion history
-                # instance.current_proposal.save(version_comment='File Deleted: {}'.format(document.name)) # to allow revision to be added to reversion history
-
-            elif action == "hide" and "document_id" in request.POST:
-                document_id = request.POST.get("document_id")
-                document = instance.documents.get(id=document_id)
-
-                document.hidden = True
-                document.save()
-                instance.save(
-                    version_comment="File hidden: {}".format(document.name)
-                )  # to allow revision to be added to reversion history
-
-            elif (
-                action == "save"
-                and "input_name" in request.POST
-                and "filename" in request.POST
-            ):
-                proposal_id = request.POST.get("proposal_id")
-                filename = request.POST.get("filename")
-                _file = request.POST.get("_file")
-                if not _file:
-                    _file = request.FILES.get("_file")
-
-                document = instance.documents.get_or_create(
-                    input_name=section, name=filename
-                )[0]
-                path = default_storage.save(
-                    "{}/proposals/{}/documents/{}".format(
-                        settings.MEDIA_APP_DIR, proposal_id, filename
-                    ),
-                    ContentFile(_file.read()),
-                )
-
-                document._file = path
-                document.save()
-                instance.save(
-                    version_comment="File Added: {}".format(filename)
-                )  # to allow revision to be added to reversion history
-                # instance.current_proposal.save(version_comment='File Added: {}'.format(filename)) # to allow revision to be added to reversion history
-
-            return Response(
-                [
-                    dict(
-                        input_name=d.input_name,
-                        name=d.name,
-                        file=d._file.url,
-                        id=d.id,
-                        can_delete=d.can_delete,
-                        can_hide=d.can_hide,
-                    )
-                    for d in instance.documents.filter(input_name=section, hidden=False)
-                    if d._file
-                ]
-            )
-
-        except serializers.ValidationError:
-            print(traceback.print_exc())
-            raise
-        except ValidationError as e:
-            if hasattr(e, "error_dict"):
-                raise serializers.ValidationError(repr(e.error_dict))
-            else:
-                if hasattr(e, "message"):
-                    raise serializers.ValidationError(e.message)
-        except Exception as e:
-            print(traceback.print_exc())
-            raise serializers.ValidationError(str(e))
-
-    @detail_route(methods=["POST"], detail=True)
-    @renderer_classes((JSONRenderer,))
-    def process_onhold_document(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            action = request.POST.get("action")
-            section = request.POST.get("input_name")
-            if action == "list" and "input_name" in request.POST:
-                pass
-
-            #            elif action == 'delete' and 'document_id' in request.POST:
-            #                document_id = request.POST.get('document_id')
-            #                document = instance.onhold_documents.get(id=document_id)
-            #
-            #                if document._file and os.path.isfile(document._file.path) and document.can_delete:
-            #                    os.remove(document._file.path)
-            #
-            #                document.delete()
-            #                instance.save(version_comment='OnHold File Deleted: {}'.format(document.name)) # to allow revision to be added to reversion history
-            #                #instance.current_proposal.save(version_comment='File Deleted: {}'.format(document.name)) # to allow revision to be added to reversion history
-
-            elif action == "delete" and "document_id" in request.POST:
-                document_id = request.POST.get("document_id")
-                document = instance.onhold_documents.get(id=document_id)
-
-                document.visible = False
-                document.save()
-                instance.save(
-                    version_comment="OnHold File Hidden: {}".format(document.name)
-                )  # to allow revision to be added to reversion history
-                # instance.current_proposal.save(version_comment='File Deleted: {}'.format(document.name)) # to allow revision to be added to reversion history
-
-            elif (
-                action == "save"
-                and "input_name" in request.POST
-                and "filename" in request.POST
-            ):
-                proposal_id = request.POST.get("proposal_id")
-                filename = request.POST.get("filename")
-                _file = request.POST.get("_file")
-                if not _file:
-                    _file = request.FILES.get("_file")
-
-                document = instance.onhold_documents.get_or_create(
-                    input_name=section, name=filename
-                )[0]
-                path = default_storage.save(
-                    "{}/proposals/{}/onhold/{}".format(
-                        settings.MEDIA_APP_DIR, proposal_id, filename
-                    ),
-                    ContentFile(_file.read()),
-                )
-
-                document._file = path
-                document.save()
-                instance.save(
-                    version_comment="On Hold File Added: {}".format(filename)
-                )  # to allow revision to be added to reversion history
-                # instance.current_proposal.save(version_comment='File Added: {}'.format(filename)) # to allow revision to be added to reversion history
-
-            return Response(
-                [
-                    dict(
-                        input_name=d.input_name,
-                        name=d.name,
-                        file=d._file.url,
-                        id=d.id,
-                        can_delete=d.can_delete,
-                    )
-                    for d in instance.onhold_documents.filter(
-                        input_name=section, visible=True
-                    )
-                    if d._file
-                ]
-            )
-
-        except serializers.ValidationError:
-            print(traceback.print_exc())
-            raise
-        except ValidationError as e:
-            if hasattr(e, "error_dict"):
-                raise serializers.ValidationError(repr(e.error_dict))
-            else:
-                if hasattr(e, "message"):
-                    raise serializers.ValidationError(e.message)
-        except Exception as e:
-            print(traceback.print_exc())
-            raise serializers.ValidationError(str(e))
-
-    @detail_route(methods=["POST"], detail=True)
-    @renderer_classes((JSONRenderer,))
-    def process_qaofficer_document(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            action = request.POST.get("action")
-            section = request.POST.get("input_name")
-            if action == "list" and "input_name" in request.POST:
-                pass
-
-            elif action == "delete" and "document_id" in request.POST:
-                document_id = request.POST.get("document_id")
-                document = instance.qaofficer_documents.get(id=document_id)
-
-                document.visible = False
-                document.save()
-                instance.save(
-                    version_comment="QA Officer File Hidden: {}".format(document.name)
-                )  # to allow revision to be added to reversion history
-
-            elif (
-                action == "save"
-                and "input_name" in request.POST
-                and "filename" in request.POST
-            ):
-                proposal_id = request.POST.get("proposal_id")
-                filename = request.POST.get("filename")
-                _file = request.POST.get("_file")
-                if not _file:
-                    _file = request.FILES.get("_file")
-
-                document = instance.qaofficer_documents.get_or_create(
-                    input_name=section, name=filename
-                )[0]
-                path = default_storage.save(
-                    "{}/proposals/{}/qaofficer/{}".format(
-                        settings.MEDIA_APP_DIR, proposal_id, filename
-                    ),
-                    ContentFile(_file.read()),
-                )
-
-                document._file = path
-                document.save()
-                instance.save(
-                    version_comment="QA Officer File Added: {}".format(filename)
-                )  # to allow revision to be added to reversion history
-                # instance.current_proposal.save(version_comment='File Added: {}'.format(filename)) # to allow revision to be added to reversion history
-
-            return Response(
-                [
-                    dict(
-                        input_name=d.input_name,
-                        name=d.name,
-                        file=d._file.url,
-                        id=d.id,
-                        can_delete=d.can_delete,
-                    )
-                    for d in instance.qaofficer_documents.filter(
-                        input_name=section, visible=True
-                    )
-                    if d._file
-                ]
-            )
-
-        except serializers.ValidationError:
-            print(traceback.print_exc())
-            raise
-        except ValidationError as e:
-            if hasattr(e, "error_dict"):
-                raise serializers.ValidationError(repr(e.error_dict))
-            else:
-                if hasattr(e, "message"):
-                    raise serializers.ValidationError(e.message)
-        except Exception as e:
-            print(traceback.print_exc())
-            raise serializers.ValidationError(str(e))
+    @basic_exception_handler
+    def process_lease_licence_approval_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(
+            request, instance, document_type="lease_licence_approval_document"
+        )
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
 
     def list(self, request, *args, **kwargs):
         proposals = self.get_queryset()
@@ -2263,64 +1952,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
         ],
         detail=True,
     )
-    @renderer_classes((JSONRenderer,))
-    def with_qaofficer(self, request, *args, **kwargs):
-        try:
-            with transaction.atomic():
-                instance = self.get_object()
-                is_with_qaofficer = eval(request.data.get("with_qaofficer"))
-                data = {}
-                if is_with_qaofficer:
-                    data["type"] = "with_qaofficer"
-                    instance.with_qaofficer(request)
-                else:
-                    data["type"] = "with_qaofficer_completed"
-                    instance.with_qaofficer_completed(request)
-
-                data["proposal"] = "{}".format(instance.id)
-                data["staff"] = "{}".format(request.user.id)
-                data["text"] = request.user.get_full_name() + ": {}".format(
-                    request.data["text"]
-                )
-                data["subject"] = request.user.get_full_name() + ": {}".format(
-                    request.data["text"]
-                )
-                serializer = ProposalLogEntrySerializer(data=data)
-                serializer.is_valid(raise_exception=True)
-                comms = serializer.save()
-
-                # Save the files
-                document_qs = []
-                if is_with_qaofficer:
-                    # Get the list of documents attached by assessor when sending application to QA officer
-                    documents_qs = instance.qaofficer_documents.filter(
-                        input_name="assessor_qa_file", visible=True
-                    )
-                else:
-                    # Get the list of documents attached by QA officer when sending application back to assessor
-                    documents_qs = instance.qaofficer_documents.filter(
-                        input_name="qaofficer_file", visible=True
-                    )
-                for f in documents_qs:
-                    document = comms.documents.create(_file=f._file, name=f.name)
-                    # document = comms.documents.create()
-                    # document.name = f.name
-                    # document._file = f._file #.strip('/media')
-                    document.input_name = f.input_name
-                    document.can_delete = True
-                    document.save()
-                # End Save Documents
-
-                return Response(serializer.data)
-        except serializers.ValidationError:
-            print(traceback.print_exc())
-            raise
-        except ValidationError as e:
-            print(traceback.print_exc())
-            raise serializers.ValidationError(repr(e.error_dict))
-        except Exception as e:
-            print(traceback.print_exc())
-            raise serializers.ValidationError(str(e))
 
     @detail_route(methods=["post"], detail=True)
     @renderer_classes((JSONRenderer,))
