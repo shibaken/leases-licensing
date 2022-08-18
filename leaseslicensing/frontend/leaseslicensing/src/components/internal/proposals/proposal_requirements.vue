@@ -237,20 +237,13 @@ export default {
             }
         },
         fetchRequirements: async function(){
-            console.log("240")
-            /*
-            console.log(api_endpoints.proposal_standard_requirements)
             const url = api_endpoints.proposal_standard_requirements;
-            */
-            console.log(url)
             const response = await fetch(url, {
-                body: JSON.stringify({'application_type_id': vm.proposal.application_type.id}),
-                method: 'GET',
+                body: JSON.stringify({'application_type_id': this.proposal.application_type.id}),
+                method: 'POST',
             });
-            console.log("243")
             if (response.ok) {
                 this.requirements = await response.json();
-                console.log(requirements)
             } else {
                 console.log("error");
             }
@@ -331,7 +324,7 @@ export default {
     },
     mounted: async function(){
         await this.fetchRequirements();
-        vm.$nextTick(() => {
+        this.$nextTick(() => {
             this.eventListeners();
         });
     },

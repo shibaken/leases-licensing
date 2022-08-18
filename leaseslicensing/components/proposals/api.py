@@ -2584,8 +2584,9 @@ class ProposalStandardRequirementViewSet(viewsets.ReadOnlyModelViewSet):
     )
     def application_type_standard_requirements(self, request, *args, **kwargs):
         application_type_id = request.data.get("application_type_id")
-        queryset = ProposalStandardRequirement.objects.filter(application_type__id=application_type_id)
-        print(queryset)
+        queryset = ProposalStandardRequirement.objects.filter(
+                application_type__id=application_type_id
+                )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 

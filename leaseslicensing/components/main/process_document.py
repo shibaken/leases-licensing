@@ -9,8 +9,6 @@ from leaseslicensing.components.approvals.models import ApprovalType, ApprovalTy
 
 
 def process_generic_document(request, instance, document_type=None, *args, **kwargs):
-    print("process_generic_document")
-    print(request.data)
     try:
         action = request.data.get("action")
         input_name = request.data.get("input_name")
