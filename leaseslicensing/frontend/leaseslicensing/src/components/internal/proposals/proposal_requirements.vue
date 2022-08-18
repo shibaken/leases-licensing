@@ -12,6 +12,7 @@
                 ref="requirement_detail"
                 :proposal_id="proposal.id"
                 :requirements="requirements"
+                :selectedRequirement="selectedRequirement"
                 @updateRequirements="updatedRequirements"
                 :key="uuid"
             />
@@ -38,6 +39,7 @@ export default {
         return {
             uuid: 0,
             panelBody: "proposal-requirements-"+vm._uid,
+            selectedRequirement: {},
             requirements: [],
             requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
             requirement_options:{
@@ -214,45 +216,54 @@ export default {
                 this.$refs.requirement_detail.isModalOpen = true;
             });
         },
-        removeRequirement(_id){
-            let vm = this;
-            swal({
+        removeRequirement: async function(_id){
+            console.log(_id)
+            await new swal({
                 title: "Remove Requirement",
                 text: "Are you sure you want to remove this requirement?",
                 type: "warning",
+            })
+            /*
+            await swal({
                 showCancelButton: true,
                 confirmButtonText: 'Remove Requirement',
                 confirmButtonColor:'#d9534f'
-            }).then(() => {
-                fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id+'/discard'))
-                .then((response) => {
-                    vm.$refs.requirements_datatable.vmDataTable.ajax.reload();
-                }, (error) => {
-                    console.log(error);
-                });
-
-            },(error) => {
+            })
+            */
+            const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id+'/discard'));
+            console.log(response)
+            if (response.ok) {
+                this.$refs.requirements_datatable.vmDataTable.ajax.reload();
+            } else {
+                console.log("error")
+            }
+        },
+        fetchRequirements: async function(){
+            const url = api_endpoints.proposal_standard_requirements;
+            const response = await fetch(url, {
+                body: JSON.stringify({'application_type_id': this.proposal.application_type.id}),
+                method: 'POST',
             });
+            if (response.ok) {
+                this.requirements = await response.json();
+            } else {
+                console.log("error");
+            }
         },
-        fetchRequirements(){
-            let vm = this;
-            let url = api_endpoints.proposal_standard_requirements
-            fetch(url, {params: {'application_type_code': vm.proposal.application_type_code}}).then((response) => {
-                vm.requirements = response.body
-            },(error) => {
-                console.log(error);
-            })
-        },
-        editRequirement(_id){
-            let vm = this;
-            fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id)).then((response) => {
-                this.$refs.requirement_detail.requirement = response.body;
-                this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
-                response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
-                this.addRequirement();
-            },(error) => {
-                console.log(error);
-            })
+        editRequirement: async function(_id){
+            const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id));
+            if (response.ok) {
+                const resData = await response.json();
+                this.selectedRequirement = Object.assign({}, resData);
+                //this.$refs.requirement_detail.requirement = Object.assign({}, resData);
+                //this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
+                //response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
+                this.$nextTick(() => {
+                    this.addRequirement();
+                });
+            } else {
+                console.log("error");
+            }
         },
         updatedRequirements(){
             this.$refs.requirements_datatable.vmDataTable.ajax.reload();
@@ -316,10 +327,9 @@ export default {
         //    })
         //},
     },
-    mounted: function(){
-        let vm = this;
-        this.fetchRequirements();
-        vm.$nextTick(() => {
+    mounted: async function(){
+        await this.fetchRequirements();
+        this.$nextTick(() => {
             this.eventListeners();
         });
     },

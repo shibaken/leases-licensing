@@ -9,8 +9,6 @@ from leaseslicensing.components.approvals.models import ApprovalType, ApprovalTy
 
 
 def process_generic_document(request, instance, document_type=None, *args, **kwargs):
-    print("process_generic_document")
-    print(request.data)
     try:
         action = request.data.get("action")
         input_name = request.data.get("input_name")
@@ -114,6 +112,8 @@ def process_generic_document(request, instance, document_type=None, *args, **kwa
                 documents_qs = instance.legislative_requirements_documents
             elif document_type == "shapefile_document":
                 documents_qs = instance.shapefile_documents
+            elif document_type == "proposed_decline_document":
+                documents_qs = instance.proposed_decline_documents
             elif document_type == "lease_licence_approval_document":
                 documents_qs = instance.lease_licence_approval_documents
                 returned_file_data = [
@@ -221,6 +221,8 @@ def delete_document(request, instance, comms_instance, document_type, input_name
             document = instance.legislative_requirements_documents.get(id=document_id)
         elif document_type == "shapefile_document":
             document = instance.shapefile_documents.get(id=document_id)
+        elif document_type == "proposed_decline_document":
+            document = instance.proposed_decline_documents.get(id=document_id)
         elif document_type == "lease_licence_approval_document":
             document = instance.lease_licence_approval_documents.get(id=document_id)
 
@@ -271,6 +273,7 @@ def cancel_document(request, instance, comms_instance, document_type, input_name
         "risk_factors_document",
         "legislative_requirements_document",
         "lease_licence_approval_document"
+        "proposed_decline_document"
     ]:
         pass
         #document_id = request.data.get("document_id")
@@ -444,6 +447,11 @@ def save_document(request, instance, comms_instance, document_type, input_name=N
                 input_name=input_name, name=filename
             )[0]
             path_format_string = "{}/proposals/{}/shapefile_documents/{}"
+        elif document_type == "proposed_decline_document":
+            document = instance.proposed_decline_documents.get_or_create(
+                input_name=input_name, name=filename
+            )[0]
+            path_format_string = "{}/proposals/{}/proposed_decline_documents/{}"
         elif document_type == "lease_licence_approval_document":
             approval_type = request.data.get("approval_type")
             approval_type_document_type = request.data.get("approval_type_document_type")

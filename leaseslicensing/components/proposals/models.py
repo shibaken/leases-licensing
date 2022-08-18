@@ -777,6 +777,27 @@ class ExclusiveUseDocument(Document):
         verbose_name = "Application Document"
 
 
+class ProposedDeclineDocument(Document):
+    proposal = models.ForeignKey(
+        "Proposal", related_name="proposed_decline_documents", on_delete=models.CASCADE
+    )
+    _file = models.FileField(upload_to=update_proposal_doc_filename, max_length=512)
+    input_name = models.CharField(max_length=255, null=True, blank=True)
+    can_delete = models.BooleanField(
+        default=True
+    )  # after initial submit prevent document from being deleted
+    can_hide = models.BooleanField(
+        default=False
+    )  # after initial submit, document cannot be deleted but can be hidden
+    hidden = models.BooleanField(
+        default=False
+    )  # after initial submit prevent document from being deleted
+
+    class Meta:
+        app_label = "leaseslicensing"
+        verbose_name = "Proposed Decline Document"
+
+
 class ProposedApprovalDocument(Document):
     proposal = models.ForeignKey(
         "Proposal", related_name="proposed_approval_documents", on_delete=models.CASCADE
@@ -892,7 +913,7 @@ class LeaseLicenceApprovalDocument(Document):
 
     class Meta:
         app_label = "leaseslicensing"
-        verbose_name = "Proposed Approval Document"
+        verbose_name = "Lease Licence Approval Document"
 
 
 class ProposalApplicantDetails(models.Model):
@@ -1958,7 +1979,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         "You cannot propose to decline if it is not with assessor"
                     )
 
+                non_field_errors = []
                 reason = details.get("reason")
+                # Input validation check
+                if not reason:
+                    non_field_errors.append("You must add details text")
+                if non_field_errors:
+                    raise serializers.ValidationError(non_field_errors)
+
                 ProposalDeclinedDetails.objects.update_or_create(
                     proposal=self,
                     defaults={
@@ -3943,6 +3971,7 @@ class ProposalRequirement(RevisionedMixin):
         Proposal, related_name="requirements", on_delete=models.CASCADE
     )
     due_date = models.DateField(null=True, blank=True)
+    reminder_date = models.DateField(null=True, blank=True)
     recurrence = models.BooleanField(default=False)
     recurrence_pattern = models.SmallIntegerField(
         choices=RECURRENCE_PATTERNS, default=1
