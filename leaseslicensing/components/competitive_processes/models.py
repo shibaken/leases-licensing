@@ -1,9 +1,15 @@
+import uuid
 from django.db import models
+from django.db.models import Q
 from django.contrib.gis.db.models.fields import PolygonField
 
 from ledger_api_client.ledger_models import EmailUserRO
+from leaseslicensing import settings
+from leaseslicensing.components import competitive_processes
+from leaseslicensing.components.main.models import CommunicationsLogEntry, Document, UserAction
 
 from leaseslicensing.components.main.related_item import RelatedItem
+from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.helpers import is_internal
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 
@@ -11,7 +17,16 @@ from leaseslicensing.ledger_api_utils import retrieve_email_user
 class CompetitiveProcessManager(models.Manager):
 
     def get_queryset(self):
-        return super().get_queryset().select_related('generating_proposal')
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'generating_proposal',
+            )
+            .prefetch_related(
+                'competitive_process_parties',
+            )
+        )
 
 
 class CompetitiveProcess(models.Model):
@@ -114,7 +129,9 @@ class CompetitiveProcess(models.Model):
 
 class CompetitiveProcessGeometry(models.Model):
     competitive_process = models.ForeignKey(
-        CompetitiveProcess, on_delete=models.CASCADE, related_name="competitive_process_geometries"
+        CompetitiveProcess, 
+        on_delete=models.CASCADE, 
+        related_name="competitive_process_geometries"
     )
     polygon = PolygonField(srid=4326, blank=True, null=True)
     # intersects = models.BooleanField(default=False)
@@ -124,3 +141,148 @@ class CompetitiveProcessGeometry(models.Model):
 
     class Meta:
         app_label = "leaseslicensing"
+
+
+class CompetitiveProcessParty(models.Model):
+    competitive_process = models.ForeignKey(
+        CompetitiveProcess, 
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE, 
+        related_name="competitive_process_parties"
+    )
+    party_person_id = models.IntegerField(null=True, blank=True)  # EmailUserRO
+    party_organisation = models.ForeignKey(
+        Organisation,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    invited_at = models.DateField(null=True, blank=True)
+    removed_at = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    modified_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        app_label = "leaseslicensing"
+        ordering = ['invited_at']
+        constraints = [
+            models.CheckConstraint(
+                # Either party_person or party_organisation must be None
+                check=Q(party_person_id=None, party_organisation__isnull=False) | Q(party_person_id__isnull=False, party_organisation=None),
+                name='either_one_null',
+            )
+        ]
+    
+    @property
+    def is_person(self):
+        if self.party_person_id:
+            return True
+        return False
+    
+    @property
+    def party_person(self):
+        if self.party_person_id:
+            person = retrieve_email_user(self.party_person_id)
+            return person
+        return None
+
+    @property
+    def is_organisation(self):
+        if self.party_organisation:
+            return True
+        return False
+
+
+class PartyDetail(models.Model):
+    competitive_processes_party = models.ForeignKey(
+        CompetitiveProcessParty, 
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="party_details"
+    )
+    detail = models.TextField(blank=True)
+    created_by = models.IntegerField(null=True, blank=True)  # EmailUserRO
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    modified_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        app_label = "leaseslicensing"
+        ordering = ['created_at']
+
+
+def update_party_detail_doc_filename(instance, filename):
+    return '{}/competitive_process/{}/{}'.format(
+        settings.MEDIA_APP_DIR, 
+        instance.party_detail.competitive_process_party.competitive_process.id,
+        uuid.uuid4()
+    )
+    # if instance.party_detail.competitive_process_party.is_person:
+    #     party_folder_name = 'party_person'
+    #     party_id = instance.party_detail.competitive_process_party.party_person
+    # elif instance.party_detail.competitive_process_party.is_organisation:
+    #     party_folder_name = 'party_organisation'
+    #     party_id = instance.party_detail.competitive_process_party.party_organisation.id
+    # else:
+    #     party_folder_name = 'unsure_party'
+    #     party_id = 'unsuer_id'
+        
+    # return "{}/competitive_process/{}/{}/{}/detail/{}/{}".format(
+        # settings.MEDIA_APP_DIR, 
+        # instance.party_detail.competitive_process_party.competitive_process.id,
+        # party_folder_name,
+        # party_id,
+        # instance.party_detail.id,
+        # filename,
+    # )
+# 
+
+class PartyDetailDocument(Document):
+    party_detail = models.ForeignKey(
+        PartyDetail, 
+        null=True, 
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='party_detail_documents'
+    )
+    _file = models.FileField(upload_to=update_party_detail_doc_filename, max_length=512)
+    
+    class Meta:
+        app_label = "leaseslicensing"
+
+
+class CompetitiveProcessLogEntry(CommunicationsLogEntry):
+    competitive_process = models.ForeignKey(
+        CompetitiveProcess, related_name="comms_logs", on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return "{} - {}".format(self.reference, self.subject)
+
+    class Meta:
+        app_label = "leaseslicensing"
+
+    def save(self, **kwargs):
+        # save the competitive process id if the reference not provided
+        if not self.reference:
+            self.reference = self.competitive_process.id
+        super().save(**kwargs)
+
+
+class CompetitiveProcessUserAction(UserAction):
+    ACTION_CREATE_CUSTOMER_ = "Create customer {}"
+    ACTION_LINK_PARK = "Link park {} to application {}"
+
+    competitive_process = models.ForeignKey(
+        CompetitiveProcess, related_name="action_logs", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        app_label = "leaseslicensing"
+        ordering = ("-when",)
+
+    @classmethod
+    def log_action(cls, competitive_process, action, user):
+        return cls.objects.create(competitive_processes=competitive_process, who=user, what=str(action))
+
