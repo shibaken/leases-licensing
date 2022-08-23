@@ -117,6 +117,11 @@ export default {
             competitive_process: null,
             can_modify: true,
             show_col_status_when_submitted: true,
+            
+            // For Comms Log
+            comms_url: helpers.add_endpoint_json(api_endpoints.competitive_process, vm.$route.params.competitive_process_id + '/comms_log'),
+            comms_add_url: helpers.add_endpoint_json(api_endpoints.competitive_process, vm.$route.params.competitive_process_id + '/add_comms_log'),
+            logs_url: helpers.add_endpoint_json(api_endpoints.competitive_process, vm.$route.params.competitive_process_id + '/action_log'),
         }
     },
     components: {

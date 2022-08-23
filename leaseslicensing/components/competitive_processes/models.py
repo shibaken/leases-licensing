@@ -30,11 +30,13 @@ class CompetitiveProcessManager(models.Manager):
 
 
 class CompetitiveProcess(models.Model):
-    """A class to represent a custom process"""
+    """A class to represent a competitive process"""
 
     objects = CompetitiveProcessManager()
 
     prefix = 'CP'
+
+    # For status
     STATUS_IN_PROGRESS = "in_progress"
     STATUS_DISCARDED = "discarded"
     STATUS_COMPLETED_APPLICATION = "completed_application"
@@ -46,11 +48,21 @@ class CompetitiveProcess(models.Model):
         (STATUS_COMPLETED_DECLINED, "Completed (Declined)"),
     )
 
+    # For outcome
+    # OUTCOME_WINNER = "winner"
+    # OUTCOME_NO_WINNER = "no_winner"
+    # OUTCOME_CHOICES = (
+        # (OUTCOME_WINNER, "Winner"),
+        # (OUTCOME_NO_WINNER, "No Winner"),
+    # )
+
     lodgement_number = models.CharField(max_length=9, blank=True, default="")
     status = models.CharField("Status", max_length=30, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0],)
     assigned_officer_id = models.IntegerField(null=True, blank=True)  # EmailUserRO
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     modified_at = models.DateTimeField(auto_now=True, null=True)
+    winner = models.ForeignKey("CompetitiveProcessParty", null=True, blank=True, on_delete=models.CASCADE)
+    details = models.TextField(blank=True)
 
     class Meta:
         app_label = "leaseslicensing"
@@ -143,6 +155,28 @@ class CompetitiveProcessGeometry(models.Model):
         app_label = "leaseslicensing"
 
 
+def update_competitive_process_doc_filename(instance, filename):
+    return '{}/competitive_process/{}/{}'.format(
+        settings.MEDIA_APP_DIR, 
+        instance.competitive_process.id,
+        filename,
+    )
+
+
+class CompetitiveProcessDocument(Document):
+    competitive_process = models.ForeignKey(
+        CompetitiveProcess, 
+        null=True, 
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='competitive_process_documents'
+    )
+    _file = models.FileField(upload_to=update_competitive_process_doc_filename, max_length=512)
+    
+    class Meta:
+        app_label = "leaseslicensing"
+
+
 class CompetitiveProcessParty(models.Model):
     competitive_process = models.ForeignKey(
         CompetitiveProcess, 
@@ -213,7 +247,7 @@ class PartyDetail(models.Model):
 
 
 def update_party_detail_doc_filename(instance, filename):
-    return '{}/competitive_process/{}/{}'.format(
+    return '{}/competitive_process/{}/party_detail/{}'.format(
         settings.MEDIA_APP_DIR, 
         instance.party_detail.competitive_process_party.competitive_process.id,
         uuid.uuid4()
