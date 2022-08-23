@@ -185,8 +185,8 @@ class CompetitiveProcessParty(models.Model):
         on_delete=models.CASCADE, 
         related_name="competitive_process_parties"
     )
-    party_person_id = models.IntegerField(null=True, blank=True)  # EmailUserRO
-    party_organisation = models.ForeignKey(
+    person_id = models.IntegerField(null=True, blank=True)  # EmailUserRO
+    organisation = models.ForeignKey(
         Organisation,
         blank=True,
         null=True,
@@ -203,27 +203,27 @@ class CompetitiveProcessParty(models.Model):
         constraints = [
             models.CheckConstraint(
                 # Either party_person or party_organisation must be None
-                check=Q(party_person_id=None, party_organisation__isnull=False) | Q(party_person_id__isnull=False, party_organisation=None),
+                check=Q(person_id=None, organisation__isnull=False) | Q(person_id__isnull=False, organisation=None),
                 name='either_one_null',
             )
         ]
     
     @property
     def is_person(self):
-        if self.party_person_id:
+        if self.person_id:
             return True
         return False
     
     @property
-    def party_person(self):
-        if self.party_person_id:
-            person = retrieve_email_user(self.party_person_id)
+    def person(self):
+        if self.person_id:
+            person = retrieve_email_user(self.person_id)
             return person
         return None
 
     @property
     def is_organisation(self):
-        if self.party_organisation:
+        if self.organisation:
             return True
         return False
 
@@ -253,11 +253,11 @@ def update_party_detail_doc_filename(instance, filename):
         uuid.uuid4()
     )
     # if instance.party_detail.competitive_process_party.is_person:
-    #     party_folder_name = 'party_person'
-    #     party_id = instance.party_detail.competitive_process_party.party_person
+    #     party_folder_name = 'person'
+    #     party_id = instance.party_detail.competitive_process_party.person
     # elif instance.party_detail.competitive_process_party.is_organisation:
-    #     party_folder_name = 'party_organisation'
-    #     party_id = instance.party_detail.competitive_process_party.party_organisation.id
+    #     party_folder_name = 'organisation'
+    #     party_id = instance.party_detail.competitive_process_party.organisation.id
     # else:
     #     party_folder_name = 'unsure_party'
     #     party_id = 'unsuer_id'

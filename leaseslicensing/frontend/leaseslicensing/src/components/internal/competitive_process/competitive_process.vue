@@ -94,10 +94,10 @@
                                         <option value="no_winner">No winner</option>
                                         <option v-for="party in competitive_process.competitive_process_parties" :value="party.id">
                                             <template v-if="party.is_person">
-                                                {{ party.party_person.fullname }}
+                                                {{ party.person.fullname }}
                                             </template>
                                             <template v-if="party.is_organisation">
-                                                {{ party.party_organisation.name }}
+                                                {{ party.organisation.name }}
                                             </template>
                                         </option>
                                     </select>

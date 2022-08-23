@@ -22,8 +22,8 @@ class RegistrationOfInterestSerializer(serializers.ModelSerializer):
 class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
     is_person = serializers.BooleanField()  # This is property at the model
     is_organisation = serializers.BooleanField()  # This is property at the model
-    party_person = serializers.SerializerMethodField()
-    party_organisation = serializers.SerializerMethodField()
+    person = serializers.SerializerMethodField()
+    organisation = serializers.SerializerMethodField()
 
     class Meta:
         model = CompetitiveProcessParty
@@ -31,21 +31,21 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
             'id',
             'is_person',
             'is_organisation',
-            'party_person',
-            'party_organisation',
+            'person',
+            'organisation',
             'invited_at',
             'removed_at',
         )
 
-    def get_party_person(self, obj):
+    def get_person(self, obj):
         if obj.is_person:
-            serializer = EmailUserSerializer(obj.party_person)
+            serializer = EmailUserSerializer(obj.person)
             return serializer.data
         return None
 
-    def get_party_organisation(self, obj):
+    def get_organisation(self, obj):
         if obj.is_organisation:
-            serializer = OrganisationSerializer(obj.party_organisation)
+            serializer = OrganisationSerializer(obj.organisation)
             return serializer.data
         return None
 
