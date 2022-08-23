@@ -1168,6 +1168,19 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=["POST"], detail=True)
     @renderer_classes((JSONRenderer,))
     @basic_exception_handler
+    def process_proposed_decline_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(
+            request, instance, document_type="proposed_decline_document"
+        )
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=["POST"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
     def process_lease_licence_approval_document(self, request, *args, **kwargs):
         instance = self.get_object()
         returned_data = process_generic_document(
@@ -1840,9 +1853,9 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def proposed_decline(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = PropedDeclineSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            instance.proposed_decline(request, serializer.validated_data)
+            #serializer = PropedDeclineSerializer(data=request.data)
+            #serializer.is_valid(raise_exception=True)
+            instance.proposed_decline(request, request.data)
             # serializer = InternalProposalSerializer(instance,context={'request':request})
             serializer_class = self.internal_serializer_class()
             serializer = serializer_class(instance, context={"request": request})
@@ -2541,7 +2554,8 @@ class ProposalRequirementViewSet(viewsets.ModelViewSet):
             # serializer = self.get_serializer(data= json.loads(request.data.get('data')))
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            instance = serializer.save()
+            serializer.save()
+            #instance = serializer.save()
             # TODO: requirements documents in LL?
             # instance.add_documents(request)
             return Response(serializer.data)
@@ -2563,13 +2577,27 @@ class ProposalStandardRequirementViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ProposalStandardRequirement.objects.all()
     serializer_class = ProposalStandardRequirementSerializer
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        search = request.GET.get("search")
-        if search:
-            queryset = queryset.filter(text__icontains=search)
+    @list_route(
+        methods=[
+            "POST",
+        ],
+        detail=False,
+    )
+    def application_type_standard_requirements(self, request, *args, **kwargs):
+        application_type_id = request.data.get("application_type_id")
+        queryset = ProposalStandardRequirement.objects.filter(
+                application_type__id=application_type_id
+                )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    #def list(self, request, *args, **kwargs):
+    #    queryset = self.get_queryset()
+    #    search = request.GET.get("search")
+    #    if search:
+    #        queryset = queryset.filter(text__icontains=search)
+    #    serializer = self.get_serializer(queryset, many=True)
+    #    return Response(serializer.data)
 
 
 class AmendmentRequestViewSet(viewsets.ModelViewSet):

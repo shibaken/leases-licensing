@@ -12,7 +12,7 @@
                             <div class="form-group">
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
-                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Decision</label>
+                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">Decision</label>
                                         <label v-else class="control-label pull-left"  for="Name">Proposed Decision</label>
                                     </div>
                                     <div class="form-check col-sm-5">
@@ -43,7 +43,7 @@
                             <div class="form-group">
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
-                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Details</label>
+                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">Details</label>
                                         <label v-else class="control-label pull-left"  for="Name">Proposed Details</label>
                                     </div>
                                     <div class="col-sm-9">
@@ -63,7 +63,7 @@
                             <div class="form-group">
                                 <div class="row modal-input-row">
                                     <div class="col-sm-3">
-                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">BCC email</label>
+                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">BCC email</label>
                                         <label v-else class="control-label pull-left"  for="Name">Proposed BCC email</label>
                                     </div>
                                     <div class="col-sm-9">
@@ -89,6 +89,7 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <select 
+                                            :disabled="withApprover"
                                             ref="approvalType"
                                             class="form-control"
                                             v-model="selectedApprovalType"
@@ -116,12 +117,19 @@
 
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Commencement</label>
+                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">Commencement</label>
                                         <label v-else class="control-label pull-left"  for="Name">Commencement</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group date" ref="start_date" style="width: 70%;">
-                                            <input type="date" class="form-control" name="start_date" placeholder="DD/MM/YYYY" v-model="approval.start_date">
+                                            <input 
+                                            :disabled="withApprover"
+                                            type="date" 
+                                            class="form-control" 
+                                            name="start_date" 
+                                            placeholder="DD/MM/YYYY" 
+                                            v-model="approval.start_date"
+                                            >
                                             <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
                                             <!--span class="input-group-addon">
                                                 <span class="glyphicon glyphicon-calendar"></span>
@@ -134,12 +142,19 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Expiry</label>
+                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">Expiry</label>
                                         <label v-else class="control-label pull-left"  for="Name">Expiry</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group date" ref="due_date" style="width: 70%;margin-bottom: 1rem">
-                                            <input type="date" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="approval.expiry_date">
+                                            <input 
+                                            :disabled="withApprover"
+                                            type="date" 
+                                            class="form-control" 
+                                            name="due_date" 
+                                            placeholder="DD/MM/YYYY" 
+                                            v-model="approval.expiry_date"
+                                            >
                                             <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
                                             <!--span class="input-group-addon">
                                                 <span class="glyphicon glyphicon-calendar"></span>
@@ -207,6 +222,7 @@
                                         </div>
                                         <div class="col-sm-9">
                                             <FileField 
+                                                :readonly="withApprover"
                                                 :name="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
                                                 :id="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
                                                 :approval_type="selectedApprovalType.id"
@@ -369,6 +385,9 @@ export default {
         },
         csrf_token: function() {
           return helpers.getCookie('csrftoken')
+        },
+        withApprover: function(){
+            return this.processing_status == 'With Approver' ? true : false;
         },
         can_preview: function(){
             return this.processing_status == 'With Approver' ? true : false;
