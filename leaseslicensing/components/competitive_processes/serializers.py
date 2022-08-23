@@ -160,6 +160,8 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
             'can_accessing_user_process',
             'accessing_user',
             'competitive_process_parties',
+            'winner',
+            'details',
         )
 
     def get_accessing_user(self, obj):

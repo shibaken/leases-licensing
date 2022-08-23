@@ -63,7 +63,6 @@
                     <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                         <FormSection :formCollapse="false" label="Map" Index="map">
                         <!--
-
                             <ComponentMap
                                 ref="component_map"
                                 :is_internal=true
@@ -86,7 +85,45 @@
                     </div>
                     <div class="tab-pane fade" id="pills-outcome" role="tabpanel" aria-labelledby="pills-outcome-tab">
                         <FormSection :formCollapse="false" label="Outcome" Index="outcome">
-
+                            <div class="row mb-2">
+                                <div class="col-sm-2">
+                                    <label for="competitive_process_winner" class="control-label">Winner</label>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select class="form-control" v-model="competitive_process.winner" id="competitive_process_winner">
+                                        <option value="no_winner">No winner</option>
+                                        <option v-for="party in competitive_process.competitive_process_parties" :value="party.id">
+                                            <template v-if="party.is_person">
+                                                {{ party.party_person.fullname }}
+                                            </template>
+                                            <template v-if="party.is_organisation">
+                                                {{ party.party_organisation.name }}
+                                            </template>
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-2">
+                                    <label for="competitive_process_details" class="control-label">Details</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <RichText
+                                        id="competitive_process_details"
+                                        :proposalData="competitive_process.details"
+                                        ref="details_text"
+                                        label="Rich text in here" 
+                                        :readonly="readonly" 
+                                        :can_view_richtext_src=true
+                                        :key="competitive_process.id"
+                                    />
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-2">
+                                    <label for="competitive_process_documents" class="control-label">Documents</label>
+                                </div>
+                            </div>
                         </FormSection>
                     </div>
                     <div class="tab-pane fade" id="pills-related-items" role="tabpanel" aria-labelledby="pills-related-items-tab">
@@ -94,6 +131,14 @@
 
                         </FormSection>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="displaySaveBtns" class="navbar fixed-bottom" style="background-color: #f5f5f5;">
+            <div class="container">
+                <div class="col-md-12 text-end">
+                    <button class="btn btn-primary" @click.prevent="save_and_continue()" :disabled="disableSaveAndContinueBtn">Save and Continue</button>
+                    <button class="btn btn-primary" @click.prevent="save_and_exit()" :disabled="disableSaveAndExitBtn">Save and Exit</button>
                 </div>
             </div>
         </div>
@@ -108,6 +153,7 @@ import Workflow from '@common-utils/workflow_competitive_process.vue'
 import FormSection from '@/components/forms/section_toggle.vue'
 import TableParties from '@common-utils/table_parties'
 import ComponentMap from '@/components/common/component_map.vue'
+import RichText from '@/components/forms/richtext.vue'
 
 export default {
     name: 'CompetitiveProcess',
@@ -130,6 +176,7 @@ export default {
         TableParties,
         FormSection,
         ComponentMap,
+        RichText,
     },
     created: function(){
         this.fetchCompetitiveProcess()
@@ -139,10 +186,19 @@ export default {
     },
     computed: {
         readonly: function(){
-
+            return false
+        },
+        displaySaveBtns: function(){
+            return true
         },
    },
     methods: {
+        save_and_continue: () => {
+
+        },
+        save_and_exit: () => {
+
+        },
         updateTableByFeatures: function() {
 
         },
