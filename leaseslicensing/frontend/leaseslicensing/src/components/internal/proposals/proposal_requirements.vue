@@ -2,16 +2,23 @@
     <div>
         <FormSection :formCollapse="false" label="Conditions" Index="conditions">
             <form class="form-horizontal" action="index.html" method="post">
-                <div class="col-sm-12">
-                    <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Condition</button>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary float-end">Add Condition</button>
+                    </div>
                 </div>
-                <datatable ref="requirements_datatable" :id="datatableId" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <datatable ref="requirements_datatable" :id="datatableId" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
+                    </div>
+                </div>
             </form>
 
             <RequirementDetail
                 ref="requirement_detail"
                 :proposal_id="proposal.id"
                 :requirements="requirements"
+                :selectedRequirement="selectedRequirement"
                 @updateRequirements="updatedRequirements"
                 :key="uuid"
             />
@@ -38,6 +45,7 @@ export default {
         return {
             uuid: 0,
             panelBody: "proposal-requirements-"+vm._uid,
+            selectedRequirement: {},
             requirements: [],
             requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
             requirement_options:{
@@ -51,7 +59,8 @@ export default {
                     "dataSrc": ''
                 },
                 order: [],
-                dom: 'lBfrtip',
+                //dom: 'lBfrtip',
+                dom: '<"top"fB>rt<"bottom"ip><"clear"l>',
                 buttons:[
                 'excel', 'csv', ], //'copy'
                 columns: [
@@ -201,7 +210,8 @@ export default {
     },
     computed:{
         datatableId: function() {
-            return 'requirements-datatable-' + this._uid;
+            //return 'requirements-datatable-' + this._uid;
+            return 'requirements-datatable';
         },
         hasAssessorMode(){
             return this.proposal.assessor_mode.has_assessor_mode;
@@ -237,32 +247,28 @@ export default {
             }
         },
         fetchRequirements: async function(){
-            console.log("240")
-            /*
-            console.log(api_endpoints.proposal_standard_requirements)
             const url = api_endpoints.proposal_standard_requirements;
-            */
-            console.log(url)
             const response = await fetch(url, {
-                body: JSON.stringify({'application_type_id': vm.proposal.application_type.id}),
-                method: 'GET',
+                body: JSON.stringify({'application_type_id': this.proposal.application_type.id}),
+                method: 'POST',
             });
-            console.log("243")
             if (response.ok) {
                 this.requirements = await response.json();
-                console.log(requirements)
             } else {
                 console.log("error");
             }
         },
         editRequirement: async function(_id){
-            console.log(_id)
             const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id));
             if (response.ok) {
-                this.$refs.requirement_detail.requirement = await response.json();
-                this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
-                response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
-                this.addRequirement();
+                const resData = await response.json();
+                this.selectedRequirement = Object.assign({}, resData);
+                //this.$refs.requirement_detail.requirement = Object.assign({}, resData);
+                //this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
+                //response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
+                this.$nextTick(() => {
+                    this.addRequirement();
+                });
             } else {
                 console.log("error");
             }
@@ -331,7 +337,7 @@ export default {
     },
     mounted: async function(){
         await this.fetchRequirements();
-        vm.$nextTick(() => {
+        this.$nextTick(() => {
             this.eventListeners();
         });
     },

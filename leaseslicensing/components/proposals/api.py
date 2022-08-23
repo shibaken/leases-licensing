@@ -2554,7 +2554,8 @@ class ProposalRequirementViewSet(viewsets.ModelViewSet):
             # serializer = self.get_serializer(data= json.loads(request.data.get('data')))
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            instance = serializer.save()
+            serializer.save()
+            #instance = serializer.save()
             # TODO: requirements documents in LL?
             # instance.add_documents(request)
             return Response(serializer.data)
@@ -2584,8 +2585,9 @@ class ProposalStandardRequirementViewSet(viewsets.ReadOnlyModelViewSet):
     )
     def application_type_standard_requirements(self, request, *args, **kwargs):
         application_type_id = request.data.get("application_type_id")
-        queryset = ProposalStandardRequirement.objects.filter(application_type__id=application_type_id)
-        print(queryset)
+        queryset = ProposalStandardRequirement.objects.filter(
+                application_type__id=application_type_id
+                )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
