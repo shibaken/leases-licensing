@@ -74,5 +74,5 @@ jobs:
             source .venv/bin/activate
             ./apply_initial_migrations.sh
             python manage.py collectstatic --no-input &&
-            run python manage.py check
+            python manage.py check
             #python manage.py test wildlifecompliance/tests

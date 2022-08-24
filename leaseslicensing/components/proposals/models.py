@@ -2195,10 +2195,48 @@ class Proposal(DirtyFieldsMixin, models.Model):
             except:
                 raise
 
+    def store_proposed_approval_data(self, request, details):
+        # Input validation check
+        non_field_errors = []
+        if not details.get("details"):
+            non_field_errors.append("You must add details text")
+        if (self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and 
+                not details.get("decision")):
+            non_field_errors.append("You must choose a decision radio button")
+        elif self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+            if not details.get("approval_type"):
+                non_field_errors.append("You must select an Approval Type")
+            if not details.get("start_date"):
+                non_field_errors.append("You must select a Start Date")
+            if not details.get("expiry_date"):
+                non_field_errors.append("You must select an Expiry Date")
+        if non_field_errors:
+            raise serializers.ValidationError(non_field_errors)
+
+        # Store proposed approval values
+        if self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
+            self.proposed_issuance_approval = {
+                "details": details.get("details"),
+                "cc_email": details.get("cc_email"),
+                "decision": details.get("decision"),
+            }
+        elif self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+            #start_date = details.get('start_date').strftime('%d/%m/%Y') if details.get('start_date') else None
+            #expiry_date = details.get('expiry_date').strftime('%d/%m/%Y') if details.get('expiry_date') else None
+            self.proposed_issuance_approval = {
+                "approval_type": details.get("approval_type"),
+                "approval_sub_type": details.get("approval_sub_type"),
+                #"approval_type_document_type": details.get("approval_type_document_type"),
+                "cc_email": details.get("cc_email"),
+                "details": details.get("details"),
+                'start_date' : details.get("start_date"),
+                'expiry_date' : details.get("expiry_date"),
+            }
+        self.save()
+
     def proposed_approval(self, request, details):
         with transaction.atomic():
             try:
-                non_field_errors = []
                 # User check
                 if not self.can_assess(request.user):
                     raise exceptions.ProposalNotAuthorized()
@@ -2217,41 +2255,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     )
                 ):
                     raise ValidationError("You cannot propose for approval")
-                # Input validation check
-                if not details.get("details"):
-                    non_field_errors.append("You must add details text")
-                if (self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST and 
-                        not details.get("decision")):
-                    non_field_errors.append("You must choose a decision radio button")
-                elif self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
-                    if not details.get("approval_type"):
-                        non_field_errors.append("You must select an Approval Type")
-                    if not details.get("start_date"):
-                        non_field_errors.append("You must select a Start Date")
-                    if not details.get("expiry_date"):
-                        non_field_errors.append("You must select an Expiry Date")
-                if non_field_errors:
-                    raise serializers.ValidationError(non_field_errors)
 
-                # Store proposed approval values
-                if self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
-                    self.proposed_issuance_approval = {
-                        "details": details.get("details"),
-                        "cc_email": details.get("cc_email"),
-                        "decision": details.get("decision"),
-                    }
-                elif self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
-                    #start_date = details.get('start_date').strftime('%d/%m/%Y') if details.get('start_date') else None
-                    #expiry_date = details.get('expiry_date').strftime('%d/%m/%Y') if details.get('expiry_date') else None
-                    self.proposed_issuance_approval = {
-                        "approval_type": details.get("approval_type"),
-                        "approval_sub_type": details.get("approval_sub_type"),
-                        #"approval_type_document_type": details.get("approval_type_document_type"),
-                        "cc_email": details.get("cc_email"),
-                        "details": details.get("details"),
-                        'start_date' : details.get("start_date"),
-                        'expiry_date' : details.get("expiry_date"),
-                    }
+                self.store_proposed_approval_data(request, details)
+
                 self.proposed_decline_status = False
                 approver_comment = ""
                 self.move_to_status(
@@ -2351,20 +2357,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     # if not self.applicant_address:
                     #   raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
 
-                    self.proposed_issuance_approval = {
-                        #'start_date' : details.get('start_date').strftime('%d/%m/%Y'),
-                        #'expiry_date' : details.get('expiry_date').strftime('%d/%m/%Y'),
-                        "decision": details.get("decision"),
-                        "details": details.get("details"),
-                        "cc_email": details.get("cc_email"),
-                    }
-                    # TODO: req for LL?
-                    # if is_departmentUser(request):
-                    # needed because external users come through this workflow following 'awaiting_payment; status
-                    # self.approved_by = request.user
+                self.store_proposed_approval_data(request, details)
 
                 self.processing_status = "approved"
-                # self.customer_status = 'approved'
                 # Log proposal action
                 self.log_user_action(
                     ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id), request
@@ -2439,6 +2434,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                 "proxy_applicant": self.proxy_applicant,
                             },
                         )
+                    ## Registration of interest
                     if (
                         self.application_type.name
                         == APPLICATION_TYPE_REGISTRATION_OF_INTEREST
@@ -2460,58 +2456,16 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         ):
                             # TODO: add logic
                             pass
+                    # Lease Licence
                     elif (
                         self.application_type.name
-                        == APPLICATION_TYPE_COMPETITIVE_PROCESS
+                        == APPLICATION_TYPE_LEASE_LICENCE
                     ):
                         pass
 
-                    # Generate compliances
-                    from leaseslicensing.components.compliances.models import (
-                        Compliance,
-                        ComplianceUserAction,
-                    )
-
-                    if created:
-                        if self.proposal_type == "amendment":
-                            approval_compliances = Compliance.objects.filter(
-                                approval=previous_approval,
-                                proposal=self.previous_application,
-                                processing_status="future",
-                            )
-                            if approval_compliances:
-                                for c in approval_compliances:
-                                    c.delete()
-                        # Log creation
-                        # Generate the document
-                        # TODO: generate doc
-                        # approval.generate_doc(request.user)
-                        self.generate_compliances(approval, request)
-                        # send the doc and log in approval and org
-                    else:
-                        # Generate the document
-                        # TODO: generate doc
-                        # approval.generate_doc(request.user)
-                        # Delete the future compliances if Approval is reissued and generate the compliances again.
-                        approval_compliances = Compliance.objects.filter(
-                            approval=approval, proposal=self, processing_status="future"
-                        )
-                        if approval_compliances:
-                            for c in approval_compliances:
-                                c.delete()
-                        self.generate_compliances(approval, request)
-                        # Log proposal action
-                        self.log_user_action(
-                            ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id),
-                            request,
-                        )
-                        # Log entry for organisation
-                        applicant_field = getattr(self, self.applicant_field)
-                        applicant_field.log_user_action(
-                            ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id),
-                            request,
-                        )
                     self.approval = approval
+                    # TODO: additional logic required for amendment, reissue, etc?
+                    self.generate_compliances(approval, request)
 
                     # send Proposal approval email with attachment
                     # TODO: generate doc, then email
