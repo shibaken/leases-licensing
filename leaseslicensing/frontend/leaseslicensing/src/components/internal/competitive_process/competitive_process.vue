@@ -86,7 +86,7 @@
                     <div class="tab-pane fade" id="pills-outcome" role="tabpanel" aria-labelledby="pills-outcome-tab">
                         <FormSection :formCollapse="false" label="Outcome" Index="outcome">
                             <div class="row mb-2">
-                                <div class="col-sm-2">
+                                <div class="col-sm-3">
                                     <label for="competitive_process_winner" class="control-label">Winner</label>
                                 </div>
                                 <div class="col-sm-4">
@@ -104,14 +104,14 @@
                                 </div>
                             </div>
                             <div class="row mb-2">
-                                <div class="col-sm-2">
-                                    <label for="competitive_process_details" class="control-label">Details</label>
+                                <div class="col-sm-3">
+                                    <label for="details" class="control-label">Details</label>
                                 </div>
-                                <div class="col-sm-10">
+                                <div class="col-sm-9">
                                     <RichText
-                                        id="competitive_process_details"
+                                        id="details"
                                         :proposalData="competitive_process.details"
-                                        ref="details_text"
+                                        ref="details"
                                         label="Rich text in here" 
                                         :readonly="readonly" 
                                         :can_view_richtext_src=true
@@ -120,8 +120,10 @@
                                 </div>
                             </div>
                             <div class="row mb-2">
-                                <div class="col-sm-2">
+                                <div class="col-sm-3">
                                     <label for="competitive_process_documents" class="control-label">Documents</label>
+                                </div>
+                                <div class="col-sm-9">
                                     <FileField
                                         :readonly="readonly"
                                         ref="competitive_process_document"
@@ -225,9 +227,15 @@ export default {
 
             try {
                 let payload = {'competitive_process': vm.competitive_process}
+                
+                // For map
                 if (vm.$refs.component_map) {
                     payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
                 }
+                
+                // For rich text
+                payload.competitive_process.details = this.$refs.details.detailsText;
+
                 const res = await fetch(vm.competitive_process_form_url, { body: JSON.stringify(payload), method: 'PUT' })
 
                 if(res.ok){

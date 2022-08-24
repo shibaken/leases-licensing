@@ -50,7 +50,6 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
         return None
 
 
-
 class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
     registration_of_interest = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
