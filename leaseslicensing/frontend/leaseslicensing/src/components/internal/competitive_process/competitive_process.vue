@@ -122,6 +122,15 @@
                             <div class="row mb-2">
                                 <div class="col-sm-2">
                                     <label for="competitive_process_documents" class="control-label">Documents</label>
+                                    <FileField
+                                        :readonly="readonly"
+                                        ref="competitive_process_document"
+                                        name="competitive_process_document"
+                                        id="competitive_process_document"
+                                        :isRepeatable="true"
+                                        :documentActionUrl="competitiveProcessDocumentUrl"
+                                        :replace_button_by_text="true"
+                                    />
                                 </div>
                             </div>
                         </FormSection>
@@ -138,7 +147,7 @@
             <div class="container">
                 <div class="col-md-12 text-end">
                     <button class="btn btn-primary" @click.prevent="save_and_continue()" :disabled="disableSaveAndContinueBtn">Save and Continue</button>
-                    <button class="btn btn-primary" @click.prevent="save_and_exit()" :disabled="disableSaveAndExitBtn">Save and Exit</button>
+                    <button class="btn btn-primary ml-2" @click.prevent="save_and_exit()" :disabled="disableSaveAndExitBtn">Save and Exit</button>
                 </div>
             </div>
         </div>
@@ -154,6 +163,7 @@ import FormSection from '@/components/forms/section_toggle.vue'
 import TableParties from '@common-utils/table_parties'
 import ComponentMap from '@/components/common/component_map.vue'
 import RichText from '@/components/forms/richtext.vue'
+import FileField from '@/components/forms/filefield_immediate.vue'
 
 export default {
     name: 'CompetitiveProcess',
@@ -177,6 +187,7 @@ export default {
         FormSection,
         ComponentMap,
         RichText,
+        FileField,
     },
     created: function(){
         this.fetchCompetitiveProcess()
@@ -185,18 +196,56 @@ export default {
 
     },
     computed: {
+        competitiveProcessDocumentUrl: function() {
+            return helpers.add_endpoint_join(
+                api_endpoints.competitive_process,
+                '/' + this.competitive_process.id + '/process_competitive_process_document/'
+            )
+        },
         readonly: function(){
             return false
         },
         displaySaveBtns: function(){
             return true
         },
+        competitive_process_form_url: function() {
+            return helpers.add_endpoint_json(api_endpoints.competitive_process, (this.competitive_process.id))
+        },
    },
     methods: {
-        save_and_continue: () => {
-
+        save_and_continue: function() {
+            this.save()
         },
-        save_and_exit: () => {
+        save_and_exit: async function() {
+            await this.save()
+            this.$router.push({ name: 'internal-dashboard' })
+        },
+        save: async function() {
+            let vm = this;
+
+            try {
+                let payload = {'competitive_process': vm.competitive_process}
+                if (vm.$refs.component_map) {
+                    payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
+                }
+                const res = await fetch(vm.competitive_process_form_url, { body: JSON.stringify(payload), method: 'PUT' })
+
+                if(res.ok){
+                    await new swal({
+                        title: 'Saved',
+                        text: 'Competitive process has been saved',
+                        type: 'success',
+                    })
+                } else {
+                    await new swal({
+                        title: "Please fix following errors before saving",
+                        text: err.bodyText,
+                        type:'error',
+                    })
+                }
+            } catch (err){
+                console.error(err)
+            }
 
         },
         updateTableByFeatures: function() {
