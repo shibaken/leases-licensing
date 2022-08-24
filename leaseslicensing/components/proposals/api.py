@@ -1824,9 +1824,9 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def final_approval(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = ProposedApprovalSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            instance.final_approval(request, serializer.validated_data)
+            #serializer = ProposedApprovalSerializer(data=request.data)
+            #serializer.is_valid(raise_exception=True)
+            instance.final_approval(request, request.data)
             # serializer = InternalProposalSerializer(instance,context={'request':request})
             serializer_class = self.internal_serializer_class()
             serializer = serializer_class(instance, context={"request": request})

@@ -102,6 +102,7 @@ MIDDLEWARE_CLASSES += [
     #'leaseslicensing.middleware.BookingTimerMiddleware',
     #'leaseslicensing.middleware.FirstTimeNagScreenMiddleware',
     #'leaseslicensing.middleware.RevisionOverrideMiddleware',
+    "leaseslicensing.middleware.CacheControlMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 MIDDLEWARE = MIDDLEWARE_CLASSES
