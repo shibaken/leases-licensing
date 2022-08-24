@@ -2,7 +2,7 @@
     <div>
         <div v-if="displayApprovedMsg" class="col-md-12 alert alert-success">
             <!--p>The {{ applicationTypeNameDisplay }} was approved to proceed to a full application on date by {{ proposal.assigned_approver.email }}</p-->
-            <p>The {{ applicationTypeNameDisplay }} was approved to proceed to a full application on {{ approvalIssueDate }} by { insert approver name here }</p>
+            <p>The {{ applicationTypeNameDisplay }} was approved to proceed to a {{ fullApplicationText }} on {{ approvalIssueDate }} by { insert approver name here }</p>
             <!--p>Expiry date: {{ approvalExpiryDate }}</p>
             <p>Permit: <a target="_blank" :href="proposal.permit">approval.pdf</a></p-->
         </div>
@@ -54,11 +54,6 @@ import {
     helpers
 }
 from '@/utils/hooks'
-import datatable from '@vue-utils/datatable.vue'
-import RequirementDetail from './proposal_add_requirement.vue'
-//import ComponentSiteSelection from '@/components/common/apiary/component_site_selection.vue'
-import FormSection from "@/components/forms/section_toggle.vue"
-import uuid from 'uuid'
 import { constants } from '@/utils/hooks'
 
 export default {
@@ -78,13 +73,18 @@ export default {
     watch:{
     },
     components:{
-        FormSection,
-        //ComponentSiteSelection,
     },
     computed:{
         approvalIssueDate: function() {
             if (this.proposal) {
                 return this.proposal.approval_issue_date;
+            }
+        },
+        fullApplicationText: function() {
+            if (this.proposal.proposed_issuance_approval.decision === 'approve_lease_licence') {
+                return 'full application';
+            } else if (this.proposal.proposed_issuance_approval.decision === 'approve_competitive_process') {
+                return 'Competitive Process';
             }
         },
         applicationTypeNameDisplay: function() {
