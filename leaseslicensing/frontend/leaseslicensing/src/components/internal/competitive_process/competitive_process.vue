@@ -140,7 +140,9 @@
                     </div>
                     <div class="tab-pane fade" id="pills-related-items" role="tabpanel" aria-labelledby="pills-related-items-tab">
                         <FormSection :formCollapse="false" label="Related Items" Index="related_items">
-
+                                <TableRelatedItems
+                                    :ajax_url="related_items_ajax_url"
+                                />
                         </FormSection>
                     </div>
                 </div>
@@ -199,6 +201,9 @@ export default {
 
     },
     computed: {
+        related_items_ajax_url: function(){
+            return '/api/competitive_process/' + this.competitive_process.id + '/get_related_items/'
+        },
         competitiveProcessDocumentUrl: function() {
             return helpers.add_endpoint_join(
                 api_endpoints.competitive_process,
@@ -230,6 +235,7 @@ export default {
             let vm = this;
 
             try {
+                // Construct payload
                 let payload = {'competitive_process': vm.competitive_process}
                 if (vm.$refs.component_map) {
                     // Append polygon data

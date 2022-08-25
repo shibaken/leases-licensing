@@ -84,7 +84,7 @@ class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
 
     def get_registration_of_interest(self, obj):
         if obj.generated_from_registration_of_interest:
-            return RegistrationOfInterestSerializer(obj.generating_proposal).data
+            return RegistrationOfInterestSerializer(obj.originating_proposal).data
         else:
             return None
 

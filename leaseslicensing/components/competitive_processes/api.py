@@ -11,6 +11,7 @@ from leaseslicensing.components.competitive_processes.serializers import Competi
     CompetitiveProcessUserActionSerializer, ListCompetitiveProcessSerializer, \
     CompetitiveProcessSerializer
 from leaseslicensing.components.main.process_document import process_generic_document
+from leaseslicensing.components.main.related_item import RelatedItemsSerializer
 from leaseslicensing.helpers import is_internal
 from rest_framework.decorators import (
     action as detail_route,
@@ -144,6 +145,14 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
             return Response(returned_data)
         else:
             return Response()
+
+    @detail_route(methods=["get"], detail=True)
+    @basic_exception_handler
+    def get_related_items(self, request, *args, **kwargs):
+        instance = self.get_object()
+        related_items = instance.get_related_items()
+        serializer = RelatedItemsSerializer(related_items, many=True)
+        return Response(serializer.data)
 
 
 class GetCompetitiveProcessStatusesDict(views.APIView):

@@ -21,7 +21,7 @@ class CompetitiveProcessManager(models.Manager):
             super()
             .get_queryset()
             .select_related(
-                'generating_proposal',
+                'originating_proposal',
             )
             .prefetch_related(
                 'competitive_process_parties',
@@ -71,8 +71,8 @@ class CompetitiveProcess(models.Model):
 
     @property
     def generated_from_registration_of_interest(self):
-        if hasattr(self, 'generating_proposal'):
-            if self.generating_proposal:
+        if hasattr(self, 'originating_proposal'):
+            if self.originating_proposal:
                 return True
         return False
 
@@ -101,6 +101,32 @@ class CompetitiveProcess(models.Model):
         if self.lodgement_number == '':
             self.lodgement_number = self.prefix + '{:07d}'.format(self.next_lodgement_number)
             self.save()
+
+    def get_related_items(self, **kwargs):
+        return_list = []
+        count = 0
+        field_competitive_process = None
+        field_names_to_display = ['originating_proposal', ]  # TODO: add   'originating_proposal', 'competitive_process', 'approval',
+        all_fields = self._meta.get_fields()
+        for a_field in all_fields:
+            if a_field.name in field_names_to_display:
+                if a_field.is_relation:
+                    if a_field.many_to_many:
+                        pass
+                    elif a_field.many_to_one:  # foreign key
+                        field_objects = [getattr(self, a_field.name),]
+                    elif a_field.one_to_many:  # reverse foreign key
+                        field_objects = a_field.related_model.objects.filter(**{a_field.remote_field.name: self})
+                    elif a_field.one_to_one:
+                        pass
+                for field_object in field_objects:
+                    if field_object:
+                        related_item = field_object.as_related_item
+                        return_list.append(related_item)
+
+        # serializer = RelatedItemsSerializer(return_list, many=True)
+        # return serializer.data
+        return return_list
 
     @property
     def as_related_item(self):
