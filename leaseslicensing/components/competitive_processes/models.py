@@ -48,14 +48,6 @@ class CompetitiveProcess(models.Model):
         (STATUS_COMPLETED_DECLINED, "Completed (Declined)"),
     )
 
-    # For outcome
-    # OUTCOME_WINNER = "winner"
-    # OUTCOME_NO_WINNER = "no_winner"
-    # OUTCOME_CHOICES = (
-        # (OUTCOME_WINNER, "Winner"),
-        # (OUTCOME_NO_WINNER, "No Winner"),
-    # )
-
     lodgement_number = models.CharField(max_length=9, blank=True, default="")
     status = models.CharField("Status", max_length=30, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0],)
     assigned_officer_id = models.IntegerField(null=True, blank=True)  # EmailUserRO

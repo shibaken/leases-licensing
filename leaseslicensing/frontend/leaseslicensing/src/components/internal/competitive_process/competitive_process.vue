@@ -116,6 +116,7 @@
                                         :readonly="readonly" 
                                         :can_view_richtext_src=true
                                         :key="competitive_process.id"
+                                        @textChanged="detailsTextChanged"
                                     />
                                 </div>
                             </div>
@@ -215,6 +216,9 @@ export default {
         },
    },
     methods: {
+        detailsTextChanged: function(new_text) {
+            this.competitive_process.details = new_text
+        },
         save_and_continue: function() {
             this.save()
         },
@@ -227,15 +231,11 @@ export default {
 
             try {
                 let payload = {'competitive_process': vm.competitive_process}
-                
-                // For map
                 if (vm.$refs.component_map) {
+                    // Append polygon data
                     payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
                 }
                 
-                // For rich text
-                payload.competitive_process.details = this.$refs.details.detailsText;
-
                 const res = await fetch(vm.competitive_process_form_url, { body: JSON.stringify(payload), method: 'PUT' })
 
                 if(res.ok){

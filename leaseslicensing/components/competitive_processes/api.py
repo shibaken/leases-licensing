@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
 
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess
-from leaseslicensing.components.competitive_processes.serializers import CompetitiveProcessLogEntrySerializer, CompetitiveProcessUserActionSerializer, ListCompetitiveProcessSerializer, \
+from leaseslicensing.components.competitive_processes.serializers import CompetitiveProcessLogEntrySerializer, \
+    CompetitiveProcessUserActionSerializer, ListCompetitiveProcessSerializer, \
     CompetitiveProcessSerializer
 from leaseslicensing.components.main.process_document import process_generic_document
 from leaseslicensing.helpers import is_internal
@@ -85,9 +86,9 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def update(self, request, *args, **kwargs):
         competitive_process = self.get_object()
-        serializer = self.get_serializer(competitive_process, data=request.data)
-        serializer.is_valid()
-        serializer.save()
+        serializer = self.get_serializer(competitive_process, data=request.data['competitive_process'])
+        serializer.is_valid(raise_exception=True)
+        temp = serializer.save()
 
         return Response({})
 

@@ -54,8 +54,8 @@ class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
     registration_of_interest = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     assigned_officer = serializers.SerializerMethodField()
-    site = serializers.CharField()  # For property
-    group = serializers.CharField()  # For property
+    site = serializers.CharField(read_only=True)  # For property
+    group = serializers.CharField(read_only=True)  # For property
     can_accessing_user_view = serializers.SerializerMethodField()
     can_accessing_user_process = serializers.SerializerMethodField()
 
@@ -142,7 +142,7 @@ class ListCompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
 
 class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
     accessing_user = serializers.SerializerMethodField()
-    competitive_process_parties = CompetitiveProcessPartySerializer(many=True)
+    competitive_process_parties = CompetitiveProcessPartySerializer(many=True, read_only=True)
 
     class Meta:
         model = CompetitiveProcess
