@@ -1110,12 +1110,21 @@ class Proposal(DirtyFieldsMixin, models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+    # Registration of Interest generates a Competitive Process
     generated_competitive_process = models.OneToOneField(
         CompetitiveProcess,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
         related_name='originating_proposal'
+    )
+    # Competitive Process generates a Lease Licence
+    originating_competitive_process = models.ForeignKey(
+        CompetitiveProcess,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='generated_proposal'
     )
     # Registration of Interest additional form fields
     # proposal details
