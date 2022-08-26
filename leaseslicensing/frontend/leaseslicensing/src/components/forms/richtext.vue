@@ -28,15 +28,24 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 
 export default {
     //props:["type","name","id", "field_data","isRequired","help_text","label","readonly", "help_text_url", "can_view_richtext_src"],
-    props: ["id", "name", "proposalData", "isRequired", "label", "readonly", "can_view_richtext_src", "placeholder_text"],
+    props: [
+        "id", 
+        "name", 
+        "proposalData", 
+        "isRequired", 
+        "label", 
+        "readonly", 
+        "can_view_richtext_src", 
+        "placeholder_text"
+    ],
     //components: {CommentBlock, HelpText, HelpTextUrl},
     data(){
         let vm = this;
         if (vm.can_view_richtext_src) {
             var remove_buttons = ''
-	} else {
+        } else {
             var remove_buttons = 'Source,About'
-	}
+        }
 
         return {
             /*
@@ -68,6 +77,12 @@ export default {
         */
     },
     computed: {
+    },
+    watch: {
+        detailsText: function(){
+            // Parent component can subscribe this event in order to update text
+            this.$emit('textChanged', this.detailsText)
+        }
     },
     created: function() {
         if (this.proposalData) {
