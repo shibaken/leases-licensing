@@ -1078,7 +1078,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
         choices=REVIEW_STATUS_CHOICES,
         default=REVIEW_STATUS_CHOICES[0][0],
     )
-    competitive_process = models.OneToOneField(CompetitiveProcess, null=True, blank=True, on_delete=models.SET_NULL, related_name='generating_proposal')
     approval = models.ForeignKey(
         "leaseslicensing.Approval", null=True, blank=True, on_delete=models.SET_NULL
     )
@@ -1110,6 +1109,13 @@ class Proposal(DirtyFieldsMixin, models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
+    )
+    generated_competitive_process = models.OneToOneField(
+        CompetitiveProcess,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='originating_proposal'
     )
     # Registration of Interest additional form fields
     # proposal details
@@ -2819,24 +2825,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
             return proposal
 
     def get_related_items(self, **kwargs):
-        # When self is Proposal
-        #     the registration of interest
-        #           generated_proposal (ForeignKey)
-        #           related_name="originating_proposal" (reverse)
-        #     the competitive process (ForeignKey)
-        #     the licence/lease (approval(ForeignKey))
-        # When self is Approval
-        #     the original registration of interest (if any)
-        #     the original competitive process (if any)
-        #     the application
-        #     any amendment application
-        #     any renewal application
         return_list = []
-        count = 0
-        field_competitive_process = None
+        # count = 0
+        # field_competitive_process = None
+        related_field_names = ['generated_proposal', 'originating_proposal', 'generated_competitive_process', 'approval',]
         all_fields = self._meta.get_fields()
         for a_field in all_fields:
-            if a_field.name in ['generated_proposal', 'originating_proposal', 'competitive_process', 'approval',]:
+            if a_field.name in related_field_names:
+                field_objects = []
                 if a_field.is_relation:
                     if a_field.many_to_many:
                         pass
@@ -2845,7 +2841,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     elif a_field.one_to_many:  # reverse foreign key
                         field_objects = a_field.related_model.objects.filter(**{a_field.remote_field.name: self})
                     elif a_field.one_to_one:
-                        pass
+                        field_objects = [getattr(self, a_field.name),]
                 for field_object in field_objects:
                     if field_object:
                         related_item = field_object.as_related_item

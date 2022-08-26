@@ -63,7 +63,6 @@
                     <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                         <FormSection :formCollapse="false" label="Map" Index="map">
                         <!--
-
                             <ComponentMap
                                 ref="component_map"
                                 :is_internal=true
@@ -86,14 +85,74 @@
                     </div>
                     <div class="tab-pane fade" id="pills-outcome" role="tabpanel" aria-labelledby="pills-outcome-tab">
                         <FormSection :formCollapse="false" label="Outcome" Index="outcome">
-
+                            <div class="row mb-2">
+                                <div class="col-sm-3">
+                                    <label for="competitive_process_winner" class="control-label">Winner</label>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select class="form-control" v-model="competitive_process.winner" id="competitive_process_winner">
+                                        <option value="no_winner">No winner</option>
+                                        <option v-for="party in competitive_process.competitive_process_parties" :value="party.id">
+                                            <template v-if="party.is_person">
+                                                {{ party.person.fullname }}
+                                            </template>
+                                            <template v-if="party.is_organisation">
+                                                {{ party.organisation.name }}
+                                            </template>
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-3">
+                                    <label for="details" class="control-label">Details</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <RichText
+                                        id="details"
+                                        :proposalData="competitive_process.details"
+                                        ref="details"
+                                        label="Rich text in here" 
+                                        :readonly="readonly" 
+                                        :can_view_richtext_src=true
+                                        :key="competitive_process.id"
+                                        @textChanged="detailsTextChanged"
+                                    />
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-3">
+                                    <label for="competitive_process_documents" class="control-label">Documents</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <FileField
+                                        :readonly="readonly"
+                                        ref="competitive_process_document"
+                                        name="competitive_process_document"
+                                        id="competitive_process_document"
+                                        :isRepeatable="true"
+                                        :documentActionUrl="competitiveProcessDocumentUrl"
+                                        :replace_button_by_text="true"
+                                    />
+                                </div>
+                            </div>
                         </FormSection>
                     </div>
                     <div class="tab-pane fade" id="pills-related-items" role="tabpanel" aria-labelledby="pills-related-items-tab">
                         <FormSection :formCollapse="false" label="Related Items" Index="related_items">
-
+                                <TableRelatedItems
+                                    :ajax_url="related_items_ajax_url"
+                                />
                         </FormSection>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="displaySaveBtns" class="navbar fixed-bottom" style="background-color: #f5f5f5;">
+            <div class="container">
+                <div class="col-md-12 text-end">
+                    <button class="btn btn-primary" @click.prevent="save_and_continue()" :disabled="disableSaveAndContinueBtn">Save and Continue</button>
+                    <button class="btn btn-primary ml-2" @click.prevent="save_and_exit()" :disabled="disableSaveAndExitBtn">Save and Exit</button>
                 </div>
             </div>
         </div>
@@ -108,6 +167,9 @@ import Workflow from '@common-utils/workflow_competitive_process.vue'
 import FormSection from '@/components/forms/section_toggle.vue'
 import TableParties from '@common-utils/table_parties'
 import ComponentMap from '@/components/common/component_map.vue'
+import RichText from '@/components/forms/richtext.vue'
+import FileField from '@/components/forms/filefield_immediate.vue'
+import TableRelatedItems from '@/components/common/table_related_items.vue'
 
 export default {
     name: 'CompetitiveProcess',
@@ -130,6 +192,9 @@ export default {
         TableParties,
         FormSection,
         ComponentMap,
+        RichText,
+        FileField,
+        TableRelatedItems,
     },
     created: function(){
         this.fetchCompetitiveProcess()
@@ -138,11 +203,67 @@ export default {
 
     },
     computed: {
+        related_items_ajax_url: function(){
+            return '/api/competitive_process/' + this.competitive_process.id + '/get_related_items/'
+        },
+        competitiveProcessDocumentUrl: function() {
+            return helpers.add_endpoint_join(
+                api_endpoints.competitive_process,
+                '/' + this.competitive_process.id + '/process_competitive_process_document/'
+            )
+        },
         readonly: function(){
-
+            return false
+        },
+        displaySaveBtns: function(){
+            return true
+        },
+        competitive_process_form_url: function() {
+            return helpers.add_endpoint_json(api_endpoints.competitive_process, (this.competitive_process.id))
         },
    },
     methods: {
+        detailsTextChanged: function(new_text) {
+            this.competitive_process.details = new_text
+        },
+        save_and_continue: function() {
+            this.save()
+        },
+        save_and_exit: async function() {
+            await this.save()
+            this.$router.push({ name: 'internal-dashboard' })
+        },
+        save: async function() {
+            let vm = this;
+
+            try {
+                // Construct payload
+                let payload = {'competitive_process': vm.competitive_process}
+                if (vm.$refs.component_map) {
+                    // Append polygon data
+                    payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
+                }
+                
+                const res = await fetch(vm.competitive_process_form_url, { body: JSON.stringify(payload), method: 'PUT' })
+
+                if(res.ok){
+                    await new swal({
+                        title: 'Saved',
+                        text: 'Competitive process has been saved',
+                        type: 'success',
+                    })
+                } else {
+                    await new swal({
+                        title: "Please fix following errors before saving",
+                        text: err.bodyText,
+                        type:'error',
+                    })
+                }
+            } catch (err){
+                console.error(err)
+            }
+
+        },
         updateTableByFeatures: function() {
 
         },

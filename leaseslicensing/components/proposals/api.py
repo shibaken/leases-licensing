@@ -2113,8 +2113,8 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @detail_route(methods=["get"], detail=True)
     @basic_exception_handler
     def get_related_items(self, request, *args, **kwargs):
-        proposal = self.get_object()
-        related_items = proposal.get_related_items()
+        instance = self.get_object()
+        related_items = instance.get_related_items()
         serializer = RelatedItemsSerializer(related_items, many=True)
         return Response(serializer.data)
 

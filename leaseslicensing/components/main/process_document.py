@@ -128,6 +128,8 @@ def process_generic_document(request, instance, document_type=None, *args, **kwa
                     if d._file
                 ]
                 return {"filedata": returned_file_data}
+            elif document_type == "competitive_process_document":
+                documents_qs = instance.competitive_process_documents
 
             # default file attributes
             returned_file_data = [
@@ -225,6 +227,8 @@ def delete_document(request, instance, comms_instance, document_type, input_name
             document = instance.proposed_decline_documents.get(id=document_id)
         elif document_type == "lease_licence_approval_document":
             document = instance.lease_licence_approval_documents.get(id=document_id)
+        elif document_type == "competitive_process_document":
+            document = instance.competitive_process_documents.get(id=document_id)
 
     # comms_log doc store delete
     elif comms_instance and "document_id" in request.data:
@@ -273,7 +277,8 @@ def cancel_document(request, instance, comms_instance, document_type, input_name
         "risk_factors_document",
         "legislative_requirements_document",
         "lease_licence_approval_document"
-        "proposed_decline_document"
+        "proposed_decline_document",
+        "competitive_process_document",
     ]:
         pass
         #document_id = request.data.get("document_id")
@@ -462,6 +467,16 @@ def save_document(request, instance, comms_instance, document_type, input_name=N
                 approval_type_document_type=ApprovalTypeDocumentType.objects.get(id=approval_type_document_type)
             )[0]
             path_format_string = "{}/proposals/{}/lease_licence_approval_documents/{}"
+        elif document_type == "competitive_process_document":
+            document = instance.competitive_process_documents.get_or_create(
+                input_name=input_name, name=filename
+            )[0]
+            path_format_string = "{}/competitive_process/{}/{}"
+            # return '{}/competitive_process/{}/{}'.format(
+            #     settings.MEDIA_APP_DIR,
+            #     instance.competitive_process.id,
+            #     filename,
+            # )
 
         path = default_storage.save(
             path_format_string.format(settings.MEDIA_APP_DIR, instance.id, filename),
