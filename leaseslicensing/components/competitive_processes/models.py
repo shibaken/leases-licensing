@@ -105,12 +105,12 @@ class CompetitiveProcess(models.Model):
 
     def get_related_items(self, **kwargs):
         return_list = []
-        count = 0
-        field_competitive_process = None
-        field_names_to_display = ['originating_proposal', 'generated_proposal',]
+        # count = 0
+        # field_competitive_process = None
+        related_field_names = ['originating_proposal', 'generated_proposal',]
         all_fields = self._meta.get_fields()
         for a_field in all_fields:
-            if a_field.name in field_names_to_display:
+            if a_field.name in related_field_names:
                 field_objects = []
                 if a_field.is_relation:
                     if a_field.many_to_many:
@@ -120,7 +120,7 @@ class CompetitiveProcess(models.Model):
                     elif a_field.one_to_many:  # reverse foreign key
                         field_objects = a_field.related_model.objects.filter(**{a_field.remote_field.name: self})
                     elif a_field.one_to_one:
-                        pass  # TODO: originating_proposal here..?
+                        field_objects = [getattr(self, a_field.name),]
                 for field_object in field_objects:
                     if field_object:
                         related_item = field_object.as_related_item
