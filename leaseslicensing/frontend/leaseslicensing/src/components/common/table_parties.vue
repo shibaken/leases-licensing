@@ -52,7 +52,6 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
-                    console.log(full)
                     return full.id
                 }
             }
