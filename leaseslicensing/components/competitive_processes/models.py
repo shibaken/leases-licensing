@@ -55,6 +55,7 @@ class CompetitiveProcess(models.Model):
     modified_at = models.DateTimeField(auto_now=True, null=True)
     winner = models.ForeignKey("CompetitiveProcessParty", null=True, blank=True, on_delete=models.CASCADE)
     details = models.TextField(blank=True)
+    generated_proposal = models.ForeignKey("Proposal", null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         app_label = "leaseslicensing"
@@ -110,6 +111,7 @@ class CompetitiveProcess(models.Model):
         all_fields = self._meta.get_fields()
         for a_field in all_fields:
             if a_field.name in field_names_to_display:
+                field_objects = []
                 if a_field.is_relation:
                     if a_field.many_to_many:
                         pass
@@ -118,7 +120,7 @@ class CompetitiveProcess(models.Model):
                     elif a_field.one_to_many:  # reverse foreign key
                         field_objects = a_field.related_model.objects.filter(**{a_field.remote_field.name: self})
                     elif a_field.one_to_one:
-                        pass
+                        pass  # TODO: originating_proposal here..?
                 for field_object in field_objects:
                     if field_object:
                         related_item = field_object.as_related_item

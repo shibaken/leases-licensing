@@ -1110,7 +1110,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    competitive_process = models.OneToOneField(
+    generated_competitive_process = models.OneToOneField(
         CompetitiveProcess,
         null=True,
         blank=True,
@@ -2842,7 +2842,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         field_competitive_process = None
         all_fields = self._meta.get_fields()
         for a_field in all_fields:
-            if a_field.name in ['generated_proposal', 'originating_proposal', 'competitive_process', 'approval',]:
+            if a_field.name in ['generated_proposal', 'originating_proposal', 'generated_competitive_process', 'approval',]:
+                field_objects = []
                 if a_field.is_relation:
                     if a_field.many_to_many:
                         pass

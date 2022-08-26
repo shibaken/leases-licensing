@@ -169,6 +169,7 @@ import TableParties from '@common-utils/table_parties'
 import ComponentMap from '@/components/common/component_map.vue'
 import RichText from '@/components/forms/richtext.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
+import TableRelatedItems from '@/components/common/table_related_items.vue'
 
 export default {
     name: 'CompetitiveProcess',
@@ -193,6 +194,7 @@ export default {
         ComponentMap,
         RichText,
         FileField,
+        TableRelatedItems,
     },
     created: function(){
         this.fetchCompetitiveProcess()
