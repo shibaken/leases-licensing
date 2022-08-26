@@ -55,7 +55,7 @@ class CompetitiveProcess(models.Model):
     modified_at = models.DateTimeField(auto_now=True, null=True)
     winner = models.ForeignKey("CompetitiveProcessParty", null=True, blank=True, on_delete=models.CASCADE)
     details = models.TextField(blank=True)
-    generated_proposal = models.ForeignKey("Proposal", null=True, blank=True, on_delete=models.SET_NULL)
+    generated_proposal = models.ForeignKey("Proposal", null=True, blank=True, on_delete=models.SET_NULL, related_name='originating_competitive_process')
 
     class Meta:
         app_label = "leaseslicensing"
