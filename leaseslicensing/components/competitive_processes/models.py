@@ -55,7 +55,7 @@ class CompetitiveProcess(models.Model):
     modified_at = models.DateTimeField(auto_now=True, null=True)
     winner = models.ForeignKey("CompetitiveProcessParty", null=True, blank=True, on_delete=models.CASCADE)
     details = models.TextField(blank=True)
-    generated_proposal = models.ForeignKey("Proposal", null=True, blank=True, on_delete=models.SET_NULL, related_name='originating_competitive_process')
+    generated_proposal = models.OneToOneField("Proposal", null=True, blank=True, on_delete=models.SET_NULL, related_name='originating_competitive_process')
 
     class Meta:
         app_label = "leaseslicensing"
@@ -107,7 +107,7 @@ class CompetitiveProcess(models.Model):
         return_list = []
         count = 0
         field_competitive_process = None
-        field_names_to_display = ['originating_proposal', ]  # TODO: add   'originating_proposal', 'competitive_process', 'approval',
+        field_names_to_display = ['originating_proposal', 'generated_proposal',]
         all_fields = self._meta.get_fields()
         for a_field in all_fields:
             if a_field.name in field_names_to_display:
