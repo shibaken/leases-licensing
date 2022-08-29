@@ -52,7 +52,6 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
-                    console.log(full)
                     return full.id
                 }
             }
@@ -62,7 +61,7 @@ export default {
                 data: null,
                 'render': function(row, type, full){
                     if (full.is_person)
-                        return full.party_person.fullname
+                        return full.person.fullname
                     return ''
                 }
             }
@@ -72,7 +71,7 @@ export default {
                 data: null,
                 'render': function(row, type, full){
                     if (full.is_organisation)
-                        return full.party_organisation.name
+                        return full.organisation.name
                     return ''
                 }
             }

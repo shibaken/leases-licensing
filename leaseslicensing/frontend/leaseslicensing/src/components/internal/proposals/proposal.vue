@@ -193,11 +193,8 @@
                         <!-- Inserted into the slot on the form.vue: Related Items -->
                         <template v-slot:slot_section_related_items>
                             <FormSection :formCollapse="false" label="Related Items" Index="related_items">
-                                <datatable
-                                    ref="related_items_datatable"
-                                    :id="related_items_datatable_id"
-                                    :dtOptions="datatable_options"
-                                    :dtHeaders="datatable_headers"
+                                <TableRelatedItems
+                                    :ajax_url="related_items_ajax_url"
                                 />
                             </FormSection>
                         </template>
@@ -243,7 +240,7 @@
             <div class="container">
                 <div class="col-md-12 text-end">
                     <button class="btn btn-primary" @click.prevent="save_and_continue()" :disabled="disableSaveAndContinueBtn">Save and Continue</button>
-                    <button class="btn btn-primary" @click.prevent="save_and_exit()" :disabled="disableSaveAndExitBtn">Save and Exit</button>
+                    <button class="btn btn-primary ml-2" @click.prevent="save_and_exit()" :disabled="disableSaveAndExitBtn">Save and Exit</button>
                 </div>
             </div>
         </div>
@@ -268,6 +265,7 @@ import ApplicationForm from '@/components/form.vue';
 import FormSection from "@/components/forms/section_toggle.vue"
 import CollapsibleQuestions from '@/components/forms/collapsible_component.vue'
 import ChecklistQuestion from '@/components/common/component_checklist_question.vue'
+import TableRelatedItems from '@/components/common/table_related_items.vue'
 require("select2/dist/css/select2.min.css");
 
 export default {
@@ -367,6 +365,7 @@ export default {
         FormSection,
         CollapsibleQuestions,
         ChecklistQuestion,
+        TableRelatedItems,
     },
     props: {
         proposalId: {
@@ -377,101 +376,8 @@ export default {
 
     },
     computed: {
-        column_lodgement_number: function(){
-            return {
-                data: 'identifier',
-                //name: 'lodgement_number',
-                orderable: false,
-                searchable: false,
-                visible: true,
-                //'render': function(row, type, full){
-                //}
-            }
-        },
-        column_type: function(){
-            return {
-                data: 'model_name',
-                //name: 'type',
-                orderable: false,
-                searchable: false,
-                visible: true,
-                //'render': function(row, type, full){
-                //}
-            }
-        },
-        column_description: function(){
-            return {
-                data: 'descriptor',
-                //name: 'descriptor',
-                orderable: false,
-                searchable: false,
-                visible: true,
-                //'render': function(row, type, full){
-                //}
-            }
-        },
-        column_action: function(){
-            return {
-                data: 'action_url',
-                //name: 'action',
-                orderable: false,
-                searchable: false,
-                visible: true,
-                //'render': function(row, type, full){
-                //}
-            }
-        },
-        datatable_options: function(){
-            let vm = this
-            let columns = [
-                vm.column_lodgement_number,
-                vm.column_type,
-                vm.column_description,
-                vm.column_action,
-            ]
-            return {
-                autoWidth: false,
-                language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
-                },
-                responsive: true,
-                //serverSide: true,
-                searching: true,
-                ordering: true,
-                order: [[0, 'desc']],
-                ajax: {
-                    "url": '/api/proposal/' + vm.proposal.id + '/get_related_items/',
-                    "dataSrc": "",
-
-                    // adding extra GET params for Custom filtering
-                    "data": function ( d ) {
-                        /*
-                        d.filter_application_type = vm.filterApplicationType
-                        d.filter_application_status = vm.filterApplicationStatus
-                        d.filter_applicant = vm.filterApplicant
-                        d.level = vm.level
-                        */
-                    }
-                },
-                dom: 'lBfrtip',
-                buttons:[ ],
-                columns: columns,
-                processing: true,
-                initComplete: function(settings, json) {
-                    console.log('in initComplete')
-                    console.log({settings})
-                    console.log({json})
-                },
-            }
-        },
-        datatable_headers: function(){
-            return [
-                //'id',
-                'Number',
-                'Type',
-                'Description',
-                'Action',
-            ]
+        related_items_ajax_url: function(){
+            return '/api/proposal/' + this.proposal.id + '/get_related_items/'
         },
         requirementsKey: function() {
             const req = "proposal_requirements_" + this.uuid;

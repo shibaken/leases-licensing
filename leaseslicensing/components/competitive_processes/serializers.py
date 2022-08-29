@@ -22,8 +22,8 @@ class RegistrationOfInterestSerializer(serializers.ModelSerializer):
 class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
     is_person = serializers.BooleanField()  # This is property at the model
     is_organisation = serializers.BooleanField()  # This is property at the model
-    party_person = serializers.SerializerMethodField()
-    party_organisation = serializers.SerializerMethodField()
+    person = serializers.SerializerMethodField()
+    organisation = serializers.SerializerMethodField()
 
     class Meta:
         model = CompetitiveProcessParty
@@ -31,32 +31,31 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
             'id',
             'is_person',
             'is_organisation',
-            'party_person',
-            'party_organisation',
+            'person',
+            'organisation',
             'invited_at',
             'removed_at',
         )
 
-    def get_party_person(self, obj):
+    def get_person(self, obj):
         if obj.is_person:
-            serializer = EmailUserSerializer(obj.party_person)
+            serializer = EmailUserSerializer(obj.person)
             return serializer.data
         return None
 
-    def get_party_organisation(self, obj):
+    def get_organisation(self, obj):
         if obj.is_organisation:
-            serializer = OrganisationSerializer(obj.party_organisation)
+            serializer = OrganisationSerializer(obj.organisation)
             return serializer.data
         return None
-
 
 
 class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
     registration_of_interest = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     assigned_officer = serializers.SerializerMethodField()
-    site = serializers.CharField()  # For property
-    group = serializers.CharField()  # For property
+    site = serializers.CharField(read_only=True)  # For property
+    group = serializers.CharField(read_only=True)  # For property
     can_accessing_user_view = serializers.SerializerMethodField()
     can_accessing_user_process = serializers.SerializerMethodField()
 
@@ -85,7 +84,7 @@ class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
 
     def get_registration_of_interest(self, obj):
         if obj.generated_from_registration_of_interest:
-            return RegistrationOfInterestSerializer(obj.generating_proposal).data
+            return RegistrationOfInterestSerializer(obj.originating_proposal).data
         else:
             return None
 
@@ -143,7 +142,7 @@ class ListCompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
 
 class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
     accessing_user = serializers.SerializerMethodField()
-    competitive_process_parties = CompetitiveProcessPartySerializer(many=True)
+    competitive_process_parties = CompetitiveProcessPartySerializer(many=True, read_only=True)
 
     class Meta:
         model = CompetitiveProcess
@@ -160,6 +159,8 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
             'can_accessing_user_process',
             'accessing_user',
             'competitive_process_parties',
+            'winner',
+            'details',
         )
 
     def get_accessing_user(self, obj):

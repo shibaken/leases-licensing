@@ -7,8 +7,11 @@ from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
 
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess
-from leaseslicensing.components.competitive_processes.serializers import CompetitiveProcessLogEntrySerializer, CompetitiveProcessUserActionSerializer, ListCompetitiveProcessSerializer, \
+from leaseslicensing.components.competitive_processes.serializers import CompetitiveProcessLogEntrySerializer, \
+    CompetitiveProcessUserActionSerializer, ListCompetitiveProcessSerializer, \
     CompetitiveProcessSerializer
+from leaseslicensing.components.main.process_document import process_generic_document
+from leaseslicensing.components.main.related_item import RelatedItemsSerializer
 from leaseslicensing.helpers import is_internal
 from rest_framework.decorators import (
     action as detail_route,
@@ -57,12 +60,14 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
             return ListCompetitiveProcessSerializer
         return CompetitiveProcessSerializer
 
+    @basic_exception_handler
     def get_queryset(self):
         if is_internal(self.request):
             return CompetitiveProcess.objects.all()
         else:
             return CompetitiveProcess.objects.none()
-    
+
+    @basic_exception_handler
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()
         qs = self.filter_queryset(qs)
@@ -73,10 +78,20 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(result_page, context={"request": request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
 
+    @basic_exception_handler
     def retrieve(self, request, *args, **kwargs):
         competitive_process = self.get_object()
         serializer = self.get_serializer(competitive_process, context={'request': request})
         return Response(serializer.data)
+
+    @basic_exception_handler
+    def update(self, request, *args, **kwargs):
+        competitive_process = self.get_object()
+        serializer = self.get_serializer(competitive_process, data=request.data['competitive_process'])
+        serializer.is_valid(raise_exception=True)
+        temp = serializer.save()
+
+        return Response({})
 
     @detail_route(methods=["GET",], detail=True,)
     @basic_exception_handler
@@ -117,6 +132,27 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
             # End Save Documents
 
             return Response(serializer.data)
+
+    @detail_route(methods=["POST"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_competitive_process_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        returned_data = process_generic_document(
+            request, instance, document_type="competitive_process_document"
+        )
+        if returned_data:
+            return Response(returned_data)
+        else:
+            return Response()
+
+    @detail_route(methods=["get"], detail=True)
+    @basic_exception_handler
+    def get_related_items(self, request, *args, **kwargs):
+        instance = self.get_object()
+        related_items = instance.get_related_items()
+        serializer = RelatedItemsSerializer(related_items, many=True)
+        return Response(serializer.data)
 
 
 class GetCompetitiveProcessStatusesDict(views.APIView):
