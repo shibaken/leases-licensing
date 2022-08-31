@@ -16,6 +16,7 @@
                 />
             </div>
         </div>
+        <div id="ahoaho"></div>
     </div>
 </template>
 
@@ -23,6 +24,9 @@
 import { v4 as uuid } from 'uuid'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import datatable from '@/utils/vue/datatable.vue'
+import CustomRow from '@/components/common/custom_row.vue'
+import { createApp, h } from 'vue';
+// import App from '@/App';
 
 export default {
     name: 'TableParties',
@@ -44,6 +48,8 @@ export default {
     },
     components: {
         datatable,
+        // CustomRow,
+        // App,
     },
     created: function(){
     },
@@ -162,9 +168,24 @@ export default {
                     {responsivePriority: 4, targets: 5},
                     {responsivePriority: 3, targets: 6},
                 ],
-                createdRow: function(row, data, dataIndex){
-                    data.expanded = false
-                    console.log({data})
+                createdRow: function(row, full_data, dataIndex){
+                    full_data.expanded = false
+                    console.log({full_data})
+
+                    // -----------------------
+                    // Add vue component dynamically
+                    // -----------------------
+                    // Configure event listener
+                    const comp = h(CustomRow, {
+                        onAho: e => console.log('onAho: ', e),  // 'aho' is the event name configured in CustomRow component.
+                    })
+                    let custom_row_app = createApp(comp, {
+                        // props
+                        party_full_data: full_data
+                    })
+                    let custom_row_vm = custom_row_app.mount('#custom_row_' + full_data.id)
+                    full_data.custom_row_app = custom_row_app
+                    // -----------------------
                 },
                 rowCallback: function (row, aho){
                     let $row = $(row)
@@ -186,14 +207,52 @@ export default {
         }
     },
     methods: {
+        //getTable: function(elem){
+        //    return '<table>' + elem + '</table>'
+        //},
+        //getTh: function(elem){
+        //    return '<th>' + elem + '</th>'
+        //},
+        //getTr: function(elem){
+        //    return '<tr>' + elem + '</tr>'
+        //},
+        //getTd: function(elem){
+        //    return '<td>' + elem + '</td>'
+        //},
+        //getCustomRowContents: function(full_data){
+        //    // let app = createApp(TestComponent)
+        //    // app.mount('#ahoaho')
+        //    // return app
+        //    // let ComponentClass = Vue.extend(TestComponent)
+        //    // let instance = new ComponentClass()
+        //    // instance.$mount()
+        //    // this.$refs.container.appendChild(instance.$el)
+
+
+        //    let td = this.getTd('<input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="full_data.invited_at">')
+        //    let th = this.getTh('Invited to competitive process')
+        //    let tr_invited = this.getTr(th + td)
+
+        //    td = this.getTd(full_data.removed_at)
+        //    th = this.getTh('Removed from competitive process')
+        //    let tr_removed = this.getTr(th + td)
+
+        //    td = this.getTd('')  // TODO
+        //    th = this.getTh('Details')
+        //    let tr_details = this.getTr(th + td)
+
+        //    let table  = this.getTable(tr_invited + tr_removed + tr_details)
+
+        //    return table
+        //},
         number_of_columns: function() {
-            let vm = this
+            // Return the number of visible columns
             let num =  this.$refs.parties_datatable.vmDataTable.columns(':visible').nodes().length;
             return num
         },
-        updateColSpan: function(){
-            let vm = this
-            $('tr.' + vm.expandable_row_class_name + ' td').attr('colspan', vm.number_of_columns())
+        updateCustomRowColSpan: function(){
+            // Set colspan to the manually added table row
+            $('tr.' + this.expandable_row_class_name + ' td').attr('colspan', this.number_of_columns())
         },
         add_party_clicked: function (){
 
@@ -211,9 +270,7 @@ export default {
 
                 // Get full data of this row
                 let $row = vm.$refs.parties_datatable.vmDataTable.row(tr)
-                console.log({$row})
                 let full_data = $row.data()
-                console.log({full_data})
 
                 if(full_data.expanded){
                     // Collapse
@@ -226,33 +283,51 @@ export default {
                     first_td.removeClass(vm.td_collapse_class_name).addClass(vm.td_expand_class_name)
                     // Hide child row, where hidden columns are
                     $row.child.hide()
-                    // Update flag
+                    // Toggle flag
                     full_data.expanded = false
                 } else {
                     // Expand
-                    let contents = 'Details here'
-                    let details_elem = $('<tr class="' + vm.expandable_row_class_name +'"><td>' + contents + '</td></tr>')
+                    let details_elem = $('<tr class="' + vm.expandable_row_class_name +'"><td id="custom_row_' + full_data.id + '"></td></tr>')
                     details_elem.hide()
                     details_elem.insertAfter(tr)
-                    vm.updateColSpan()
+                    vm.updateCustomRowColSpan()
+
+                    // // -----------------------
+                    // // Add vue component dynamically
+                    // // -----------------------
+                    // // Configure event listener
+                    // const comp = h(CustomRow, {
+                    //     onAho: e => console.log('onAho: ', e),  // 'aho' is the event name configured in CustomRow component.
+                    // })
+                    // let custom_row_app = createApp(comp, {
+                    //     // props
+                    //     party_full_data: full_data
+                    // })
+                    // let custom_row_vm = custom_row_app.mount('#custom_row_' + full_data.id)
+                    // // -----------------------
+                    let custom_row_vm = full_data.custom_row_app.mount('#custom_row_' + full_data.id)
+
                     details_elem.fadeIn(1000)
 
                     // Change icon
                     first_td.removeClass(vm.td_expand_class_name).addClass(vm.td_collapse_class_name)
                     // Show child row, where hidden columns are
                     $row.child.show()
-                    // Update flag
+                    // Toggle flag
                     full_data.expanded = true
                 }
             })
         },
         addResponsiveResizeHandler: function(){
+            // When columns are shown/hidden, expand/collapse the child row according to the current expand-collapse status of each row
             let vm = this
             vm.$refs.parties_datatable.vmDataTable.on('responsive-resize', function(e, datatable, columns) {
-                vm.updateColSpan()
+                // This event can be used to inform external libraries and controls that Responsive has changed the visibility of columns in the table in response to a resize or recalculation event.
+                vm.updateCustomRowColSpan()
                 datatable.rows().every(function(rowIdx, tableLoop, rowLoop){
-                    let data = this.data()
-                    if (data.expanded){
+                    // Work on each row
+                    let full_data = this.data()
+                    if (full_data.expanded){
                         this.child.show()
                     } else {
                         this.child.hide()
