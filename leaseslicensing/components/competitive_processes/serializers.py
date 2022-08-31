@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from leaseslicensing.components.competitive_processes.models import CompetitiveProcess, CompetitiveProcessLogEntry, CompetitiveProcessParty, CompetitiveProcessUserAction
+from leaseslicensing.components.competitive_processes.models import CompetitiveProcess, CompetitiveProcessLogEntry, \
+    CompetitiveProcessParty, CompetitiveProcessUserAction, PartyDetail
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 from ..organisations.serializers import OrganisationSerializer
 from leaseslicensing.components.proposals.models import Proposal
@@ -19,11 +20,22 @@ class RegistrationOfInterestSerializer(serializers.ModelSerializer):
         )
 
 
+class PartyDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PartyDetail
+        fields = (
+            'id',
+            'detail',
+        )
+
+
 class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
     is_person = serializers.BooleanField()  # This is property at the model
     is_organisation = serializers.BooleanField()  # This is property at the model
     person = serializers.SerializerMethodField()
     organisation = serializers.SerializerMethodField()
+    party_details = PartyDetailSerializer(many=True)
 
     class Meta:
         model = CompetitiveProcessParty
@@ -35,6 +47,7 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
             'organisation',
             'invited_at',
             'removed_at',
+            'party_details',
         )
 
     def get_person(self, obj):

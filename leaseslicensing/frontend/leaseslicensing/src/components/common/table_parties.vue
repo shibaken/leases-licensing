@@ -170,22 +170,6 @@ export default {
                 ],
                 createdRow: function(row, full_data, dataIndex){
                     full_data.expanded = false
-                    console.log({full_data})
-
-                    // -----------------------
-                    // Add vue component dynamically
-                    // -----------------------
-                    // Configure event listener
-                    const comp = h(CustomRow, {
-                        onAho: e => console.log('onAho: ', e),  // 'aho' is the event name configured in CustomRow component.
-                    })
-                    let custom_row_app = createApp(comp, {
-                        // props
-                        party_full_data: full_data
-                    })
-                    let custom_row_vm = custom_row_app.mount('#custom_row_' + full_data.id)
-                    full_data.custom_row_app = custom_row_app
-                    // -----------------------
                 },
                 rowCallback: function (row, aho){
                     let $row = $(row)
@@ -279,6 +263,12 @@ export default {
                         siblings.remove()
                     })
 
+                    if (full_data.custom_row_app){
+                        // Component mounted once cannot be remount easily.  Therefore unmount and delete it completely here and then when required, create it again.
+                        full_data.custom_row_app.unmount()
+                        full_data.custom_row_app = undefined
+                    }
+
                     // Change icon
                     first_td.removeClass(vm.td_collapse_class_name).addClass(vm.td_expand_class_name)
                     // Hide child row, where hidden columns are
@@ -292,20 +282,22 @@ export default {
                     details_elem.insertAfter(tr)
                     vm.updateCustomRowColSpan()
 
-                    // // -----------------------
-                    // // Add vue component dynamically
-                    // // -----------------------
-                    // // Configure event listener
-                    // const comp = h(CustomRow, {
-                    //     onAho: e => console.log('onAho: ', e),  // 'aho' is the event name configured in CustomRow component.
-                    // })
-                    // let custom_row_app = createApp(comp, {
-                    //     // props
-                    //     party_full_data: full_data
-                    // })
-                    // let custom_row_vm = custom_row_app.mount('#custom_row_' + full_data.id)
-                    // // -----------------------
-                    let custom_row_vm = full_data.custom_row_app.mount('#custom_row_' + full_data.id)
+                    // -----------------------
+                    // Add vue component dynamically
+                    // -----------------------
+                    // Configure event listener
+                    const comp = h(CustomRow, {
+                        onAho: e => console.log('onAho: ', e),  // 'aho' is the event name configured in CustomRow component.
+                    })
+                    let custom_row_app = createApp(comp, {
+                        // props
+                        party_full_data: full_data
+                    })
+                    custom_row_app.mount('#custom_row_' + full_data.id)
+
+                    // Store custom_row_app to unmount when hide
+                    full_data.custom_row_app = custom_row_app
+                    // -----------------------
 
                     details_elem.fadeIn(1000)
 

@@ -291,7 +291,7 @@ def update_party_detail_doc_filename(instance, filename):
         # instance.party_detail.id,
         # filename,
     # )
-# 
+
 
 class PartyDetailDocument(Document):
     party_detail = models.ForeignKey(
