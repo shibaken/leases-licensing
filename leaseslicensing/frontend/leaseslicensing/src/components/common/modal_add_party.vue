@@ -1,6 +1,6 @@
 <template lang="html">
-    <div id="recordSale">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Add Party" okText="Add" large>
+    <div id="modal_add_party">
+        <modal transition="modal fade" @ok="okClicked" @cancel="cancel()" title="Add Party" okText="Add" large>
             <div class="container-fluid">
                 <div class="row modal-input-row">
                     <div class="col-sm-3">
@@ -17,38 +17,37 @@
                         </div>
                     </div>
                 </div>
-                <div class="row modal-input-row">
-                    <div v-show="type_to_add=='person'">
-                        <div class="col-sm-3">
-                            <label class="form-label">Person</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <select 
-                                class="form-select" 
-                                aria-label="Select person to add"
-                                :disabled="false"
-                                ref="email_users"
-                            >
-                                <option value="null"></option>
-                                <option v-for="user in email_users" :value="user.email" :key="user.id">{{user.name}}</option>
-                            </select>
-                        </div>
+                <div v-show="type_to_add=='person'" class="row modal-input-row">
+                    <div class="col-sm-3">
+                        <label class="form-label">Person</label>
                     </div>
-                    <div v-show="type_to_add=='organisation'">
-                        <div class="col-sm-3">
-                            <label class="form-label">Organisation</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <select 
-                                class="form-select" 
-                                aria-label="Select organisation to add"
-                                :disabled="false"
-                                ref="organisations"
-                            >
-                                <option value="null"></option>
-                                <option v-for="organisation in organisations" :value="organisation.email" :key="organisation.id">{{ organisation.name }}</option>
-                            </select>
-                        </div>
+                    <div class="col-sm-7">
+                        <select 
+                            class="form-select" 
+                            aria-label="Select person to add"
+                            :disabled="false"
+                            ref="email_users"
+                            id="select_email_users"
+                        >
+                            <option value="null"></option>
+                            <option v-for="user in email_users" :value="user.email" :key="user.id">{{user.name}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div v-show="type_to_add=='organisation'" class="row modal-input-row">
+                    <div class="col-sm-3">
+                        <label class="form-label">Organisation</label>
+                    </div>
+                    <div class="col-sm-7">
+                        <select 
+                            class="form-select" 
+                            aria-label="Select organisation to add"
+                            :disabled="false"
+                            ref="organisations"
+                        >
+                            <option value="null"></option>
+                            <option v-for="organisation in organisations" :value="organisation.email" :key="organisation.id">{{ organisation.name }}</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -72,10 +71,6 @@ export default {
         modal,
     },
     props:{
-            recordSaleId:{
-                type:Number,
-                required: true
-            },
     },
     data:function () {
         let vm = this;
@@ -118,6 +113,7 @@ export default {
                 "theme": "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Person",
+                // dropdownParent: $('#modal_add_party'),
                 ajax: {
                     url: api_endpoints.users_api + '/',
                     dataType: 'json',
@@ -128,11 +124,19 @@ export default {
                         }
                         return query;
                     },
+                    processResults: function(data){
+                        // Format results returned to match the format select2 expects
+                        for (let item of data){
+                            item.text = item.fullname  // Select2 requires 'text' attribute
+                        }
+                        return {'results': data}  // Select2 expects one object with an attribute 'results' 
+                    }
                 },
             })
             .on("select2:select", function (e) {
-                let data = e.params.data.id;
-                vm.selected_email_user = data;
+                // let data = e.params.data;
+                // console.log({data})
+                vm.selected_email_user = e.params.data;
             })
             .on("select2:unselect",function (e) {
                 var selected = $(e.currentTarget);
@@ -156,6 +160,13 @@ export default {
                         }
                         return query;
                     },
+                    processResults: function(data){
+                        // Format results returned to match the format select2 expects
+                        for (let item of data){
+                            item.text = item.name  // Select2 requires 'text' attribute
+                        }
+                        return {'results': data}  // Select2 expects one object with an attribute 'results' 
+                    }
                 },
             })
             .on("select2:select", function (e) {
@@ -167,10 +178,21 @@ export default {
                 vm.selected_organisation = null;
             })
         },
-        ok:function () {
-            this.$nextTick(()=>{
-                this.sendData();
-            });
+        okClicked:function () {
+            let party_to_add = null
+            if (this.type_to_add === 'person'){
+                party_to_add = this.selected_email_user
+            } else if (this.type_to_add === 'organisation'){
+                party_to_add = this.selected_organisation
+            }
+            if (party_to_add){
+                this.$emit('partyToAdd', {
+                    // Issue an event with type and person/organisation
+                    'type': this.type_to_add,
+                    'party_to_add': party_to_add
+                })
+            }
+            this.close()
         },
         cancel:function () {
             this.close()
@@ -182,6 +204,7 @@ export default {
             this.$emit('closeModal');
         },
         sendData: async function(){
+            console.log('in sendData')
             try {
                 this.saving = true;
                 const url = `${api_endpoints.vesselownership}${this.recordSaleId}/record_sale/`;
@@ -204,19 +227,6 @@ export default {
                 this.errorString = helpers.apiVueResourceError(error);
             }
         },
-        fetchSaleDate: async function(){
-            try {
-                const url = `${api_endpoints.vesselownership}${this.recordSaleId}/fetch_sale_date/`;
-                const res = await this.$http.get(url);
-                if (res.ok && res.body.end_date) {
-                    console.log(res.body)
-                    // this.saleDate = res.body.end_date;
-                }
-            } catch(error) {
-                this.errors = true;
-                this.errorString = helpers.apiVueResourceError(error);
-            }
-        },
         addEventListeners:function () {
 
         },
@@ -226,8 +236,6 @@ export default {
         vm.$nextTick(async ()=>{
             vm.initialiseSelectPerson()
             vm.initialiseSelectOrganisation()
-            // await this.fetchSaleDate();
-            // this.addeventlisteners();
         });
     },
     created: async function() {
@@ -241,7 +249,6 @@ export default {
     margin-bottom: 1em;
 }
 .select2-container--bootstrap-5 {
-    /* this is required for the select2 in a modal */
     z-index: 99999;
 }
 </style>

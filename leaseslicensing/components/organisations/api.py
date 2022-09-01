@@ -110,12 +110,10 @@ class OrganisationViewSet(viewsets.ModelViewSet):
         #            values('email', 'first_name', 'last_name')[:10]
         # data_transform = [{'id': person['email'], 'text': person['first_name'] + ' ' + person['last_name']} for person in data]
         # return Response({"results": data_transform})
-        data = self.queryset
-        data_transform = [{'id': org['id'],} for org in data]
 
         # TODO: search organisations with search term
-
-        return Response({'results': data_transform})
+        serializer = OrganisationSerializer(self.queryset, many=True)
+        return Response(serializer.data)
 
     @detail_route(methods=["GET",], detail=True,)
     @basic_exception_handler
