@@ -16,7 +16,14 @@
                 />
             </div>
         </div>
-        <div id="ahoaho"></div>
+
+        <AddParty 
+            ref="add_party" 
+            :recordSaleId="recordSaleId"
+            :key="recordSaleKey"
+            @closeModal="closeModal"
+            @refreshDatatable="refreshFromResponse"
+        />
     </div>
 </template>
 
@@ -26,7 +33,7 @@ import { api_endpoints, helpers } from '@/utils/hooks'
 import datatable from '@/utils/vue/datatable.vue'
 import CustomRow from '@/components/common/custom_row.vue'
 import { createApp, h } from 'vue';
-// import App from '@/App';
+import AddParty from '@/components/common/modal_add_party.vue';
 
 export default {
     name: 'TableParties',
@@ -48,8 +55,7 @@ export default {
     },
     components: {
         datatable,
-        // CustomRow,
-        // App,
+        AddParty,
     },
     created: function(){
     },
@@ -191,44 +197,18 @@ export default {
         }
     },
     methods: {
-        //getTable: function(elem){
-        //    return '<table>' + elem + '</table>'
-        //},
-        //getTh: function(elem){
-        //    return '<th>' + elem + '</th>'
-        //},
-        //getTr: function(elem){
-        //    return '<tr>' + elem + '</tr>'
-        //},
-        //getTd: function(elem){
-        //    return '<td>' + elem + '</td>'
-        //},
-        //getCustomRowContents: function(full_data){
-        //    // let app = createApp(TestComponent)
-        //    // app.mount('#ahoaho')
-        //    // return app
-        //    // let ComponentClass = Vue.extend(TestComponent)
-        //    // let instance = new ComponentClass()
-        //    // instance.$mount()
-        //    // this.$refs.container.appendChild(instance.$el)
-
-
-        //    let td = this.getTd('<input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="full_data.invited_at">')
-        //    let th = this.getTh('Invited to competitive process')
-        //    let tr_invited = this.getTr(th + td)
-
-        //    td = this.getTd(full_data.removed_at)
-        //    th = this.getTh('Removed from competitive process')
-        //    let tr_removed = this.getTr(th + td)
-
-        //    td = this.getTd('')  // TODO
-        //    th = this.getTh('Details')
-        //    let tr_details = this.getTr(th + td)
-
-        //    let table  = this.getTable(tr_invited + tr_removed + tr_details)
-
-        //    return table
-        //},
+        openAddPartyModal: function() {
+            this.$nextTick(() => {
+                this.$refs.add_party.isModalOpen = true;
+            });
+        },
+        closeModal: function() {
+            this.uuid++;
+        },
+        refreshFromResponse: async function(){
+            // await this.$refs.vessels_datatable.vmDataTable.ajax.reload();
+            console.log('TODO: update table')
+        },
         number_of_columns: function() {
             // Return the number of visible columns
             let num =  this.$refs.parties_datatable.vmDataTable.columns(':visible').nodes().length;
@@ -239,7 +219,7 @@ export default {
             $('tr.' + this.expandable_row_class_name + ' td').attr('colspan', this.number_of_columns())
         },
         add_party_clicked: function (){
-
+            this.openAddPartyModal()
         },
         addClickEventHandler: function(){
             let vm = this
@@ -285,7 +265,7 @@ export default {
                     // -----------------------
                     // Add vue component dynamically
                     // -----------------------
-                    // Configure event listener
+                    // Configure event listener (Ref: https://stackoverflow.com/questions/67516974/vue3-listen-to-event-from-dynamically-created-child-component-on-replacement)
                     const comp = h(CustomRow, {
                         onAho: e => console.log('onAho: ', e),  // 'aho' is the event name configured in CustomRow component.
                     })

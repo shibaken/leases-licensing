@@ -1,7 +1,7 @@
 <template>
     <div>
         <div @click="clicked">Test Event</div>
-        <table>
+        <table class="party_detail_table">
             <tr>
                 <th>Invited to competitive process</th>
                 <td>
@@ -51,3 +51,9 @@ export default {
     }
 }
 </script>
+<style scoped>
+.party_detail_table {
+    width: 100%;
+}
+
+</style>

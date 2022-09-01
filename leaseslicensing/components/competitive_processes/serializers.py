@@ -27,6 +27,8 @@ class PartyDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'detail',
+            'created_at',
+            'modified_at',
         )
 
 
