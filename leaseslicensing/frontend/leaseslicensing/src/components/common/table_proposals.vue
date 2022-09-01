@@ -454,7 +454,6 @@ export default {
                      "<'d-flex align-items-center'<'me-auto'i>p>",
                 buttons: buttons,
                 order: [[1, 'desc']],
-
                 columns: columns,
                 processing: true,
                 initComplete: function() {
