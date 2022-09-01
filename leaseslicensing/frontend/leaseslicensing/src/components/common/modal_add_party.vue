@@ -1,19 +1,28 @@
 <template lang="html">
     <div id="recordSale">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Add Party" large>
+        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Add Party" okText="Add" large>
             <div class="container-fluid">
-                <div class="row">
+                <div class="row modal-input-row">
                     <div class="col-sm-3">
-                        Add party
+                        <label class="form-label">Add party</label>
                     </div>
                     <div class="col-sm-9">
-                        radio buttons here
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+                            <label class="form-check-label" for="inlineRadio1">Person</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+                            <label class="form-check-label" for="inlineRadio2">Organisation</label>
+                        </div>
                     </div>
+                </div>
+                <div class="row modal-input-row">
                     <div class="col-sm-3">
-                        Person
+                        <label class="form-label">Person</label>
                     </div>
                     <div class="col-sm-9">
-                        <input type="text" /> Create New
+                        <input class="form-control" type="text" placeholder="Default input" aria-label="default input example">
                     </div>
                 </div>
             </div>
@@ -139,9 +148,13 @@ export default {
         });
     },
     created: async function() {
+
     },
 }
 </script>
 
 <style lang="css">
+.modal-input-row {
+    margin-bottom: 1em;
+}
 </style>
