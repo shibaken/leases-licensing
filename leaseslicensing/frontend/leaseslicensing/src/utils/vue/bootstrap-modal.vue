@@ -73,11 +73,11 @@
             },
             okClass: {
                 type: String,
-                default: 'btn btn-default'
+                default: 'btn btn-primary'
             },
             cancelClass: {
                 type: String,
-                default: 'btn btn-default'
+                default: 'btn btn-primary'
             },
             closeWhenOK: {
                 type: Boolean,
