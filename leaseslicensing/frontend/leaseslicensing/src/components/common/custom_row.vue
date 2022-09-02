@@ -3,24 +3,36 @@
     <table class="party_detail_table">
         <tr>
             <th>Invited to competitive process</th>
-            <td>
-                <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="party_full_data.invited_at">
-            </td>
+            <td><input type="date" class="form-control w-auto" placeholder="DD/MM/YYYY" v-model="party_full_data.invited_at"></td>
         </tr>
         <tr>
             <th>Removed from competitive process</th>
-            <td>
-                <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="party_full_data.removed_at">
-            </td>
+            <td><input type="date" class="form-control w-auto" placeholder="DD/MM/YYYY" v-model="party_full_data.removed_at"></td>
         </tr>
         <tr>
             <th>Details</th>
             <td>
-                <template v-for="party_detail in party_full_data.party_details" :key="party_detail.id">
-                    <div>
-                        <input type="text" class="form-control detail_text" placeholder="DD/MM/YYYY" v-model="party_detail.detail" readonly>
+                <div class="details_box p-2">
+                    <div v-for="(party_detail, index) in party_full_data.party_details" :key="party_detail.id">
+                        <template v-if="index!=0">
+                            <hr class="m-1">
+                        </template>
+                        <template v-if="party_detail.id">
+                            <!-- This is an entry already saved in the database -->
+                            <div>{{ party_detail.created_by.fullname }}, {{ formatDatetime(party_detail.created_at) }}</div>
+                            <div>{{ party_detail.detail }}</div>
+                            <div>(Files here)</div> 
+                        </template>
+                        <template v-else>
+                            <!-- This entry is the one added just now, and not saved into the database yet -->
+                            <div>(Username here) (Datetime here)</div>
+                            <div>{{ party_detail.temporary_data.detail }}</div>
+                            <template v-for="document in party_detail.temporary_data.documents">
+                                <div><a href="document.file">{{ document.name }}</a></div>
+                            </template>
+                        </template>
                     </div>
-                </template>
+                </div>
                 <div class="new_detail_div mt-2 p-2">
                     <table class="party_detail_table">
                         <tr>
@@ -51,14 +63,6 @@
                         
                     </table>
                 </div>
-                <!-- <div class="row modal-input-row">
-                    <div class="col-sm-3">
-                        <label class="form-label">New detail</label>
-                    </div>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" placeholder="">
-                    </div>
-                </div> -->
             </td>
         </tr>
     </table>
@@ -82,6 +86,7 @@ export default {
         return {
             temporary_document_collection_id: null,
             new_detail_text: '',
+            datetimeFormat: 'DD/MM/YYYY HH:mm:ss',
         }
     },
     created: function(){
@@ -108,10 +113,18 @@ export default {
         },
     },
     methods: {
+        formatDatetime: function(dt){
+            return moment(dt).format(this.datetimeFormat);
+        },
         addDetailClicked: function(){
             this.party_full_data.party_details.push({
-                'detail': this.new_detail_text
+                'temporary_data': {
+                    'detail': this.new_detail_text,
+                    'temporary_document_collection_id': this.temporary_document_collection_id,
+                    'documents': this.$refs.temp_document.documents,
+                }
             })
+            this.new_detail_text = ''
         },
         addToTemporaryDocumentCollectionList(temp_doc_id) {
             console.log({temp_doc_id})
@@ -132,6 +145,11 @@ export default {
 }
 .new_detail_div {
     border: 1px solid lightgray;
+    border-radius: 0.25em;
+}
+.details_box {
+    border: 1px solid lightgray;
+    border-radius: 0.25em;
 }
 .detail_text {
     width: 100%;
