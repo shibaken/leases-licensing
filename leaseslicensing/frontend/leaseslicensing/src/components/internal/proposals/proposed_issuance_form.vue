@@ -222,7 +222,7 @@
                                             :readonly="withApprover"
                                             :name="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
                                             :id="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
-                                            :approval_type="selectedApprovalTypeID"
+                                            :approval_type="selectedApprovalTypeId"
                                             :approval_type_document_type="docType.id"
                                             :isRepeatable="true"
                                             :documentActionUrl="leaseLicenceApprovalDocumentsUrl"
@@ -417,13 +417,17 @@ export default {
         },
     },
     methods:{
-        updateSelectedApprovalType(evt) {
+        handleApprovalTypeChangeEvent(evt) {
             evt.preventDefault();
+            const id = parseInt(evt.target.value);
+            this.updateSelectedApprovalType(id);
+        },
+        updateSelectedApprovalType(id) {
             // clear existing doc arrays
             this.availableDocumentTypes = [];
             this.selectedDocumentTypes = [];
             for (const approvalType of this.approvalTypes) {
-                if (approvalType.id === parseInt(evt.target.value)) {
+                if (approvalType.id === id) {
                     for (const docType of approvalType.approval_type_document_types) {
                         this.availableDocumentTypes.push(docType);
                     }
@@ -434,7 +438,7 @@ export default {
             $('#'+'documentTypeSelector').val(null);
         },
         updateSelectedDocumentTypes(evt) {
-            console.log(evt.target.value);
+            evt.preventDefault();
             if (!this.selectedDocumentTypes.find(element => element.id === parseInt(evt.target.value))) {
                 this.selectedDocumentTypes.push(this.availableDocumentTypes.find(element => element.id === parseInt(evt.target.value)));
             }
@@ -522,7 +526,8 @@ export default {
                 this.approval.decision = this.selectedDecision;
             } else if (this.leaseLicence) {
                 this.approval.details = this.$refs.lease_licence_details.detailsText;
-                this.approval.approval_type = this.selectedApprovalType ? this.selectedApprovalType.id : null;
+                //this.approval.approval_type = this.selectedApprovalType ? this.selectedApprovalType.id : null;
+                this.approval.approval_type = this.selectedApprovalTypeId;
                 this.approval.approval_sub_type = this.selectedApprovalSubType ? this.selectedApprovalSubType.id : null;
             }
             this.$nextTick(async () => {
@@ -571,11 +576,15 @@ export default {
             }
             // Approval Type
             if (this.approval.approval_type) {
+                this.selectedApprovalTypeId = this.approval.approval_type;
+                this.updateSelectedApprovalType(this.selectedApprovalTypeId);
+                /*
                 for (let atype of this.approvalTypes) {
                     if (atype.id === this.approval.approval_type) {
                         this.selectedApprovalType = atype;
                     }
                 }
+                */
             }
             // Approval Sub Type
             if (this.approval.approval_sub_type) {
