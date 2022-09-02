@@ -34,8 +34,8 @@
             </div>
 
             <div slot="footer">
-                <button type="button" class="btn btn-default" @click="ok">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" @click="ok">Ok</button>
+                <button type="button" class="btn btn-primary" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>
