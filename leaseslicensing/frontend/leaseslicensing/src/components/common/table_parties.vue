@@ -13,10 +13,19 @@
                     :id="datatable_id"
                     :dtHeaders="datatable_headers"
                     :dtOptions="datatable_options"
+                    :key="datatable_key"
                 />
             </div>
         </div>
-        <div id="ahoaho"></div>
+
+        <AddPartyModal 
+            ref="add_party" 
+            :recordSaleId="recordSaleId"
+            :key="recordSaleKey"
+            @closeModal="closeModal"
+            @refreshDatatable="refreshFromResponse"
+            @partyToAdd="addParty"
+        />
     </div>
 </template>
 
@@ -26,7 +35,8 @@ import { api_endpoints, helpers } from '@/utils/hooks'
 import datatable from '@/utils/vue/datatable.vue'
 import CustomRow from '@/components/common/custom_row.vue'
 import { createApp, h } from 'vue';
-// import App from '@/App';
+import AddPartyModal from '@/components/common/modal_add_party.vue';
+import { none } from 'ol/centerconstraint';
 
 export default {
     name: 'TableParties',
@@ -48,8 +58,7 @@ export default {
     },
     components: {
         datatable,
-        // CustomRow,
-        // App,
+        AddPartyModal,
     },
     created: function(){
     },
@@ -191,44 +200,45 @@ export default {
         }
     },
     methods: {
-        //getTable: function(elem){
-        //    return '<table>' + elem + '</table>'
-        //},
-        //getTh: function(elem){
-        //    return '<th>' + elem + '</th>'
-        //},
-        //getTr: function(elem){
-        //    return '<tr>' + elem + '</tr>'
-        //},
-        //getTd: function(elem){
-        //    return '<td>' + elem + '</td>'
-        //},
-        //getCustomRowContents: function(full_data){
-        //    // let app = createApp(TestComponent)
-        //    // app.mount('#ahoaho')
-        //    // return app
-        //    // let ComponentClass = Vue.extend(TestComponent)
-        //    // let instance = new ComponentClass()
-        //    // instance.$mount()
-        //    // this.$refs.container.appendChild(instance.$el)
+        addParty: function(params){
+            if (params.type === 'person'){
+                let new_data = {
+                    'id': '',  // This is competitive_process_party id.  Empty string because this is not saved yet.
+                    'is_person': true,
+                    'is_organisation': false,
+                    'person': params.party_to_add,
+                    'organisation': null,
+                    'invited_at': null,
+                    'removed_at': null,
+                    'party_details': [],
+                    'expanded': false,
+                }
+                this.competitive_process_parties.push(new_data)
+                this.$refs.parties_datatable.vmDataTable.row.add(new_data).draw()
+            } else if (params.type === 'organisation'){
 
+                // TODO
 
-        //    let td = this.getTd('<input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="full_data.invited_at">')
-        //    let th = this.getTh('Invited to competitive process')
-        //    let tr_invited = this.getTr(th + td)
+            }
 
-        //    td = this.getTd(full_data.removed_at)
-        //    th = this.getTh('Removed from competitive process')
-        //    let tr_removed = this.getTr(th + td)
+            for (let party of this.competitive_process_parties){
+                // Somehow all the expander collapsed when adding a new row.  Accordingly set the expanded attribute to false
+                party.expanded = false
+            }
 
-        //    td = this.getTd('')  // TODO
-        //    th = this.getTh('Details')
-        //    let tr_details = this.getTr(th + td)
-
-        //    let table  = this.getTable(tr_invited + tr_removed + tr_details)
-
-        //    return table
-        //},
+        },
+        openAddPartyModal: function() {
+            this.$nextTick(() => {
+                this.$refs.add_party.isModalOpen = true;
+            });
+        },
+        closeModal: function() {
+            this.uuid++;
+        },
+        refreshFromResponse: async function(){
+            // await this.$refs.vessels_datatable.vmDataTable.ajax.reload();
+            console.log('TODO: update table')
+        },
         number_of_columns: function() {
             // Return the number of visible columns
             let num =  this.$refs.parties_datatable.vmDataTable.columns(':visible').nodes().length;
@@ -239,11 +249,15 @@ export default {
             $('tr.' + this.expandable_row_class_name + ' td').attr('colspan', this.number_of_columns())
         },
         add_party_clicked: function (){
-
+            this.openAddPartyModal()
         },
         addClickEventHandler: function(){
+            console.log('in addClickEventHandler')
             let vm = this
+            console.log(vm.$refs.parties_datatable.vmDataTable)
+
             vm.$refs.parties_datatable.vmDataTable.on('click', 'td', function(e) {
+                console.log('in click')
                 let td_link = $(this)
                 if (!(td_link.hasClass(vm.td_expand_class_name) || td_link.hasClass(vm.td_collapse_class_name))){
                     // This row is not configured as expandable row (at the rowCallback)
@@ -258,23 +272,21 @@ export default {
 
                 if(full_data.expanded){
                     // Collapse
-                    let siblings = tr.siblings('tr.' + vm.expandable_row_class_name)
+                    let siblings = tr.next('tr.' + vm.expandable_row_class_name)
                     siblings.fadeOut(500, function(){
                         siblings.remove()
+                        // Change icon
+                        first_td.removeClass(vm.td_collapse_class_name).addClass(vm.td_expand_class_name)
+                        // Hide child row, where hidden columns are
+                        $row.child.hide()
+                        // Toggle flag
+                        full_data.expanded = false
+                        if (full_data.custom_row_app){
+                            // Component mounted once cannot be remount easily.  Therefore unmount and delete it completely here and then when required, create it again.
+                            full_data.custom_row_app.unmount()
+                            full_data.custom_row_app = undefined
+                        }
                     })
-
-                    if (full_data.custom_row_app){
-                        // Component mounted once cannot be remount easily.  Therefore unmount and delete it completely here and then when required, create it again.
-                        full_data.custom_row_app.unmount()
-                        full_data.custom_row_app = undefined
-                    }
-
-                    // Change icon
-                    first_td.removeClass(vm.td_collapse_class_name).addClass(vm.td_expand_class_name)
-                    // Hide child row, where hidden columns are
-                    $row.child.hide()
-                    // Toggle flag
-                    full_data.expanded = false
                 } else {
                     // Expand
                     let details_elem = $('<tr class="' + vm.expandable_row_class_name +'"><td id="custom_row_' + full_data.id + '"></td></tr>')
@@ -285,7 +297,7 @@ export default {
                     // -----------------------
                     // Add vue component dynamically
                     // -----------------------
-                    // Configure event listener
+                    // Configure event listener (Ref: https://stackoverflow.com/questions/67516974/vue3-listen-to-event-from-dynamically-created-child-component-on-replacement)
                     const comp = h(CustomRow, {
                         onAho: e => console.log('onAho: ', e),  // 'aho' is the event name configured in CustomRow component.
                     })
@@ -294,10 +306,10 @@ export default {
                         party_full_data: full_data
                     })
                     custom_row_app.mount('#custom_row_' + full_data.id)
-
-                    // Store custom_row_app to unmount when hide
-                    full_data.custom_row_app = custom_row_app
                     // -----------------------
+
+                    // Store custom_row_app in order to unmount when being hidden
+                    full_data.custom_row_app = custom_row_app
 
                     details_elem.fadeIn(1000)
 
@@ -311,6 +323,7 @@ export default {
             })
         },
         addResponsiveResizeHandler: function(){
+            console.log('in addResponsiveResizeHandler')
             // When columns are shown/hidden, expand/collapse the child row according to the current expand-collapse status of each row
             let vm = this
             vm.$refs.parties_datatable.vmDataTable.on('responsive-resize', function(e, datatable, columns) {
@@ -328,6 +341,7 @@ export default {
             })
         },
         addEventListeners: function (){
+            console.log('in addEventListener')
             this.addClickEventHandler()
             this.addResponsiveResizeHandler()
         },
