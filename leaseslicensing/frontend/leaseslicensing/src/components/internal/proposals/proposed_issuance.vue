@@ -1,251 +1,18 @@
 <template lang="html">
     <div id="proposedIssuanceApproval">
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
-            <!--template v-if="is_local">
-                proposed_issuance.vue
-            </template-->
-            <div class="container-fluid">
-                <div class="row">
-                    <form class="form-horizontal" name="approvalForm">
-                        <VueAlert :show.sync="showError" type="danger"><strong v-html="errorString"></strong></VueAlert>
-                        <div class="col-sm-12" v-if="registrationOfInterest">
-                            <div class="form-group">
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-3">
-                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">Decision</label>
-                                        <label v-else class="control-label pull-left"  for="Name">Proposed Decision</label>
-                                    </div>
-                                    <div class="form-check col-sm-5">
-                                        <input 
-                                        type="radio" 
-                                        class="form-check-input"
-                                        name="approve_lease_licence" 
-                                        id="approve_lease_licence" 
-                                        value="approve_lease_licence" 
-                                        v-model="selectedDecision"
-                                        />
-                                        <label class="form-check-label" for="approve_lease_licence" style="font-weight:normal">Invite applicant to apply for a lease or licence</label>
-                                    </div>
-                                    <div class="form-check col-sm-4">
-                                        <input 
-                                        type="radio" 
-                                        class="form-check-input"
-                                        name="approve_competitive_process" 
-                                        id="approve_competitive_process" 
-                                        value="approve_competitive_process" 
-                                        v-model="selectedDecision"
-                                        />
-                                        <label class="form-check-label" for="approve_competitive_process" style="font-weight:normal">Start Competitive process</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-3">
-                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">Details</label>
-                                        <label v-else class="control-label pull-left"  for="Name">Proposed Details</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <!--textarea name="approval_details" class="form-control" style="width:70%;" v-model="approval.details"></textarea-->
-                                        <RichText
-                                        :proposalData="approval.details"
-                                        ref="registration_of_interest_details"
-                                        id="registration_of_interest_details"
-                                        :can_view_richtext_src=true
-                                        :key="proposedApprovalKey"
-                                        v-model="approval.details"
-                                        />
-
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-3">
-                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">BCC email</label>
-                                        <label v-else class="control-label pull-left"  for="Name">Proposed BCC email</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                            <input type="text" class="form-control" name="approval_bcc" style="width:70%;" ref="bcc_email" v-model="approval.bcc_email">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-12">
-                                        <label v-if="submitter_email && applicant_email" class="control-label pull-left"  for="Name">After approving this proposal, approval will be emailed to {{submitter_email}} and {{applicant_email}}.</label>
-                                        <label v-else class="control-label pull-left"  for="Name">After approving this proposal, approval will be emailed to {{submitter_email}}.</label>
-                                    </div>
-                                    
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-12" v-if="leaseLicence">
-                            <div class="form-group">
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-3">
-                                        <label class="control-label pull-left" for="approvalType">Approval Type</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <select 
-                                            :disabled="withApprover"
-                                            ref="approvalType"
-                                            class="form-control"
-                                            v-model="selectedApprovalType"
-                                        >
-                                            <option value="null"></option>
-                                            <option v-for="atype in approvalTypes" :value="atype" :key="atype.name">{{atype.name}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-3">
-                                        <label class="control-label pull-left" for="approvalSubType">Approval Sub Type</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <select 
-                                            ref="approvalSubType"
-                                            class="form-control"
-                                            v-model="selectedApprovalSubType"
-                                        >
-                                            <option value="null"></option>
-                                            <option v-for="atype in approvalSubTypes" :value="atype" :key="atype.name">{{atype.name}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">Commencement</label>
-                                        <label v-else class="control-label pull-left"  for="Name">Commencement</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group date" ref="start_date" style="width: 70%;">
-                                            <input 
-                                            :disabled="withApprover"
-                                            type="date" 
-                                            class="form-control" 
-                                            name="start_date" 
-                                            placeholder="DD/MM/YYYY" 
-                                            v-model="approval.start_date"
-                                            >
-                                            <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
-                                            <!--span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span-->
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row" v-show="showstartDateError">
-                                    <VueAlert  class="col-sm-12" type="danger"><strong>{{startDateErrorString}}</strong></VueAlert>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <label v-if="withApprover" class="control-label pull-left"  for="Name">Expiry</label>
-                                        <label v-else class="control-label pull-left"  for="Name">Expiry</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group date" ref="due_date" style="width: 70%;margin-bottom: 1rem">
-                                            <input 
-                                            :disabled="withApprover"
-                                            type="date" 
-                                            class="form-control" 
-                                            name="due_date" 
-                                            placeholder="DD/MM/YYYY" 
-                                            v-model="approval.expiry_date"
-                                            >
-                                            <i class="bi bi-calendar3 ms-2" style="font-size: 2rem"></i>
-                                            <!--span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span-->
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row" v-show="showtoDateError">
-                                    <VueAlert  class="col-sm-12" type="danger"><strong>{{toDateErrorString}}</strong></VueAlert>
-                                </div>
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-3">
-                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Details</label>
-                                        <label v-else class="control-label pull-left"  for="Name">Details</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <!--textarea name="approval_details" class="form-control" style="width:70%;" v-model="approval.details"></textarea-->
-                                        <RichText
-                                        :proposalData="approval.details"
-                                        ref="lease_licence_details"
-                                        id="lease_licence_details"
-                                        :can_view_richtext_src=true
-                                        :key="selectedApprovalTypeName"
-                                        :placeholder_text="selectedApprovalTypeDetailsPlaceholder"
-                                        v-model="approval.details"
-                                        />
-                                    </div>
-                                </div>
-                                <div class="row question-row">
-                                    <div class="col-sm-3">
-                                        <label for="supporting_documents">File</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <FileField 
-                                            ref="proposed_approval_documents"
-                                            name="proposed_approval_documents"
-                                            id="proposed_approval_documents"
-                                            :isRepeatable="true"
-                                            :documentActionUrl="proposedApprovalDocumentsUrl"
-                                            :replace_button_by_text="true"
-                                        />
-                                    </div>
-                                </div>
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-3">
-                                        <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">CC email</label>
-                                        <label v-else class="control-label pull-left"  for="Name">Proposed CC email</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <input type="text" class="form-control" name="approval_cc" style="width:70%;" ref="cc_email" v-model="approval.cc_email">
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="form-group" v-if="selectedApprovalTypeExists">
-                                <div class="row modal-input-row">
-                                    <div class="col-sm-12">
-                                    Select zero or more documents that need to be attached as part of the approval of this application
-                                    </div>
-                                </div>
-                                <div v-for="docType in selectedApprovalDocumentTypes">
-                                    <div class="row modal-input-row">
-                                        <div class="col-sm-3">
-                                            <label class="control-label pull-left" for="approvalTypeDocumentTypes">{{docType.name}}</label>
-                                        </div>
-                                        <div class="col-sm-9">
-                                            <FileField 
-                                                :readonly="withApprover"
-                                                :name="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
-                                                :id="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
-                                                :approval_type="selectedApprovalType.id"
-                                                :approval_type_document_type="docType.id"
-                                                :isRepeatable="true"
-                                                :documentActionUrl="leaseLicenceApprovalDocumentsUrl"
-                                                :replace_button_by_text="true"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <p v-if="can_preview">Click <a href="#" @click.prevent="preview">here</a> to preview the approval letter.</p>
-
-            <div slot="footer">
-                <!--button type="button" v-if="issuingApproval" disabled class="btn btn-light" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-light" @click="ok">Ok</button>
-                <button type="button" class="btn btn-light" @click="cancel">Cancel</button-->
-            </div>
+            <ProposedIssuanceForm
+                v-if="proposal"
+                :proposal="proposal"
+                ref="proposed_approval_form"
+                :processing_status="proposal.processing_status"
+                :proposal_id="proposal.id"
+                :proposal_type='proposal.proposal_type.code'
+                :submitter_email="submitter_email"
+                :applicant_email="applicant_email"
+                :key="proposedApprovalKey"
+                :proposedApprovalKey="proposedApprovalKey"
+            />
         </modal>
     </div>
 </template>
@@ -255,8 +22,9 @@
 import modal from '@vue-utils/bootstrap-modal.vue'
 import VueAlert from '@vue-utils/alert.vue'
 import RichText from '@/components/forms/richtext.vue'
-import {helpers, api_endpoints} from "@/utils/hooks.js"
+import { helpers, api_endpoints } from "@/utils/hooks.js"
 import FileField from '@/components/forms/filefield_immediate.vue'
+import ProposedIssuanceForm from '@/components/internal/proposals/proposed_issuance_form.vue'
 export default {
     name:'Proposed-Approval',
     components:{
@@ -264,6 +32,7 @@ export default {
         VueAlert,
         RichText,
         FileField,
+        ProposedIssuanceForm,
     },
     props:{
         proposal_id: {
@@ -276,10 +45,6 @@ export default {
         },
         proposal_type: {
             type: String,
-            required: true
-        },
-        isApprovalLevelDocument: {
-            type: Boolean,
             required: true
         },
         submitter_email: {
@@ -333,6 +98,16 @@ export default {
         }
     },
     computed: {
+        submitter_email: function(){
+            if (this.proposal.submitter){
+                return this.proposal.submitter.email
+            } else {
+                return this.proposal.applicant_obj.email
+            }
+        },
+        applicant_email:function(){
+            return this.proposal && this.proposal.applicant.email ? this.proposal.applicant.email : '';
+        },
         selectedApprovalTypeExists: function() {
             if (this.selectedApprovalType && this.selectedApprovalType.id) {
                 return true;

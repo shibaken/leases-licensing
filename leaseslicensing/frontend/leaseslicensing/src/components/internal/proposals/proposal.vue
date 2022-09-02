@@ -48,7 +48,6 @@
                 <template v-if="display_approval_screen">
                     <ApprovalScreen
                         :proposal="proposal"
-                        @refreshFromResponse="refreshFromResponse"
                     />
                 </template>
 
@@ -215,7 +214,6 @@
             :isApprovalLevelDocument="isApprovalLevelDocument"
             :submitter_email="submitter_email"
             :applicant_email="applicant_email"
-            @refreshFromResponse="refreshFromResponse"
             :key="proposedApprovalKey"
             :proposedApprovalKey="proposedApprovalKey"
         />
@@ -223,13 +221,11 @@
             ref="proposed_decline"
             :processing_status="proposal.processing_status"
             :proposal="proposal"
-            @refreshFromResponse="refreshFromResponse"
             :proposedApprovalKey="proposedApprovalKey"
         />
         <AmendmentRequest
             ref="amendment_request"
             :proposal="proposal"
-            @refreshFromResponse="refreshFromResponse"
         />
         <!--
         <input type="hidden" name="csrfmiddlewaretoken" :value="csrf_token"/>
@@ -927,7 +923,7 @@ export default {
                     fetch(helpers.add_endpoint_json(api_endpoints.proposal,vm.proposal.id+'/approval_level_comment'), { body: JSON.stringify(data), method: 'POST' }).then(
                         res => {
                             vm.proposal = res.body;
-                            vm.refreshFromResponse(res);
+                            //vm.refreshFromResponse(res);
                         }, err => {
                             console.log(err);
                         }
@@ -1022,6 +1018,7 @@ export default {
                 )
             }
         },
+        /*
         refreshFromResponse:function(response){
             this.proposal = helpers.copyObject(response.body);
             this.$nextTick(() => {
@@ -1029,6 +1026,7 @@ export default {
                 this.updateAssignedOfficerSelect();
             });
         },
+        */
         assignTo: async function(){
             let vm = this
             console.log('in assignTo')
