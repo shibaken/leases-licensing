@@ -100,7 +100,8 @@ class ApprovalSubType(RevisionedMixin):
 class ApprovalType(RevisionedMixin):
     name = models.CharField(max_length=200, unique=True)
     details_placeholder = models.CharField(max_length=200, blank=True)
-    approval_type_document_types = models.ManyToManyField("ApprovalTypeDocumentType")
+    #approval_type_document_types = models.ManyToManyField("ApprovalTypeDocumentType", through='ApprovalTypeDocumentTypeOnApprovalType')
+    approvaltypedocumenttypes = models.ManyToManyField("ApprovalTypeDocumentType", through='ApprovalTypeDocumentTypeOnApprovalType')
     class Meta:
         app_label = "leaseslicensing"
 
@@ -116,6 +117,15 @@ class ApprovalTypeDocumentType(RevisionedMixin):
 
     def __str__(self):
         return self.name
+
+
+class ApprovalTypeDocumentTypeOnApprovalType(RevisionedMixin):
+    approval_type = models.ForeignKey(ApprovalType, on_delete=models.CASCADE)
+    approval_type_document_type = models.ForeignKey(ApprovalTypeDocumentType, on_delete=models.CASCADE)
+    mandatory = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = "leaseslicensing"
 
 
 # class Approval(models.Model):
