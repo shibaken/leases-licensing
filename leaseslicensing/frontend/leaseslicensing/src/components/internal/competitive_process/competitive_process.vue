@@ -57,6 +57,7 @@
                             <TableParties 
                                 level=internal
                                 :competitive_process_parties="competitive_process.competitive_process_parties"
+                                :competitive_process_id="competitive_process.id"
                             />
                         </FormSection>
                     </div>

@@ -20,13 +20,16 @@ from rest_framework.permissions import (
 )
 from rest_framework.pagination import PageNumberPagination
 from django.urls import reverse
+
+from leaseslicensing.components.main.decorators import basic_exception_handler
 from leaseslicensing.components.main.models import (
     ApplicationType,
     RequiredDocument,
     Question,
     GlobalSettings,
-    MapLayer,
+    MapLayer, TemporaryDocumentCollection,
 )
+from leaseslicensing.components.main.process_document import save_document, delete_document, cancel_document
 from leaseslicensing.components.main.serializers import (
     ApplicationTypeSerializer,
     RequiredDocumentSerializer,
@@ -34,7 +37,7 @@ from leaseslicensing.components.main.serializers import (
     GlobalSettingsSerializer,
     OracleSerializer,
     BookingSettlementReportSerializer,
-    MapLayerSerializer,
+    MapLayerSerializer, TemporaryDocumentCollectionSerializer,
 )
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -94,6 +97,49 @@ class MapLayerViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+
+class TemporaryDocumentCollectionViewSet(viewsets.ModelViewSet):
+    queryset = TemporaryDocumentCollection.objects.all()
+    serializer_class = TemporaryDocumentCollectionSerializer
+
+    @basic_exception_handler
+    def create(self, request, *args, **kwargs):
+        with transaction.atomic():
+            serializer = TemporaryDocumentCollectionSerializer(
+                data=request.data,
+            )
+            serializer.is_valid(raise_exception=True)
+            if serializer.is_valid():
+                instance = serializer.save()
+                save_document(request, instance, comms_instance=None, document_type=None)
+
+                return Response(serializer.data)
+
+    @detail_route(methods=["POST"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_temp_document(self, request, *args, **kwargs):
+        instance = self.get_object()
+        action = request.data.get('action')
+
+        if action == 'list':
+            pass
+
+        elif action == 'delete':
+            delete_document(request, instance, comms_instance=None, document_type='temp_document')
+
+        elif action == 'cancel':
+            cancel_document(request, instance, comms_instance=None, document_type='temp_document')
+
+        elif action == 'save':
+            save_document(request, instance, comms_instance=None, document_type='temp_document')
+
+        returned_file_data = [dict(
+            file=d._file.url,
+            id=d.id,
+            name=d.name,
+        ) for d in instance.documents.all() if d._file]
+        return Response({'filedata': returned_file_data})
 
 # class PaymentViewSet(viewsets.ModelViewSet):
 #    #queryset = Proposal.objects.all()

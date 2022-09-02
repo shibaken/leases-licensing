@@ -43,6 +43,7 @@ export default {
     props: {
         level: '',
         competitive_process_parties: [],
+        competitive_process_id: '',
     },
     data() {
         let vm = this;
@@ -303,7 +304,8 @@ export default {
                     })
                     let custom_row_app = createApp(comp, {
                         // props
-                        party_full_data: full_data
+                        party_full_data: full_data,
+                        competitive_process_id: vm.competitive_process_id,
                     })
                     custom_row_app.mount('#custom_row_' + full_data.id)
                     // -----------------------

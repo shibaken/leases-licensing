@@ -1,5 +1,4 @@
 <template>
-    <div>
         <div @click="clicked">Test Event</div>
         <table class="party_detail_table">
             <tr>
@@ -32,7 +31,16 @@
                         <tr>
                             <th>Documents</th>
                             <td>
-                                Attach file
+                                <FileField
+                                    :readonly="readonly"
+                                    ref="temp_document"
+                                    name="temp_document"
+                                    isRepeatable="true"
+                                    :documentActionUrl="detailDocumentUrl"
+                                    :replace_button_by_text="true"
+                                    :temporaryDocumentCollectionId="temporary_document_collection_id"
+                                    @update-temp-doc-coll-id="addToTemporaryDocumentCollectionList"
+                                />
                             </td>
                         </tr>
                     </table>
@@ -47,26 +55,54 @@
                 </td>
             </tr>
         </table>
-    </div>
 </template>
 
-
 <script>
+import { api_endpoints, helpers } from '@/utils/hooks'
+import FileField from '@/components/forms/filefield_immediate.vue'
+
 export default {
     name: 'CustomRow',
     props: {
         party_full_data: null,
+        competitive_process_id: '',
+    },
+    components: {
+        FileField,
     },
     data() {
         let vm = this;
         return {
-            //full_data: null,
+            temporary_document_collection_id: null,
         }
     },
     created: function(){
-        //this.invited_at_data = this.invited_at
+
+    },
+    computed: {
+        readonly: function(){
+            return false
+        },
+        existingDetail: function() {
+            return false
+        },
+        detailDocumentUrl: function() {
+            let url = '';
+            if (this.existingDetail) {
+                // url = helpers.add_endpoint_join(
+                //     api_endpoints.vesselownership,
+                //     this.vessel.vessel_ownership.id + '/process_vessel_registration_document/'
+                // )
+            } else {
+                url = 'temporary_document';
+            }
+            return url;
+        },
     },
     methods: {
+        addToTemporaryDocumentCollectionList(temp_doc_id) {
+            this.temporary_document_collection_id = temp_doc_id;
+        },
         clicked: function(){
             this.$emit('aho', 123)
         }
