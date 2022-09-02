@@ -415,6 +415,24 @@ class UserSystemSettings(models.Model):
         verbose_name_plural = "User System Settings"
 
 
+class TemporaryDocumentCollection(models.Model):
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+
+class TemporaryDocument(Document):
+    temp_document_collection = models.ForeignKey(
+        TemporaryDocumentCollection,
+        related_name='documents',
+        on_delete=models.CASCADE,
+    )
+    _file = models.FileField(max_length=255)
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+
 # import reversion
 # reversion.register(Region, follow=['districts'])
 # reversion.register(District, follow=['parks'])
