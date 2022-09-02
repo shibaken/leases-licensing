@@ -215,9 +215,17 @@ export default {
                 }
                 this.competitive_process_parties.push(new_data)
                 this.$refs.parties_datatable.vmDataTable.row.add(new_data).draw()
+            } else if (params.type === 'organisation'){
+
+                // TODO
+
             }
-            // this.datatable_key = uuid()
-            // this.addEventListeners()
+
+            for (let party of this.competitive_process_parties){
+                // Somehow all the expander collapsed when adding a new row.  Accordingly set the expanded attribute to false
+                party.expanded = false
+            }
+
         },
         openAddPartyModal: function() {
             this.$nextTick(() => {
