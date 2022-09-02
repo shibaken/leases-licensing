@@ -204,6 +204,9 @@ export default {
 
     },
     computed: {
+        isFinalised: function(){
+            return false
+        },
         related_items_ajax_url: function(){
             return '/api/competitive_process/' + this.competitive_process.id + '/get_related_items/'
         },

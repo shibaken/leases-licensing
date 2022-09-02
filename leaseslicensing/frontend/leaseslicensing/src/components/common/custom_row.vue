@@ -1,31 +1,32 @@
 <template>
-        <div @click="clicked">Test Event</div>
-        <table class="party_detail_table">
-            <tr>
-                <th>Invited to competitive process</th>
-                <td>
-                    <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="party_full_data.invited_at">
-                </td>
-            </tr>
-            <tr>
-                <th>Removed from competitive process</th>
-                <td>
-                    <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="party_full_data.removed_at">
-                </td>
-            </tr>
-            <tr>
-                <th>Details</th>
-                <td>
-                    <template v-for="party_detail in party_full_data.party_details" :key="party_detail.id">
-                        <div>
-                            <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="party_detail.detail">
-                        </div>
-                    </template>
+    <div @click="clicked">Test Event</div>
+    <table class="party_detail_table">
+        <tr>
+            <th>Invited to competitive process</th>
+            <td>
+                <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="party_full_data.invited_at">
+            </td>
+        </tr>
+        <tr>
+            <th>Removed from competitive process</th>
+            <td>
+                <input type="date" class="form-control" placeholder="DD/MM/YYYY" v-model="party_full_data.removed_at">
+            </td>
+        </tr>
+        <tr>
+            <th>Details</th>
+            <td>
+                <template v-for="party_detail in party_full_data.party_details" :key="party_detail.id">
+                    <div>
+                        <input type="text" class="form-control detail_text" placeholder="DD/MM/YYYY" v-model="party_detail.detail" readonly>
+                    </div>
+                </template>
+                <div class="new_detail_div mt-2 p-2">
                     <table class="party_detail_table">
                         <tr>
                             <th>New detail</th>
                             <td>
-                                <input type="text" class="form-control">
+                                <input type="text" class="form-control detail_text" v-model="new_detail_text">
                             </td>
                         </tr>
                         <tr>
@@ -35,7 +36,7 @@
                                     :readonly="readonly"
                                     ref="temp_document"
                                     name="temp_document"
-                                    isRepeatable="true"
+                                    :isRepeatable="true"
                                     :documentActionUrl="detailDocumentUrl"
                                     :replace_button_by_text="true"
                                     :temporaryDocumentCollectionId="temporary_document_collection_id"
@@ -43,18 +44,24 @@
                                 />
                             </td>
                         </tr>
+                        <tr>
+                            <th></th>
+                            <td class="text-end"><button class="btn btn-primary" @click="addDetailClicked"><i class="fa-solid fa-circle-plus"></i> Add</button></td>
+                        </tr>
+                        
                     </table>
-                    <!-- <div class="row modal-input-row">
-                        <div class="col-sm-3">
-                            <label class="form-label">New detail</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" placeholder="">
-                        </div>
-                    </div> -->
-                </td>
-            </tr>
-        </table>
+                </div>
+                <!-- <div class="row modal-input-row">
+                    <div class="col-sm-3">
+                        <label class="form-label">New detail</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" placeholder="">
+                    </div>
+                </div> -->
+            </td>
+        </tr>
+    </table>
 </template>
 
 <script>
@@ -74,6 +81,7 @@ export default {
         let vm = this;
         return {
             temporary_document_collection_id: null,
+            new_detail_text: '',
         }
     },
     created: function(){
@@ -100,7 +108,13 @@ export default {
         },
     },
     methods: {
+        addDetailClicked: function(){
+            this.party_full_data.party_details.push({
+                'detail': this.new_detail_text
+            })
+        },
         addToTemporaryDocumentCollectionList(temp_doc_id) {
+            console.log({temp_doc_id})
             this.temporary_document_collection_id = temp_doc_id;
         },
         clicked: function(){
@@ -115,6 +129,12 @@ export default {
 }
 .party_detail_table th, td {
     border: none;
+}
+.new_detail_div {
+    border: 1px solid lightgray;
+}
+.detail_text {
+    width: 100%;
 }
 
 </style>
