@@ -1,6 +1,14 @@
 <template lang="html">
     <div id="modal_add_party">
-        <modal transition="modal fade" @ok="okClicked" @cancel="cancel()" title="Add Party" okText="Add" large>
+        <Modal 
+            ref="modal_add_party" 
+            transition="modal fade" 
+            @ok="okClicked" 
+            @cancel="cancel" 
+            title="Add Party" 
+            okText="Add" large
+            @mounted="modalMounted"
+        >
             <div class="container-fluid">
                 <div class="row modal-input-row">
                     <div class="col-sm-3">
@@ -56,19 +64,19 @@
                 <button type="button" v-else class="btn btn-primary" @click="ok">OK</button>
                 <button type="button" class="btn btn-primary" @click="cancel">Cancel</button>
             </div> -->
-        </modal>
+        </Modal>
     </div>
 </template>
 
 <script>
 //import $ from 'jquery'
-import modal from '@vue-utils/bootstrap-modal.vue'
+import Modal from '@vue-utils/bootstrap-modal.vue'
 import {helpers, api_endpoints} from "@/utils/hooks.js"
 
 export default {
     name:'Add Party',
     components:{
-        modal,
+        Modal,
     },
     props:{
     },
@@ -85,11 +93,11 @@ export default {
             type_to_add: '',
             // Person
             email_users: [],
-            selected_email_user: '',
+            selected_email_user: null,
 
             // Organisation
             organisations: [],
-            selected_organisation: '',
+            selected_organisation: null,
         }
     },
     computed: {
@@ -97,22 +105,40 @@ export default {
             var vm = this;
             return vm.errors;
         },
-    },
-    /*
-    watch: {
-        due_date: function(){
-            this.validDate = moment(this.requirement.due_date,'DD/MM/YYYY').isValid();
+        okButtonDisabled: function(){
+            console.log('computed okButtonDisabled')
+            let disabled = true
+            if (this.selected_email_user || this.selected_organisation){
+                disabled = false
+            }
+            return disabled
         },
     },
-    */
+    watch: {
+        okButtonDisabled: function(){
+            console.log('watch okButtonDisabled')
+            this.updateOkButton()
+        },
+    },
     methods:{
+        updateOkButton: function(){
+            console.log('in updateOkButton')
+            if (this.$refs.modal_add_party){
+                console.log('in if')
+                this.$refs.modal_add_party.okDisabled = this.okButtonDisabled
+            }
+        },
+        modalMounted: function(){
+            console.log('in modalMounted')
+            this.updateOkButton()
+        },
         initialiseSelectPerson: function(){
             let vm = this;
             $(vm.$refs.email_users).select2({
                 minimumInputLength: 2,
                 "theme": "bootstrap-5",
                 allowClear: true,
-                placeholder:"Select Person",
+                placeholder:"Type and select Person",
                 // dropdownParent: $('#modal_add_party'),
                 ajax: {
                     url: api_endpoints.users_api + '/',
@@ -149,7 +175,7 @@ export default {
                 minimumInputLength: 2,
                 "theme": "bootstrap-5",
                 allowClear: true,
-                placeholder:"Select Organisation",
+                placeholder:"Type and select Organisation",
                 ajax: {
                     url: api_endpoints.organisations + '/',
                     dataType: 'json',
@@ -195,6 +221,11 @@ export default {
             this.close()
         },
         cancel:function () {
+            console.log('in cancel')
+            this.selected_email_user = null
+            this.selected_organisation = null
+            $(this.$refs.email_users).empty()
+            $(this.$refs.organisations).empty()
             this.close()
         },
         close:function () {

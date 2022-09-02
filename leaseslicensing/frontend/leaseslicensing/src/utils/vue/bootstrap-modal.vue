@@ -20,7 +20,7 @@
                     <!--Footer-->
                     <div class="modal-footer">
                         <slot name="footer">
-                            <button id="okBtn" type="button" :class="okClass" @click="ok">{{okText}}</button>
+                            <button id="okBtn" type="button" :class="okClass" @click="ok" :disabled="okDisabled">{{okText}}</button>
                             <button type="button" :class="cancelClass" @click="cancel">{{cancelText}}</button>
                         </slot>
                     </div>
@@ -86,7 +86,8 @@
         },
         data () {
             return {
-                duration: null
+                duration: null,
+                okDisabled: false,
             };
         },
         computed: {
@@ -101,10 +102,14 @@
                 return this.$parent.isModalOpen;
             }
         },
-        created () {
+        created: function(){
             if (this.show) {
                 document.body.className += ' modal-open';
             }
+            this.$emit('created')
+        },
+        mounted: function(){
+            this.$emit('mounted')
         },
         beforeDestroy () {
             document.body.className = document.body.className.replace(/\s?modal-open/, '');
