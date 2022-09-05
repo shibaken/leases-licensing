@@ -2,7 +2,7 @@
     <div>
         <div v-if="is_internal" class="row">
             <div class="text-end mb-2">
-                <button type="button" class="btn btn-primary pull-right" @click="add_party_clicked"><i class="fa-solid fa-circle-plus"></i>Add Party</button>
+                <button type="button" class="btn btn-primary pull-right" @click="add_party_clicked"><i class="fa-solid fa-circle-plus"></i> Add Party</button>
             </div>
         </div>
 
@@ -20,8 +20,6 @@
 
         <AddPartyModal 
             ref="add_party" 
-            :recordSaleId="recordSaleId"
-            :key="recordSaleKey"
             @closeModal="closeModal"
             @refreshDatatable="refreshFromResponse"
             @partyToAdd="addParty"
@@ -42,7 +40,13 @@ export default {
     name: 'TableParties',
     props: {
         level: '',
-        competitive_process_parties: [],
+        competitive_process_parties: {
+            type: Array,
+            default: function(){
+                return []
+            }
+        },
+        competitive_process_id: '',
     },
     data() {
         let vm = this;
@@ -257,7 +261,6 @@ export default {
             console.log(vm.$refs.parties_datatable.vmDataTable)
 
             vm.$refs.parties_datatable.vmDataTable.on('click', 'td', function(e) {
-                console.log('in click')
                 let td_link = $(this)
                 if (!(td_link.hasClass(vm.td_expand_class_name) || td_link.hasClass(vm.td_collapse_class_name))){
                     // This row is not configured as expandable row (at the rowCallback)
@@ -303,7 +306,8 @@ export default {
                     })
                     let custom_row_app = createApp(comp, {
                         // props
-                        party_full_data: full_data
+                        party_full_data: full_data,
+                        competitive_process_id: vm.competitive_process_id,
                     })
                     custom_row_app.mount('#custom_row_' + full_data.id)
                     // -----------------------

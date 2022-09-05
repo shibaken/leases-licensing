@@ -258,13 +258,20 @@ class PartyDetail(models.Model):
         related_name="party_details"
     )
     detail = models.TextField(blank=True)
-    created_by = models.IntegerField(null=True, blank=True)  # EmailUserRO
+    created_by_id = models.IntegerField(null=True, blank=True)  # EmailUserRO
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     modified_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         app_label = "leaseslicensing"
         ordering = ['created_at']
+
+    @property
+    def created_by(self):
+        if self.created_by_id:
+            person = retrieve_email_user(self.created_by_id)
+            return person
+        return None
 
 
 def update_party_detail_doc_filename(instance, filename):
@@ -273,24 +280,6 @@ def update_party_detail_doc_filename(instance, filename):
         instance.party_detail.competitive_process_party.competitive_process.id,
         uuid.uuid4()
     )
-    # if instance.party_detail.competitive_process_party.is_person:
-    #     party_folder_name = 'person'
-    #     party_id = instance.party_detail.competitive_process_party.person
-    # elif instance.party_detail.competitive_process_party.is_organisation:
-    #     party_folder_name = 'organisation'
-    #     party_id = instance.party_detail.competitive_process_party.organisation.id
-    # else:
-    #     party_folder_name = 'unsure_party'
-    #     party_id = 'unsuer_id'
-        
-    # return "{}/competitive_process/{}/{}/{}/detail/{}/{}".format(
-        # settings.MEDIA_APP_DIR, 
-        # instance.party_detail.competitive_process_party.competitive_process.id,
-        # party_folder_name,
-        # party_id,
-        # instance.party_detail.id,
-        # filename,
-    # )
 
 
 class PartyDetailDocument(Document):

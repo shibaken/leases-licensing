@@ -163,4 +163,3 @@ class GetCompetitiveProcessStatusesDict(views.APIView):
     def get(self, request, format=None):
         data = [{"id": i[0], "text": i[1]} for i in CompetitiveProcess.STATUS_CHOICES]
         return Response(data)
-

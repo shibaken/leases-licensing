@@ -106,7 +106,6 @@ export default {
             return vm.errors;
         },
         okButtonDisabled: function(){
-            console.log('computed okButtonDisabled')
             let disabled = true
             if (this.selected_email_user || this.selected_organisation){
                 disabled = false
@@ -116,20 +115,16 @@ export default {
     },
     watch: {
         okButtonDisabled: function(){
-            console.log('watch okButtonDisabled')
             this.updateOkButton()
         },
     },
     methods:{
         updateOkButton: function(){
-            console.log('in updateOkButton')
             if (this.$refs.modal_add_party){
-                console.log('in if')
                 this.$refs.modal_add_party.okDisabled = this.okButtonDisabled
             }
         },
         modalMounted: function(){
-            console.log('in modalMounted')
             this.updateOkButton()
         },
         initialiseSelectPerson: function(){
@@ -160,8 +155,6 @@ export default {
                 },
             })
             .on("select2:select", function (e) {
-                // let data = e.params.data;
-                // console.log({data})
                 vm.selected_email_user = e.params.data;
             })
             .on("select2:unselect",function (e) {
@@ -221,7 +214,6 @@ export default {
             this.close()
         },
         cancel:function () {
-            console.log('in cancel')
             this.selected_email_user = null
             this.selected_organisation = null
             $(this.$refs.email_users).empty()
@@ -233,30 +225,6 @@ export default {
             this.errors = false;
             $('.has-error').removeClass('has-error');
             this.$emit('closeModal');
-        },
-        sendData: async function(){
-            console.log('in sendData')
-            try {
-                this.saving = true;
-                const url = `${api_endpoints.vesselownership}${this.recordSaleId}/record_sale/`;
-                const res = await this.$http.post(url, {
-                    // "sale_date": this.saleDate,
-                });
-                if (res.ok) {
-                    await swal(
-                        'Saved',
-                        'Your sale date has been saved',
-                        'success'
-                    );
-                }
-                this.close()
-                this.saving = false;
-                this.$emit('refreshDatatable');
-            } catch(error) {
-                this.errors = true;
-                this.saving = false;
-                this.errorString = helpers.apiVueResourceError(error);
-            }
         },
         addEventListeners:function () {
 

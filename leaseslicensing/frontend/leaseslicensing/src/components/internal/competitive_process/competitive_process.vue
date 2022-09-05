@@ -57,6 +57,7 @@
                             <TableParties 
                                 level=internal
                                 :competitive_process_parties="competitive_process.competitive_process_parties"
+                                :competitive_process_id="competitive_process.id"
                             />
                         </FormSection>
                     </div>
@@ -203,6 +204,9 @@ export default {
 
     },
     computed: {
+        isFinalised: function(){
+            return false
+        },
         related_items_ajax_url: function(){
             return '/api/competitive_process/' + this.competitive_process.id + '/get_related_items/'
         },

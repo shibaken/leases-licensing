@@ -21,6 +21,7 @@ class RegistrationOfInterestSerializer(serializers.ModelSerializer):
 
 
 class PartyDetailSerializer(serializers.ModelSerializer):
+    created_by = serializers.SerializerMethodField()
 
     class Meta:
         model = PartyDetail
@@ -29,7 +30,12 @@ class PartyDetailSerializer(serializers.ModelSerializer):
             'detail',
             'created_at',
             'modified_at',
+            'created_by',
         )
+
+    def get_created_by(self, obj):
+        serializer = EmailUserSerializer(obj.created_by)
+        return serializer.data
 
 
 class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
