@@ -216,6 +216,7 @@
             :applicant_email="applicant_email"
             :key="proposedApprovalKey"
             :proposedApprovalKey="proposedApprovalKey"
+            :proposedApprovalState="proposedApprovalState"
         />
         <ProposedDecline
             ref="proposed_decline"
@@ -340,6 +341,7 @@ export default {
             //additional_document_types: [],
             additionalDocumentTypesSelected: [],
             select2AppliedToAdditionalDocumentTypes: false,
+            proposedApprovalState: ""
         }
     },
     components: {
@@ -937,10 +939,10 @@ export default {
                     'error'
                 )
             } else {
+                this.proposedApprovalState = 'final_approval';
                 this.uuid++;
                 this.$nextTick(() => {
-                    this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? helpers.copyObject(this.proposal.proposed_issuance_approval) : {};
-                    this.$refs.proposed_approval.state = 'final_approval';
+                    //this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? helpers.copyObject(this.proposal.proposed_issuance_approval) : {};
                     //this.$refs.proposed_approval.isApprovalLevelDocument = this.isApprovalLevelDocument;
                     this.$refs.proposed_approval.isModalOpen = true;
                 });

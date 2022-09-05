@@ -299,6 +299,10 @@ export default {
             type: String,
             //default: ''
         },
+        proposedApprovalState: {
+            type: String,
+            //default: ''
+        },
         proposal: {
             type: Object,
             required: true,
@@ -319,7 +323,7 @@ export default {
             //
             approvalSubTypes: [],
             selectedApprovalSubType: {},
-            state: 'proposed_approval',
+            //state: 'proposed_approval',
             issuingApproval: false,
             validation_form: null,
             errors: false,
@@ -532,7 +536,7 @@ export default {
                     this.approval.approval_sub_type = this.selectedApprovalSubType ? this.selectedApprovalSubType.id : null;
                     this.approval.selected_document_types = this.selectedDocumentTypes;
                 }
-                if (this.state == 'proposed_approval'){
+                if (this.proposedApprovalState == 'proposed_approval'){
                     const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/proposed_approval'),{
                         body: JSON.stringify(this.approval),
                         method: 'POST',
@@ -546,7 +550,7 @@ export default {
                         this.issuingApproval = false;
                         this.errorString = await helpers.parseFetchError(response)
                     }
-                } else if (this.state == 'final_approval'){
+                } else if (this.proposedApprovalState == 'final_approval'){
                     const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/final_approval'),{ 
                         body: JSON.stringify(this.approval),
                         method: 'POST',

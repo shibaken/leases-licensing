@@ -12,6 +12,7 @@
                 :applicant_email="applicant_email"
                 :key="proposedApprovalKey"
                 :proposedApprovalKey="proposedApprovalKey"
+                :proposedApprovalState="proposedApprovalState"
             />
         </modal>
     </div>
@@ -56,6 +57,10 @@ export default {
             //default: ''
         },
         proposedApprovalKey: {
+            type: String,
+            //default: ''
+        },
+        proposedApprovalState: {
             type: String,
             //default: ''
         },
