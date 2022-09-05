@@ -8,7 +8,7 @@
                         <div class="form-group">
                             <div class="row modal-input-row">
                                 <div class="col-sm-3">
-                                    <label v-if="withApprover" class="control-label pull-left"  for="Name">Decision</label>
+                                    <label v-if="withApprover || readonly" class="control-label pull-left"  for="Name">Decision</label>
                                     <label v-else class="control-label pull-left"  for="Name">Proposed Decision</label>
                                 </div>
                                 <div class="form-check col-sm-5">
@@ -19,6 +19,7 @@
                                     id="approve_lease_licence" 
                                     value="approve_lease_licence" 
                                     v-model="selectedDecision"
+                                    :disabled="readonly"
                                     />
                                     <label class="form-check-label" for="approve_lease_licence" style="font-weight:normal">Invite applicant to apply for a lease or licence</label>
                                 </div>
@@ -30,6 +31,7 @@
                                     id="approve_competitive_process" 
                                     value="approve_competitive_process" 
                                     v-model="selectedDecision"
+                                    :disabled="readonly"
                                     />
                                     <label class="form-check-label" for="approve_competitive_process" style="font-weight:normal">Start Competitive process</label>
                                 </div>
@@ -39,7 +41,7 @@
                         <div class="form-group">
                             <div class="row modal-input-row">
                                 <div class="col-sm-3">
-                                    <label v-if="withApprover" class="control-label pull-left"  for="Name">Details</label>
+                                    <label v-if="withApprover || readonly" class="control-label pull-left"  for="Name">Details</label>
                                     <label v-else class="control-label pull-left"  for="Name">Proposed Details</label>
                                 </div>
                                 <div class="col-sm-9">
@@ -51,6 +53,7 @@
                                     :can_view_richtext_src=true
                                     :key="proposedApprovalKey"
                                     v-model="approval.details"
+                                    :readonly="readonly"
                                     />
 
                                 </div>
@@ -59,21 +62,28 @@
                         <div class="form-group">
                             <div class="row modal-input-row">
                                 <div class="col-sm-3">
-                                    <label v-if="withApprover" class="control-label pull-left"  for="Name">BCC email</label>
+                                    <label v-if="withApprover || readonly" class="control-label pull-left"  for="Name">BCC email</label>
                                     <label v-else class="control-label pull-left"  for="Name">Proposed BCC email</label>
                                 </div>
                                 <div class="col-sm-9">
-                                        <input type="text" class="form-control" name="approval_bcc" style="width:70%;" ref="bcc_email" v-model="approval.bcc_email">
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    name="approval_bcc" 
+                                    style="width:70%;" 
+                                    ref="bcc_email" 
+                                    v-model="approval.bcc_email"
+                                    :readonly="readonly"
+                                    >
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div v-if="!readonly" class="form-group">
                             <div class="row modal-input-row">
                                 <div class="col-sm-12">
                                     <label v-if="submitter_email && applicant_email" class="control-label pull-left"  for="Name">After approving this proposal, approval will be emailed to {{submitter_email}} and {{applicant_email}}.</label>
                                     <label v-else class="control-label pull-left"  for="Name">After approving this proposal, approval will be emailed to {{submitter_email}}.</label>
                                 </div>
-                                
                             </div>
                         </div>
                     </div>
@@ -85,11 +95,11 @@
                                 </div>
                                 <div class="col-sm-9">
                                     <select 
-                                        :disabled="withApprover"
+                                        :disabled="withApprover || readonly"
                                         ref="approvalType"
                                         class="form-control"
                                         v-model="selectedApprovalTypeId"
-                                        @change="updateSelectedApprovalType"
+                                        @change="handleApprovalTypeChangeEvent"
                                     >
                                         <option value="null"></option>
                                         <option v-for="atype in approvalTypes" :value="atype.id" :key="atype.name">{{atype.name}}</option>
@@ -105,6 +115,7 @@
                                         ref="approvalSubType"
                                         class="form-control"
                                         v-model="selectedApprovalSubType"
+                                        :disabled="readonly"
                                     >
                                         <option value="null"></option>
                                         <option v-for="atype in approvalSubTypes" :value="atype" :key="atype.name">{{atype.name}}</option>
@@ -120,7 +131,7 @@
                                 <div class="col-sm-9">
                                     <div class="input-group date" ref="start_date" style="width: 70%;">
                                         <input 
-                                        :disabled="withApprover"
+                                        :disabled="withApprover || readonly"
                                         type="date" 
                                         class="form-control" 
                                         name="start_date" 
@@ -135,17 +146,17 @@
                                 </div>
                             </div>
                             <div class="row" v-show="showstartDateError">
-                                <VueAlert  class="col-sm-12" type="danger"><strong>{{startDateErrorString}}</strong></VueAlert>
+                                <VueAlert class="col-sm-12" type="danger"><strong>{{startDateErrorString}}</strong></VueAlert>
                             </div>
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <label v-if="withApprover" class="control-label pull-left"  for="Name">Expiry</label>
+                                    <label v-if="withApprover || readonly" class="control-label pull-left"  for="Name">Expiry</label>
                                     <label v-else class="control-label pull-left"  for="Name">Expiry</label>
                                 </div>
                                 <div class="col-sm-9">
                                     <div class="input-group date" ref="due_date" style="width: 70%;margin-bottom: 1rem">
                                         <input 
-                                        :disabled="withApprover"
+                                        :disabled="withApprover || readonly"
                                         type="date" 
                                         class="form-control" 
                                         name="due_date" 
@@ -164,7 +175,7 @@
                             </div>
                             <div class="row modal-input-row">
                                 <div class="col-sm-3">
-                                    <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">Details</label>
+                                    <label v-if="withApprover" class="control-label pull-left"  for="Name">Details</label>
                                     <label v-else class="control-label pull-left"  for="Name">Details</label>
                                 </div>
                                 <div class="col-sm-9">
@@ -177,6 +188,7 @@
                                     :key="selectedApprovalTypeName"
                                     :placeholder_text="selectedApprovalTypeDetailsPlaceholder"
                                     v-model="approval.details"
+                                    :readonly="readonly"
                                     />
                                 </div>
                             </div>
@@ -192,22 +204,31 @@
                                         :isRepeatable="true"
                                         :documentActionUrl="proposedApprovalDocumentsUrl"
                                         :replace_button_by_text="true"
+                                        :readonly="readonly"
                                     />
                                 </div>
                             </div>
                             <div class="row modal-input-row">
                                 <div class="col-sm-3">
-                                    <label v-if="processing_status == 'With Approver'" class="control-label pull-left"  for="Name">CC email</label>
+                                    <label v-if="withApprover || readonly" class="control-label pull-left"  for="Name">CC email</label>
                                     <label v-else class="control-label pull-left"  for="Name">Proposed CC email</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" name="approval_cc" style="width:70%;" ref="cc_email" v-model="approval.cc_email">
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    name="approval_cc" 
+                                    style="width:70%;" 
+                                    ref="cc_email" 
+                                    v-model="approval.cc_email"
+                                    :disabled="readonly"
+                                    >
                                 </div>
                             </div>
                         </div>
                         <hr>
                         <div class="form-group" v-if="leaseLicence">
-                            <div class="row modal-input-row">
+                            <div v-if="!readonly" class="row modal-input-row">
                                 <div class="col-sm-12">
                                 Select zero or more documents that need to be attached as part of the approval of this application
                                 </div>
@@ -219,7 +240,7 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <FileField 
-                                            :readonly="withApprover"
+                                            :readonly="withApprover || readonly"
                                             :name="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
                                             :id="'lease_licence_approval_documents_' + docType.name + '_' + docType.id"
                                             :approval_type="selectedApprovalTypeId"
@@ -232,7 +253,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group" v-if="leaseLicence">
+                        <div class="form-group" v-if="leaseLicence && !readonly">
                             <div class="row modal-input-row">
                                 <div class="col-sm-4">
                                     <select 
@@ -286,6 +307,10 @@ export default {
         isApprovalLevelDocument: {
             type: Boolean,
             required: true
+        },
+        readonly: {
+            type: Boolean,
+            required: false
         },
         submitter_email: {
             type: String,
@@ -427,6 +452,7 @@ export default {
             this.updateSelectedApprovalType(id);
         },
         updateSelectedApprovalType(id) {
+            console.log(id);
             // clear existing doc arrays
             this.availableDocumentTypes = [];
             this.selectedDocumentTypes = [];

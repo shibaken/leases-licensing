@@ -2248,6 +2248,25 @@ class Proposal(DirtyFieldsMixin, models.Model):
                 'start_date' : details.get("start_date"),
                 'expiry_date' : details.get("expiry_date"),
             }
+            # Check mandatory docs
+            mandatory_doc_errors = []
+            from leaseslicensing.components.approvals.models import ApprovalType, ApprovalTypeDocumentTypeOnApprovalType
+            approval_type = details.get("approval_type")
+            for approval_type_document_type_on_approval_type in ApprovalTypeDocumentTypeOnApprovalType.objects.filter(
+                    approval_type_id=approval_type,
+                    mandatory=True
+                    ):
+                if not self.lease_licence_approval_documents.filter(
+                        approval_type=approval_type_document_type_on_approval_type.approval_type, 
+                        approval_type_document_type=approval_type_document_type_on_approval_type.approval_type_document_type,
+                        ):
+                    mandatory_doc_errors.append("Missing mandatory document/s: Approval Type {}, Document Type {}".format(
+                        approval_type_document_type_on_approval_type.approval_type,
+                        approval_type_document_type_on_approval_type.approval_type_document_type,
+                        )
+                    )
+            if mandatory_doc_errors:
+                raise serializers.ValidationError(mandatory_doc_errors)
         self.save()
 
     def proposed_approval(self, request, details):

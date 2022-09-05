@@ -907,6 +907,7 @@ export default {
             });
         },
         proposedApproval: function(){
+            this.proposedApprovalState = 'proposed_approval';
             this.uuid++;
             this.$nextTick(() => {
                 //this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? Object.assign({}, this.proposal.proposed_issuance_approval) : {};

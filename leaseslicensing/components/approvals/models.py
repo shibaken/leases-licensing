@@ -126,6 +126,7 @@ class ApprovalTypeDocumentTypeOnApprovalType(RevisionedMixin):
 
     class Meta:
         app_label = "leaseslicensing"
+        unique_together = ("approval_type", "approval_type_document_type")
 
 
 # class Approval(models.Model):
