@@ -147,7 +147,8 @@ urlpatterns = [
     ),
     url(r"^external/", views.ExternalView.as_view(), name="external"),
     url(r"^firsttime/$", views.first_time, name="first_time"),
-    url(r"^account/$", views.ExternalView.as_view(), name="manage-account"),
+    #url(r"^account/$", views.ExternalView.as_view(), name="manage-account"),
+    #url(r"^ledger-ui/accounts$", views.ExternalView.as_view(), name="manage-account"),
     url(r"^profiles/", views.ExternalView.as_view(), name="manage-profiles"),
     url(
         r"^help/(?P<application_type>[^/]+)/(?P<help_type>[^/]+)/$",

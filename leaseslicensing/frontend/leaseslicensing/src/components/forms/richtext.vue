@@ -7,9 +7,10 @@
             :editor="editor" 
             v-model="detailsText" 
             :config="editorConfig" 
-            :read-only="readonly" 
             :name="name" 
             :required="isRequired"
+            :disabled="readonly"
+            :read-only="readonly"
             />
         </div>
     </div>
