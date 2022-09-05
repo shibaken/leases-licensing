@@ -25,7 +25,7 @@
                         </template>
                         <template v-else>
                             <!-- This entry is the one added just now, and not saved into the database yet -->
-                            <div>(Username here) (Datetime here)</div>
+                            <div>{{ party_detail.temporary_data.accessing_user.full_name }} {{ formatDatetime(party_detail.temporary_data.created_at) }}</div>
                             <div>{{ party_detail.temporary_data.detail }}</div>
                             <template v-for="document in party_detail.temporary_data.documents">
                                 <div><a href="document.file">{{ document.name }}</a></div>
@@ -77,6 +77,7 @@ export default {
     props: {
         party_full_data: null,
         competitive_process_id: '',
+        accessing_user: null,
     },
     components: {
         FileField,
@@ -122,6 +123,8 @@ export default {
                     'detail': this.new_detail_text,
                     'temporary_document_collection_id': this.temporary_document_collection_id,
                     'documents': this.$refs.temp_document.documents,
+                    'accessing_user': this.accessing_user,
+                    'created_at': new Date(),
                 }
             })
             this.new_detail_text = ''

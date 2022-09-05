@@ -58,6 +58,7 @@
                                 level=internal
                                 :competitive_process_parties="competitive_process.competitive_process_parties"
                                 :competitive_process_id="competitive_process.id"
+                                :accessing_user="competitive_process.accessing_user"
                             />
                         </FormSection>
                     </div>

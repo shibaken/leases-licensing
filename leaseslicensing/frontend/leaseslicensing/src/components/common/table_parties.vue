@@ -47,6 +47,7 @@ export default {
             }
         },
         competitive_process_id: '',
+        accessing_user: null,
     },
     data() {
         let vm = this;
@@ -308,6 +309,7 @@ export default {
                         // props
                         party_full_data: full_data,
                         competitive_process_id: vm.competitive_process_id,
+                        accessing_user: vm.accessing_user,
                     })
                     custom_row_app.mount('#custom_row_' + full_data.id)
                     // -----------------------
