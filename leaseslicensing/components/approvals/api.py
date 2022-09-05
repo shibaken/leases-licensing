@@ -94,10 +94,12 @@ class GetApprovalTypesDict(views.APIView):
                 "approval_type_document_types":
                 [
                     {
-                        "id": doc_type.id,
-                        "name": doc_type.name
+                        "id": doc_type_link.approval_type_document_type.id,
+                        "name": doc_type_link.approval_type_document_type.name,
+                        "mandatory": doc_type_link.mandatory,
                     }
-                    for doc_type in t.approval_type_document_types.all()
+                    #for doc_type in t.approvaltypedocumenttypes.all()
+                    for doc_type_link in t.approvaltypedocumenttypeonapprovaltype_set.all()
                 ]
             } for t in ApprovalType.objects.all()]
             cache.set(

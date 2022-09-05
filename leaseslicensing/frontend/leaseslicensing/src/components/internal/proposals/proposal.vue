@@ -48,7 +48,6 @@
                 <template v-if="display_approval_screen">
                     <ApprovalScreen
                         :proposal="proposal"
-                        @refreshFromResponse="refreshFromResponse"
                     />
                 </template>
 
@@ -215,21 +214,19 @@
             :isApprovalLevelDocument="isApprovalLevelDocument"
             :submitter_email="submitter_email"
             :applicant_email="applicant_email"
-            @refreshFromResponse="refreshFromResponse"
             :key="proposedApprovalKey"
             :proposedApprovalKey="proposedApprovalKey"
+            :proposedApprovalState="proposedApprovalState"
         />
         <ProposedDecline
             ref="proposed_decline"
             :processing_status="proposal.processing_status"
             :proposal="proposal"
-            @refreshFromResponse="refreshFromResponse"
             :proposedApprovalKey="proposedApprovalKey"
         />
         <AmendmentRequest
             ref="amendment_request"
             :proposal="proposal"
-            @refreshFromResponse="refreshFromResponse"
         />
         <!--
         <input type="hidden" name="csrfmiddlewaretoken" :value="csrf_token"/>
@@ -344,6 +341,7 @@ export default {
             //additional_document_types: [],
             additionalDocumentTypesSelected: [],
             select2AppliedToAdditionalDocumentTypes: false,
+            proposedApprovalState: ""
         }
     },
     components: {
@@ -909,6 +907,7 @@ export default {
             });
         },
         proposedApproval: function(){
+            this.proposedApprovalState = 'proposed_approval';
             this.uuid++;
             this.$nextTick(() => {
                 //this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? Object.assign({}, this.proposal.proposed_issuance_approval) : {};
@@ -927,7 +926,7 @@ export default {
                     fetch(helpers.add_endpoint_json(api_endpoints.proposal,vm.proposal.id+'/approval_level_comment'), { body: JSON.stringify(data), method: 'POST' }).then(
                         res => {
                             vm.proposal = res.body;
-                            vm.refreshFromResponse(res);
+                            //vm.refreshFromResponse(res);
                         }, err => {
                             console.log(err);
                         }
@@ -941,10 +940,10 @@ export default {
                     'error'
                 )
             } else {
+                this.proposedApprovalState = 'final_approval';
                 this.uuid++;
                 this.$nextTick(() => {
-                    this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? helpers.copyObject(this.proposal.proposed_issuance_approval) : {};
-                    this.$refs.proposed_approval.state = 'final_approval';
+                    //this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? helpers.copyObject(this.proposal.proposed_issuance_approval) : {};
                     //this.$refs.proposed_approval.isApprovalLevelDocument = this.isApprovalLevelDocument;
                     this.$refs.proposed_approval.isModalOpen = true;
                 });
@@ -1022,6 +1021,7 @@ export default {
                 )
             }
         },
+        /*
         refreshFromResponse:function(response){
             this.proposal = helpers.copyObject(response.body);
             this.$nextTick(() => {
@@ -1029,6 +1029,7 @@ export default {
                 this.updateAssignedOfficerSelect();
             });
         },
+        */
         assignTo: async function(){
             let vm = this
             console.log('in assignTo')
