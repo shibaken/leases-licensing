@@ -33,9 +33,9 @@
                 </div>
             </div>
             <div slot="footer">
-                <button type="button" v-if="saving" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Saving</button>
-                <button type="button" v-else class="btn btn-default" @click="ok">Save</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" v-if="saving" disabled class="btn btn-primary" @click="ok"><i class="fa fa-spinner fa-spin"></i> Saving</button>
+                <button type="button" v-else class="btn btn-primary" @click="ok">Save</button>
+                <button type="button" class="btn btn-primary" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>

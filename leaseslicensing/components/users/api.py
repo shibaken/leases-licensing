@@ -17,6 +17,7 @@ from ledger_api_client.ledger_models import (
 
 # from leaseslicensing.components.main.utils import retrieve_department_users
 from leaseslicensing.components.main.decorators import basic_exception_handler
+from leaseslicensing.components.main.serializers import EmailUserSerializer
 from leaseslicensing.components.users.serializers import (
     UserSerializer,
     UserFilterSerializer,
@@ -87,15 +88,17 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = EmailUser.objects.all()
     serializer_class = UserSerializer
 
+    @basic_exception_handler
+    def list(self, request, *args, **kwargs):
+        search_term = request.GET.get('term', '')
+        queryset = self.queryset.filter(Q(first_name__icontains=search_term) | Q(last_name__icontains=search_term))[:10]
+        data_transform = EmailUserSerializer(queryset, many=True)
+        return Response(data_transform.data)
+
     @list_route(methods=['GET',], detail=False)
     @basic_exception_handler
     def get_department_users(self, request, *args, **kwargs):
         search_term = request.GET.get('term', '')
-        #serializer = UserSerializer(
-        #        staff,
-        #        many=True
-        #        )
-        #return Response(serializer.data)
         data = EmailUser.objects.filter(is_staff=True). \
             filter(Q(first_name__icontains=search_term) | Q(last_name__icontains=search_term)). \
             values('email', 'first_name', 'last_name')[:10]
