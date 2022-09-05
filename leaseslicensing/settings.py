@@ -270,3 +270,12 @@ GROUP_NAME_APPROVER = "ProposalApproverGroup"
 
 template_title = "Leases and Licensing"
 template_group = "parkswildlife"
+
+LEDGER_TEMPLATE = 'bootstrap5'
+#LEDGER_UI_ACCOUNTS_MANAGEMENT = [
+#    {'first_name': {'options': {'view': True, 'edit': True}}},
+#    {'last_name': {'options': {'view': True, 'edit': True}}},
+#    {'residential_address': {'options': {'view': True, 'edit': True}}},
+#    {'phone_number': {'options': {'view': True, 'edit': True}}},
+#    {'mobile_number': {'options': {'view': True, 'edit': True}}},
+#]
