@@ -521,18 +521,19 @@ export default {
             this.errors = false;
             this.issuingApproval = true;
             //let approval = JSON.parse(JSON.stringify(vm.approval));
-            if (this.registrationOfInterest) {
-                this.approval.details = this.$refs.registration_of_interest_details.detailsText;
-                this.approval.decision = this.selectedDecision;
-            } else if (this.leaseLicence) {
-                this.approval.details = this.$refs.lease_licence_details.detailsText;
-                //this.approval.approval_type = this.selectedApprovalType ? this.selectedApprovalType.id : null;
-                this.approval.approval_type = this.selectedApprovalTypeId;
-                this.approval.approval_sub_type = this.selectedApprovalSubType ? this.selectedApprovalSubType.id : null;
-            }
             this.$nextTick(async () => {
+                if (this.registrationOfInterest) {
+                    this.approval.details = this.$refs.registration_of_interest_details.detailsText;
+                    this.approval.decision = this.selectedDecision;
+                } else if (this.leaseLicence) {
+                    this.approval.details = this.$refs.lease_licence_details.detailsText;
+                    //this.approval.approval_type = this.selectedApprovalType ? this.selectedApprovalType.id : null;
+                    this.approval.approval_type = this.selectedApprovalTypeId;
+                    this.approval.approval_sub_type = this.selectedApprovalSubType ? this.selectedApprovalSubType.id : null;
+                    this.approval.selected_document_types = this.selectedDocumentTypes;
+                }
                 if (this.state == 'proposed_approval'){
-                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/proposed_approval'),{ 
+                    const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/proposed_approval'),{
                         body: JSON.stringify(this.approval),
                         method: 'POST',
                     })
@@ -585,6 +586,10 @@ export default {
                     }
                 }
                 */
+            }
+            // Selected Document Types
+            if (this.approval.selected_document_types) {
+                this.selectedDocumentTypes = this.approval.selected_document_types;
             }
             // Approval Sub Type
             if (this.approval.approval_sub_type) {

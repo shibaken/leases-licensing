@@ -2241,6 +2241,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
             self.proposed_issuance_approval = {
                 "approval_type": details.get("approval_type"),
                 "approval_sub_type": details.get("approval_sub_type"),
+                "selected_document_types": details.get("selected_document_types"),
                 #"approval_type_document_type": details.get("approval_type_document_type"),
                 "cc_email": details.get("cc_email"),
                 "details": details.get("details"),
