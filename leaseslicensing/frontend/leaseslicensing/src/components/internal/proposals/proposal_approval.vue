@@ -2,7 +2,7 @@
     <div>
         <div v-if="displayApprovedMsg" class="col-md-12 alert alert-success">
             <!--p>The {{ applicationTypeNameDisplay }} was approved to proceed to a full application on date by {{ proposal.assigned_approver.email }}</p-->
-            <p>The {{ applicationTypeNameDisplay }} was approved to proceed to a full application on {{ approvalIssueDate }} by { insert approver name here }</p>
+            <p>The {{ applicationTypeNameDisplay }} was approved to proceed to a {{ fullApplicationText }} on {{ approvalIssueDate }} by { insert approver name here }</p>
             <!--p>Expiry date: {{ approvalExpiryDate }}</p>
             <p>Permit: <a target="_blank" :href="proposal.permit">approval.pdf</a></p-->
         </div>
@@ -10,7 +10,7 @@
             <p>The proposal was declined. The decision was emailed to {{ proposal.submitter.email }}</p>
         </div>
 
-        <div class="card card-default">
+        <!--div class="card card-default">
             <div class="card-header">
                 <h3 v-if="!isFinalised" class="card-title">Proposed Decision
                     <a class="panelClicker" :href="'#'+proposedDecision" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="proposedDecision">
@@ -45,7 +45,24 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div-->
+        <FormSection :formCollapse="false" label="Decision" Index="proposal_decision">
+            <ProposedIssuanceForm
+                v-if="proposal"
+                :proposal="proposal"
+                ref="proposed_approval_form"
+                :processing_status="proposal.processing_status"
+                :proposal_id="proposal.id"
+                :proposal_type='proposal.proposal_type.code'
+                :submitter_email="submitter_email"
+                :applicant_email="applicant_email"
+                :key="proposedApprovalKey"
+                :proposedApprovalKey="proposedApprovalKey"
+                :proposedApprovalState="proposedApprovalState"
+                :readonly=true
+            />
+        </FormSection>
+
     </div>
 </template>
 <script>
@@ -54,12 +71,9 @@ import {
     helpers
 }
 from '@/utils/hooks'
-import datatable from '@vue-utils/datatable.vue'
-import RequirementDetail from './proposal_add_requirement.vue'
-//import ComponentSiteSelection from '@/components/common/apiary/component_site_selection.vue'
-import FormSection from "@/components/forms/section_toggle.vue"
-import uuid from 'uuid'
 import { constants } from '@/utils/hooks'
+import ProposedIssuanceForm from '@/components/internal/proposals/proposed_issuance_form.vue'
+import FormSection from "@/components/forms/section_toggle.vue"
 
 export default {
     name: 'InternalProposalApproval',
@@ -78,13 +92,20 @@ export default {
     watch:{
     },
     components:{
+        ProposedIssuanceForm,
         FormSection,
-        //ComponentSiteSelection,
     },
     computed:{
         approvalIssueDate: function() {
             if (this.proposal) {
                 return this.proposal.approval_issue_date;
+            }
+        },
+        fullApplicationText: function() {
+            if (this.proposal.proposed_issuance_approval.decision === 'approve_lease_licence') {
+                return 'full application';
+            } else if (this.proposal.proposed_issuance_approval.decision === 'approve_competitive_process') {
+                return 'Competitive Process';
             }
         },
         applicationTypeNameDisplay: function() {
