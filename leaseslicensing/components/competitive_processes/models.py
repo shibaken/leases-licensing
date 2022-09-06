@@ -250,7 +250,7 @@ class CompetitiveProcessParty(models.Model):
 
 
 class PartyDetail(models.Model):
-    competitive_processes_party = models.ForeignKey(
+    competitive_process_party = models.ForeignKey(
         CompetitiveProcessParty, 
         blank=True,
         null=True,
