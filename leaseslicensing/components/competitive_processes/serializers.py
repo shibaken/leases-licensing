@@ -31,7 +31,14 @@ class PartyDetailSerializer(serializers.ModelSerializer):
             'created_at',
             'modified_at',
             'created_by',
+            'created_by_id',
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+            },
+        }
 
     def get_created_by(self, obj):
         serializer = EmailUserSerializer(obj.created_by)
@@ -51,12 +58,19 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
             'id',
             'is_person',
             'is_organisation',
+            'person_id',
             'person',
             'organisation',
             'invited_at',
             'removed_at',
             'party_details',
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+            },
+        }
 
     def get_person(self, obj):
         if obj.is_person:
@@ -69,6 +83,36 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
             serializer = OrganisationSerializer(obj.organisation)
             return serializer.data
         return None
+
+    def create(self, validated_data):
+        id = validated_data.pop('id', None)  # Remove id not to update the object with id: 0
+        party_details = validated_data.pop('party_details', None)
+        is_person = validated_data.pop('is_person', None)
+        is_organisation = validated_data.pop('is_organisation', None)
+
+        competitive_process_party = CompetitiveProcessParty.objects.create(**validated_data)
+        return competitive_process_party
+
+    def update(self, instance, validated_data):
+        instance.invited_at = validated_data.get('invited_at', None)
+        instance.removed_at = validated_data.get('removed_at', None)
+        instance.save()
+
+        party_details = validated_data.get('party_details', None)
+        for party_detail in party_details:
+            if party_detail['id']:
+                # We don't update detail once saved
+                pass
+            else:
+                # New competitive_process_party
+                id = party_detail.pop('id', None)  # Otherwise update the object with this id, not creating new
+                serializer = PartyDetailSerializer(data=party_detail)
+                serializer.is_valid(raise_exception=True)
+                new_detail = serializer.save()
+                new_detail.competitive_process_party = instance
+                new_detail.save()
+
+        return instance
 
 
 class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
@@ -163,7 +207,7 @@ class ListCompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
 
 class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
     accessing_user = serializers.SerializerMethodField()
-    competitive_process_parties = CompetitiveProcessPartySerializer(many=True, read_only=True)
+    competitive_process_parties = CompetitiveProcessPartySerializer(many=True,)
 
     class Meta:
         model = CompetitiveProcess
@@ -188,6 +232,28 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
         user = self.context.get("request").user
         serializer = UserSerializerSimple(user)
         return serializer.data
+
+    def update(self, instance, validated_data):
+        # competitive_process
+
+        # competitive_process_parties
+        competitive_process_parties_data = validated_data.pop('competitive_process_parties')
+        for competitive_process_party_data in competitive_process_parties_data:
+            if competitive_process_party_data['id']:
+                # This competitive_process_party exists
+                competitive_process_party_instance = CompetitiveProcessParty.objects.get(id=int(competitive_process_party_data['id']))
+                serializer = CompetitiveProcessPartySerializer(competitive_process_party_instance, competitive_process_party_data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            else:
+                # New competitive_process_party
+                serializer = CompetitiveProcessPartySerializer(data=competitive_process_party_data)
+                serializer.is_valid(raise_exception=True)
+                new_party = serializer.save()
+                new_party.competitive_process = instance
+                new_party.save()
+
+        return instance
 
 
 class CompetitiveProcessLogEntrySerializer(CommunicationLogEntrySerializer):

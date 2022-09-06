@@ -86,8 +86,14 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
 
     @basic_exception_handler
     def update(self, request, *args, **kwargs):
-        competitive_process = self.get_object()
-        serializer = self.get_serializer(competitive_process, data=request.data['competitive_process'])
+        instance = self.get_object()
+        # save_proponent_data(instance, request.data['competitive_process'], self)
+        # formatted_data = format_data(request.data['competitive_process'])
+        # serializer = self.get_serializer(instance, data=formatted_data)
+        # serializer.is_valid(raise_exception=True)
+        # temp = serializer.save()
+
+        serializer = self.get_serializer(instance, data=request.data['competitive_process'])
         serializer.is_valid(raise_exception=True)
         temp = serializer.save()
 

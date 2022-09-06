@@ -12,8 +12,8 @@
         <tr>
             <th>Details</th>
             <td>
-                <div class="details_box p-2">
-                    <div v-for="(party_detail, index) in party_full_data.party_details" :key="party_detail.id">
+                <div v-if="party_full_data.party_details.length > 0" class="details_box p-2">
+                    <template v-for="(party_detail, index) in party_full_data.party_details" :key="party_detail.id">
                         <template v-if="index!=0">
                             <hr class="m-1">
                         </template>
@@ -25,13 +25,13 @@
                         </template>
                         <template v-else>
                             <!-- This entry is the one added just now, and not saved into the database yet -->
-                            <div>{{ party_detail.temporary_data.accessing_user.full_name }} {{ formatDatetime(party_detail.temporary_data.created_at) }}</div>
-                            <div>{{ party_detail.temporary_data.detail }}</div>
-                            <template v-for="document in party_detail.temporary_data.documents">
+                            <div>{{ party_detail.accessing_user.full_name }} {{ formatDatetime(party_detail.created_at) }}</div>
+                            <div>{{ party_detail.detail }}</div>
+                            <template v-for="document in party_detail.documents">
                                 <div><a href="document.file">{{ document.name }}</a></div>
                             </template>
                         </template>
-                    </div>
+                    </template>
                 </div>
                 <div class="new_detail_div mt-2 p-2">
                     <table class="party_detail_table">
@@ -60,7 +60,6 @@
                             <th></th>
                             <td class="text-end"><button class="btn btn-primary" @click="addDetailClicked"><i class="fa-solid fa-circle-plus"></i> Add</button></td>
                         </tr>
-                        
                     </table>
                 </div>
             </td>
@@ -118,14 +117,22 @@ export default {
             return moment(dt).format(this.datetimeFormat);
         },
         addDetailClicked: function(){
+            let now = new Date()
             this.party_full_data.party_details.push({
-                'temporary_data': {
-                    'detail': this.new_detail_text,
-                    'temporary_document_collection_id': this.temporary_document_collection_id,
-                    'documents': this.$refs.temp_document.documents,
-                    'accessing_user': this.accessing_user,
-                    'created_at': new Date(),
-                }
+                // 'temporary_data': {
+                //     'detail': this.new_detail_text,
+                //     'temporary_document_collection_id': this.temporary_document_collection_id,
+                //     'documents': this.$refs.temp_document.documents,
+                //     'accessing_user': this.accessing_user,
+                //     'created_at': now,
+                // },
+                'id': 0,
+                'created_at': now,
+                'detail': this.new_detail_text,
+                'temporary_document_collection_id': this.temporary_document_collection_id,
+                'created_by_id': this.accessing_user.id,
+                'accessing_user': this.accessing_user,
+                'documents': this.$refs.temp_document.documents,
             })
             this.new_detail_text = ''
         },
@@ -151,8 +158,9 @@ export default {
     border-radius: 0.25em;
 }
 .details_box {
-    border: 1px solid lightgray;
+    /* border: 1px solid lightgray; */
     border-radius: 0.25em;
+    background-color: white;
 }
 .detail_text {
     width: 100%;

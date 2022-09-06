@@ -238,6 +238,21 @@ export default {
             await this.save()
             this.$router.push({ name: 'internal-dashboard' })
         },
+        // omitKeys: function(obj, keys) {
+        //     let vm = this
+        //     let dup = {}
+        //     for (var key in obj) {
+        //         console.log({key})
+        //         if (typeof obj[key] == "object" && obj[key] !== null){
+        //             vm.omitKeys(obj[key], keys);
+        //         } else {
+        //             if (keys.indexOf(key) == -1) {
+        //                 dup[key] = obj[key];
+        //             }
+        //         }
+        //     }
+        //     return dup
+        // },
         save: async function() {
             let vm = this;
 
@@ -248,8 +263,19 @@ export default {
                     // Append polygon data
                     payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
                 }
+
+                let custom_row_apps = {} 
+                for (let a_party of vm.competitive_process.competitive_process_parties){
+                    if (Object.hasOwn(a_party, 'custom_row_app')){
+                        // custom_row_apps[a_party.id] = structuredClone(a_party.custom_row_app)
+                        // Object.assign(custom_row_apps[a_party.id], a_party.custom_row_app)
+                        custom_row_apps[a_party.id] = JSON.parse(JSON.stringify(a_party.custom_row_app))
+                        a_party.custom_row_app = undefined
+                    }
+                }
+                console.log({custom_row_apps})
                 
-                const res = await fetch(vm.competitive_process_form_url, { body: JSON.stringify(payload), method: 'PUT' })
+                const res = await fetch(vm.competitive_process_form_url, {body: JSON.stringify(payload), method: 'PUT'})
 
                 if(res.ok){
                     await new swal({
