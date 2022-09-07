@@ -1,11 +1,15 @@
+from django.core.files.storage import default_storage
 from rest_framework import serializers
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess, CompetitiveProcessLogEntry, \
-    CompetitiveProcessParty, CompetitiveProcessUserAction, PartyDetail
+    CompetitiveProcessParty, CompetitiveProcessUserAction, PartyDetail, PartyDetailDocument, \
+    update_party_detail_doc_filename
 from leaseslicensing.ledger_api_utils import retrieve_email_user
+from ..main.models import TemporaryDocumentCollection
 from ..organisations.serializers import OrganisationSerializer
 from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer, EmailUserSerializer
 from leaseslicensing.components.users.serializers import UserSerializerSimple
+from ... import settings
 
 
 class RegistrationOfInterestSerializer(serializers.ModelSerializer):
@@ -22,6 +26,8 @@ class RegistrationOfInterestSerializer(serializers.ModelSerializer):
 
 class PartyDetailSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
+    temporary_document_collection_id = serializers.IntegerField(default=0)
+    party_detail_documents = serializers.SerializerMethodField()
 
     class Meta:
         model = PartyDetail
@@ -32,17 +38,69 @@ class PartyDetailSerializer(serializers.ModelSerializer):
             'modified_at',
             'created_by',
             'created_by_id',
+            'temporary_document_collection_id',
+            'party_detail_documents',
         )
         extra_kwargs = {
             'id': {
                 'read_only': False,
                 'required': False,
             },
+            'party_detail_documents': {
+                'read_only': True,
+                'required': False,
+            }
         }
+
+    def get_party_detail_documents(self, obj):
+        test = obj.party_detail_documents.first()
+        ret_array = []
+        for item in obj.party_detail_documents.all():
+            ret_array.append({'name': item.name, 'file': item._file.url})
+        return ret_array
 
     def get_created_by(self, obj):
         serializer = EmailUserSerializer(obj.created_by)
         return serializer.data
+
+    def update(self, instance, validated_data):
+        # For now, we don't update this record once saved
+        pass
+
+    def create(self, validated_data):
+        temporary_document_collection_id = validated_data.pop('temporary_document_collection_id', 0)
+        id = validated_data.pop('id', 0)  # When create, we don't want to specify id.  That's why the 'id' is removed here.
+
+        instance = PartyDetail.objects.create(**validated_data)
+
+        if temporary_document_collection_id:
+            if TemporaryDocumentCollection.objects.filter(id=temporary_document_collection_id):
+                temp_doc_collection = TemporaryDocumentCollection.objects.filter(id=temporary_document_collection_id)[0]
+                if temp_doc_collection:
+                    for doc in temp_doc_collection.documents.all():
+                        self.save_vessel_registration_document_obj(instance, doc)
+                    temp_doc_collection.delete()
+                    # instance.temporary_document_collection_id = None
+                    # instance.save()
+
+        return instance
+
+    def save_vessel_registration_document_obj(self, instance, temp_document):
+        new_document = instance.party_detail_documents.get_or_create(
+            # input_name="party_detail_document",
+            name=temp_document.name
+        )[0]
+        # new_document = PartyDetailDocument.objects.create(party_detail=instance)
+        save_path = '{}/competitive_process/{}/party_detail/{}/{}'.format(
+            settings.MEDIA_APP_DIR,
+            self.context.get('competitive_process').id,
+            self.context.get('competitive_process_party').id,
+            temp_document.name,
+        )
+
+        path = default_storage.save(save_path, temp_document._file)
+        new_document._file = path
+        new_document.save()
 
 
 class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
@@ -86,12 +144,14 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         id = validated_data.pop('id', None)  # Remove id not to update the object with id: 0
-        party_details = validated_data.pop('party_details', None)
         is_person = validated_data.pop('is_person', None)
         is_organisation = validated_data.pop('is_organisation', None)
+        party_details = validated_data.pop('party_details', None)
 
-        competitive_process_party = CompetitiveProcessParty.objects.create(**validated_data)
-        return competitive_process_party
+        instance = CompetitiveProcessParty.objects.create(**validated_data)
+        self.handle_party_details(instance, party_details)
+
+        return instance
 
     def update(self, instance, validated_data):
         instance.invited_at = validated_data.get('invited_at', None)
@@ -99,6 +159,12 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
         instance.save()
 
         party_details = validated_data.get('party_details', None)
+        self.handle_party_details(instance, party_details)
+
+        return instance
+
+    def handle_party_details(self, instance, party_details):
+        self.context['competitive_process_party'] = instance
         for party_detail in party_details:
             if party_detail['id']:
                 # We don't update detail once saved
@@ -106,13 +172,11 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
             else:
                 # New competitive_process_party
                 id = party_detail.pop('id', None)  # Otherwise update the object with this id, not creating new
-                serializer = PartyDetailSerializer(data=party_detail)
+                serializer = PartyDetailSerializer(data=party_detail, context=self.context)
                 serializer.is_valid(raise_exception=True)
                 new_detail = serializer.save()
                 new_detail.competitive_process_party = instance
                 new_detail.save()
-
-        return instance
 
 
 class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
@@ -242,12 +306,12 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
             if competitive_process_party_data['id']:
                 # This competitive_process_party exists
                 competitive_process_party_instance = CompetitiveProcessParty.objects.get(id=int(competitive_process_party_data['id']))
-                serializer = CompetitiveProcessPartySerializer(competitive_process_party_instance, competitive_process_party_data)
+                serializer = CompetitiveProcessPartySerializer(competitive_process_party_instance, competitive_process_party_data, context={'competitive_process': instance})
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
             else:
                 # New competitive_process_party
-                serializer = CompetitiveProcessPartySerializer(data=competitive_process_party_data)
+                serializer = CompetitiveProcessPartySerializer(data=competitive_process_party_data, context={'competitive_process': instance})
                 serializer.is_valid(raise_exception=True)
                 new_party = serializer.save()
                 new_party.competitive_process = instance

@@ -17,19 +17,20 @@
                         <template v-if="index!=0">
                             <hr class="m-1">
                         </template>
+
                         <template v-if="party_detail.id">
                             <!-- This is an entry already saved in the database -->
                             <div>{{ party_detail.created_by.fullname }}, {{ formatDatetime(party_detail.created_at) }}</div>
-                            <div>{{ party_detail.detail }}</div>
-                            <div>(Files here)</div> 
                         </template>
                         <template v-else>
                             <!-- This entry is the one added just now, and not saved into the database yet -->
                             <div>{{ party_detail.accessing_user.full_name }} {{ formatDatetime(party_detail.created_at) }}</div>
-                            <div>{{ party_detail.detail }}</div>
-                            <template v-for="document in party_detail.documents">
-                                <div><a href="document.file">{{ document.name }}</a></div>
-                            </template>
+                        </template>
+
+                        <div>{{ party_detail.detail }}</div>
+
+                        <template v-for="document in party_detail.party_detail_documents">
+                            <div><a :href="document.file" target="_blank"><i :class="getFileIconClass(document.file)"></i> {{ document.name }}</a></div>
                         </template>
                     </template>
                 </div>
@@ -53,7 +54,8 @@
                                     :replace_button_by_text="true"
                                     :temporaryDocumentCollectionId="temporary_document_collection_id"
                                     @update-temp-doc-coll-id="addToTemporaryDocumentCollectionList"
-                                />
+                                    :key="filefield_id"
+                                ></FileField>
                             </td>
                         </tr>
                         <tr>
@@ -70,6 +72,7 @@
 <script>
 import { api_endpoints, helpers } from '@/utils/hooks'
 import FileField from '@/components/forms/filefield_immediate.vue'
+import { v4 as uuid } from 'uuid';
 
 export default {
     name: 'CustomRow',
@@ -87,6 +90,7 @@ export default {
             temporary_document_collection_id: null,
             new_detail_text: '',
             datetimeFormat: 'DD/MM/YYYY HH:mm:ss',
+            filefield_id: uuid(),
         }
     },
     created: function(){
@@ -113,28 +117,44 @@ export default {
         },
     },
     methods: {
+        getFileIconClass: function(filepath){
+            let ext = filepath.split('.').pop().toLowerCase()
+            let classname = ['bi', 'fa-lg',]
+            if (['png', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif',].includes(ext)){
+                classname.push('bi-file-image-fill')
+            } else if (['pdf',].includes(ext)){
+                classname.push('bi-file-pdf-fill')
+            } else if (['doc', 'docx',].includes(ext)){
+                classname.push('bi-file-word-fill')
+            } else if (['xls', 'xlsx',].includes(ext)){
+                classname.push('bi-file-excel-fill')
+            } else if (['txt', 'text',].includes(ext)){
+                classname.push('bi-file-text-fill')
+            } else if (['rtf',].includes(ext)){
+                classname.push('bi-file-richtext-fill')
+            } else if (['mp3', 'mp4'].includes(ext)){
+                classname.push('bi-file-play-fill')
+            } else {
+                classname.push('bi-file_fill')
+            }
+            return classname.join(' ')
+        },
         formatDatetime: function(dt){
             return moment(dt).format(this.datetimeFormat);
         },
         addDetailClicked: function(){
             let now = new Date()
             this.party_full_data.party_details.push({
-                // 'temporary_data': {
-                //     'detail': this.new_detail_text,
-                //     'temporary_document_collection_id': this.temporary_document_collection_id,
-                //     'documents': this.$refs.temp_document.documents,
-                //     'accessing_user': this.accessing_user,
-                //     'created_at': now,
-                // },
-                'id': 0,
+                'id': 0,  // Should be 0, which is used to determine this as a new entry at the backend
                 'created_at': now,
                 'detail': this.new_detail_text,
                 'temporary_document_collection_id': this.temporary_document_collection_id,
                 'created_by_id': this.accessing_user.id,
                 'accessing_user': this.accessing_user,
-                'documents': this.$refs.temp_document.documents,
+                'party_detail_documents': this.$refs.temp_document.documents,
             })
             this.new_detail_text = ''
+            this.filefield_id = uuid()
         },
         addToTemporaryDocumentCollectionList(temp_doc_id) {
             console.log({temp_doc_id})
@@ -156,11 +176,12 @@ export default {
 .new_detail_div {
     border: 1px solid lightgray;
     border-radius: 0.25em;
+    background-color: white;
 }
 .details_box {
     /* border: 1px solid lightgray; */
     border-radius: 0.25em;
-    background-color: white;
+    background-color: whitesmoke;
 }
 .detail_text {
     width: 100%;

@@ -34,7 +34,8 @@ class CommunicationLogEntrySerializer(serializers.ModelSerializer):
             "subject" "text",
             "created",
             "staff",
-            "proposal" "documents",
+            "proposal",
+            "documents",
         )
 
     def get_documents(self, obj):
