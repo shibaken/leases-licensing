@@ -2870,7 +2870,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     elif a_field.one_to_many:  # reverse foreign key
                         field_objects = a_field.related_model.objects.filter(**{a_field.remote_field.name: self})
                     elif a_field.one_to_one:
-                        field_objects = [getattr(self, a_field.name),]
+                        if hasattr(self, a_field.name):
+                            field_objects = [getattr(self, a_field.name),]
                 for field_object in field_objects:
                     if field_object:
                         related_item = field_object.as_related_item
