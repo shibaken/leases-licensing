@@ -279,3 +279,19 @@ LEDGER_TEMPLATE = 'bootstrap5'
 #    {'phone_number': {'options': {'view': True, 'edit': True}}},
 #    {'mobile_number': {'options': {'view': True, 'edit': True}}},
 #]
+
+GROUP_REGISTRATION_OF_INTEREST_ASSESSOR = "registration_of_interest_assessor"
+GROUP_REGISTRATION_OF_INTEREST_APPROVER = "registration_of_interest_approver"
+GROUP_LEASE_LICENCE_ASSESSOR = "lease_licence_assessor"
+GROUP_LEASE_LICENCE_APPROVER = "lease_licence_approver"
+GROUP_COMPETITIVE_PROCESS_EDITOR = "competitive_process_editor"
+GROUP_FINANCE = "finance"
+GROUP_NAME_CHOICES = (
+    (GROUP_REGISTRATION_OF_INTEREST_ASSESSOR, "Registration of Interest Assessor"),
+    (GROUP_REGISTRATION_OF_INTEREST_APPROVER, "Registration of Interest Approver"),
+    (GROUP_LEASE_LICENCE_ASSESSOR, "Lease Licence Assessor"),
+    (GROUP_LEASE_LICENCE_APPROVER, "Lease Licence Approver"),
+    (GROUP_COMPETITIVE_PROCESS_EDITOR, "Competitive Process Editor"),
+    (GROUP_FINANCE, "Finance"),
+)
+

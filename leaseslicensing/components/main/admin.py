@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.forms import ModelForm
 
-from leaseslicensing.components.main.models import MapLayer, MapColumn
+from leaseslicensing.components.main.models import (
+    MapLayer, MapColumn, SecurityGroup, SecurityGroupMembership,
+)
 
 
 class MyForm(ModelForm):
@@ -51,3 +53,57 @@ class MapLayerAdmin(admin.ModelAdmin):
     inlines = [
         MapColumnInline,
     ]
+
+
+def SecurityGroupTemplate(model_instance):
+    class SecurityGroupMembershipInline(admin.TabularInline):
+        model = SecurityGroupMembership
+        extra = 0
+        raw_id_fields = ('emailuser',)
+        model_instance = None
+        verbose_name = "Group member"
+        verbose_name_plural = "Group members"
+
+        def __init__(self, *args, **kwargs):
+            super(SecurityGroupMembershipInline, self).__init__(*args, **kwargs)
+            self.model_instance = model_instance
+
+        #def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        #    if self.model_instance.name == settings.GROUP_COMPLIANCE_MANAGEMENT_APPROVED_EXTERNAL_USER and db_field.name == "emailuser":
+        #        print("external")
+        #        print(EmailUser.objects.filter(is_staff=False).count())
+        #        kwargs["queryset"] = EmailUser.objects.filter(is_staff=False)
+        #    elif db_field.name == "emailuser":
+        #        print("internal")
+        #        print(EmailUser.objects.filter(is_staff=True).count())
+        #        kwargs["queryset"] = EmailUser.objects.filter(is_staff=True)
+        #    return super(ComplianceManagementSystemGroupPermissionInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+    return SecurityGroupMembershipInline
+
+
+@admin.register(SecurityGroup)
+class SecurityGroupAdmin(admin.ModelAdmin):
+    list_display = ('id','name',)
+    #inlines = [ComplianceManagementPermissionTemplate(self)]
+    #inlines = [ComplianceManagementAdminTemplate("what what")]
+    #form = ComplianceManagementGroupAdminFormTemplate
+
+    def get_inline_instances(self, request, obj=None):
+        return [
+                SecurityGroupTemplate(obj)(self.model, self.admin_site),
+                ]
+
+    #def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    #    if db_field.name == "district":
+    #        kwargs["required"] = False
+    #    if db_field.name == "region":
+    #        kwargs["required"] = False
+    #    return super(ComplianceManagementSystemGroupAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_actions(self, request):
+        return None
+
+
