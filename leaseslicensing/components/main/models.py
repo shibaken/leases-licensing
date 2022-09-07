@@ -17,6 +17,7 @@ from ledger_api_client.ledger_models import (
 # from django.contrib.postgres.fields.jsonb import JSONField
 from django.db.models import JSONField
 from leaseslicensing import settings
+from leaseslicensing.ledger_api_utils import retrieve_email_user
 
 
 ## TODO: remove ledger models
@@ -413,6 +414,40 @@ class UserSystemSettings(models.Model):
     class Meta:
         app_label = "leaseslicensing"
         verbose_name_plural = "User System Settings"
+
+
+class SecurityGroup(models.Model):
+
+    #name = models.CharField(max_length=150, unique=True)
+    name = models.CharField(
+        max_length=200,
+        choices=settings.GROUP_NAME_CHOICES)
+    #group_email = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+    def __str__(self):
+        return self.name
+
+    def get_members(self):
+        return [retrieve_email_user(member.emailuser) for member in self.securitygroupmembership_set.all()]
+
+    def add_member(self, user_id):
+        SecurityGroupMembership.objects.create(group=self,emailuser=user_id)
+
+
+class SecurityGroupMembership(models.Model):
+    group = models.ForeignKey(SecurityGroup, on_delete=models.PROTECT)
+    #emailuser = models.ForeignKey(EmailUser, on_delete=models.PROTECT, blank=True, null=True, db_constraint=False)
+    emailuser = models.IntegerField(null=True)  # EmailUserRO
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        app_label = 'leaseslicensing'
+
+    def __str__(self):
+        return str(self.group)
 
 
 class TemporaryDocumentCollection(models.Model):

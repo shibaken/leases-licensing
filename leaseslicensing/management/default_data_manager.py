@@ -12,6 +12,7 @@ from leaseslicensing import settings
 from leaseslicensing.components.main.models import (
     ApplicationType,
     GlobalSettings,
+    SecurityGroup, SecurityGroupMembership,
     # NumberOfDaysType,
     # NumberOfDaysSetting
 )
@@ -76,14 +77,35 @@ class DefaultDataManager(object):
                 logger.error("{}, Key: {}".format(e, item[0]))
 
         # ProposalAssessorGroup
-        group, created = SystemGroup.objects.get_or_create(
-            name=settings.GROUP_NAME_ASSESSOR
-        )
+        #group, created = SystemGroup.objects.get_or_create(
+        #    name=settings.GROUP_NAME_ASSESSOR
+        #)
 
-        # ProposalApproverGroup
-        group, created = SystemGroup.objects.get_or_create(
-            name=settings.GROUP_NAME_APPROVER
-        )
+        ## ProposalApproverGroup
+        #group, created = SystemGroup.objects.get_or_create(
+        #    name=settings.GROUP_NAME_APPROVER
+        #)
+
+        # Set up CM security Groups without Region/District
+        created = None
+        group, created = SecurityGroup.objects.get_or_create(name=settings.GROUP_FINANCE)
+        if created:
+            logger.info("Created Finance Group")
+        group, created = SecurityGroup.objects.get_or_create(name=settings.GROUP_REGISTRATION_OF_INTEREST_ASSESSOR)
+        if created:
+            logger.info("Created Registration of Interest Assessor Group")
+        group, created = SecurityGroup.objects.get_or_create(name=settings.GROUP_REGISTRATION_OF_INTEREST_APPROVER)
+        if created:
+            logger.info("Created Registration of Interest Approver Group")
+        group, created = SecurityGroup.objects.get_or_create(name=settings.GROUP_LEASE_LICENCE_ASSESSOR)
+        if created:
+            logger.info("Created Lease Licensing Assessor Group")
+        group, created = SecurityGroup.objects.get_or_create(name=settings.GROUP_LEASE_LICENCE_APPROVER)
+        if created:
+            logger.info("Created Lease Licensing Approver Group")
+        group, created = SecurityGroup.objects.get_or_create(name=settings.GROUP_COMPETITIVE_PROCESS_EDITOR)
+        if created:
+            logger.info("Created Competitive Process Group")
 
         ## Oracle account codes
         # today = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE)).date()
