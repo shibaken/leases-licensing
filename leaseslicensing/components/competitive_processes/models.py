@@ -120,7 +120,8 @@ class CompetitiveProcess(models.Model):
                     elif a_field.one_to_many:  # reverse foreign key
                         field_objects = a_field.related_model.objects.filter(**{a_field.remote_field.name: self})
                     elif a_field.one_to_one:
-                        field_objects = [getattr(self, a_field.name),]
+                        if hasattr(self, a_field.name):
+                            field_objects = [getattr(self, a_field.name),]
                 for field_object in field_objects:
                     if field_object:
                         related_item = field_object.as_related_item
@@ -250,7 +251,7 @@ class CompetitiveProcessParty(models.Model):
 
 
 class PartyDetail(models.Model):
-    competitive_processes_party = models.ForeignKey(
+    competitive_process_party = models.ForeignKey(
         CompetitiveProcessParty, 
         blank=True,
         null=True,
@@ -274,7 +275,7 @@ class PartyDetail(models.Model):
         return None
 
 
-def update_party_detail_doc_filename(instance, filename):
+def update_party_detail_doc_filename(instance):
     return '{}/competitive_process/{}/party_detail/{}'.format(
         settings.MEDIA_APP_DIR, 
         instance.party_detail.competitive_process_party.competitive_process.id,

@@ -47,6 +47,7 @@ export default {
             }
         },
         competitive_process_id: '',
+        accessing_user: null,
     },
     data() {
         let vm = this;
@@ -57,7 +58,8 @@ export default {
             // For expander
             td_expand_class_name: 'expand-icon',
             td_collapse_class_name: 'collapse-icon',
-            expandable_row_class_name: 'expandable_row_class_name',
+            expandable_row_class_name: 'expandable_row',
+            custom_row_apps: {},
         }
     },
     components: {
@@ -207,10 +209,11 @@ export default {
         addParty: function(params){
             if (params.type === 'person'){
                 let new_data = {
-                    'id': '',  // This is competitive_process_party id.  Empty string because this is not saved yet.
+                    'id': 0,  // This is competitive_process_party id.  Empty string because this is not saved yet.
                     'is_person': true,
                     'is_organisation': false,
                     'person': params.party_to_add,
+                    'person_id': params.party_to_add.id,
                     'organisation': null,
                     'invited_at': null,
                     'removed_at': null,
@@ -256,9 +259,7 @@ export default {
             this.openAddPartyModal()
         },
         addClickEventHandler: function(){
-            console.log('in addClickEventHandler')
             let vm = this
-            console.log(vm.$refs.parties_datatable.vmDataTable)
 
             vm.$refs.parties_datatable.vmDataTable.on('click', 'td', function(e) {
                 let td_link = $(this)
@@ -284,11 +285,17 @@ export default {
                         $row.child.hide()
                         // Toggle flag
                         full_data.expanded = false
-                        if (full_data.custom_row_app){
-                            // Component mounted once cannot be remount easily.  Therefore unmount and delete it completely here and then when required, create it again.
-                            full_data.custom_row_app.unmount()
-                            full_data.custom_row_app = undefined
+
+
+                        if (full_data.id in vm.custom_row_apps){
+                            vm.custom_row_apps[full_data.id].unmount()
+                            vm.custom_row_apps[full_data.id] = undefined
                         }
+                        // if (full_data.custom_row_app){
+                        //     // Component mounted once cannot be remount easily.  Therefore unmount and delete it completely here and then when required, create it again.
+                        //     full_data.custom_row_app.unmount()
+                        //     full_data.custom_row_app = undefined
+                        // }
                     })
                 } else {
                     // Expand
@@ -308,12 +315,14 @@ export default {
                         // props
                         party_full_data: full_data,
                         competitive_process_id: vm.competitive_process_id,
+                        accessing_user: vm.accessing_user,
                     })
                     custom_row_app.mount('#custom_row_' + full_data.id)
                     // -----------------------
 
                     // Store custom_row_app in order to unmount when being hidden
-                    full_data.custom_row_app = custom_row_app
+                    // full_data.custom_row_app = custom_row_app
+                    vm.custom_row_apps[full_data.id] = custom_row_app
 
                     details_elem.fadeIn(1000)
 
@@ -399,6 +408,9 @@ export default {
     text-indent: 0 !important;
     font-family: 'Courier New', Courier monospace;
     margin: 5px;
+}
+.expandable_row {
+    background-color: lightgray !important;
 }
 
 </style>
