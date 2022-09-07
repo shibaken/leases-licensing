@@ -7,7 +7,7 @@ from leaseslicensing.components.main.models import (
     GlobalSettings,
     ApplicationType,
     MapLayer,
-    MapColumn,
+    MapColumn, TemporaryDocumentCollection,
 )
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, EmailUserRO
 from datetime import datetime, date
@@ -34,7 +34,8 @@ class CommunicationLogEntrySerializer(serializers.ModelSerializer):
             "subject" "text",
             "created",
             "staff",
-            "proposal" "documents",
+            "proposal",
+            "documents",
         )
 
     def get_documents(self, obj):
@@ -180,3 +181,9 @@ class EmailUserSerializer(serializers.ModelSerializer):
 
     def get_text(self, obj):
         return self.get_fullname(obj)
+
+
+class TemporaryDocumentCollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryDocumentCollection
+        fields = ('id',)
