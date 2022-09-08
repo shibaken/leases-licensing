@@ -271,7 +271,8 @@ class ListCompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
 
 class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
     accessing_user = serializers.SerializerMethodField()
-    competitive_process_parties = CompetitiveProcessPartySerializer(many=True,)
+    competitive_process_parties = CompetitiveProcessPartySerializer(many=True, required=False)
+    # winner = CompetitiveProcessPartySerializer(required=False)
 
     class Meta:
         model = CompetitiveProcess
@@ -291,6 +292,12 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
             'winner',
             'details',
         )
+        extra_kwargs = {
+            'winner': {
+                'read_only': False,
+                'required': False,
+            },
+        }
 
     def get_accessing_user(self, obj):
         user = self.context.get("request").user
@@ -298,10 +305,17 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
         return serializer.data
 
     def update(self, instance, validated_data):
+        competitive_process_parties_data = validated_data.pop('competitive_process_parties')
+
         # competitive_process
+        # winner_dict = validated_data['winner']
+        # winner = CompetitiveProcessParty.objects.get(id=int(winner_dict['id']))
+        # instance.winner = winner
+        instance.winner = validated_data['winner']
+        instance.details = validated_data['details']
+        instance.save()
 
         # competitive_process_parties
-        competitive_process_parties_data = validated_data.pop('competitive_process_parties')
         for competitive_process_party_data in competitive_process_parties_data:
             if competitive_process_party_data['id']:
                 # This competitive_process_party exists

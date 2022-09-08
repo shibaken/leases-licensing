@@ -2489,8 +2489,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                             == "approve_competitive_process"
                             and not self.generated_proposal
                         ):
-                            # TODO: add logic
-                            pass
+                            self.generate_competitive_process()
                     # Lease Licence
                     elif (
                         self.application_type.name
@@ -2898,6 +2897,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
     @property
     def related_item_descriptor(self):
         return '(return descriptor)'
+
+    def generate_competitive_process(self):
+        if self.generated_competitive_process:
+            raise ValidationError('Couldn\'t generate a competitive process.  Proposal {} has already generated a Competitive Process: {}'.format(self, self.generated_competitive_process))
+
+        new_competitive_process = CompetitiveProcess.objects.create()
+        self.generated_competitive_process = new_competitive_process
+        self.save()
 
 
 class ProposalAdditionalDocumentType(models.Model):

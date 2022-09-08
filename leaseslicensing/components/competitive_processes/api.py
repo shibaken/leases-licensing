@@ -67,6 +67,30 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
         else:
             return CompetitiveProcess.objects.none()
 
+    @detail_route(methods=["POST",], detail=True,)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def complete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data['competitive_process'])
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        instance.complete(request)
+        return Response({})
+
+    @detail_route(methods=["POST",], detail=True,)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def discard(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data['competitive_process'])
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        instance.discard(request)
+        return Response({})
+
     @basic_exception_handler
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()
@@ -87,15 +111,9 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        # save_proponent_data(instance, request.data['competitive_process'], self)
-        # formatted_data = format_data(request.data['competitive_process'])
-        # serializer = self.get_serializer(instance, data=formatted_data)
-        # serializer.is_valid(raise_exception=True)
-        # temp = serializer.save()
-
         serializer = self.get_serializer(instance, data=request.data['competitive_process'])
         serializer.is_valid(raise_exception=True)
-        temp = serializer.save()
+        instance = serializer.save()
 
         return Response({})
 

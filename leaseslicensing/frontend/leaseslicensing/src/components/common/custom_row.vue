@@ -13,25 +13,30 @@
             <th>Details</th>
             <td>
                 <div v-if="party_full_data.party_details.length > 0" class="details_box p-2">
-                    <template v-for="(party_detail, index) in party_full_data.party_details" :key="party_detail.id">
+                    <template v-for="(party_detail, index) in party_full_data.party_details" :key="party_detail.key">
                         <template v-if="index!=0">
                             <hr class="m-1">
                         </template>
 
-                        <template v-if="party_detail.id">
-                            <!-- This is an entry already saved in the database -->
-                            <div>{{ party_detail.created_by.fullname }}, {{ formatDatetime(party_detail.created_at) }}</div>
-                        </template>
-                        <template v-else>
-                            <!-- This entry is the one added just now, and not saved into the database yet -->
-                            <div>{{ party_detail.accessing_user.full_name }} {{ formatDatetime(party_detail.created_at) }}</div>
-                        </template>
+                        <div class="detail_wrapper">
+                            <template v-if="party_detail.id">
+                                <!-- This is an entry already saved in the database -->
+                                <div>{{ party_detail.created_by.fullname }}, {{ formatDatetime(party_detail.created_at) }}</div>
+                            </template>
+                            <template v-else>
+                                <!-- This entry is the one added just now, and not saved into the database yet -->
+                                <div>{{ party_detail.accessing_user.full_name }} {{ formatDatetime(party_detail.created_at) }}</div>
+                                <div class="remove_party_detail text-danger" @click="remove_party_detail(party_detail, $event)"><i class="bi bi-x-circle-fill"></i></div>
+                            </template>
 
-                        <div>{{ party_detail.detail }}</div>
+                            <div>{{ party_detail.detail }}</div>
 
-                        <template v-for="document in party_detail.party_detail_documents">
-                            <div><a :href="document.file" target="_blank"><i :class="getFileIconClass(document.file)"></i> {{ document.name }}</a></div>
-                        </template>
+                            <template v-for="document in party_detail.party_detail_documents">
+                                <div>
+                                    <a :href="document.file" target="_blank"><i :class="getFileIconClass(document.file, ['bi', 'fa-lg'])"></i> {{ document.name }}</a>
+                                </div>
+                            </template>
+                        </div>
                     </template>
                 </div>
                 <div class="new_detail_div mt-2 p-2">
@@ -60,7 +65,9 @@
                         </tr>
                         <tr>
                             <th></th>
-                            <td class="text-end"><button class="btn btn-primary" @click="addDetailClicked"><i class="fa-solid fa-circle-plus"></i> Add</button></td>
+                            <td class="text-end"><button class="btn btn-primary" @click="addDetailClicked">
+                                <i class="fa-solid fa-circle-plus"></i> Add</button>
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -87,7 +94,7 @@ export default {
     data() {
         let vm = this;
         return {
-            temporary_document_collection_id: null,
+            temporary_document_collection_id: 0,
             new_detail_text: '',
             datetimeFormat: 'DD/MM/YYYY HH:mm:ss',
             filefield_id: uuid(),
@@ -117,27 +124,19 @@ export default {
         },
     },
     methods: {
-        getFileIconClass: function(filepath){
-            let ext = filepath.split('.').pop().toLowerCase()
-            let classname = ['bi', 'fa-lg',]
-            if (['png', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif',].includes(ext)){
-                classname.push('bi-file-image-fill')
-            } else if (['pdf',].includes(ext)){
-                classname.push('bi-file-pdf-fill')
-            } else if (['doc', 'docx',].includes(ext)){
-                classname.push('bi-file-word-fill')
-            } else if (['xls', 'xlsx',].includes(ext)){
-                classname.push('bi-file-excel-fill')
-            } else if (['txt', 'text',].includes(ext)){
-                classname.push('bi-file-text-fill')
-            } else if (['rtf',].includes(ext)){
-                classname.push('bi-file-richtext-fill')
-            } else if (['mp3', 'mp4'].includes(ext)){
-                classname.push('bi-file-play-fill')
-            } else {
-                classname.push('bi-file_fill')
-            }
-            return classname.join(' ')
+        remove_party_detail: function(item, e){
+            let vm = this
+            let $elem = $(e.target)
+
+            $elem.closest('.detail_wrapper').fadeOut(500, function(){
+                const index = vm.party_full_data.party_details.indexOf(item)
+                if (index > -1){
+                    vm.party_full_data.party_details.splice(index, 1)
+                }
+            }).prev('hr').fadeOut(500)
+        },
+        getFileIconClass: function(filepath, additional_class_names){
+            return helpers.getFileIconClass(filepath, additional_class_names)
         },
         formatDatetime: function(dt){
             return moment(dt).format(this.datetimeFormat);
@@ -146,6 +145,7 @@ export default {
             let now = new Date()
             this.party_full_data.party_details.push({
                 'id': 0,  // Should be 0, which is used to determine this as a new entry at the backend
+                'key': uuid(),  // This is used only for vue for-loop
                 'created_at': now,
                 'detail': this.new_detail_text,
                 'temporary_document_collection_id': this.temporary_document_collection_id,
@@ -185,6 +185,15 @@ export default {
 }
 .detail_text {
     width: 100%;
+}
+.remove_party_detail{
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+}
+.detail_wrapper {
+    position: relative;
 }
 
 </style>
