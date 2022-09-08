@@ -98,9 +98,11 @@ class CompetitiveProcess(models.Model):
     def complete(self, request):
         if self.winner:
             self.status = CompetitiveProcess.STATUS_COMPLETED_APPLICATION
-            # 1. create application for the winner
+
+            # 1. Create application for the winner
             self.create_lease_licence_from_competitive_process()
-            # 2. email
+
+            # 2. Send email to the winner
             send_winner_notification(request, self)
         else:
             self.status = CompetitiveProcess.STATUS_COMPLETED_DECLINED

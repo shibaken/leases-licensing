@@ -93,7 +93,7 @@
                                 </div>
                                 <div class="col-sm-4">
                                     <select class="form-control" v-model="competitive_process.winner" id="competitive_process_winner">
-                                        <option value="no_winner">No winner</option>
+                                        <option value="">No winner</option>
                                         <option v-for="party in competitive_process.competitive_process_parties" :value="party.id">
                                             <template v-if="party.is_person">
                                                 {{ party.person.fullname }}
@@ -172,6 +172,7 @@ import ComponentMap from '@/components/common/component_map.vue'
 import RichText from '@/components/forms/richtext.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
 import TableRelatedItems from '@/components/common/table_related_items.vue'
+import { doExpression } from '@babel/types'
 
 export default {
     name: 'CompetitiveProcess',
@@ -291,9 +292,27 @@ export default {
         issueComplete: async function(){
             let vm = this;
             try {
+                let description = ''
+                if (vm.competitive_process.winner){
+                    for (let party of vm.competitive_process.competitive_process_parties){
+                        if (party.id === vm.competitive_process.winner){
+                            if (party.is_person){
+                                description = '<strong>' + party.person.fullname + '</strong> is selected as a winner.'
+                                break
+                            } else if (party.is_organisation) {
+                                description = '<strong>' + party.organisation.name + '</strong> is selected as a winner.'
+                                break
+                            }
+                            return
+                        }
+                    }
+                } else {
+                    description = '<strong>No winner</strong> selected'
+                }
                 swal.fire({
-                    title: "Complete",
-                    text: "Are you sure you want to complete this competitive process?",
+                    title: "Complete this competitive process",
+                    // text: "Are you sure you want to complete this competitive process?<br />" + description,
+                    html: "Are you sure you want to complete this competitive process?<br />" + description,
                     type: "warning",
                     showCancelButton: true,
                     confirmButtonText: 'Complete',
@@ -333,7 +352,7 @@ export default {
             let vm = this;
             try {
                 swal.fire({
-                    title: "Discard",
+                    title: "Discard this competitive process",
                     text: "Are you sure you want to discard this competitive process?",
                     type: "warning",
                     showCancelButton: true,
