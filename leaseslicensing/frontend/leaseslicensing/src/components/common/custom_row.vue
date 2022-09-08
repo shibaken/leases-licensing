@@ -13,7 +13,7 @@
             <th>Details</th>
             <td>
                 <div v-if="party_full_data.party_details.length > 0" class="details_box p-2">
-                    <template v-for="(party_detail, index) in party_full_data.party_details" :key="party_detail.id">
+                    <template v-for="(party_detail, index) in party_full_data.party_details" :key="party_detail.key">
                         <template v-if="index!=0">
                             <hr class="m-1">
                         </template>
@@ -23,10 +23,10 @@
                                 <!-- This is an entry already saved in the database -->
                                 <div>{{ party_detail.created_by.fullname }}, {{ formatDatetime(party_detail.created_at) }}</div>
                             </template>
-                            <template v-else class="detail_wrapper">
+                            <template v-else>
                                 <!-- This entry is the one added just now, and not saved into the database yet -->
                                 <div>{{ party_detail.accessing_user.full_name }} {{ formatDatetime(party_detail.created_at) }}</div>
-                                <div class="remove_party_detail text-danger" @click="remove_party_detail(index, $event)"><i class="bi bi-x-circle-fill"></i></div>
+                                <div class="remove_party_detail text-danger" @click="remove_party_detail(party_detail, $event)"><i class="bi bi-x-circle-fill"></i></div>
                             </template>
 
                             <div>{{ party_detail.detail }}</div>
@@ -94,7 +94,7 @@ export default {
     data() {
         let vm = this;
         return {
-            temporary_document_collection_id: null,
+            temporary_document_collection_id: 0,
             new_detail_text: '',
             datetimeFormat: 'DD/MM/YYYY HH:mm:ss',
             filefield_id: uuid(),
@@ -124,10 +124,15 @@ export default {
         },
     },
     methods: {
-        remove_party_detail: function(index, e){
+        remove_party_detail: function(item, e){
+            let vm = this
             let $elem = $(e.target)
+
             $elem.closest('.detail_wrapper').fadeOut(500, function(){
-                this.party_full_data.party_details.splice(index, 1)
+                const index = vm.party_full_data.party_details.indexOf(item)
+                if (index > -1){
+                    vm.party_full_data.party_details.splice(index, 1)
+                }
             }).prev('hr').fadeOut(500)
         },
         getFileIconClass: function(filepath, additional_class_names){
@@ -140,6 +145,7 @@ export default {
             let now = new Date()
             this.party_full_data.party_details.push({
                 'id': 0,  // Should be 0, which is used to determine this as a new entry at the backend
+                'key': uuid(),  // This is used only for vue for-loop
                 'created_at': now,
                 'detail': this.new_detail_text,
                 'temporary_document_collection_id': this.temporary_document_collection_id,
