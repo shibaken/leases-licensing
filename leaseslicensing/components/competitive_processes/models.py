@@ -62,6 +62,9 @@ class CompetitiveProcess(models.Model):
         verbose_name = "Competitive Process"
         verbose_name_plural = "Competitive Processes"
 
+    def __str__(self):
+        return self.lodgement_number
+
     @property
     def site(self):
         return 'site_name'
