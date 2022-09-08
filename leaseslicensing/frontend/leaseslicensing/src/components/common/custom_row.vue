@@ -18,20 +18,25 @@
                             <hr class="m-1">
                         </template>
 
-                        <template v-if="party_detail.id">
-                            <!-- This is an entry already saved in the database -->
-                            <div>{{ party_detail.created_by.fullname }}, {{ formatDatetime(party_detail.created_at) }}</div>
-                        </template>
-                        <template v-else>
-                            <!-- This entry is the one added just now, and not saved into the database yet -->
-                            <div>{{ party_detail.accessing_user.full_name }} {{ formatDatetime(party_detail.created_at) }}</div>
-                        </template>
+                        <div class="detail_wrapper">
+                            <template v-if="party_detail.id">
+                                <!-- This is an entry already saved in the database -->
+                                <div>{{ party_detail.created_by.fullname }}, {{ formatDatetime(party_detail.created_at) }}</div>
+                            </template>
+                            <template v-else class="detail_wrapper">
+                                <!-- This entry is the one added just now, and not saved into the database yet -->
+                                <div>{{ party_detail.accessing_user.full_name }} {{ formatDatetime(party_detail.created_at) }}</div>
+                                <div class="remove_party_detail text-danger" @click="remove_party_detail(index, $event)"><i class="bi bi-x-circle-fill"></i></div>
+                            </template>
 
-                        <div>{{ party_detail.detail }}</div>
+                            <div>{{ party_detail.detail }}</div>
 
-                        <template v-for="document in party_detail.party_detail_documents">
-                            <div><a :href="document.file" target="_blank"><i :class="getFileIconClass(document.file)"></i> {{ document.name }}</a></div>
-                        </template>
+                            <template v-for="document in party_detail.party_detail_documents">
+                                <div>
+                                    <a :href="document.file" target="_blank"><i :class="getFileIconClass(document.file, ['bi', 'fa-lg'])"></i> {{ document.name }}</a>
+                                </div>
+                            </template>
+                        </div>
                     </template>
                 </div>
                 <div class="new_detail_div mt-2 p-2">
@@ -60,7 +65,9 @@
                         </tr>
                         <tr>
                             <th></th>
-                            <td class="text-end"><button class="btn btn-primary" @click="addDetailClicked"><i class="fa-solid fa-circle-plus"></i> Add</button></td>
+                            <td class="text-end"><button class="btn btn-primary" @click="addDetailClicked">
+                                <i class="fa-solid fa-circle-plus"></i> Add</button>
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -117,27 +124,14 @@ export default {
         },
     },
     methods: {
-        getFileIconClass: function(filepath){
-            let ext = filepath.split('.').pop().toLowerCase()
-            let classname = ['bi', 'fa-lg',]
-            if (['png', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif',].includes(ext)){
-                classname.push('bi-file-image-fill')
-            } else if (['pdf',].includes(ext)){
-                classname.push('bi-file-pdf-fill')
-            } else if (['doc', 'docx',].includes(ext)){
-                classname.push('bi-file-word-fill')
-            } else if (['xls', 'xlsx',].includes(ext)){
-                classname.push('bi-file-excel-fill')
-            } else if (['txt', 'text',].includes(ext)){
-                classname.push('bi-file-text-fill')
-            } else if (['rtf',].includes(ext)){
-                classname.push('bi-file-richtext-fill')
-            } else if (['mp3', 'mp4'].includes(ext)){
-                classname.push('bi-file-play-fill')
-            } else {
-                classname.push('bi-file_fill')
-            }
-            return classname.join(' ')
+        remove_party_detail: function(index, e){
+            let $elem = $(e.target)
+            $elem.closest('.detail_wrapper').fadeOut(500, function(){
+                this.party_full_data.party_details.splice(index, 1)
+            }).prev('hr').fadeOut(500)
+        },
+        getFileIconClass: function(filepath, additional_class_names){
+            return helpers.getFileIconClass(filepath, additional_class_names)
         },
         formatDatetime: function(dt){
             return moment(dt).format(this.datetimeFormat);
@@ -185,6 +179,15 @@ export default {
 }
 .detail_text {
     width: 100%;
+}
+.remove_party_detail{
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+}
+.detail_wrapper {
+    position: relative;
 }
 
 </style>

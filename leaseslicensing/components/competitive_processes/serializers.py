@@ -271,7 +271,7 @@ class ListCompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
 
 class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
     accessing_user = serializers.SerializerMethodField()
-    competitive_process_parties = CompetitiveProcessPartySerializer(many=True,)
+    competitive_process_parties = CompetitiveProcessPartySerializer(many=True, required=False)
 
     class Meta:
         model = CompetitiveProcess
@@ -298,10 +298,14 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
         return serializer.data
 
     def update(self, instance, validated_data):
+        competitive_process_parties_data = validated_data.pop('competitive_process_parties')
+
         # competitive_process
+        instance.winner = validated_data['winner']
+        instance.details = validated_data['details']
+        instance.save()
 
         # competitive_process_parties
-        competitive_process_parties_data = validated_data.pop('competitive_process_parties')
         for competitive_process_party_data in competitive_process_parties_data:
             if competitive_process_party_data['id']:
                 # This competitive_process_party exists
