@@ -93,7 +93,7 @@
                                 </div>
                                 <div class="col-sm-4">
                                     <select class="form-control" v-model="competitive_process.winner" id="competitive_process_winner">
-                                        <option value="no_winner">No winner</option>
+                                        <option value="">No winner</option>
                                         <option v-for="party in competitive_process.competitive_process_parties" :value="party.id">
                                             <template v-if="party.is_person">
                                                 {{ party.person.fullname }}
@@ -172,6 +172,7 @@ import ComponentMap from '@/components/common/component_map.vue'
 import RichText from '@/components/forms/richtext.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
 import TableRelatedItems from '@/components/common/table_related_items.vue'
+import { doExpression } from '@babel/types'
 
 export default {
     name: 'CompetitiveProcess',
@@ -226,6 +227,12 @@ export default {
         competitive_process_form_url: function() {
             return helpers.add_endpoint_json(api_endpoints.competitive_process, (this.competitive_process.id))
         },
+        competitive_process_discard_url: function() {
+            return '/api/competitive_process/' + this.competitive_process.id + '/discard/'
+        },
+        competitive_process_complete_url: function() {
+            return '/api/competitive_process/' + this.competitive_process.id + '/complete/'
+        },
    },
     methods: {
         detailsTextChanged: function(new_text) {
@@ -238,62 +245,148 @@ export default {
             await this.save()
             this.$router.push({ name: 'internal-dashboard' })
         },
-        // omitKeys: function(obj, keys) {
-        //     let vm = this
-        //     let dup = {}
-        //     for (var key in obj) {
-        //         console.log({key})
-        //         if (typeof obj[key] == "object" && obj[key] !== null){
-        //             vm.omitKeys(obj[key], keys);
-        //         } else {
-        //             if (keys.indexOf(key) == -1) {
-        //                 dup[key] = obj[key];
-        //             }
-        //         }
-        //     }
-        //     return dup
-        // },
+        constructPayload: function(){
+            let vm = this
+
+            let payload = {'competitive_process': vm.competitive_process}
+            if (vm.$refs.component_map) {
+                payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
+            }
+
+            let custom_row_apps = {} 
+            for (let a_party of vm.competitive_process.competitive_process_parties){
+                if (Object.hasOwn(a_party, 'custom_row_app')){
+                    custom_row_apps[a_party.id] = JSON.parse(JSON.stringify(a_party.custom_row_app))
+                    a_party.custom_row_app = undefined  // Remove custom_row_app in order to JSON.stringify()
+                }
+            }
+            
+            return payload
+        },
         save: async function() {
             let vm = this;
 
             try {
-                // Construct payload
-                let payload = {'competitive_process': vm.competitive_process}
-                if (vm.$refs.component_map) {
-                    // Append polygon data
-                    payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
-                }
-
-                let custom_row_apps = {} 
-                for (let a_party of vm.competitive_process.competitive_process_parties){
-                    if (Object.hasOwn(a_party, 'custom_row_app')){
-                        // custom_row_apps[a_party.id] = structuredClone(a_party.custom_row_app)
-                        // Object.assign(custom_row_apps[a_party.id], a_party.custom_row_app)
-                        custom_row_apps[a_party.id] = JSON.parse(JSON.stringify(a_party.custom_row_app))
-                        a_party.custom_row_app = undefined
-                    }
-                }
-                console.log({custom_row_apps})
-                
+                let payload = vm.constructPayload()
                 const res = await fetch(vm.competitive_process_form_url, {body: JSON.stringify(payload), method: 'PUT'})
 
                 if(res.ok){
-                    await new swal({
+                    await swal.fire({
                         title: 'Saved',
                         text: 'Competitive process has been saved',
                         type: 'success',
+                        confirmButtonColor: '#0d6efd',
                     })
                 } else {
-                    await new swal({
+                    await swal.fire({
                         title: "Please fix following errors before saving",
                         text: err.bodyText,
                         type:'error',
+                        confirmButtonColor: '#0d6efd',
                     })
                 }
             } catch (err){
                 console.error(err)
             }
+        },
+        issueComplete: async function(){
+            let vm = this;
+            try {
+                let description = ''
+                if (vm.competitive_process.winner){
+                    for (let party of vm.competitive_process.competitive_process_parties){
+                        if (party.id === vm.competitive_process.winner){
+                            if (party.is_person){
+                                description = '<strong>' + party.person.fullname + '</strong> is selected as a winner.'
+                                break
+                            } else if (party.is_organisation) {
+                                description = '<strong>' + party.organisation.name + '</strong> is selected as a winner.'
+                                break
+                            }
+                            return
+                        }
+                    }
+                } else {
+                    description = '<strong>No winner</strong> selected'
+                }
+                swal.fire({
+                    title: "Complete this competitive process",
+                    // text: "Are you sure you want to complete this competitive process?<br />" + description,
+                    html: "Are you sure you want to complete this competitive process?<br />" + description,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: 'Complete',
+                    confirmButtonColor: '#0d6efd',
+                }).then(async result => {
+                    if (result.isConfirmed){
+                        // When Yes
+                        let payload = vm.constructPayload()
+                        const res = await fetch(vm.competitive_process_complete_url, {body: JSON.stringify(payload), method: 'POST'})
 
+                        if(res.ok){
+                            await new swal({
+                                title: 'Completed',
+                                text: 'Competitive process has been completed',
+                                type: 'success',
+                            })
+                        } else {
+                            await new swal({
+                                title: "Please fix following errors before saving",
+                                text: err.bodyText,
+                                type:'error',
+                            })
+                        }
+                        this.$router.push({ name: 'internal-dashboard' })
+                    } else if (result.isDenied){
+                        // When No
+                    } else {
+                        // When cancel
+                    }
+                })
+
+            } catch (err){
+                console.error(err)
+            }
+        },
+        issueDiscard: async function(){
+            let vm = this;
+            try {
+                swal.fire({
+                    title: "Discard this competitive process",
+                    text: "Are you sure you want to discard this competitive process?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: 'Discard',
+                    confirmButtonColor: '#0d6efd',
+                }).then(async result => {
+                    if (result.isConfirmed){
+                        // When Yes
+                        let payload = vm.constructPayload()
+                        const res = await fetch(vm.competitive_process_discard_url, {body: JSON.stringify(payload), method: 'POST'})
+
+                        if(res.ok){
+                            await swal.fire({
+                                title: 'Discarded',
+                                text: 'Competitive process has been discarded',
+                                type: 'success',
+                            })
+                        } else {
+                            await swal.fire({
+                                title: "Please fix following errors before saving",
+                                text: err.bodyText,
+                                type:'error',
+                            })
+                        }
+                        this.$router.push({ name: 'internal-dashboard' })
+                    } else if (result.isDenied){
+                        // When No
+                    } else {
+                        // When cancel
+                    }
+                })
+            } catch (err){
+                console.error(err)
+            }
         },
         updateTableByFeatures: function() {
 
@@ -303,12 +396,6 @@ export default {
         },
         popupClosed: function() {
 
-        },
-        issueComplete: function(){
-            console.log('in issueComplete')
-        },
-        issueDiscard: function(){
-            console.log('in issueDiscard')
         },
         assignTo: async function(){
             let vm = this

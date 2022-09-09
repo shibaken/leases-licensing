@@ -6,12 +6,14 @@ from django.contrib.gis.db.models.fields import PolygonField
 from ledger_api_client.ledger_models import EmailUserRO
 from leaseslicensing import settings
 from leaseslicensing.components import competitive_processes
-from leaseslicensing.components.main.models import CommunicationsLogEntry, Document, UserAction
+from leaseslicensing.components.main.models import CommunicationsLogEntry, Document, UserAction, ApplicationType
 
 from leaseslicensing.components.main.related_item import RelatedItem
 from leaseslicensing.components.organisations.models import Organisation
+from leaseslicensing.components.proposals.email import send_winner_notification
 from leaseslicensing.helpers import is_internal
 from leaseslicensing.ledger_api_utils import retrieve_email_user
+from leaseslicensing import settings
 
 
 class CompetitiveProcessManager(models.Manager):
@@ -55,12 +57,56 @@ class CompetitiveProcess(models.Model):
     modified_at = models.DateTimeField(auto_now=True, null=True)
     winner = models.ForeignKey("CompetitiveProcessParty", null=True, blank=True, on_delete=models.CASCADE)
     details = models.TextField(blank=True)
-    # generated_proposal = models.ForeignKey("Proposal", null=True, blank=True, on_delete=models.SET_NULL, related_name='originating_competitive_process')
 
     class Meta:
         app_label = "leaseslicensing"
         verbose_name = "Competitive Process"
         verbose_name_plural = "Competitive Processes"
+
+    def __str__(self):
+        return self.lodgement_number
+
+    def create_lease_licence_from_competitive_process(self):
+        from leaseslicensing.components.proposals.models import Proposal
+
+        # TODO: complete logic below
+
+        lease_licence = Proposal.objects.create(
+            application_type=ApplicationType.objects.get(
+                name=settings.APPLICATION_TYPE_LEASE_LICENCE
+            ),
+            # submitter=self.submitter,
+            ind_applicant=self.winner.person_id,
+            org_applicant=self.winner.organisation,
+            # proposal_type_id=self.proposal_type.id,
+        )
+        # add geometry
+        from copy import deepcopy
+        for geo in self.competitive_process_geometries.all():
+            new_geo = deepcopy(geo)
+            new_geo.proposal = lease_licence
+            new_geo.copied_from = geo
+            new_geo.id = None
+            new_geo.save()
+
+        return lease_licence
+
+    def discard(self, request):
+        self.status = CompetitiveProcess.STATUS_DISCARDED
+        self.save()
+
+    def complete(self, request):
+        if self.winner:
+            self.status = CompetitiveProcess.STATUS_COMPLETED_APPLICATION
+
+            # 1. Create application for the winner
+            self.create_lease_licence_from_competitive_process()
+
+            # 2. Send email to the winner
+            send_winner_notification(request, self)
+        else:
+            self.status = CompetitiveProcess.STATUS_COMPLETED_DECLINED
+        self.save()
 
     @property
     def site(self):
@@ -248,6 +294,14 @@ class CompetitiveProcessParty(models.Model):
         if self.organisation:
             return True
         return False
+
+    @property
+    def email_address(self):
+        if self.is_person:
+            return self.person.email
+        else:
+            # TODO: return organisation email address
+            return 'todo_org_email_address@mail.com'
 
 
 class PartyDetail(models.Model):

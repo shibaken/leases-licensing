@@ -214,5 +214,29 @@ module.exports = {
         }
         console.log(errorString)
         return errorString
-    }
+    },
+    getFileIconClass: function(filepath, additional_class_names=[]){
+        let ext = filepath.split('.').pop().toLowerCase()
+        let classname = additional_class_names
+
+        if (['png', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif',].includes(ext)){
+            classname.push('bi-file-image-fill')
+        } else if (['pdf',].includes(ext)){
+            classname.push('bi-file-pdf-fill')
+        } else if (['doc', 'docx',].includes(ext)){
+            classname.push('bi-file-word-fill')
+        } else if (['xls', 'xlsx',].includes(ext)){
+            classname.push('bi-file-excel-fill')
+        } else if (['txt', 'text',].includes(ext)){
+            classname.push('bi-file-text-fill')
+        } else if (['rtf',].includes(ext)){
+            classname.push('bi-file-richtext-fill')
+        } else if (['mp3', 'mp4'].includes(ext)){
+            classname.push('bi-file-play-fill')
+        } else {
+            classname.push('bi-file_fill')
+        }
+
+        return classname.join(' ')
+    },
 };
