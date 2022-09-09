@@ -64,7 +64,6 @@
                     </div>
                     <div class="tab-pane fade" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
                         <FormSection :formCollapse="false" label="Map" Index="map">
-                        <!--
                             <ComponentMap
                                 ref="component_map"
                                 :is_internal=true
@@ -77,7 +76,6 @@
                                 :proposal="competitive_process"
                                 :readonly="readonly"
                             />
-                        -->
                         </FormSection>
                     </div>
                     <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">

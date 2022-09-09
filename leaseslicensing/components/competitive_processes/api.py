@@ -91,6 +91,15 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
         instance.discard(request)
         return Response({})
 
+    @detail_route(methods=["POST"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_shapefile_document(self, request, *args, **kwargs):
+
+        # TODO: implement
+
+        return Response({})
+
     @basic_exception_handler
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()

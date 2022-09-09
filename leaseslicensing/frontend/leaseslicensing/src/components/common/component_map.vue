@@ -173,7 +173,11 @@ export default {
     props: {
         proposal:{
             type: Object,
-            required:true
+            required: false,
+        },
+        competitive_process: {
+            type: Object,
+            require: false,
         },
         readonly:{
             type: Boolean,
@@ -195,10 +199,21 @@ export default {
     },
     computed: {
         shapefileDocumentUrl: function() {
+            let endpoint = ''
+            let obj_id = 0
+            if (this.proposal){
+                endpoint = api_endpoints.proposal
+                obj_id = this.proposal.id
+            } else if (this.competitive_process){
+                endpoint = api_endpoints.competitive_process
+                obj_id = this.competitive_process.id
+            } else {
+                return ''  // Should not reach here.  Either this.proposal or this.competitive process should have an object.
+            }
             return helpers.add_endpoint_join(
-                api_endpoints.proposal,
-                this.proposal.id + '/process_shapefile_document/'
-                )
+                // api_endpoints.proposal,
+                endpoint, obj_id + '/process_shapefile_document/'
+            )
         },
         valid_button_disabled: function(){
             return false;
