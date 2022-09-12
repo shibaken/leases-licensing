@@ -143,13 +143,15 @@ class InternalComplianceSerializer(serializers.ModelSerializer):
     documents = serializers.SerializerMethodField()
     # submitter = serializers.CharField(source='submitter.get_full_name')
     submitter = serializers.SerializerMethodField(read_only=True)
-    allowed_assessors = EmailUserSerializer(many=True)
+    #allowed_assessors = EmailUserSerializer(many=True)
+    allowed_assessors = serializers.SerializerMethodField(read_only=True)
     # assigned_to = serializers.CharField(source='assigned_to.get_full_name')
     # assigned_to = serializers.SerializerMethodField(read_only=True)
     requirement = serializers.CharField(
         source="requirement.requirement", required=False, allow_null=True
     )
     approval_lodgement_number = serializers.SerializerMethodField()
+    lodgement_date = serializers.SerializerMethodField()
 
     class Meta:
         model = Compliance
@@ -183,6 +185,18 @@ class InternalComplianceSerializer(serializers.ModelSerializer):
             "fee_paid",
         )
 
+    def get_allowed_assessors(self, obj):
+        if obj.allowed_assessors:
+            email_users = []
+            for user in obj.allowed_assessors:
+                email_users.append(retrieve_email_user(user))
+            return EmailUserSerializer(email_users, many=True).data
+        else:
+            return ""
+    
+    def get_lodgement_date(self, obj):
+        return obj.lodgement_date.strftime("%d/%m/%Y") if obj.lodgement_date else ""
+
     def get_documents(self, obj):
         return [[d.name, d._file.url, d.can_delete, d.id] for d in obj.documents.all()]
 
@@ -212,12 +226,17 @@ class SaveComplianceSerializer(serializers.ModelSerializer):
 
 
 class ComplianceActionSerializer(serializers.ModelSerializer):
-    who = serializers.CharField(source="who.get_full_name")
+    #who = serializers.CharField(source="who.get_full_name")
+    who = serializers.SerializerMethodField()
 
     class Meta:
         model = ComplianceUserAction
         fields = "__all__"
 
+    def get_who(self, obj):
+        user = retrieve_email_user(obj.id)
+        #return user.first_name + " " + user.last_name
+        return "{} {}".format(user.first_name, user.last_name)
 
 class ComplianceCommsSerializer(serializers.ModelSerializer):
     documents = serializers.SerializerMethodField()

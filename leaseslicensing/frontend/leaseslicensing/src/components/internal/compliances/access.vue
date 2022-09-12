@@ -4,7 +4,6 @@
         <h3>Compliance with Requirements {{ compliance.reference }}</h3>
         <div class="col-md-3">
         <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
-            <div class="row">
                 <div class="card card-default">
                     <div class="card-header">
                        Submission
@@ -17,7 +16,7 @@
                             </div>
                             <div class="col-sm-12 top-buffer-s">
                                 <strong>Lodged on</strong><br/>
-                                {{ compliance.lodgement_date | formatDate}}
+                                    {{ compliance.lodgement_date }}
                             </div>
                             <div class="col-sm-12 top-buffer-s">
                                 <table class="table small-table">
@@ -31,8 +30,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
                 <div class="card card-default">
                     <div class="card-header">
                         Workflow
@@ -64,7 +61,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
         <div class="col-md-1"></div>
         <div class="col-md-8">
@@ -145,8 +141,11 @@ export default {
   },
   watch: {},
   filters: {
-    formatDate: function(data){
-        return data ? moment(data).format('DD/MM/YYYY'): '';    }
+      formatDate: function(data){
+          //return data ? moment(data).format('DD/MM/YYYY'): '';
+          console.log(data);
+          console.log(moment(data).format('DD/MM/YYYY'));
+      },
   },
   beforeRouteEnter: async function(to, from, next){
       /*
@@ -154,8 +153,9 @@ export default {
     const resData = await res.json();
       this.compliance = Object.assign({}, resData);
     */
-      next(vm => {
-          vm.compliance = Object.assign({}, `/api/proposal/${vm.$route.params.proposal_id}/internal_proposal.json`);
+      next(async (vm) => {
+          const url = helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/internal_compliance');
+          vm.compliance = Object.assign({}, await helpers.fetchWrapper(url));
           //vm.members = vm.compliance.allowed_assessors;
       });
   },
