@@ -87,6 +87,9 @@ export default {
 </script>
 
 <style lang="css">
+    div.dataTables_processing div {
+      display: none;
+    }
     td > a{
         border: none;
         border-radius: 2px;
