@@ -1480,8 +1480,9 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
     @property
     def compliance_assessors(self):
-        group = self.get_assessor_group()
-        return group.members if group else []
+        #group = self.get_assessor_group()
+        #return group.members if group else []
+        return self.get_assessor_group().get_system_group_member_ids()
 
     @property
     def can_officer_process(self):

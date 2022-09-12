@@ -105,7 +105,11 @@
             </div>
         </div>
     </div>
-    <ComplianceAmendmentRequest ref="amendment_request" :compliance_id="compliance.id"></ComplianceAmendmentRequest>
+    <ComplianceAmendmentRequest 
+    ref="amendment_request" 
+    :compliance_id="compliance.id"
+    v-if="compliance.id"
+    />
 </div>
 </template>
 <script>
@@ -113,10 +117,11 @@ import $ from 'jquery'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import ComplianceAmendmentRequest from './compliance_amendment_request.vue'
+import FormSection from "@/components/forms/section_toggle.vue"
 //import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import {
-  api_endpoints,
-  helpers
+    api_endpoints,
+    helpers,
 }
 from '@/utils/hooks'
 export default {
@@ -127,7 +132,7 @@ export default {
         loading: [],
         profile:{},
         compliance: {
-            requester: {}
+            //requester: {}
         },
         DATE_TIME_FORMAT: 'DD/MM/YYYY HH:mm:ss',
         members: [],
@@ -143,22 +148,27 @@ export default {
     formatDate: function(data){
         return data ? moment(data).format('DD/MM/YYYY'): '';    }
   },
-  beforeRouteEnter: function(to, from, next){
-    this.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/internal_compliance')).then((response) => {
-        next(vm => {
-            vm.compliance = response.body
-            vm.members = vm.compliance.allowed_assessors
-        })
-    },(error) => {
-        console.log(error);
-    })
+  beforeRouteEnter: async function(to, from, next){
+      /*
+    const res = await fetch(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`);
+    const resData = await res.json();
+      this.compliance = Object.assign({}, resData);
+    */
+      next(vm => {
+          vm.compliance = Object.assign({}, `/api/proposal/${vm.$route.params.proposal_id}/internal_proposal.json`);
+          //vm.members = vm.compliance.allowed_assessors;
+      });
   },
   components: {
     datatable,
     CommsLogs,
     ComplianceAmendmentRequest,
+    FormSection,
   },
   computed: {
+    members: function() {
+        return this.compliance.allowed_assessors ? this.compliance : [];
+    },
     isLoading: function () {
       return this.loading.length > 0;
     },
@@ -171,73 +181,64 @@ export default {
         return s.replace(/[,;]/g, '\n');
     },
 
-    assignMyself: function(){
+    assignMyself: async function(){
         let vm = this;
-        vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_request_user')))
-        .then((response) => {
-            vm.compliance = response.body;
-        }, (error) => {
-            console.log(error);
-        });
+        /*
+        const res = await fetch(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_request_user')));
+        const resData = await res.json();
+        this.compliance = Object.assign({}, resData);
+        */
+        this.compliance = Object.assign({}, await helpers.fetchWrapper(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_request_user'))));
     },
-    assignTo: function(){
+    assignTo: async function(){
         let vm = this;
-        if ( vm.compliance.assigned_to != 'null'){
-            let data = {'user_id': vm.compliance.assigned_to};
-            vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_to')),JSON.stringify(data),{
-                emulateJSON:true
-            }).then((response) => {
-                vm.compliance = response.body;
-            }, (error) => {
-                console.log(error);
+        if (vm.compliance.assigned_to != 'null'){
+            const data = {'user_id': vm.compliance.assigned_to};
+            const url = helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_to'));
+            /*
+            const res = await fetch(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_to')),{
+                body: JSON.stringify(data),
+                method: 'POST',
             });
-
+            const resData = await res.json();
+            this.compliance = Object.assign({}, resData);
+            */
+            this.compliance = Object.assign({}, await helpers.fetchWrapper(url, 'POST', data));
         }
         else{
-            vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/unassign')))
-            .then((response) => {
-                console.log(response);
-                vm.compliance = response.body;
-            }, (error) => {
-                console.log(error);
-            });
+            /*
+            const res = await fetch(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/unassign')));
+            const resData = await res.json();
+            this.compliance = Object.assign({}, resData);
+            */
+            this.compliance = Object.assign({}, await helpers.fetchWrapper(url));
         }
     },
-    acceptCompliance: function() {
-        let vm = this;
-        swal({
+    acceptCompliance: async function() {
+        await new swal({
+        //swal({
             title: "Accept Compliance with requirements",
             text: "Are you sure you want to accept this compliance with requirements?",
             type: "question",
             showCancelButton: true,
             confirmButtonText: 'Accept'
-        }).then(() => {
-            vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/accept')))
-            .then((response) => {
-                console.log(response);
-                vm.compliance = response.body;
-            }, (error) => {
-                console.log(error);
-            });
-        },(error) => {
-
         });
-
+        /*
+        const res = await fetch(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/accept')));
+        const resData = await res.json();
+        vm.compliance = Object.assign({}, resData);
+        */
+        this.compliance = Object.assign({}, await helpers.fetchWrapper(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/accept'))));
     },
     amendmentRequest: function(){
             this.$refs.amendment_request.amendment.compliance = this.compliance.id;
             this.$refs.amendment_request.isModalOpen = true;
     },
-    fetchProfile: function(){
-        let vm = this;
-        this.$http.get(api_endpoints.profile).then((response) => {
-            vm.profile = response.body
-
-         },(error) => {
-            console.log(error);
-
-        })
-        },
+    fetchProfile: async function(){
+        //const res = await fetch(api_endpoints.profile);
+        //const resData = await res.json();
+        this.profile = Object.assign({}, await helpers.fetchWrapper(api_endpoints.profile));
+    },
 
     check_assessor: function(){
         let vm = this;
