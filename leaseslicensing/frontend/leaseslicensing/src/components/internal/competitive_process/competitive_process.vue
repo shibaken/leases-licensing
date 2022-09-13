@@ -31,7 +31,7 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-map-tab" data-bs-toggle="pill" data-bs-target="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="toggleComponentMapOn">
+                        <button class="nav-link" id="pills-map-tab" data-bs-toggle="pill" data-bs-target="#pills-map" role="tab" aria-controls="pills-map" aria-selected="false" @click="mapTabClicked">
                             Map
                         </button>
                     </li>
@@ -73,7 +73,7 @@
                                 :display_at_time_of_submitted="show_col_status_when_submitted"
                                 @featureGeometryUpdated="featureGeometryUpdated"
                                 @popupClosed="popupClosed"
-                                :proposal="competitive_process"
+                                :competitive_process="competitive_process"
                                 :readonly="readonly"
                             />
                         </FormSection>
@@ -233,6 +233,9 @@ export default {
         },
    },
     methods: {
+        mapTabClicked: function(){
+            this.$refs.component_map.forceMapRefresh()
+        },
         detailsTextChanged: function(new_text) {
             this.competitive_process.details = new_text
         },
