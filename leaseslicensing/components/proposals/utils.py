@@ -585,6 +585,7 @@ def save_geometry(instance, request, viewset):
             for geom in lands_geos_data:
                 if geom.intersects(geos_repr_transform):
                     intersects = True
+                    break
             linear_ring = LinearRing(feature_dict.get("coordinates")[0])
             polygon = Polygon(linear_ring)
         if proposal_geometry and feature.get("id"):

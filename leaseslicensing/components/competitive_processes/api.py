@@ -12,6 +12,7 @@ from leaseslicensing.components.competitive_processes.serializers import Competi
     CompetitiveProcessSerializer
 from leaseslicensing.components.main.process_document import process_generic_document
 from leaseslicensing.components.main.related_item import RelatedItemsSerializer
+from leaseslicensing.components.competitive_processes.utils import save_geometry
 from leaseslicensing.helpers import is_internal
 from rest_framework.decorators import (
     action as detail_route,
@@ -91,6 +92,15 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
         instance.discard(request)
         return Response({})
 
+    @detail_route(methods=["POST"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def process_shapefile_document(self, request, *args, **kwargs):
+
+        # TODO: implement
+
+        return Response({})
+
     @basic_exception_handler
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()
@@ -111,9 +121,20 @@ class CompetitiveProcessViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data['competitive_process'])
+
+        competitive_process_data = request.data.get('competitive_process', None)
+
+        # Pop "geometry" data to handle it independently of the "competitive process"
+        competitive_process_geometry_data = competitive_process_data.pop('competitive_process_geometries', None)
+
+        # Handle "competitive process"
+        serializer = self.get_serializer(instance, data=competitive_process_data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
+
+        # Handle "geometry" data
+        if competitive_process_geometry_data:
+            save_geometry(instance, competitive_process_geometry_data, self.action)
 
         return Response({})
 
