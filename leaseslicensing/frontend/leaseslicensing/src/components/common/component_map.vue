@@ -173,7 +173,11 @@ export default {
     props: {
         proposal:{
             type: Object,
-            required:true
+            required: false,
+        },
+        competitive_process: {
+            type: Object,
+            require: false,
         },
         readonly:{
             type: Boolean,
@@ -195,10 +199,23 @@ export default {
     },
     computed: {
         shapefileDocumentUrl: function() {
-            return helpers.add_endpoint_join(
-                api_endpoints.proposal,
-                this.proposal.id + '/process_shapefile_document/'
-                )
+            let endpoint = ''
+            let obj_id = 0
+            if (this.proposal){
+                endpoint = api_endpoints.proposal
+                obj_id = this.proposal.id
+            } else if (this.competitive_process){
+                endpoint = api_endpoints.competitive_process
+                obj_id = this.competitive_process.id
+            } else {
+                return ''  // Should not reach here.  Either this.proposal or this.competitive process should have an object.
+            }
+            let url = helpers.add_endpoint_join(
+                // api_endpoints.proposal,
+                endpoint, '/' + obj_id + '/process_shapefile_document/'
+            )
+            console.log({url})
+            return url
         },
         valid_button_disabled: function(){
             return false;
@@ -261,7 +278,7 @@ export default {
                 }),
             });
 
-            if (this.proposal.proposalgeometry) {
+            if (this.proposal && this.proposal.proposalgeometry) {
                 //const featuresJson = (new GeoJSON).readFeatures(this.proposal.proposalgeometry)
                 for (let poly of this.proposal.proposalgeometry.features) {
                     const feature = (new GeoJSON).readFeature(poly);
@@ -273,6 +290,8 @@ export default {
                     this.leaselicenceQuerySource.addFeature(feature);
                     this.newFeatureId++;
                 };
+            } else if (this.competitive_process && this.competitive_process.competitive_process_geometries){
+
             }
             this.forceMapRefresh();
         },
@@ -722,7 +741,6 @@ export default {
 
             return styles
         },
-
         forceMapRefresh: function() {
             let vm = this
             setTimeout(function(){

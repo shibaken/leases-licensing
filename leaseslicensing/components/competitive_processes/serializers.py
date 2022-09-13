@@ -2,7 +2,7 @@ from django.core.files.storage import default_storage
 from rest_framework import serializers
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess, CompetitiveProcessLogEntry, \
     CompetitiveProcessParty, CompetitiveProcessUserAction, PartyDetail, PartyDetailDocument, \
-    update_party_detail_doc_filename
+    update_party_detail_doc_filename, CompetitiveProcessGeometry
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 from ..main.models import TemporaryDocumentCollection
 from ..organisations.serializers import OrganisationSerializer
@@ -10,6 +10,7 @@ from leaseslicensing.components.proposals.models import Proposal
 from leaseslicensing.components.main.serializers import CommunicationLogEntrySerializer, EmailUserSerializer
 from leaseslicensing.components.users.serializers import UserSerializerSimple
 from ... import settings
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 
 class RegistrationOfInterestSerializer(serializers.ModelSerializer):
@@ -179,6 +180,21 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
                 new_detail.save()
 
 
+class CompetitiveProcessGeometrySerializer(GeoFeatureModelSerializer):
+    proposal_id = serializers.IntegerField(write_only=True, required=False)
+
+    class Meta:
+        model = CompetitiveProcessGeometry
+        geo_field = "polygon"
+        fields = (
+            "id",
+            "competitive_process_id",
+            "polygon",
+            "intersects",
+        )
+        read_only_fields = ("id",)
+
+
 class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
     registration_of_interest = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
@@ -187,6 +203,7 @@ class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
     group = serializers.CharField(read_only=True)  # For property
     can_accessing_user_view = serializers.SerializerMethodField()
     can_accessing_user_process = serializers.SerializerMethodField()
+    competitive_process_geometry = CompetitiveProcessGeometrySerializer(many=True, read_only=True)
 
     class Meta:
         model = CompetitiveProcess
@@ -201,6 +218,7 @@ class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
             'group',
             'can_accessing_user_view',
             'can_accessing_user_process',
+            'competitive_process_geometry',
         )
         # additional data to be returned for datatable
         # fields listed here should be listed 'fields' above, otherwise not returned
