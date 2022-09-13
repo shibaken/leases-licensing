@@ -278,9 +278,14 @@ export default {
                 }),
             });
 
+            let geometries = null
             if (this.proposal && this.proposal.proposalgeometry) {
-                //const featuresJson = (new GeoJSON).readFeatures(this.proposal.proposalgeometry)
-                for (let poly of this.proposal.proposalgeometry.features) {
+                geometries = this.proposal.proposalgeometry
+            } else if (this.competitive_process && this.competitive_process.competitive_process_geometries){
+                geometries = this.competitive_process.competitive_process_geometries
+            }
+            if (geometries){
+                for (let poly of geometries.features){
                     const feature = (new GeoJSON).readFeature(poly);
                     //console.log(feature)
                     if (!feature.getProperties().intersects) {
@@ -290,8 +295,6 @@ export default {
                     this.leaselicenceQuerySource.addFeature(feature);
                     this.newFeatureId++;
                 };
-            } else if (this.competitive_process && this.competitive_process.competitive_process_geometries){
-
             }
             this.forceMapRefresh();
         },

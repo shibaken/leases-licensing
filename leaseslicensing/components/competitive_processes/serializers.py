@@ -288,7 +288,7 @@ class ListCompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
 class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
     accessing_user = serializers.SerializerMethodField()
     competitive_process_parties = CompetitiveProcessPartySerializer(many=True, required=False)
-    competitive_process_geometry = CompetitiveProcessGeometrySerializer(many=True, required=False)
+    competitive_process_geometries = CompetitiveProcessGeometrySerializer(many=True, required=False)
 
     class Meta:
         model = CompetitiveProcess
@@ -307,7 +307,7 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
             'competitive_process_parties',
             'winner',
             'details',
-            'competitive_process_geometry',
+            'competitive_process_geometries',
         )
         extra_kwargs = {
             'winner': {
