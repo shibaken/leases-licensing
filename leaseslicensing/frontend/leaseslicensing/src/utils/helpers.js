@@ -1,4 +1,49 @@
 module.exports = {
+    // Handle fetch get and post requests by stringifying JSON input and returning a JSON object
+    fetchWrapper: async function(url, method, data) {
+        let parsedMethod = null;
+        if (method) {
+            parsedMethod = method.trim().toUpperCase();
+        }
+        let response = null;
+        // mandatory arguments
+        if (!url) {
+            throw 'You must specify a url';
+        }
+        // for POST requests
+        if (arguments.length > 1) {
+            if (!(['POST', 'GET'].includes(parsedMethod))) {
+                throw 'HTTP method must be GET or POST';
+            }
+            if (parsedMethod === 'POST' && !data) {
+                throw 'POST method requires data argument';
+            }
+        }
+        // split logic by http method
+        if (!parsedMethod || parsedMethod === 'GET') {
+            try {
+                const getResponse = await fetch(url);
+                response = await getResponse.json();
+            } catch(error) {
+                //throw error;
+                response = error;
+            }
+        } else if (parsedMethod === 'POST') {
+            try {
+                const postResponse = await fetch(url, {
+                    method: parsedMethod,
+                    body: JSON.stringify(data)
+                })
+                response = await postResponse.json();
+            } catch(error) {
+                //throw error;
+                response = error;
+            }
+        }
+        //return jsonData;
+        return response;
+    },
+
     formatError: function(err) {
         let returnStr = '';
         // object {}

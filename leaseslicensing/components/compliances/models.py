@@ -84,7 +84,7 @@ class Compliance(models.Model):
         default=CUSTOMER_STATUS_CHOICES[1][0],
     )
     # assigned_to = models.ForeignKey(EmailUser,related_name='leaseslicensing_compliance_assignments',null=True,blank=True, on_delete=models.SET_NULL)
-    assigned_to = models.IntegerField()  # EmailUserRO
+    assigned_to = models.IntegerField(null=True)  # EmailUserRO
     requirement = models.ForeignKey(
         ProposalRequirement,
         blank=True,
@@ -94,7 +94,7 @@ class Compliance(models.Model):
     )
     lodgement_date = models.DateTimeField(blank=True, null=True)
     # submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='leaseslicensing_compliances', on_delete=models.SET_NULL)
-    submitter = models.IntegerField()  # EmailUserRO
+    submitter = models.IntegerField(null=True)  # EmailUserRO
     reminder_sent = models.BooleanField(default=False)
     post_reminder_sent = models.BooleanField(default=False)
     fee_invoice_reference = models.CharField(
@@ -105,12 +105,8 @@ class Compliance(models.Model):
         app_label = "leaseslicensing"
 
     @property
-    def regions(self):
-        return self.proposal.regions_list
-
-    @property
-    def activity(self):
-        return self.proposal.activity
+    def approval_number(self):
+        return self.approval.lodgement_number if self.approval else ""
 
     @property
     def title(self):
@@ -316,7 +312,7 @@ class Compliance(models.Model):
                 )
 
     def log_user_action(self, action, request):
-        return ComplianceUserAction.log_action(self, action, request.user)
+        return ComplianceUserAction.log_action(self, action, request.user.id)
 
     def __str__(self):
         return self.lodgement_number
