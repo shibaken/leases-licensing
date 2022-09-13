@@ -1,6 +1,6 @@
 <template>
     <div class="container" id="compliancesDash">
-        <FormSection :formCollapse="false" label="Conditions" Index="conditions">
+        <FormSection :formCollapse="false" label="Compliances" Index="compliances">
             <CompliancesTable
                 level="internal"
             />

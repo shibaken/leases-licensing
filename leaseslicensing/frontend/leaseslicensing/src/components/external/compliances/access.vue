@@ -253,7 +253,7 @@ export default {
             this.attachAnother();
             vm.$router.push({ name: 'external-proposals-dash'}); //Navigate to dashboard
         },
-
+/*
     addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
@@ -286,7 +286,7 @@ export default {
                 }
             });
        },
-
+*/
 
     setAmendmentData: function(amendment_request){
       this.amendment_request = amendment_request;
@@ -300,11 +300,12 @@ export default {
         let data = {'document': doc}
         if(doc)
         {
-          vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/delete_document'),JSON.stringify(data),{
-                emulateJSON:true
-                }).then((response)=>{
+            fetch(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/delete_document'), {
+                method: 'POST',
+                body: JSON.stringify(data),
+                }).then(async (response)=>{
                     vm.refreshFromResponse(response);
-                    vm.compliance = response.body;
+                    vm.compliance = await Object.assign({}, response.json());
                 },(error)=>{
                     vm.errors = true;
                     vm.errorString = helpers.apiVueResourceError(error);
@@ -314,57 +315,59 @@ export default {
 
 
     sendData:function(){
-            let vm = this;
-            vm.errors = false;
-            let data = new FormData(vm.form);
-            vm.addingComms = true;
-            vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/submit'),data,{
-                emulateJSON:true
-                }).then((response)=>{
-                    vm.addingCompliance = false;
-                    vm.refreshFromResponse(response);
-                    /*swal(
-                     'Submit',
-                     'Your Compliance with Requirement has been submitted',
-                     'success'
-                    );*/
-                    vm.compliance = response.body;
-                    vm.$router.push({
-                    name: 'submit_compliance',
-                    params: { compliance: vm.compliance}
-                });
+        let vm = this;
+        vm.errors = false;
+        let data = new FormData(vm.form);
+        vm.addingComms = true;
+        fetch(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/submit'),{
+            method: 'POST',
+            body: JSON.stringify(data),
+        }).then(async (response)=>{
+            const resData = await response.json()
+            vm.addingCompliance = false;
+            vm.refreshFromResponse(resData);
+            /*swal(
+             'Submit',
+             'Your Compliance with Requirement has been submitted',
+             'success'
+            );*/
+            vm.compliance = Object.assign({}, resData);
+            vm.$router.push({
+                name: 'submit_compliance',
+                params: { compliance: vm.compliance}
+            });
 
-                },(error)=>{
-                    vm.errors = true;
-                    vm.addingCompliance = false;
-                    vm.errorString = helpers.apiVueResourceError(error);
-                });
+        },(error)=>{
+            vm.errors = true;
+            vm.addingCompliance = false;
+            vm.errorString = helpers.apiVueResourceError(error);
+        });
     },
 
-    refreshFromResponse:function(response){
-            let vm = this;
-            vm.original_compliance = helpers.copyObject(response.body);
-            vm.compliance = helpers.copyObject(response.body);
-            if ( vm.compliance.customer_status == "Under Review" || vm.compliance.customer_status == "Approved" ) { vm.isFinalised = true }
-            if (vm.compliance && vm.compliance.documents){ vm.hasDocuments = true}
-
+    refreshFromResponse:async function(resData){
+        //const resData = await response.json();
+        this.original_compliance = helpers.copyObject(resData);
+        this.compliance = helpers.copyObject(resData);
+        if (this.compliance.customer_status == "Under Review" || this.compliance.customer_status == "Approved" ) { this.isFinalised = true }
+        if (this.compliance && this.compliance.documents){ this.hasDocuments = true}
     },
   },
   mounted: function () {
     let vm = this;
     vm.form = document.forms.complianceForm;
-    vm.addFormValidations();
+    //vm.addFormValidations();
   },
 
  beforeRouteEnter: function(to, from, next){
-    this.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id)).then((response) => {
-        next(vm => {
-            vm.compliance = response.body
+    fetch(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id)).then((response) => {
+        next(async (vm) => {
+            const resData = await response.json();
+            vm.compliance = Object.assign({}, resData);
             if ( vm.compliance.customer_status == "Under Review" || vm.compliance.customer_status == "Approved" ) { vm.isFinalised = true }
             if (vm.compliance && vm.compliance.documents){ vm.hasDocuments = true}
 
-            this.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/amendment_request')).then((res) => {
-                      vm.setAmendmentData(res.body);
+            fetch(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/amendment_request')).then(async (res) => {
+                      vm.setAmendmentData(await res.json());
                 },
               err => {
                         console.log(err);

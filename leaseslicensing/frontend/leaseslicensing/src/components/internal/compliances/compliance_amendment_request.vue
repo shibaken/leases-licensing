@@ -96,7 +96,9 @@ export default {
             
             this.validation_form.resetForm();
         },
-        fetchAmendmentChoices: function(){
+        fetchAmendmentChoices: async function(){
+            const url = '/api/compliance_amendment_reason_choices.json';
+            /*
             let vm = this;
             vm.$http.get('/api/compliance_amendment_reason_choices.json').then((response) => {
                 vm.reason_choices = response.body;
@@ -104,12 +106,29 @@ export default {
             },(error) => {
                 console.log(error);
             } );
+            */
+            this.reason_choices = Object.assign({}, await helpers.fetchWrapper(url));
         },
-        sendData:function(){
-            let vm = this;
+        sendData: async function(){
             vm.errors = false;
-            //console.log(vm.amendment);
-            let amendment = JSON.parse(JSON.stringify(vm.amendment));            
+            const amendment = JSON.parse(JSON.stringify(vm.amendment));
+            const url = '/api/compliance_amendment_request.json';
+            const response = await helpers.fetchWrapper(url, 'POST', amendment);
+            if (!response.ok) {
+                console.log(error);
+                vm.errors = true;
+                vm.errorString = helpers.apiVueResourceError(error);
+                vm.amendingcompliance = true;
+            } else {
+                await new swal(
+                             'Sent',
+                             'An email has been sent to applicant with the request to amend this compliance',
+                             'success'
+                        );
+                vm.amendingcompliance = true;
+                vm.close();
+            }
+            /*
             vm.$http.post('/api/compliance_amendment_request.json',JSON.stringify(amendment),{
                         emulateJSON:true,
                     }).then((response)=>{
@@ -134,7 +153,7 @@ export default {
                         
                     });
                 
-
+            */
         },
         addFormValidations: function() {
             let vm = this;

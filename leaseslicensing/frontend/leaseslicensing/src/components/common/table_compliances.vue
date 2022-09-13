@@ -171,11 +171,11 @@ export default {
         compliancesHeaders: function() {
             let headers = ['Number', 'Licence/Permit', 'Condition', 'Due Date', 'Status', 'Action'];
             if (this.level === 'internal') {
-                headers = ['Number', 'Type', 'Approval Number', 'Holder', 'Status', 'Due Date', 'Assigned to', 'Action'];
+                headers = ['Number', 'Type',  'Holder', 'Approval Number','Status', 'Due Date', 'Action'];
             }
             return headers;
         },
-        approvalSubmitterColumn: function() {
+        holderColumn: function() {
             return {
                         data: "id",
                         orderable: true,
@@ -183,19 +183,19 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             //return full.approval_submitter;
-                            return full.id;
+                            return full.holder;
                         }
                     }
         },
-        approvalTypeColumn: function() {
+        applicationTypeColumn: function() {
             return {
                         data: "id",
                         orderable: true,
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            //return full.approval_type;
-                            return full.id;
+                            return full.application_type;
+                            //return full.id;
                         }
                     }
         },
@@ -207,8 +207,7 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            //return full.lodgement_number
-                            return full.id;
+                            return full.lodgement_number;
                         }
                     }
         },
@@ -220,8 +219,8 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            //return full.approval_number
-                            return full.id;
+                            return full.approval_lodgement_number
+                            //return full.id;
                         }
                     }
         },
@@ -255,7 +254,7 @@ export default {
                                 dueDate = full.requirement.read_due_date;
                             }
                             //return dueDate;
-                            return full.id;
+                            return full.due_date;
                         }
                     }
         },
@@ -267,8 +266,8 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            //return full.status
-                            return full.id;
+                            return full.processing_status
+                            //return full.id;
                         }
                     }
         },
@@ -281,8 +280,6 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
-                            //return 'not implemented'
-                            /*
                             let links = '';
                             if (!vm.is_external){
                                 //if (full.processing_status=='With Assessor' && vm.check_assessor(full)) {
@@ -304,9 +301,6 @@ export default {
                                 }
                             }
                             return links;
-                            */
-
-                            return full.id;
                         }
                     }
         },
@@ -336,13 +330,13 @@ export default {
             if (this.level === 'internal') {
                 columns = [
                     this.lodgementNumberColumn,
-                    this.approvalTypeColumn,
+                    this.applicationTypeColumn,
+                    this.holderColumn,
                     this.licenceNumberColumn,
-                    this.approvalSubmitterColumn,
                     //this.conditionColumn,
                     this.statusColumn,
                     this.dueDateColumn,
-                    this.assignedToNameColumn,
+                    //this.assignedToNameColumn,
                     this.actionColumn,
                     ]
             }

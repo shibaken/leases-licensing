@@ -27,9 +27,9 @@
 
         <FormSection 
             :formCollapse="false" 
-            label="Conditions" 
-            subtitle="- View submitted Conditions and submit new ones" 
-            Index="Conditions"
+            label="Compliances" 
+            subtitle="- View submitted Compliances and submit new ones" 
+            Index="compliances"
         >
             <CompliancesTable
                 level="external"
