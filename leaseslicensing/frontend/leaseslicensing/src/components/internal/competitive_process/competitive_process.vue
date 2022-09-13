@@ -251,7 +251,10 @@ export default {
 
             let payload = {'competitive_process': vm.competitive_process}
             if (vm.$refs.component_map) {
-                payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
+                // payload['competitive_process_geometry'] = vm.$refs.component_map.getJSONFeatures();
+                // let geojson = vm.$refs.component_map.getJSONFeatures()
+                let geojson = vm.$refs.component_map.leaselicenceQuerySource.getFeatures()
+                payload['competitive_process']['competitive_process_geometry'] = geojson
             }
 
             let custom_row_apps = {} 

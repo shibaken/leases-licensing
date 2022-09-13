@@ -213,7 +213,7 @@ class CompetitiveProcessGeometry(models.Model):
         related_name="competitive_process_geometries"
     )
     polygon = PolygonField(srid=4326, blank=True, null=True)
-    # intersects = models.BooleanField(default=False)
+    intersects = models.BooleanField(default=False)
     # copied_from = models.ForeignKey(
         # "self", on_delete=models.SET_NULL, blank=True, null=True
     # )

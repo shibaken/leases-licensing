@@ -181,7 +181,7 @@ class CompetitiveProcessPartySerializer(serializers.ModelSerializer):
 
 
 class CompetitiveProcessGeometrySerializer(GeoFeatureModelSerializer):
-    proposal_id = serializers.IntegerField(write_only=True, required=False)
+    competitive_process_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = CompetitiveProcessGeometry
@@ -203,7 +203,6 @@ class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
     group = serializers.CharField(read_only=True)  # For property
     can_accessing_user_view = serializers.SerializerMethodField()
     can_accessing_user_process = serializers.SerializerMethodField()
-    competitive_process_geometry = CompetitiveProcessGeometrySerializer(many=True, read_only=True)
 
     class Meta:
         model = CompetitiveProcess
@@ -218,7 +217,6 @@ class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
             'group',
             'can_accessing_user_view',
             'can_accessing_user_process',
-            'competitive_process_geometry',
         )
         # additional data to be returned for datatable
         # fields listed here should be listed 'fields' above, otherwise not returned
@@ -290,7 +288,7 @@ class ListCompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
 class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
     accessing_user = serializers.SerializerMethodField()
     competitive_process_parties = CompetitiveProcessPartySerializer(many=True, required=False)
-    # winner = CompetitiveProcessPartySerializer(required=False)
+    competitive_process_geometry = CompetitiveProcessGeometrySerializer(many=True, required=False)
 
     class Meta:
         model = CompetitiveProcess
@@ -309,6 +307,7 @@ class CompetitiveProcessSerializer(CompetitiveProcessSerializerBase):
             'competitive_process_parties',
             'winner',
             'details',
+            'competitive_process_geometry',
         )
         extra_kwargs = {
             'winner': {
