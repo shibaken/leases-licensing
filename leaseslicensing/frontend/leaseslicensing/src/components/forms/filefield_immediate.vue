@@ -108,7 +108,11 @@ export default {
     },
     computed: {
         numDocuments: function() {
-            return this.documents.length
+            if (this.documents){
+                return this.documents.length
+            } else {
+                return 0
+            }
         },
         /*
         repeat: function() {

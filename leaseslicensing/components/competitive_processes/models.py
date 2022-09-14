@@ -10,7 +10,7 @@ from leaseslicensing.components.main.models import CommunicationsLogEntry, Docum
 
 from leaseslicensing.components.main.related_item import RelatedItem
 from leaseslicensing.components.organisations.models import Organisation
-from leaseslicensing.components.proposals.email import send_winner_notification
+from leaseslicensing.components.competitive_processes.email import send_winner_notification
 from leaseslicensing.helpers import is_internal
 from leaseslicensing.ledger_api_utils import retrieve_email_user
 from leaseslicensing import settings
@@ -213,7 +213,7 @@ class CompetitiveProcessGeometry(models.Model):
         related_name="competitive_process_geometries"
     )
     polygon = PolygonField(srid=4326, blank=True, null=True)
-    # intersects = models.BooleanField(default=False)
+    intersects = models.BooleanField(default=False)
     # copied_from = models.ForeignKey(
         # "self", on_delete=models.SET_NULL, blank=True, null=True
     # )

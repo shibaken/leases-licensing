@@ -843,10 +843,11 @@ export default {
             vm.checkAssessorData();
             try {
                 let payload = {'proposal': this.proposal}
-                if (this.$refs.application_form.componentMapOn) {
+                if (vm.$refs.application_form.$refs.component_map) {
                     //this.proposal.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
-                    payload['proposal_geometry'] = this.$refs.application_form.$refs.component_map.getJSONFeatures();
+                    payload['proposal_geometry'] = vm.$refs.application_form.$refs.component_map.getJSONFeatures();
                 }
+                console.log({payload})
                 const res = await fetch(vm.proposal_form_url, { body: JSON.stringify(payload), method: 'POST' })
 
                 if(res.ok){
