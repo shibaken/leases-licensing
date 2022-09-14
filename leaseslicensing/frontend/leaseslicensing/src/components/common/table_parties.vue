@@ -208,6 +208,11 @@ export default {
     methods: {
         addParty: function(params){
             if (params.type === 'person'){
+                for (let party of this.competitive_process_parties){
+                    if (party.person_id === params.party_to_add.id)
+                        // Person has been already added
+                        return
+                }
                 let new_data = {
                     'id': 0,  // This is competitive_process_party id.  Empty string because this is not saved yet.
                     'is_person': true,

@@ -214,13 +214,13 @@ export default {
             this.close()
         },
         cancel:function () {
+            this.close()
+        },
+        close:function () {
             this.selected_email_user = null
             this.selected_organisation = null
             $(this.$refs.email_users).empty()
             $(this.$refs.organisations).empty()
-            this.close()
-        },
-        close:function () {
             this.isModalOpen = false;
             this.errors = false;
             $('.has-error').removeClass('has-error');
