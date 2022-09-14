@@ -188,9 +188,9 @@ export default {
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
                                 // When application type is 'lease_licence'
                                 // When proposal status is 'with_assessor', 'assessor'/'referral' can see this button
-                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.LEASE_LICENCE_ASSESSOR.ID, ROLES.REFERRAL.ID,],
                                 // When proposal status is 'with_referral', 'assessor'/'referral' can see this button
-                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.ASSESSOR, ROLES.REFERRAL,],
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.LEASE_LICENCE_ASSESSOR.ID, ROLES.REFERRAL.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -205,10 +205,10 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
-                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.REFERRAL,],
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.REFERRAL.ID,],
                             },
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.REFERRAL,],
+                                [PROPOSAL_STATUS.WITH_REFERRAL.ID]: [ROLES.REFERRAL.ID,],
                             }
                         }
                         let show1 = vm.check_role_conditions(condition_to_display)
@@ -232,10 +232,10 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
-                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.REGISTRATION_OF_INTEREST_ASSESSOR.ID,],
                             },
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.LEASE_LICENCE_ASSESSOR.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -249,11 +249,11 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
-                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
-                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.REGISTRATION_OF_INTEREST_ASSESSOR.ID,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.REGISTRATION_OF_INTEREST_ASSESSOR.ID,],
                             },
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.LEASE_LICENCE_ASSESSOR.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -269,7 +269,7 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,, ROLES.REFERRAL,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.LEASE_LICENCE_ASSESSOR.ID, ROLES.REFERRAL.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -283,11 +283,11 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
-                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
-                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.REGISTRATION_OF_INTEREST_ASSESSOR.ID,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.REGISTRATION_OF_INTEREST_ASSESSOR.ID,],
                             },
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID]: [ROLES.LEASE_LICENCE_ASSESSOR.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -354,7 +354,7 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.WITH_ASSESSOR.ID]: [ROLES.LEASE_LICENCE_ASSESSOR.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -368,7 +368,7 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID]: [ROLES.ASSESSOR,],
+                                [PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID]: [ROLES.LEASE_LICENCE_ASSESSOR.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
