@@ -185,6 +185,8 @@ export default {
             comms_url: helpers.add_endpoint_json(api_endpoints.competitive_process, vm.$route.params.competitive_process_id + '/comms_log'),
             comms_add_url: helpers.add_endpoint_json(api_endpoints.competitive_process, vm.$route.params.competitive_process_id + '/add_comms_log'),
             logs_url: helpers.add_endpoint_json(api_endpoints.competitive_process, vm.$route.params.competitive_process_id + '/action_log'),
+
+            processing: false,
         }
     },
     components: {
@@ -204,6 +206,16 @@ export default {
 
     },
     computed: {
+        disableSaveAndContinueBtn: function(){
+            if (this.processing)
+                return true
+            return false
+        },
+        disableSaveAndExitBtn: function(){
+            if (this.processing)
+                return true
+            return false
+        },
         isFinalised: function(){
             return false
         },
@@ -270,6 +282,7 @@ export default {
             let vm = this;
 
             try {
+                vm.processing = true
                 let payload = vm.constructPayload()
                 const res = await fetch(vm.competitive_process_form_url, {body: JSON.stringify(payload), method: 'PUT'})
 
@@ -288,13 +301,16 @@ export default {
                         confirmButtonColor: '#0d6efd',
                     })
                 }
+                vm.processing = false
             } catch (err){
+                vm.processing = false
                 console.error(err)
             }
         },
         issueComplete: async function(){
             let vm = this;
             try {
+                vm.processing = true
                 let description = ''
                 if (vm.competitive_process.winner){
                     for (let party of vm.competitive_process.competitive_process_parties){
@@ -332,6 +348,7 @@ export default {
                                 text: 'Competitive process has been completed',
                                 type: 'success',
                             })
+                            this.$router.push({ name: 'internal-dashboard' })
                         } else {
                             await new swal({
                                 title: "Please fix following errors before saving",
@@ -339,14 +356,13 @@ export default {
                                 type:'error',
                             })
                         }
-                        this.$router.push({ name: 'internal-dashboard' })
                     } else if (result.isDenied){
                         // When No
                     } else {
                         // When cancel
                     }
+                    vm.processing = false
                 })
-
             } catch (err){
                 console.error(err)
             }
@@ -354,6 +370,7 @@ export default {
         issueDiscard: async function(){
             let vm = this;
             try {
+                vm.processing = true
                 swal.fire({
                     title: "Discard this competitive process",
                     text: "Are you sure you want to discard this competitive process?",
@@ -386,6 +403,7 @@ export default {
                     } else {
                         // When cancel
                     }
+                    vm.processing = false
                 })
             } catch (err){
                 console.error(err)
