@@ -185,7 +185,7 @@ class Compliance(models.Model):
                 if self.processing_status == "future" or "due":
                     self.processing_status = "with_assessor"
                     self.customer_status = "with_assessor"
-                    self.submitter = request.user
+                    self.submitter = request.user.id
 
                     if request.FILES:
                         for f in request.FILES:
@@ -201,9 +201,11 @@ class Compliance(models.Model):
 
                 # self.lodgement_date = datetime.datetime.strptime(timezone.now().strftime('%Y-%m-%d'),'%Y-%m-%d').date()
                 self.lodgement_date = timezone.now()
-                self.save(version_comment="Compliance Submitted: {}".format(self.id))
+                self.save(
+                        #version_comment="Compliance Submitted: {}".format(self.id)
+                        )
                 self.proposal.save(
-                    version_comment="Compliance Submitted: {}".format(self.id)
+                    #version_comment="Compliance Submitted: {}".format(self.id)
                 )
                 self.log_user_action(
                     ComplianceUserAction.ACTION_SUBMIT_REQUEST.format(self.id), request
