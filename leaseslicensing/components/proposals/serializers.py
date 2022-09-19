@@ -1005,7 +1005,7 @@ class ProposalUserActionSerializer(serializers.ModelSerializer):
     def get_who(self, proposal_user_action):
         email_user = retrieve_email_user(proposal_user_action.who)
         fullname = email_user.get_full_name()
-        #return fullname
+        return fullname
 
 
 class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
