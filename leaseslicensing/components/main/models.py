@@ -305,7 +305,7 @@ class CommunicationsLogEntry(models.Model):
     text = models.TextField(blank=True)
 
     # customer = models.ForeignKey(EmailUser, null=True, related_name='+', on_delete=models.SET_NULL)
-    customer = models.IntegerField()  # EmailUserRO
+    customer = models.IntegerField(null=True)  # EmailUserRO
     # staff = models.ForeignKey(EmailUser, null=True, related_name='+', on_delete=models.SET_NULL)
     staff = models.IntegerField()  # EmailUserRO
 
