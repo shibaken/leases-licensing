@@ -93,11 +93,11 @@
                     </form>
                 </div>
             </div>
-            <div slot="footer">
+            <!--div slot="footer">
                 <button type="button" v-if="addingComms" disabled class="btn btn-primary" @click="ok"><i class="fa fa-spinner fa-spin"></i> Adding</button>
                 <button type="button" v-else class="btn btn-primary" @click="ok">Add</button>
                 <button type="button" class="btn btn-primary" @click="cancel">Cancel</button>
-            </div>
+            </div-->
         </modal>
     </div>
 </template>
@@ -127,7 +127,7 @@ export default {
             comms: {},
             state: 'proposed_approval',
             addingComms: false,
-            validation_form: null,
+            //validation_form: null,
             errors: false,
             errorString: '',
             successString: '',
@@ -159,9 +159,12 @@ export default {
     methods:{
         ok:function () {
             let vm =this;
+            /*
             if($(vm.form).valid()){
                 vm.sendData();
             }
+            */
+            vm.sendData();
         },
         uploadFile(target,file_obj){
             let vm = this;
@@ -201,7 +204,7 @@ export default {
             this.comms = {};
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            this.validation_form.resetForm();
+            //this.validation_form.resetForm();
             let file_length = vm.files.length;
             this.files = [];
             for (var i = 0; i < file_length;i++){
@@ -216,7 +219,9 @@ export default {
             vm.errors = false;
             let comms = new FormData(vm.form); 
             vm.addingComms = true;
-            vm.$http.post(vm.url,comms,{
+            fetch(vm.url,{
+                body: comms,
+                method: 'POST',
                 }).then((response)=>{
                     vm.addingComms = false;
                     vm.close();
@@ -228,6 +233,7 @@ export default {
                 });
             
         },
+        /*
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
@@ -260,11 +266,12 @@ export default {
                 }
             });
        },
+       */
    },
    mounted:function () {
         let vm =this;
         vm.form = document.forms.commsForm;
-        vm.addFormValidations();
+        //vm.addFormValidations();
    }
 }
 </script>
