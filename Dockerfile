@@ -52,7 +52,8 @@ RUN poetry config virtualenvs.create false \
 
 WORKDIR $REPO_NO_DASH/frontend/$REPO_NO_DASH/
 #RUN npm install --production
-RUN npm install --omit=dev
+#RUN npm install --omit=dev
+RUN npm install
 RUN npm run build
 WORKDIR /app
 RUN touch /app/.env
