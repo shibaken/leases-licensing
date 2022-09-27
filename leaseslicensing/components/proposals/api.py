@@ -1280,6 +1280,10 @@ class ProposalViewSet(viewsets.ModelViewSet):
     )
     @renderer_classes((JSONRenderer,))
     def add_comms_log(self, request, *args, **kwargs):
+        print("request.data")
+        print(request.data)
+        print("request.FILES")
+        print(request.FILES)
         try:
             with transaction.atomic():
                 instance = self.get_object()

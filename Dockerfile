@@ -52,12 +52,13 @@ RUN poetry config virtualenvs.create false \
 
 WORKDIR $REPO_NO_DASH/frontend/$REPO_NO_DASH/
 #RUN npm install --production
-RUN npm install --omit=dev
+#RUN npm install --omit=dev
+RUN npm install
 RUN npm run build
 WORKDIR /app
 RUN touch /app/.env
 RUN python manage.py collectstatic --no-input
-RUN rm -rf node_modules/
+#RUN rm -rf node_modules/
 RUN git log --pretty=medium -30 > ./git_history_recent
 
 # Install the project (ensure that frontend projects have been built prior to this step).

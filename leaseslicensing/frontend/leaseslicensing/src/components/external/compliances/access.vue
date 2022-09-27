@@ -72,7 +72,7 @@
                                         <div class="col-sm-6">
                                             <div class="row" v-for="d in compliance.documents">
                                                 <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]   }}</a>
-                                                <span v-if="!isFinalisedi && d.can_delete">
+                                                <span v-if="!isFinalised && d.can_delete">
                                                     <a @click="delete_document(d)" class="fa fa-trash-o control-label" title="Remove file" style="cursor: pointer; color:red;"></a>
                                                 </span>
                                                 <span v-else >
@@ -129,7 +129,6 @@
 </div>
 </template>
 <script>
-import $ from 'jquery'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 //import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
@@ -154,7 +153,6 @@ export default {
         errorString: '',
         pdBody: 'pdBody'+vm._uid,
         oBody: 'oBody'+vm._uid,
-        isFinalised: false,
         pdBody: 'pdBody'+vm._uid,
         hasDocuments: false,
         validation_form: null,
@@ -315,35 +313,36 @@ export default {
 
 
     sendData:function(){
-        let vm = this;
-        vm.errors = false;
-        let data = new FormData(vm.form);
-        vm.addingComms = true;
-        fetch(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/submit'),{
-            method: 'POST',
-            body: JSON.stringify(data),
-        }).then(async (response)=>{
-            const resData = await response.json()
-            vm.addingCompliance = false;
-            vm.refreshFromResponse(resData);
-            /*swal(
-             'Submit',
-             'Your Compliance with Requirement has been submitted',
-             'success'
-            );*/
-            vm.compliance = Object.assign({}, resData);
-            vm.$router.push({
-                name: 'submit_compliance',
-                params: { compliance: vm.compliance}
-            });
+        this.$nextTick(() => {
+            this.errors = false;
+            let data = new FormData(this.form);
+            this.addingComms = true;
+            fetch(helpers.add_endpoint_json(api_endpoints.compliances,this.compliance.id+'/submit'),{
+                method: 'POST',
+                //body: JSON.stringify(this.compliance),
+                body: data
+            }).then(async (response)=>{
+                const resData = await response.json()
+                this.addingCompliance = false;
+                this.refreshFromResponse(resData);
+                /*swal(
+                 'Submit',
+                 'Your Compliance with Requirement has been submitted',
+                 'success'
+                );*/
+                this.compliance = Object.assign({}, resData);
+                this.$router.push({
+                    name: 'submit_compliance',
+                    params: { compliance: this.compliance.id }
+                });
 
-        },(error)=>{
-            vm.errors = true;
-            vm.addingCompliance = false;
-            vm.errorString = helpers.apiVueResourceError(error);
+            },(error)=>{
+                this.errors = true;
+                this.addingCompliance = false;
+                this.errorString = helpers.apiVueResourceError(error);
+            });
         });
     },
-
     refreshFromResponse:async function(resData){
         //const resData = await response.json();
         this.original_compliance = helpers.copyObject(resData);
