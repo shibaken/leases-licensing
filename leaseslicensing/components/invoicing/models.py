@@ -151,14 +151,14 @@ class InvoicingDetails(BaseModel):
     invoicing_once_every = models.PositiveSmallIntegerField(null=True, blank=True)
 
     # Review dates
-    review_date_annually = models.ForeignKey(ReviewDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
-    review_date_quarterly = models.ForeignKey(ReviewDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
-    review_date_monthly = models.ForeignKey(ReviewDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
+    # review_date_annually = models.ForeignKey(ReviewDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
+    # review_date_quarterly = models.ForeignKey(ReviewDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
+    # review_date_monthly = models.ForeignKey(ReviewDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
 
     # Invoicing dates
-    invoicing_date_annually = models.ForeignKey(InvoicingDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
-    invoicing_date_quarterly = models.ForeignKey(InvoicingDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
-    invoicing_date_monthly = models.ForeignKey(InvoicingDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
+    # invoicing_date_annually = models.ForeignKey(InvoicingDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
+    # invoicing_date_quarterly = models.ForeignKey(InvoicingDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
+    # invoicing_date_monthly = models.ForeignKey(InvoicingDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
 
     approval = models.ForeignKey('Approval', null=True, blank=True, on_delete=models.SET_NULL)
     previous_invoicing_details = models.OneToOneField('self', null=True, blank=True, related_name='next_invoicing_details', on_delete=models.SET_NULL)
