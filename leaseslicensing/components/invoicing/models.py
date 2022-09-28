@@ -194,3 +194,11 @@ class InvoicingDetails(BaseModel):
         #         name='either_one_null',
         #     )
         # ]
+
+
+class CrownLandRentReviewDate(BaseModel):
+    review_date = models.DateField(null=True, blank=True)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = "leaseslicensing"
