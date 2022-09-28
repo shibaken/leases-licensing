@@ -2,6 +2,7 @@ from django.db import models
 from datetime import datetime
 import pytz
 from ledger_api_client import settings_base
+from dateutil.relativedelta import relativedelta
 
 
 class BaseModel(models.Model):
@@ -150,13 +151,39 @@ class InvoicingDateMonthly(BaseModel):
         return invoicing_date_monthly
 
 
-class ConsumerPriceIndex(BaseModel):
-    name = models.CharField(max_length=200, blank=True)
-    start_date = models.DateField(null=True, blank=True)  # end_date is one day before the start_date of the next ConsumerPriceIndex object.
-    cpi_value = models.FloatField(null=True, blank=True)
+# class ConsumerPriceIndex(BaseModel):
+#     name = models.CharField(max_length=200, blank=True)
+#     start_date = models.DateField(null=True, blank=True)  # end_date is one day before the start_date of the next ConsumerPriceIndex object.
+#     cpi_value = models.FloatField(null=True, blank=True)
+#
+#     class Meta:
+#         app_label = "leaseslicensing"
+class FinancialYear(BaseModel):
+    name = models.CharField(max_length=200,)  # i.e. 2022-2023
+    start_date_q1 = models.DateField(null=True, blank=True)
+    start_date_q2 = models.DateField(null=True, blank=True)
+    start_date_q3 = models.DateField(null=True, blank=True)
+    start_date_q4 = models.DateField(null=True, blank=True)
+    cpi_value_q1 = models.FloatField(null=True, blank=True)
+    cpi_value_q2 = models.DateField(null=True, blank=True)
+    cpi_value_q3 = models.DateField(null=True, blank=True)
+    cpi_value_q4 = models.DateField(null=True, blank=True)
 
     class Meta:
         app_label = "leaseslicensing"
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def start_date(self):
+        return self.start_date_q1
+
+    def end_date(self):
+        end_date = None
+        if self.start_date:
+            end_date = self.start_date + relativedelta(years=1) - relativedelta(days=1)
+        return end_date
 
 
 class InvoicingDetails(BaseModel):
