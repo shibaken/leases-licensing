@@ -165,9 +165,9 @@ class ConsumerPriceIndex(BaseModel):
     start_date_q3 = models.DateField(null=True, blank=True)
     start_date_q4 = models.DateField(null=True, blank=True)
     cpi_value_q1 = models.FloatField(null=True, blank=True)
-    cpi_value_q2 = models.DateField(null=True, blank=True)
-    cpi_value_q3 = models.DateField(null=True, blank=True)
-    cpi_value_q4 = models.DateField(null=True, blank=True)
+    cpi_value_q2 = models.FloatField(null=True, blank=True)
+    cpi_value_q3 = models.FloatField(null=True, blank=True)
+    cpi_value_q4 = models.FloatField(null=True, blank=True)
 
     class Meta:
         app_label = "leaseslicensing"
