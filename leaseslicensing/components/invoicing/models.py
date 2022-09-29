@@ -164,51 +164,87 @@ class InvoicingDateMonthly(BaseModel):
 #
 #     class Meta:
 #         app_label = "leaseslicensing"
+def get_start_date(month_string, q_name):
+    cpis = ConsumerPriceIndex.objects.all()
+    if cpis:
+        latest_cpis = cpis.order_by('start_date_q1').last()
+        start_date = getattr(latest_cpis, 'start_date_' + q_name) + relativedelta(years=1)
+        return start_date
+    else:
+        return datetime.strptime(str(ConsumerPriceIndex.start_year) + '/' + month_string + '/01', '%Y/%m/%d')
+
+
+def get_start_date_q1():
+    return get_start_date('07', 'q1')  # Jun
+
+
+def get_start_date_q2():
+    return get_start_date('10', 'q2')  # Oct
+
+
+def get_start_date_q3():
+    return get_start_date('01', 'q3')  # Jan
+
+
+def get_start_date_q4():
+    return get_start_date('04', 'q4')  # Apr
+
+
 class ConsumerPriceIndex(BaseModel):
-    name = models.CharField(max_length=200,)  # i.e. 2022-2023
-    start_date_q1 = models.DateField(null=True, blank=True)
-    start_date_q2 = models.DateField(null=True, blank=True)
-    start_date_q3 = models.DateField(null=True, blank=True)
-    start_date_q4 = models.DateField(null=True, blank=True)
-    cpi_value_q1 = models.FloatField(null=True, blank=True)
-    cpi_value_q2 = models.FloatField(null=True, blank=True)
-    cpi_value_q3 = models.FloatField(null=True, blank=True)
-    cpi_value_q4 = models.FloatField(null=True, blank=True)
+    start_year = 2021
+
+    start_date_q1 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q1)
+    start_date_q2 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q2)
+    start_date_q3 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q3)
+    start_date_q4 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q4)
+    cpi_value_q1 = models.FloatField('CPI (Q1)', null=True, blank=True)
+    cpi_value_q2 = models.FloatField('CPI (Q2)', null=True, blank=True)
+    cpi_value_q3 = models.FloatField('CPI (Q3)', null=True, blank=True)
+    cpi_value_q4 = models.FloatField('CPI (Q4)', null=True, blank=True)
 
     class Meta:
         app_label = "leaseslicensing"
 
     def __str__(self):
-        return self.name
+        return '{}'.format(self.name)
+
+    @property
+    def name(self):
+        return '{} --- {}'.format(self.start_date_q1.strftime('%Y'), (self.start_date_q1 + relativedelta(years=1)).strftime('%Y'))
 
     @property
     def start_date(self):
         return self.start_date_q1
 
+    @property
     def end_date(self):
         end_date = None
         if self.start_date:
             end_date = self.start_date + relativedelta(years=1) - relativedelta(days=1)
         return end_date
 
+    @property
     def end_date_q1(self):
         end_date = None
         if self.start_date_q2:
             end_date = self.start_date_q2 - relativedelta(days=1)
         return end_date
 
+    @property
     def end_date_q2(self):
         end_date = None
         if self.start_date_q3:
             end_date = self.start_date_q3 - relativedelta(days=1)
         return end_date
 
+    @property
     def end_date_q3(self):
         end_date = None
         if self.start_date_q4:
             end_date = self.start_date_q4 - relativedelta(days=1)
         return end_date
 
+    @property
     def end_date_q4(self):
         return self.end_date()
 

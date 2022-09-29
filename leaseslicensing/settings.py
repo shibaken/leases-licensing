@@ -318,7 +318,3 @@ REPETITION_TYPES = (
     (REPETITION_TYPE_QUARTERLY, 'Quarterly'),
     (REPETITION_TYPE_MONTHLY, 'Monthly'),
 )
-
-
-
-

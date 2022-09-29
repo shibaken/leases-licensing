@@ -49,4 +49,10 @@ class InvoicingDateMonthlyAdmin(admin.ModelAdmin):
 
 @admin.register(models.ConsumerPriceIndex)
 class ConsumerPriceIndexAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['name', 'cpi_value_q1', 'cpi_value_q2', 'cpi_value_q3', 'cpi_value_q4']
+
+    # def cpi_value_q1(self):
+    #     return self.cpi_value_q1
+    #
+    # cpi_value_q1.short_description = 'aho'
+
