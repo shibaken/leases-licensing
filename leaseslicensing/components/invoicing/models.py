@@ -158,7 +158,7 @@ class InvoicingDateMonthly(BaseModel):
 #
 #     class Meta:
 #         app_label = "leaseslicensing"
-class FinancialYear(BaseModel):
+class ConsumerPriceIndex(BaseModel):
     name = models.CharField(max_length=200,)  # i.e. 2022-2023
     start_date_q1 = models.DateField(null=True, blank=True)
     start_date_q2 = models.DateField(null=True, blank=True)
@@ -184,6 +184,27 @@ class FinancialYear(BaseModel):
         if self.start_date:
             end_date = self.start_date + relativedelta(years=1) - relativedelta(days=1)
         return end_date
+
+    def end_date_q1(self):
+        end_date = None
+        if self.start_date_q2:
+            end_date = self.start_date_q2 - relativedelta(days=1)
+        return end_date
+
+    def end_date_q2(self):
+        end_date = None
+        if self.start_date_q3:
+            end_date = self.start_date_q3 - relativedelta(days=1)
+        return end_date
+
+    def end_date_q3(self):
+        end_date = None
+        if self.start_date_q4:
+            end_date = self.start_date_q4 - relativedelta(days=1)
+        return end_date
+
+    def end_date_q4(self):
+        return self.end_date()
 
 
 class InvoicingDetails(BaseModel):
