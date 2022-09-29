@@ -15,3 +15,38 @@ class ChargeMethodAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # Remove 'Delete'
         return False
+
+
+@admin.register(models.ReviewDateAnnually)
+class ReviewDateAnnuallAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.ReviewDateQuarterly)
+class ReviewDateQuarterlyAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.ReviewDateMonthly)
+class ReviewDateMonthlyAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.InvoicingDateAnnually)
+class InvoicingDateAnnuallAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.InvoicingDateQuarterly)
+class InvoicingDateQuarterlyAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.InvoicingDateMonthly)
+class InvoicingDateMonthlyAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.ConsumerPriceIndex)
+class ConsumerPriceIndexAdmin(admin.ModelAdmin):
+    pass
