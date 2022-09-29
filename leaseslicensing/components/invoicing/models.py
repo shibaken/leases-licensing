@@ -43,6 +43,7 @@ class ReviewDateAnnually(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Review Date Annually'
 
     @staticmethod
     def get_review_date_annually_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -64,6 +65,7 @@ class ReviewDateQuarterly(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Review Date Quarterly'
 
     @staticmethod
     def get_review_date_quarterly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -82,6 +84,7 @@ class ReviewDateMonthly(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Review Date Monthly'
 
     @staticmethod
     def get_review_date_monthly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -100,6 +103,7 @@ class InvoicingDateAnnually(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Invoicing Date Annually'
 
     @staticmethod
     def get_invoicing_date_annually_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -121,6 +125,7 @@ class InvoicingDateQuarterly(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Invoicing Date Quarterly'
 
     @staticmethod
     def get_invoicing_date_quarterly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -139,6 +144,7 @@ class InvoicingDateMonthly(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Invoicing Date Monthly'
 
     @staticmethod
     def get_invoicing_date_monthly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
