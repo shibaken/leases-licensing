@@ -210,7 +210,7 @@ class InternalComplianceSerializer(serializers.ModelSerializer):
 
     def get_submitter(self, obj):
         if obj.submitter:
-            return obj.submitter.get_full_name()
+            return retrieve_email_user(obj.submitter).get_full_name()
         return None
 
 
