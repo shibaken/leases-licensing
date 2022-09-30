@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 from django.core.files import File
 
 from leaseslicensing import settings
+from leaseslicensing.components.invoicing.models import ChargeMethod, RepetitionType
 
 # from mooringlicensing.components.approvals.models import AgeGroup, AdmissionType
 from leaseslicensing.components.main.models import (
@@ -119,3 +120,23 @@ class DefaultDataManager(object):
         #            logger.info("Created oracle code item: {}".format(oracle_code_item))
         #        except Exception as e:
         #            logger.error('{}, failed to create oracle code item'.format(application_type))
+
+        for item in settings.CHARGE_METHODS:
+            try:
+                myMethod, created = ChargeMethod.objects.get_or_create(key=item[0])
+                if created:
+                    myMethod.display_name = item[1]
+                    myMethod.save()
+                    logger.info("Created ChargeMethod: {}".format(item[1]))
+            except Exception as e:
+                logger.error("{}, ChargeMethod: {}".format(e, item[1]))
+
+        for item in settings.REPETITION_TYPES:
+            try:
+                myType, created = RepetitionType.objects.get_or_create(key=item[0])
+                if created:
+                    myType.display_name = item[1]
+                    myType.save()
+                    logger.info("Created RepetitionType: {}".format(item[1]))
+            except Exception as e:
+                logger.error("{}, RepetitionType: {}".format(e, item[1]))
