@@ -15,8 +15,8 @@ from ledger_api_client.ledger_models import (
     EmailIdentity,
 )  # EmailUserAction
 
-from leaseslicensing.components.invoicing.models import ChargeMethod
-from leaseslicensing.components.invoicing.serializers import ChargeMethodSerializer
+from leaseslicensing.components.invoicing.models import ChargeMethod, RepetitionType
+from leaseslicensing.components.invoicing.serializers import ChargeMethodSerializer, RepetitionTypeSerializer
 # from leaseslicensing.components.main.utils import retrieve_department_users
 from leaseslicensing.components.main.decorators import basic_exception_handler
 from leaseslicensing.components.main.serializers import EmailUserSerializer
@@ -56,6 +56,17 @@ class GetChargeMethods(views.APIView):
     def get(self, request, format=None):
         charge_methods = ChargeMethod.objects.all()
         serializer = ChargeMethodSerializer(charge_methods, many=True)
+        return Response(serializer.data)
+
+
+class GetRepetitionTypes(views.APIView):
+    renderer_classes = [
+        JSONRenderer,
+    ]
+
+    def get(self, request, format=None):
+        repetition_types = RepetitionType.objects.all()
+        serializer = RepetitionTypeSerializer(repetition_types, many=True)
         return Response(serializer.data)
 
 

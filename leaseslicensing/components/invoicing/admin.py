@@ -19,7 +19,7 @@ class ChargeMethodAdmin(admin.ModelAdmin):
 
 @admin.register(models.ReviewDateAnnually)
 class ReviewDateAnnuallAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['review_date', 'date_of_enforcement',]
 
 
 @admin.register(models.ReviewDateQuarterly)
