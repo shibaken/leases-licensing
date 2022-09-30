@@ -166,22 +166,6 @@ def get_year():
         return ConsumerPriceIndex.start_year
 
 
-# def get_start_date_q1():
-#     pass
-
-
-# def get_start_date_q2():
-#     pass
-
-
-# def get_start_date_q3():
-#     pass
-
-
-# def get_start_date_q4():
-#     pass
-
-
 class ConsumerPriceIndex(BaseModel):
     start_year = 2021
 
@@ -250,16 +234,6 @@ class InvoicingDetails(BaseModel):
     review_repetition_type = models.ForeignKey(RepetitionType, null=True, blank=True, on_delete=models.SET_NULL, related_name='invoicing_details_set_for_review')
     invoicing_repetition_type = models.ForeignKey(RepetitionType, null=True, blank=True, on_delete=models.SET_NULL, related_name='invoicing_details_set_for_invoicing')
 
-    # Review dates
-    # review_date_annually = models.ForeignKey(ReviewDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
-    # review_date_quarterly = models.ForeignKey(ReviewDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
-    # review_date_monthly = models.ForeignKey(ReviewDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
-
-    # Invoicing dates
-    # invoicing_date_annually = models.ForeignKey(InvoicingDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
-    # invoicing_date_quarterly = models.ForeignKey(InvoicingDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
-    # invoicing_date_monthly = models.ForeignKey(InvoicingDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
-
     approval = models.ForeignKey('Approval', null=True, blank=True, on_delete=models.SET_NULL)
     previous_invoicing_details = models.OneToOneField('self', null=True, blank=True, related_name='next_invoicing_details', on_delete=models.SET_NULL)
 
@@ -272,6 +246,24 @@ class InvoicingDetails(BaseModel):
         #         name='either_one_null',
         #     )
         # ]
+
+
+class FixedAnnualIncrement(BaseModel):
+    year = models.PositiveSmallIntegerField(null=True, blank=True)
+    increment_amount = models.DecimalField(max_digits=10, decimal_places=2, default="0.00")
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = "leaseslicensing"
+
+
+class FixedAnnualPercentage(BaseModel):
+    year = models.PositiveSmallIntegerField(null=True, blank=True)
+    percentage = models.FloatField(default=0)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = "leaseslicensing"
 
 
 class CrownLandRentReviewDate(BaseModel):
