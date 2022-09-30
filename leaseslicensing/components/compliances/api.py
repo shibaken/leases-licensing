@@ -284,7 +284,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
     def assign_request_user(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            instance.assign_to(request.user, request)
+            instance.assign_to(request.user.id, request)
             serializer = InternalComplianceSerializer(instance)
             return Response(serializer.data)
         except serializers.ValidationError:
@@ -331,16 +331,16 @@ class ComplianceViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             user_id = request.data.get("user_id", None)
-            user = None
+            #user = None
             if not user_id:
                 raise serializers.ValiationError("A user id is required")
-            try:
-                user = EmailUser.objects.get(id=user_id)
-            except EmailUser.DoesNotExist:
-                raise serializers.ValidationError(
-                    "A user with the id passed in does not exist"
-                )
-            instance.assign_to(user, request)
+            #try:
+            #    user = EmailUser.objects.get(id=user_id)
+            #except EmailUser.DoesNotExist:
+            #    raise serializers.ValidationError(
+            #        "A user with the id passed in does not exist"
+            #    )
+            instance.assign_to(user_id, request)
             serializer = InternalComplianceSerializer(instance)
             return Response(serializer.data)
         except serializers.ValidationError:
