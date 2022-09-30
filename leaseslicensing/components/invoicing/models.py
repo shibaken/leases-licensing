@@ -157,46 +157,35 @@ class InvoicingDateMonthly(BaseModel):
         return invoicing_date_monthly
 
 
-# class ConsumerPriceIndex(BaseModel):
-#     name = models.CharField(max_length=200, blank=True)
-#     start_date = models.DateField(null=True, blank=True)  # end_date is one day before the start_date of the next ConsumerPriceIndex object.
-#     cpi_value = models.FloatField(null=True, blank=True)
-#
-#     class Meta:
-#         app_label = "leaseslicensing"
-def get_start_date(month_string, q_name):
+def get_year():
     cpis = ConsumerPriceIndex.objects.all()
     if cpis:
-        latest_cpis = cpis.order_by('start_date_q1').last()
-        start_date = getattr(latest_cpis, 'start_date_' + q_name) + relativedelta(years=1)
-        return start_date
+        latest_cpis = cpis.order_by('year').last()
+        return getattr(latest_cpis, 'year') + 1
     else:
-        return datetime.strptime(str(ConsumerPriceIndex.start_year) + '/' + month_string + '/01', '%Y/%m/%d')
+        return ConsumerPriceIndex.start_year
 
 
-def get_start_date_q1():
-    return get_start_date('07', 'q1')  # Jun
+# def get_start_date_q1():
+#     pass
 
 
-def get_start_date_q2():
-    return get_start_date('10', 'q2')  # Oct
+# def get_start_date_q2():
+#     pass
 
 
-def get_start_date_q3():
-    return get_start_date('01', 'q3')  # Jan
+# def get_start_date_q3():
+#     pass
 
 
-def get_start_date_q4():
-    return get_start_date('04', 'q4')  # Apr
+# def get_start_date_q4():
+#     pass
 
 
 class ConsumerPriceIndex(BaseModel):
     start_year = 2021
 
-    start_date_q1 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q1)
-    start_date_q2 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q2)
-    start_date_q3 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q3)
-    start_date_q4 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q4)
+    year = models.PositiveSmallIntegerField(null=True, blank=True, default=get_year)
     cpi_value_q1 = models.FloatField('CPI (Q1)', null=True, blank=True)
     cpi_value_q2 = models.FloatField('CPI (Q2)', null=True, blank=True)
     cpi_value_q3 = models.FloatField('CPI (Q3)', null=True, blank=True)
@@ -210,43 +199,42 @@ class ConsumerPriceIndex(BaseModel):
 
     @property
     def name(self):
-        return '{} --- {}'.format(self.start_date_q1.strftime('%Y'), (self.start_date_q1 + relativedelta(years=1)).strftime('%Y'))
+        if self.year:
+            return '{} --- {}'.format(str(self.year), str(self.year + 1))
+        else:
+            return '---'
 
     @property
-    def start_date(self):
-        return self.start_date_q1
+    def q1_start_date(self):
+        return datetime.strptime(str(self.year) + '/07/01', '%Y/%m/%d')
 
     @property
-    def end_date(self):
-        end_date = None
-        if self.start_date:
-            end_date = self.start_date + relativedelta(years=1) - relativedelta(days=1)
-        return end_date
+    def q2_start_date(self):
+        return datetime.strptime(str(self.year) + '/10/01', '%Y/%m/%d')
 
     @property
-    def end_date_q1(self):
-        end_date = None
-        if self.start_date_q2:
-            end_date = self.start_date_q2 - relativedelta(days=1)
-        return end_date
+    def q3_start_date(self):
+        return datetime.strptime(str(self.year + 1) + '/01/01', '%Y/%m/%d')
 
     @property
-    def end_date_q2(self):
-        end_date = None
-        if self.start_date_q3:
-            end_date = self.start_date_q3 - relativedelta(days=1)
-        return end_date
+    def q4_start_date(self):
+        return datetime.strptime(str(self.year + 1) + '/04/01', '%Y/%m/%d')
 
     @property
-    def end_date_q3(self):
-        end_date = None
-        if self.start_date_q4:
-            end_date = self.start_date_q4 - relativedelta(days=1)
-        return end_date
+    def q1_end_date(self):
+        return self.q1_start_date + relativedelta(months=3) - relativedelta(days=1)
 
     @property
-    def end_date_q4(self):
-        return self.end_date()
+    def q2_end_date(self):
+        return self.q2_start_date + relativedelta(months=3) - relativedelta(days=1)
+
+    @property
+    def q3_end_date(self):
+        return self.q3_start_date + relativedelta(months=3) - relativedelta(days=1)
+
+    @property
+    def q4_end_date(self):
+        return self.q4_start_date + relativedelta(months=3) - relativedelta(days=1)
 
 
 class InvoicingDetails(BaseModel):
