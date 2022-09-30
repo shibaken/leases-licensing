@@ -383,34 +383,30 @@ export default {
         },
         displaySaveBtns: function(){
             let display = false
+
             if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
-                if (this.proposal.accessing_user_roles.includes(constants.ROLES.ASSESSOR.ID)){
-                    display = true
+                if (this.proposal.application_type === constants.APPLICATION_TYPES.LEASE_LICENCE){
+                    if (this.proposal.accessing_user_roles.includes(constants.ROLES.LEASE_LICENCE_ASSESSOR.ID)){
+                        display = true
+                    }
+                } else if (this.proposal.application_type === constants.APPLICATION_TYPES.REGISTRATION_OF_INTEREST){
+                    if (this.proposal.accessing_user_roles.includes(constants.ROLES.REGISTRATION_OF_INTEREST.ID)){
+                        display = true
+                    }
                 }
-            }
-            if ([constants.WITH_REFERRAL, constants.WITH_REFERRAL_CONDITIONS].includes(this.proposal.processing_status)){
+            } else if ([constants.WITH_REFERRAL, constants.WITH_REFERRAL_CONDITIONS].includes(this.proposal.processing_status)){
                 if (this.proposal.accessing_user_roles.includes(constants.ROLES.REFERRAL.ID)){
                     display = true
                 }
             }
+
             return display
         },
-        disableSaveAndContinueBtn: function(){
-            let enabled = false
-            if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
-                if (this.proposal.accessing_user_roles.includes(constants.ROLES.ASSESSOR.ID)){
-                    enabled = true
-                }
-            }
-            if ([constants.WITH_REFERRAL, constants.WITH_REFERRAL_CONDITIONS].includes(this.proposal.processing_status)){
-                if (this.proposal.accessing_user_roles.includes(constants.ROLES.REFERRAL.ID)){
-                    enabled = true
-                }
-            }
-            return !enabled
+        disableSaveAndContinueBtn: function(){  // Is this needed?
+            return !this.displaySaveBtns()
         },
-        disableSaveAndExitBtn: function(){
-            return this.disableSaveAndContinueBtn
+        disableSaveAndExitBtn: function(){  // Is this needed?
+            return !this.displaySaveBtns()
         },
         submitter_first_name: function(){
             if (this.proposal.submitter){
