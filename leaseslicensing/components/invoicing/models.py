@@ -2,6 +2,7 @@ from django.db import models
 from datetime import datetime
 import pytz
 from ledger_api_client import settings_base
+from dateutil.relativedelta import relativedelta
 
 
 class BaseModel(models.Model):
@@ -25,12 +26,24 @@ class ChargeMethod(models.Model):
         return self.display_name
 
 
+class RepetitionType(models.Model):
+    key = models.CharField(max_length=200, unique=True)
+    display_name = models.CharField(max_length=200,)
+
+    class Meta:
+        app_label = "leaseslicensing"
+
+    def __str__(self):
+        return self.display_name
+
+
 class ReviewDateAnnually(BaseModel):
     review_date = models.DateField(null=True, blank=True)
     date_of_enforcement = models.DateField()
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Review Date Annually'
 
     @staticmethod
     def get_review_date_annually_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -52,6 +65,7 @@ class ReviewDateQuarterly(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Review Date Quarterly'
 
     @staticmethod
     def get_review_date_quarterly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -70,6 +84,7 @@ class ReviewDateMonthly(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Review Date Monthly'
 
     @staticmethod
     def get_review_date_monthly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -88,6 +103,7 @@ class InvoicingDateAnnually(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Invoicing Date Annually'
 
     @staticmethod
     def get_invoicing_date_annually_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -109,6 +125,7 @@ class InvoicingDateQuarterly(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Invoicing Date Quarterly'
 
     @staticmethod
     def get_invoicing_date_quarterly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -127,6 +144,7 @@ class InvoicingDateMonthly(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        verbose_name_plural = 'Invoicing Date Monthly'
 
     @staticmethod
     def get_invoicing_date_monthly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
@@ -139,6 +157,98 @@ class InvoicingDateMonthly(BaseModel):
         return invoicing_date_monthly
 
 
+# class ConsumerPriceIndex(BaseModel):
+#     name = models.CharField(max_length=200, blank=True)
+#     start_date = models.DateField(null=True, blank=True)  # end_date is one day before the start_date of the next ConsumerPriceIndex object.
+#     cpi_value = models.FloatField(null=True, blank=True)
+#
+#     class Meta:
+#         app_label = "leaseslicensing"
+def get_start_date(month_string, q_name):
+    cpis = ConsumerPriceIndex.objects.all()
+    if cpis:
+        latest_cpis = cpis.order_by('start_date_q1').last()
+        start_date = getattr(latest_cpis, 'start_date_' + q_name) + relativedelta(years=1)
+        return start_date
+    else:
+        return datetime.strptime(str(ConsumerPriceIndex.start_year) + '/' + month_string + '/01', '%Y/%m/%d')
+
+
+def get_start_date_q1():
+    return get_start_date('07', 'q1')  # Jun
+
+
+def get_start_date_q2():
+    return get_start_date('10', 'q2')  # Oct
+
+
+def get_start_date_q3():
+    return get_start_date('01', 'q3')  # Jan
+
+
+def get_start_date_q4():
+    return get_start_date('04', 'q4')  # Apr
+
+
+class ConsumerPriceIndex(BaseModel):
+    start_year = 2021
+
+    start_date_q1 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q1)
+    start_date_q2 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q2)
+    start_date_q3 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q3)
+    start_date_q4 = models.DateField(null=True, blank=True, editable=False, default=get_start_date_q4)
+    cpi_value_q1 = models.FloatField('CPI (Q1)', null=True, blank=True)
+    cpi_value_q2 = models.FloatField('CPI (Q2)', null=True, blank=True)
+    cpi_value_q3 = models.FloatField('CPI (Q3)', null=True, blank=True)
+    cpi_value_q4 = models.FloatField('CPI (Q4)', null=True, blank=True)
+
+    class Meta:
+        app_label = "leaseslicensing"
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    @property
+    def name(self):
+        return '{} --- {}'.format(self.start_date_q1.strftime('%Y'), (self.start_date_q1 + relativedelta(years=1)).strftime('%Y'))
+
+    @property
+    def start_date(self):
+        return self.start_date_q1
+
+    @property
+    def end_date(self):
+        end_date = None
+        if self.start_date:
+            end_date = self.start_date + relativedelta(years=1) - relativedelta(days=1)
+        return end_date
+
+    @property
+    def end_date_q1(self):
+        end_date = None
+        if self.start_date_q2:
+            end_date = self.start_date_q2 - relativedelta(days=1)
+        return end_date
+
+    @property
+    def end_date_q2(self):
+        end_date = None
+        if self.start_date_q3:
+            end_date = self.start_date_q3 - relativedelta(days=1)
+        return end_date
+
+    @property
+    def end_date_q3(self):
+        end_date = None
+        if self.start_date_q4:
+            end_date = self.start_date_q4 - relativedelta(days=1)
+        return end_date
+
+    @property
+    def end_date_q4(self):
+        return self.end_date()
+
+
 class InvoicingDetails(BaseModel):
     """
     This is the main model to store invoicing details, generated by a proposal first (Proposal has a field: invoicing_details)
@@ -149,16 +259,18 @@ class InvoicingDetails(BaseModel):
     once_off_charge_amount = models.DecimalField(max_digits=10, decimal_places=2, default="0.00")
     review_once_every = models.PositiveSmallIntegerField(null=True, blank=True)
     invoicing_once_every = models.PositiveSmallIntegerField(null=True, blank=True)
+    review_repetition_type = models.ForeignKey(RepetitionType, null=True, blank=True, on_delete=models.SET_NULL, related_name='invoicing_details_set_for_review')
+    invoicing_repetition_type = models.ForeignKey(RepetitionType, null=True, blank=True, on_delete=models.SET_NULL, related_name='invoicing_details_set_for_invoicing')
 
     # Review dates
-    review_date_annually = models.ForeignKey(ReviewDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
-    review_date_quarterly = models.ForeignKey(ReviewDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
-    review_date_monthly = models.ForeignKey(ReviewDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
+    # review_date_annually = models.ForeignKey(ReviewDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
+    # review_date_quarterly = models.ForeignKey(ReviewDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
+    # review_date_monthly = models.ForeignKey(ReviewDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
 
     # Invoicing dates
-    invoicing_date_annually = models.ForeignKey(InvoicingDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
-    invoicing_date_quarterly = models.ForeignKey(InvoicingDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
-    invoicing_date_monthly = models.ForeignKey(InvoicingDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
+    # invoicing_date_annually = models.ForeignKey(InvoicingDateAnnually, null=True, blank=True, on_delete=models.SET_NULL)
+    # invoicing_date_quarterly = models.ForeignKey(InvoicingDateQuarterly, null=True, blank=True, on_delete=models.SET_NULL)
+    # invoicing_date_monthly = models.ForeignKey(InvoicingDateMonthly, null=True, blank=True, on_delete=models.SET_NULL)
 
     approval = models.ForeignKey('Approval', null=True, blank=True, on_delete=models.SET_NULL)
     previous_invoicing_details = models.OneToOneField('self', null=True, blank=True, related_name='next_invoicing_details', on_delete=models.SET_NULL)
@@ -172,3 +284,11 @@ class InvoicingDetails(BaseModel):
         #         name='either_one_null',
         #     )
         # ]
+
+
+class CrownLandRentReviewDate(BaseModel):
+    review_date = models.DateField(null=True, blank=True)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = "leaseslicensing"
