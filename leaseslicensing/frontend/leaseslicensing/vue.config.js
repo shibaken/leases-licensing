@@ -9,6 +9,7 @@ module.exports = {
     chainWebpack: config => {
         config.resolve.alias.set('@vue-utils', path.resolve(__dirname, 'src/utils/vue'));
         config.resolve.alias.set('@common-utils', path.resolve(__dirname, 'src/components/common/'));
+        config.resolve.alias.set('@static-root', path.resolve(__dirname, '../../../staticfiles_ll/'));
         //config.resolve.alias.set('datetimepicker','eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
         //config.resolve.alias.set('easing','jquery.easing/jquery.easing.js');
     },
