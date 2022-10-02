@@ -4,7 +4,8 @@
             <div class="container-fluid">
                 <div class="row">
                     <form class="form-horizontal" name="amendForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <!--alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert-->
+                        <VueAlert :show.sync="showError" type="danger"><strong v-html="errorString"></strong></VueAlert>
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="col-sm-offset-2 col-sm-8">
@@ -36,14 +37,14 @@
 //import $ from 'jquery'
 import Vue from 'vue'
 import modal from '@vue-utils/bootstrap-modal.vue'
-import alert from '@vue-utils/alert.vue'
+import VueAlert from '@vue-utils/alert.vue'
 
 import {helpers, api_endpoints} from "@/utils/hooks.js"
 export default {
     name:'compliance-amendment-request',
     components:{
         modal,
-        alert
+        VueAlert
     },
     props:{
             compliance_id:{
@@ -110,14 +111,17 @@ export default {
             this.reason_choices = Object.assign({}, await helpers.fetchWrapper(url));
         },
         sendData: async function(){
+            let vm = this;
             vm.errors = false;
             const amendment = JSON.parse(JSON.stringify(vm.amendment));
             const url = '/api/compliance_amendment_request.json';
             const response = await helpers.fetchWrapper(url, 'POST', amendment);
+            console.log(response)
             if (!response.ok) {
-                console.log(error);
                 vm.errors = true;
-                vm.errorString = helpers.apiVueResourceError(error);
+                //vm.errorString = helpers.apiVueResourceError(response);
+                this.errorString = await helpers.parseFetchError(response)
+                //this.errorString = response
                 vm.amendingcompliance = true;
             } else {
                 await new swal(
@@ -155,6 +159,7 @@ export default {
                 
             */
         },
+        /*
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
@@ -187,6 +192,7 @@ export default {
                 }
             });
        },
+       */
        eventListerners:function () {
             let vm = this;
             
@@ -210,7 +216,7 @@ export default {
        let vm =this;
        vm.form = document.forms.amendForm;
        vm.fetchAmendmentChoices();
-       vm.addFormValidations();
+       //vm.addFormValidations();
        this.$nextTick(()=>{  
             vm.eventListerners();
         });
