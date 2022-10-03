@@ -3,10 +3,17 @@
         <div class="col-sm-3">
             <label for="" class="control-label">Rent or licence charge method</label>
         </div>
-        <div class="col-sm-4">
-            <div v-for="charge_method in charge_methods" :id="charge_method.id">
-                <input type="radio" :id="charge_method.key" :value="charge_method.key" v-model="invoicing_details.charge_method" />
-                <label :for="charge_method.key">{{ charge_method.display_name }}</label>
+        <div class="col-sm-9">
+            <div v-for="charge_method in charge_methods" class="form-check" :id="charge_method.id">
+                <input 
+                    type="radio" 
+                    class="form-check-input"
+                    name="charge_method"
+                    :id="charge_method.key" 
+                    :value="charge_method.key" 
+                    v-model="invoicing_details.charge_method"
+                />
+                <label :for="charge_method.key" class="form-check-label">{{ charge_method.display_name }}</label>
             </div>
         </div>
     </div>
@@ -15,7 +22,7 @@
             <label for="once_off_charge_amount" class="control-label">Once-off charge (AU$)</label>
         </div>
         <div class="col-sm-2">
-            <input type="number" id="once_off_charge_amount" class="form-control" v-model="invoicing_details.once_off_charge_amount">
+            <input type="number" min="0" step="100" id="once_off_charge_amount" class="form-control" v-model="invoicing_details.once_off_charge_amount">
         </div>
     </div>
     <div v-show="show_fixed_annual_increment || show_fixed_annual_percentage" class="row mb-2">
@@ -23,7 +30,7 @@
             <label for="base_fee_amount" class="control-label">Base fee (AU$)</label>
         </div>
         <div class="col-sm-2">
-            <input type="number" id="base_fee_amount" class="form-control" v-model="invoicing_details.base_fee_amount">
+            <input type="number" min="0" step="100" id="base_fee_amount" class="form-control" v-model="invoicing_details.base_fee_amount">
         </div>
     </div>
     <div v-show="show_fixed_annual_increment" class="row mb-2">
@@ -40,12 +47,19 @@
             <label for="review_once_every" class="control-label">Once every</label>
         </div>
         <div class="col-sm-2">
-            <input type="number" id="review_once_every" class="form-control" v-model="invoicing_details.review_once_every">
+            <input type="number" min="0" max="5" step="1" id="review_once_every" class="form-control" v-model="invoicing_details.review_once_every">
         </div>
         <div class="col-sm-2">
-            <div v-for="repetition_type in repetition_types" :id="repetition_type.id">
-                <input type="radio" :id="repetition_type.key" :value="repetition_type.key" v-model="invoicing_details.review_repetition_type" />
-                <label :for="repetition_type.key">{{ repetition_type.display_name }}</label>
+            <div v-for="repetition_type in repetition_types" class="form-check" :id="repetition_type.id">
+                <input 
+                    type="radio" 
+                    name="repetition_type_review"
+                    class="form-check-input"
+                    :id="'review_' + repetition_type.key" 
+                    :value="repetition_type.key" 
+                    v-model="invoicing_details.review_repetition_type"
+                />
+                <label :for="'review_' + repetition_type.key" class="form-check-label">{{ repetition_type.display_name }}</label>
             </div>
         </div>
     </div>
@@ -60,12 +74,19 @@
             <label for="invoicing_once_every" class="control-label">Once every</label>
         </div>
         <div class="col-sm-2">
-            <input type="number" id="invoicing_once_every" class="form-control" v-model="invoicing_details.invoicing_once_every">
+            <input type="number" min="0" max="5" step="1" id="invoicing_once_every" class="form-control" v-model="invoicing_details.invoicing_once_every">
         </div>
         <div class="col-sm-2">
-            <div v-for="repetition_type in repetition_types" :id="repetition_type.id">
-                <input type="radio" :id="repetition_type.key" :value="repetition_type.key" v-model="invoicing_details.invoicing_repetition_type" />
-                <label :for="repetition_type.key">{{ repetition_type.display_name }}</label>
+            <div v-for="repetition_type in repetition_types" class="form-check" :id="repetition_type.id">
+                <input 
+                    type="radio" 
+                    name="repetition_type_invoicing"
+                    class="form-check-input"
+                    :id="'invoicing_' + repetition_type.key" 
+                    :value="repetition_type.key" 
+                    v-model="invoicing_details.invoicing_repetition_type"
+                />
+                <label :for="'invoicing_' + repetition_type.key" class="form-check-label">{{ repetition_type.display_name }}</label>
             </div>
         </div>
     </div>
