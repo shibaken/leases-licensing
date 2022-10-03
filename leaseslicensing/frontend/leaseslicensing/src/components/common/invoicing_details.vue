@@ -34,10 +34,14 @@
         </div>
     </div>
     <div v-show="show_fixed_annual_increment" class="row mb-2">
-        TODO: Annual Increment Component
+        <AnnualAmount
+            amount_type="increment"
+        />
     </div>
     <div v-show="show_fixed_annual_percentage" class="row mb-2">
-        TODO: Annual Percentage Component
+        <AnnualAmount
+            amount_type="percentage"
+        />
     </div>
     <div v-show="show_review_of_base_fee" class="row mb-2">
         <div class="col-sm-3">
@@ -95,6 +99,7 @@
 <script>
 import { none } from 'ol/centerconstraint';
 import { v4 as uuid } from 'uuid'
+import AnnualAmount from '@/components/common/component_fixed_annual_amount.vue'
 
 export default {
     name: 'InvoicingDetails',
@@ -107,7 +112,7 @@ export default {
         }
     },
     components: {
-
+        AnnualAmount,
     },
     created: function(){
         this.fetchChargeMethods()
