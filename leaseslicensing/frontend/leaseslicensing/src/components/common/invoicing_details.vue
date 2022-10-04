@@ -25,7 +25,7 @@
             <input type="number" min="0" step="100" id="once_off_charge_amount" class="form-control" v-model="invoicing_details.once_off_charge_amount">
         </div>
     </div>
-    <div v-show="show_fixed_annual_increment || show_fixed_annual_percentage" class="row mb-2">
+    <div v-show="show_base_fee" class="row mb-2">
         <div class="col-sm-3">
             <label for="base_fee_amount" class="control-label">Base fee [AU$]</label>
         </div>
@@ -44,6 +44,17 @@
             increment_type="percentage"
             :years_array="years_array_percentage"
         />
+    </div>
+    <div v-show="show_percentage_of_gross_turnover">
+        <AnnualIncrement
+            increment_type="percentage"
+            :years_array="percentage_of_gross_turnover"
+        />
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                Approval holder will be asked to upload their audited financial statement once a year.
+            </div>
+        </div>
     </div>
     <div v-show="show_review_of_base_fee" class="row mb-2">
         <div class="col-sm-3">
@@ -70,7 +81,9 @@
         </div>
     </div>
     <div v-show="show_crown_land_rent_review_date">
-        <CrownLandRentReviewDate />
+        <CrownLandRentReviewDate
+            :review_dates="review_dates" 
+        />
     </div>
     <div v-show="show_invoicing_frequency" class="row mb-2">
         <div class="col-sm-3">
@@ -115,6 +128,8 @@ export default {
 
             years_array_increment: [],
             years_array_percentage: [],
+            percentage_of_gross_turnover: [],
+            review_dates: [],
         }
     },
     components: {
@@ -130,28 +145,44 @@ export default {
     },
     computed: {
         show_once_off_charge_amount: function(){
-            // TODO
-            return true
+            if (this.invoicing_details && this.invoicing_details.charge_method === 'once_off_charge')
+                return true
+            return false
         },
         show_fixed_annual_increment: function(){
-            // TODO
-            return true
+            if (this.invoicing_details && this.invoicing_details.charge_method === 'base_fee_plus_fixed_annual_increment')
+                return true
+            return false
         },
         show_fixed_annual_percentage: function(){
-            // TODO
-            return true
+            if (this.invoicing_details && this.invoicing_details.charge_method === 'base_fee_plus_fixed_annual_percentage')
+                return true
+            return false
+        },
+        show_base_fee: function(){
+            if (this.show_fixed_annual_increment || this.show_fixed_annual_percentage || (
+                this.invoicing_details && this.invoicing_details.charge_method === 'base_fee_plus_annual_cpi'
+            ))
+                return true
+            return false
         },
         show_review_of_base_fee: function(){
-            // TODO
-            return true
+            return this.show_base_fee
+        },
+        show_percentage_of_gross_turnover: function(){
+            if (this.invoicing_details && this.invoicing_details.charge_method === 'percentage_of_gross_turnover')
+                return true
+            return false
         },
         show_crown_land_rent_review_date: function(){
-            // TODO
-            return true
+            return this.show_base_fee
         },
         show_invoicing_frequency: function(){
-            // TODO
-            return true
+            if (this.invoicing_details){
+                if (['base_fee_plus_fixed_annual_increment', 'base_fee_plus_fixed_annual percentage', 'base_fee_plus_annual_cpi', 'percentage_of_gross_turnover'].includes(this.invoicing_details.charge_method))
+                    return true
+                return false
+            }
         },
     },
     methods: {
