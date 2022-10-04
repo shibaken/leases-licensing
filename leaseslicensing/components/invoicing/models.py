@@ -266,6 +266,15 @@ class FixedAnnualPercentage(BaseModel):
         app_label = "leaseslicensing"
 
 
+class PercentageOfGrossTurnover(BaseModel):
+    year = models.PositiveSmallIntegerField(null=True, blank=True)
+    percentage = models.FloatField(default=0)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = "leaseslicensing"
+
+
 class CrownLandRentReviewDate(BaseModel):
     review_date = models.DateField(null=True, blank=True)
     invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
