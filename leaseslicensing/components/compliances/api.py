@@ -5,6 +5,7 @@ import base64
 import geojson
 from six.moves.urllib.parse import urlparse
 from wsgiref.util import FileWrapper
+from copy import deepcopy
 from django.db.models import Q, Min
 from django.db import transaction
 from django.http import HttpResponse
@@ -509,7 +510,9 @@ class ComplianceAmendmentRequestViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            serializer = self.get_serializer(data=request.data)
+            request_data = deepcopy(request.data)
+            request_data.update({"officer": request.user.id})
+            serializer = self.get_serializer(data=request_data)
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
             instance.generate_amendment(request)
