@@ -19,7 +19,7 @@
     </div>
     <div v-show="show_once_off_charge_amount" class="row mb-2">
         <div class="col-sm-3">
-            <label for="once_off_charge_amount" class="control-label">Once-off charge (AU$)</label>
+            <label for="once_off_charge_amount" class="control-label">Once-off charge [AU$]</label>
         </div>
         <div class="col-sm-2">
             <input type="number" min="0" step="100" id="once_off_charge_amount" class="form-control" v-model="invoicing_details.once_off_charge_amount">
@@ -27,20 +27,22 @@
     </div>
     <div v-show="show_fixed_annual_increment || show_fixed_annual_percentage" class="row mb-2">
         <div class="col-sm-3">
-            <label for="base_fee_amount" class="control-label">Base fee (AU$)</label>
+            <label for="base_fee_amount" class="control-label">Base fee [AU$]</label>
         </div>
         <div class="col-sm-2">
             <input type="number" min="0" step="100" id="base_fee_amount" class="form-control" v-model="invoicing_details.base_fee_amount">
         </div>
     </div>
-    <div v-show="show_fixed_annual_increment" class="row mb-2">
-        <AnnualAmount
-            amount_type="increment"
+    <div v-show="show_fixed_annual_increment">
+        <AnnualIncrement
+            increment_type="amount"
+            :years_array="years_array_increment"
         />
     </div>
-    <div v-show="show_fixed_annual_percentage" class="row mb-2">
-        <AnnualAmount
-            amount_type="percentage"
+    <div v-show="show_fixed_annual_percentage">
+        <AnnualIncrement
+            increment_type="percentage"
+            :years_array="years_array_percentage"
         />
     </div>
     <div v-show="show_review_of_base_fee" class="row mb-2">
@@ -67,8 +69,8 @@
             </div>
         </div>
     </div>
-    <div v-show="show_crown_land_rent_review_date" class="row mb-2">
-        TODO: Cronw Land Component
+    <div v-show="show_crown_land_rent_review_date">
+        <CrownLandRentReviewDate />
     </div>
     <div v-show="show_invoicing_frequency" class="row mb-2">
         <div class="col-sm-3">
@@ -99,7 +101,8 @@
 <script>
 import { none } from 'ol/centerconstraint';
 import { v4 as uuid } from 'uuid'
-import AnnualAmount from '@/components/common/component_fixed_annual_amount.vue'
+import AnnualIncrement from '@/components/common/component_fixed_annual_amount.vue'
+import CrownLandRentReviewDate from '@/components/common/component_crown_land_rent_review_date.vue'
 
 export default {
     name: 'InvoicingDetails',
@@ -109,10 +112,14 @@ export default {
             charge_methods: [],
             repetition_types: [],
             invoicing_details: {},
+
+            years_array_increment: [],
+            years_array_percentage: [],
         }
     },
     components: {
-        AnnualAmount,
+        AnnualIncrement,
+        CrownLandRentReviewDate,
     },
     created: function(){
         this.fetchChargeMethods()
