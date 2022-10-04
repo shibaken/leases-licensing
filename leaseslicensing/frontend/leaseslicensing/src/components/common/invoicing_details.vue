@@ -1,5 +1,5 @@
 <template>
-    <div class="row mb-2">
+    <div class="row mb-4">
         <div class="col-sm-3">
             <label for="" class="control-label">Rent or licence charge method</label>
         </div>
@@ -25,7 +25,7 @@
             <input type="number" min="0" step="100" id="once_off_charge_amount" class="form-control" v-model="invoicing_details.once_off_charge_amount">
         </div>
     </div>
-    <div v-show="show_base_fee" class="row mb-2">
+    <div v-show="show_base_fee" class="row mb-4">
         <div class="col-sm-3">
             <label for="base_fee_amount" class="control-label">Base fee [AU$]</label>
         </div>
@@ -179,7 +179,7 @@ export default {
         },
         show_invoicing_frequency: function(){
             if (this.invoicing_details){
-                if (['base_fee_plus_fixed_annual_increment', 'base_fee_plus_fixed_annual percentage', 'base_fee_plus_annual_cpi', 'percentage_of_gross_turnover'].includes(this.invoicing_details.charge_method))
+                if (['base_fee_plus_fixed_annual_increment', 'base_fee_plus_fixed_annual_percentage', 'base_fee_plus_annual_cpi', 'percentage_of_gross_turnover'].includes(this.invoicing_details.charge_method))
                     return true
                 return false
             }

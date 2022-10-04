@@ -1,47 +1,45 @@
 <template>
-    <template v-for="item in years_array" :key="item.key">
-        <div class="row mb-2">
+        <div class="row mb-4">
             <div class="col-sm-3">
             </div>
             <div class="col-sm-9">
-                <div class="row row_wrapper">
-                    <div class="col-sm-2">
-                        Increment
+                <template v-for="item in years_array" :key="item.key">
+                    <div class="row mb-2 row_wrapper">
+                        <div class="col-sm-2">
+                            Increment
+                        </div>
+                        <div class="col-sm-1 text-end">year</div>
+                        <div class="col-sm-2">
+                            <input 
+                                type="number" 
+                                :min="min_year" 
+                                :max="max_year" 
+                                :step="step_year" 
+                                class="form-control"
+                                v-model="item.year"
+                            />
+                        </div>
+                        <div class="col-sm-3 text-end">{{ value_title }}</div>
+                        <div class="col-sm-2">
+                            <input 
+                                type="number" 
+                                :min="min_increment" 
+                                :max="max_increment" 
+                                :step="step_increment" 
+                                class="form-control"
+                                v-model="item.increment_value"
+                            />
+                        </div>
+                        <div class="col-sm-1">
+                            <template v-if="item.id === 0">
+                                <span class="remove_a_row text-danger" @click="remove_a_row(item, $event)"><i class="bi bi-x-circle-fill"></i></span>
+                            </template>
+                        </div>
                     </div>
-                    <div class="col-sm-1 text-end">year</div>
-                    <div class="col-sm-2">
-                        <input 
-                            type="number" 
-                            :min="min_year" 
-                            :max="max_year" 
-                            :step="step_year" 
-                            class="form-control"
-                            v-model="item.year"
-                        />
-                    </div>
-                    <div class="col-sm-3 text-end">{{ value_title }}</div>
-                    <div class="col-sm-2">
-                        <input 
-                            type="number" 
-                            :min="min_increment" 
-                            :max="max_increment" 
-                            :step="step_increment" 
-                            class="form-control"
-                            v-model="item.increment_value"
-                        />
-                    </div>
-                    <div class="col-sm-1">
-                        <template v-if="item.id === 0">
-                            <span class="remove_a_row text-danger" @click="remove_a_row(item, $event)"><i class="bi bi-x-circle-fill"></i></span>
-                        </template>
-                    </div>
-                </div>
+                </template>
+                <a href="#" @click="addAnotherYearClicked">Add increment year</a>
             </div>
         </div>
-    </template>
-    <div class="text-end">
-        <a href="#" @click="addAnotherYearClicked">Add another year</a>
-    </div>
 </template>
 
 <script>

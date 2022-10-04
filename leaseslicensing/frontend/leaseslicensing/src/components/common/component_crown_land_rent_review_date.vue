@@ -1,5 +1,5 @@
 <template>
-    <div class="row mb-2">
+    <div class="row mb-4">
         <div class="col-sm-3">
             Crown Land Rent Review Date
         </div>
@@ -14,13 +14,10 @@
                     </div>
                 </div>
             </template>
+            <a href="#" @click="addAnotherDateClicked">Add review date</a>
         </div>
     </div>
-    <div class="text-end">
-        <a href="#" @click="addAnotherDateClicked">Add another date</a>
-    </div>
 </template>
-
 
 <script>
 import { v4 as uuid } from 'uuid'
