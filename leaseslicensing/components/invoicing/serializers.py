@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from leaseslicensing.components.invoicing.models import ChargeMethod, RepetitionType
+from leaseslicensing.components.invoicing.models import ChargeMethod, RepetitionType, InvoicingDetails
 
 
 class ChargeMethodSerializer(serializers.ModelSerializer):
@@ -22,4 +22,13 @@ class RepetitionTypeSerializer(serializers.ModelSerializer):
             'id',
             'key',
             'display_name',
+        )
+
+
+class InvoicingDetailsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InvoicingDetails
+        fields = (
+            'id',
         )
