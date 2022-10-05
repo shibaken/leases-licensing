@@ -455,7 +455,7 @@ export default {
             if (this.proposal.application_type.name in condition_to_display){
                 if (this.proposal.processing_status_id in condition_to_display[this.proposal.application_type.name]){
                     let roles = condition_to_display[this.proposal.application_type.name][this.proposal.processing_status_id]
-                    const intersection = roles.filter(role => this.proposal.accessing_user_roles.includes(role.ID));
+                    const intersection = roles.filter(role => this.proposal.accessing_user_roles.includes(role));
                     if (intersection.length > 0)
                         condition = true
                 }
