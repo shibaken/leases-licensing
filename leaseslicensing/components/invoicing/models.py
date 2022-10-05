@@ -251,7 +251,7 @@ class InvoicingDetails(BaseModel):
 class FixedAnnualIncrementAmount(BaseModel):
     year = models.PositiveSmallIntegerField(null=True, blank=True)
     increment_amount = models.DecimalField(max_digits=10, decimal_places=2, default="0.00")
-    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE, related_name="annual_increment_amounts")
 
     class Meta:
         app_label = "leaseslicensing"
@@ -260,7 +260,7 @@ class FixedAnnualIncrementAmount(BaseModel):
 class FixedAnnualIncrementPercentage(BaseModel):
     year = models.PositiveSmallIntegerField(null=True, blank=True)
     percentage = models.FloatField(default=0)
-    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE, related_name="annual_increment_percentages")
 
     class Meta:
         app_label = "leaseslicensing"
@@ -269,7 +269,7 @@ class FixedAnnualIncrementPercentage(BaseModel):
 class PercentageOfGrossTurnover(BaseModel):
     year = models.PositiveSmallIntegerField(null=True, blank=True)
     percentage = models.FloatField(default=0)
-    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE, related_name="gross_turnover_percentages")
 
     class Meta:
         app_label = "leaseslicensing"
@@ -277,7 +277,7 @@ class PercentageOfGrossTurnover(BaseModel):
 
 class CrownLandRentReviewDate(BaseModel):
     review_date = models.DateField(null=True, blank=True)
-    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE, related_name="crown_land_rent_review_dates")
 
     class Meta:
         app_label = "leaseslicensing"
