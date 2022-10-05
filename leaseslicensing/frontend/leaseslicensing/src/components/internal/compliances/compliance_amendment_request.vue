@@ -11,8 +11,8 @@
                                 <div class="col-sm-offset-2 col-sm-8">
                                     <div class="form-group">
                                         <label class="control-label pull-left"  for="Name">Reason</label>
-                                        <select class="form-control" name="reason" ref="reason" v-model="amendment.reason">
-                                            <option v-for="r in reason_choices" :value="r.key">{{r.value}}</option>
+                                        <select class="form-control" name="reasons" ref="reasons" v-model="amendment.reason">
+                                            <option v-for="reason in reason_choices" :value="reason.key" :key="reason.key">{{reason.value}}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -61,7 +61,7 @@ export default {
                 amendingcompliance: false,
                 compliance: vm.compliance_id 
             },
-            reason_choices: {},
+            reason_choices: null,
             errors: false,
             errorString: '',
             validation_form: null,
@@ -92,7 +92,7 @@ export default {
                 compliance: this.compliance_id
             };
             this.errors = false;
-            $(this.$refs.reason).val(null).trigger('change');
+            $(this.$refs.reasons).val(null).trigger('change');
             $('.has-error').removeClass('has-error');
             
             this.validation_form.resetForm();
@@ -108,14 +108,18 @@ export default {
                 console.log(error);
             } );
             */
-            this.reason_choices = Object.assign({}, await helpers.fetchWrapper(url));
+            //this.reason_choices = Object.assign({}, await helpers.fetchWrapper(url));
+            this.reason_choices = await helpers.fetchWrapper(url);
         },
         sendData: async function(){
             let vm = this;
             vm.errors = false;
-            const amendment = JSON.parse(JSON.stringify(vm.amendment));
+            //const amendment = JSON.parse(JSON.stringify(vm.amendment));
+            const amendment = JSON.stringify(vm.amendment);
             const url = '/api/compliance_amendment_request.json';
-            const response = await helpers.fetchWrapper(url, 'POST', amendment);
+            const response = await fetch(url, {
+                method: 'POST', 
+                body: amendment});
             console.log(response)
             if (!response.ok) {
                 vm.errors = true;
@@ -131,6 +135,7 @@ export default {
                         );
                 vm.amendingcompliance = true;
                 vm.close();
+                vm.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
             }
             /*
             vm.$http.post('/api/compliance_amendment_request.json',JSON.stringify(amendment),{
@@ -197,8 +202,8 @@ export default {
             let vm = this;
             
             // Intialise select2
-            $(vm.$refs.reason).select2({
-                "theme": "bootstrap",
+            $(vm.$refs.reasons).select2({
+                "theme": "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Reason"
             }).
