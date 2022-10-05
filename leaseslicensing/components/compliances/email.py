@@ -106,13 +106,13 @@ def send_amendment_email_notification(
     }
 
     submitter = (
-        compliance.submitter.email
-        if compliance.submitter and compliance.submitter.email
-        else compliance.proposal.submitter.email
+        retrieve_email_user(compliance.submitter).email
+        if compliance.submitter and retrieve_email_user(compliance.submitter).email
+        else retrieve_email_user(compliance.proposal.submitter).email
     )
     all_ccs = []
-    if compliance.proposal.org_applicant and compliance.proposal.org_applicant.email:
-        cc_list = compliance.proposal.org_applicant.email
+    if compliance.proposal.org_applicant and retrieve_email_user(compliance.proposal.org_applicant).email:
+        cc_list = retrieve_email_user(compliance.proposal.org_applicant).email
         if cc_list:
             all_ccs = [cc_list]
     msg = email.send(submitter, cc=all_ccs, context=context)
@@ -121,14 +121,14 @@ def send_amendment_email_notification(
 
     sender = request.user if request else settings.DEFAULT_FROM_EMAIL
     _log_compliance_email(msg, compliance, sender=sender)
-    if compliance.proposal.org_applicant:
-        _log_org_email(
-            msg, compliance.proposal.org_applicant, compliance.submitter, sender=sender
-        )
-    else:
-        _log_user_email(
-            msg, compliance.proposal.submitter, compliance.submitter, sender=sender
-        )
+    #if compliance.proposal.org_applicant:
+    #    _log_org_email(
+    #        msg, compliance.proposal.org_applicant, compliance.submitter, sender=sender
+    #    )
+    #else:
+    #    _log_user_email(
+    #        msg, compliance.proposal.submitter, compliance.submitter, sender=sender
+    #    )
 
 
 # send reminder emails if Compliance has not been lodged by due date. Used in Cron job so cannot use 'request' parameter
