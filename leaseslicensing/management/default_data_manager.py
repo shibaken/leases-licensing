@@ -140,3 +140,11 @@ class DefaultDataManager(object):
                     logger.info("Created RepetitionType: {}".format(item[1]))
             except Exception as e:
                 logger.error("{}, RepetitionType: {}".format(e, item[1]))
+
+        for a_group in settings.GROUP_NAME_CHOICES:
+            try:
+                myGroup, created = SystemGroup.objects.get_or_create(name=a_group[0])  # Should name be a_group[1]???
+                if created:
+                    logger.info("Created SystemGroup: {}".format(item[0]))
+            except Exception as e:
+                logger.error("{}, SystemGroup: {}".format(e, item[1]))
