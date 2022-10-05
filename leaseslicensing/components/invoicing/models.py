@@ -248,7 +248,7 @@ class InvoicingDetails(BaseModel):
         # ]
 
 
-class FixedAnnualIncrement(BaseModel):
+class FixedAnnualIncrementAmount(BaseModel):
     year = models.PositiveSmallIntegerField(null=True, blank=True)
     increment_amount = models.DecimalField(max_digits=10, decimal_places=2, default="0.00")
     invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
@@ -257,7 +257,7 @@ class FixedAnnualIncrement(BaseModel):
         app_label = "leaseslicensing"
 
 
-class FixedAnnualPercentage(BaseModel):
+class FixedAnnualIncrementPercentage(BaseModel):
     year = models.PositiveSmallIntegerField(null=True, blank=True)
     percentage = models.FloatField(default=0)
     invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE)
