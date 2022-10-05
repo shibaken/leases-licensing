@@ -18,21 +18,25 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='consumerpriceindex',
             name='start_date_q1',
-            field=models.DateField(blank=True, default=leaseslicensing.components.invoicing.models.get_start_date_q1, editable=False, null=True),
+            # field=models.DateField(blank=True, default=leaseslicensing.components.invoicing.models.get_start_date_q1, editable=False, null=True),
+            field=models.DateField(blank=True, editable=False, null=True),
         ),
         migrations.AlterField(
             model_name='consumerpriceindex',
             name='start_date_q2',
-            field=models.DateField(blank=True, default=leaseslicensing.components.invoicing.models.get_start_date_q2, editable=False, null=True),
+            # field=models.DateField(blank=True, default=leaseslicensing.components.invoicing.models.get_start_date_q2, editable=False, null=True),
+            field=models.DateField(blank=True, editable=False, null=True),
         ),
         migrations.AlterField(
             model_name='consumerpriceindex',
             name='start_date_q3',
-            field=models.DateField(blank=True, default=leaseslicensing.components.invoicing.models.get_start_date_q3, editable=False, null=True),
+            # field=models.DateField(blank=True, default=leaseslicensing.components.invoicing.models.get_start_date_q3, editable=False, null=True),
+            field=models.DateField(blank=True, editable=False, null=True),
         ),
         migrations.AlterField(
             model_name='consumerpriceindex',
             name='start_date_q4',
-            field=models.DateField(blank=True, default=leaseslicensing.components.invoicing.models.get_start_date_q4, editable=False, null=True),
+            # field=models.DateField(blank=True, default=leaseslicensing.components.invoicing.models.get_start_date_q4, editable=False, null=True),
+            field=models.DateField(blank=True, editable=False, null=True),
         ),
     ]

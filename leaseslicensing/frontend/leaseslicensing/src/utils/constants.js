@@ -1,9 +1,8 @@
-
 module.exports = {
-	APPLICATION_TYPES: {
-		REGISTRATION_OF_INTEREST: 'registration_of_interest',
-		LEASE_LICENCE: 'lease_licence',
-	},
+    APPLICATION_TYPES: {
+        REGISTRATION_OF_INTEREST: 'registration_of_interest',
+        LEASE_LICENCE: 'lease_licence',
+    },
     ROLES: {
         // GROUP_REGISTRATION_OF_INTEREST_ASSESSOR = "registration_of_interest_assessor"
         // GROUP_REGISTRATION_OF_INTEREST_APPROVER = "registration_of_interest_approver"
@@ -57,16 +56,16 @@ module.exports = {
         EXTENDED_BASE_FEE_REVIEW: {ID: 'extended_base_fee_review', TEXT: 'Extended (base fee review)'},
         EXPIRED_LICENCE: {ID: 'expired_licence', TEXT: 'Expired (licence)'},
     },
-	DRAFT: 'Draft',
-	WITH_ASSESSOR: 'With Assessor',
-	WITH_ASSESSOR_CONDITIONS: 'With Assessor (Conditions)',
-	WITH_APPROVER: 'With Approver',
-	WITH_REFERRAL: 'With Referral',
-	WITH_REFERRAL_CONDITIONS: 'With Referral (Conditions)',
-	APPROVED_APPLICATION: 'Approved (Application)',
-	APPROVED_COMPETITIVE_PROCESS: 'Approved (Competitive Process)',
-	APPROVED_EDITING_INVOICING: 'Approved (Editing Invoicing)',
-	APPROVED: 'Approved',
-	DECLINED: 'Declined',
-	DISCARDED: 'Discarded',
-}
+    DRAFT: 'Draft',
+    WITH_ASSESSOR: 'With Assessor',
+    WITH_ASSESSOR_CONDITIONS: 'With Assessor (Conditions)',
+    WITH_APPROVER: 'With Approver',
+    WITH_REFERRAL: 'With Referral',
+    WITH_REFERRAL_CONDITIONS: 'With Referral (Conditions)',
+    APPROVED_APPLICATION: 'Approved (Application)',
+    APPROVED_COMPETITIVE_PROCESS: 'Approved (Competitive Process)',
+    APPROVED_EDITING_INVOICING: 'Approved (Editing Invoicing)',
+    APPROVED: 'Approved',
+    DECLINED: 'Declined',
+    DISCARDED: 'Discarded',
+};
