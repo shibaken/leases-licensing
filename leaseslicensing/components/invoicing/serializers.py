@@ -71,8 +71,8 @@ class CrownLandRentReviewDateSerializer(serializers.ModelSerializer):
 
 class InvoicingDetailsSerializer(serializers.ModelSerializer):
     charge_method = ChargeMethodSerializer()
-    review_once_every = RepetitionTypeSerializer()
-    invoicing_once_every = RepetitionTypeSerializer()
+    review_repetition_type = RepetitionTypeSerializer()
+    invoicing_repetition_type = RepetitionTypeSerializer()
     annual_increment_amounts = FixedAnnualIncrementAmountSerializer(many=True)
     annual_increment_percentages = FixedAnnualIncrementPercentageSerializer(many=True)
     gross_turnover_percentages = PercentageOfGrossTurnoverSerializer(many=True)
@@ -86,7 +86,9 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
             'base_fee_amount',
             'once_off_charge_amount',
             'review_once_every',
+            'review_repetition_type',
             'invoicing_once_every',
+            'invoicing_repetition_type',
             'annual_increment_amounts',
             'annual_increment_percentages',
             'gross_turnover_percentages',

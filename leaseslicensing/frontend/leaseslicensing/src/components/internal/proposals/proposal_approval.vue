@@ -127,21 +127,21 @@ export default {
         displayAwaitingPaymentMsg: function(){
             let display = false
             console.log(this.proposal.processing_status)
-            if (this.proposal.processing_status === constants.AWAITING_PAYMENT){
+            if (this.proposal.processing_status_id === constants.PROPOSAL_STATUS.AWAITING_PAYMENT.ID){
                 display = true
             }
             return display
         },
         displayApprovedMsg: function(){
             let display = false
-            if (this.proposal.processing_status === constants.APPROVED){
+            if (this.proposal.processing_status_id === constants.PROPOSAL_STATUS.APPROVED.ID){
                 display = true
             }
             return display
         },
         displayDeclinedMsg: function(){
             let display = false
-            if (this.proposal.processing_status === constants.DECLINED){
+            if (this.proposal.processing_status_id === constants.PROPOSAL_STATUS.DECLINED.ID){
                 display = true
             }
             return display

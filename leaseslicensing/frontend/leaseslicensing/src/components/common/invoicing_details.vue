@@ -35,20 +35,20 @@
     </div>
     <div v-show="show_fixed_annual_increment">
         <AnnualIncrement
-            increment_type="amount"
-            :years_array="years_array_increment"
+            increment_type="annual_increment_amount"
+            :years_array="invoicing_details.annual_increment_amounts"
         />
     </div>
     <div v-show="show_fixed_annual_percentage">
         <AnnualIncrement
-            increment_type="percentage"
-            :years_array="years_array_percentage"
+            increment_type="annual_increment_percentage"
+            :years_array="invoicing_details.annual_increment_percentages"
         />
     </div>
     <div v-show="show_percentage_of_gross_turnover">
         <AnnualIncrement
-            increment_type="percentage"
-            :years_array="percentage_of_gross_turnover"
+            increment_type="gross_turnover_percentage"
+            :years_array="invoicing_details.gross_turnover_percentages"
         />
         <div class="row mb-2">
             <div class="col-sm-12">
@@ -73,7 +73,7 @@
                     name="repetition_type_review"
                     class="form-check-input"
                     :id="'review_' + repetition_type.key" 
-                    :value="repetition_type.key" 
+                    :value="repetition_type" 
                     v-model="invoicing_details.review_repetition_type"
                 />
                 <label :for="'review_' + repetition_type.key" class="form-check-label">{{ repetition_type.display_name }}</label>
@@ -82,7 +82,7 @@
     </div>
     <div v-show="show_crown_land_rent_review_date">
         <CrownLandRentReviewDate
-            :review_dates="review_dates" 
+            :review_dates="invoicing_details.crown_land_rent_review_dates" 
         />
     </div>
     <div v-show="show_invoicing_frequency" class="row mb-2">
@@ -102,7 +102,7 @@
                     name="repetition_type_invoicing"
                     class="form-check-input"
                     :id="'invoicing_' + repetition_type.key" 
-                    :value="repetition_type.key" 
+                    :value="repetition_type" 
                     v-model="invoicing_details.invoicing_repetition_type"
                 />
                 <label :for="'invoicing_' + repetition_type.key" class="form-check-label">{{ repetition_type.display_name }}</label>
@@ -130,14 +130,8 @@ export default {
     data: function() {
         let vm = this;
         return {
-            charge_methods: [],
-            repetition_types: [],
-            // invoicing_details: {},
-
-            years_array_increment: [],
-            years_array_percentage: [],
-            percentage_of_gross_turnover: [],
-            review_dates: [],
+            charge_methods: [],  // For radio button options
+            repetition_types: [],  // For radio button options
         }
     },
     components: {

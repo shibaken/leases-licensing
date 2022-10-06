@@ -22,12 +22,31 @@
                         <div class="col-sm-3 text-end">{{ value_title }}</div>
                         <div class="col-sm-2">
                             <input 
+                                v-if="increment_type === 'annual_increment_amount'"
                                 type="number" 
                                 :min="min_increment" 
                                 :max="max_increment" 
                                 :step="step_increment" 
                                 class="form-control"
-                                v-model="item.increment_value"
+                                v-model="item.increment_amount"
+                            />
+                            <input 
+                                v-else-if="increment_type === 'annual_increment_percentage'"
+                                type="number" 
+                                :min="min_increment" 
+                                :max="max_increment" 
+                                :step="step_increment" 
+                                class="form-control"
+                                v-model="item.increment_percentage"
+                            />
+                            <input 
+                                v-else-if="increment_type === 'gross_turnover_percentage'"
+                                type="number" 
+                                :min="min_increment" 
+                                :max="max_increment" 
+                                :step="step_increment" 
+                                class="form-control"
+                                v-model="item.percentage"
                             />
                         </div>
                         <div class="col-sm-1">
@@ -82,27 +101,45 @@ export default {
 
     },
     computed: {
+        // temp: function(){
+        //     if (this.increment_type === 'annual_increment_amount')
+        //         return this.years_array.increment_amount
+        //     else if (this.increment_type === 'annual_increment_percentage')
+        //         return this.years_array.increment_percentage
+        //     else if (this.increment_type === 'gross_turnover_percentage')
+        //         return this.years_array.percentage
+        //     return 5
+        // },
         value_title: function(){
-            if (this.increment_type === 'amount')
+            if (this.increment_type === 'annual_increment_amount')
                 return 'amount [AU$]'
-            else if (this.increment_type === 'percentage')
+            else if (['annual_increment_percentage', 'gross_turnover_percentage'].includes(this.increment_type))
                 return 'percentage [%]'
         },
         step_increment: function(){
-            if (this.increment_type === 'amount')
+            if (this.increment_type === 'annual_increment_amount')
                 return 100
-            else if (this.increment_type === 'percentage')
+            else if (['annual_increment_percentage', 'gross_turnover_percentage'].includes(this.increment_type))
                 return 0.1
         },
     },
     methods: {
         addAnotherYearClicked: function(e){
             e.preventDefault()
+
+            let key_name = ''
+            if (this.increment_type === 'annual_increment_amount')
+                key_name = 'increment_amount'
+            else if (this.increment_type === 'annual_increment_percentage')
+                key_name = 'increment_percentage'
+            else if (this.increment_type === 'gross_turnover_percentage')
+                key_name = 'percentage'
+
             this.years_array.push({
                 'id': 0,
                 'key': uuid(),
                 'year': null,
-                'increment_value': null,
+                [key_name]: null,
             })
             
         },
