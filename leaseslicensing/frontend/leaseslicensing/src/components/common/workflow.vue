@@ -303,10 +303,10 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
-                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.REGISTRATION_OF_INTEREST_APPROVER.ID,],
                             },
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.LEASE_LICENCE_APPROVER.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -320,10 +320,10 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
-                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.REGISTRATION_OF_INTEREST_APPROVER.ID,],
                             },
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.LEASE_LICENCE_APPROVER.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -337,10 +337,10 @@ export default {
                     'function_to_show_hide': () => {
                         let condition_to_display = {
                             [APPLICATION_TYPE.REGISTRATION_OF_INTEREST]: {
-                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.REGISTRATION_OF_INTEREST_APPROVER.ID,],
                             },
                             [APPLICATION_TYPE.LEASE_LICENCE]: {
-                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.APPROVER,],
+                                [PROPOSAL_STATUS.WITH_APPROVER.ID]: [ROLES.LEASE_LICENCE_APPROVER.ID,],
                             }
                         }
                         let show = vm.check_role_conditions(condition_to_display)
@@ -419,14 +419,14 @@ export default {
             return true
         },
         show_toggle_proposal: function(){
-            if(this.proposal.processing_status == constants.WITH_ASSESSOR_CONDITIONS || this.proposal.processing_status == constants.WITH_APPROVER || this.isFinalised){
+            if(this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID || this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_APPROVER.ID || this.isFinalised){
                 return true
             } else {
                 return false
             }
         },
         show_toggle_requirements: function(){
-            if(this.proposal.processing_status == constants.WITH_APPROVER || this.isFinalised){
+            if(this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_APPROVER.ID || this.isFinalised){
                 return true
             } else {
                 return false
@@ -451,6 +451,9 @@ export default {
     },
     methods: {
         check_role_conditions: function(condition_to_display){
+            if (this.debug)
+                return true
+
             let condition = false
             if (this.proposal.application_type.name in condition_to_display){
                 if (this.proposal.processing_status_id in condition_to_display[this.proposal.application_type.name]){
@@ -493,6 +496,7 @@ export default {
             return ret_value
         },
         completeEditing: function(){
+
         },
         requireDas: function(){
         },

@@ -4,13 +4,13 @@
             <label for="" class="control-label">Rent or licence charge method</label>
         </div>
         <div class="col-sm-9">
-            <div v-for="charge_method in charge_methods" class="form-check" :id="charge_method.id">
+            <div v-for="charge_method in charge_methods" class="form-check" :id="invoicing_details.charge_method.id">
                 <input 
                     type="radio" 
                     class="form-check-input"
                     name="charge_method"
                     :id="charge_method.key" 
-                    :value="charge_method.key" 
+                    :value="charge_method" 
                     v-model="invoicing_details.charge_method"
                 />
                 <label :for="charge_method.key" class="form-check-label">{{ charge_method.display_name }}</label>
@@ -35,20 +35,20 @@
     </div>
     <div v-show="show_fixed_annual_increment">
         <AnnualIncrement
-            increment_type="amount"
-            :years_array="years_array_increment"
+            increment_type="annual_increment_amount"
+            :years_array="invoicing_details.annual_increment_amounts"
         />
     </div>
     <div v-show="show_fixed_annual_percentage">
         <AnnualIncrement
-            increment_type="percentage"
-            :years_array="years_array_percentage"
+            increment_type="annual_increment_percentage"
+            :years_array="invoicing_details.annual_increment_percentages"
         />
     </div>
     <div v-show="show_percentage_of_gross_turnover">
         <AnnualIncrement
-            increment_type="percentage"
-            :years_array="percentage_of_gross_turnover"
+            increment_type="gross_turnover_percentage"
+            :years_array="invoicing_details.gross_turnover_percentages"
         />
         <div class="row mb-2">
             <div class="col-sm-12">
@@ -73,7 +73,7 @@
                     name="repetition_type_review"
                     class="form-check-input"
                     :id="'review_' + repetition_type.key" 
-                    :value="repetition_type.key" 
+                    :value="repetition_type" 
                     v-model="invoicing_details.review_repetition_type"
                 />
                 <label :for="'review_' + repetition_type.key" class="form-check-label">{{ repetition_type.display_name }}</label>
@@ -82,7 +82,7 @@
     </div>
     <div v-show="show_crown_land_rent_review_date">
         <CrownLandRentReviewDate
-            :review_dates="review_dates" 
+            :review_dates="invoicing_details.crown_land_rent_review_dates" 
         />
     </div>
     <div v-show="show_invoicing_frequency" class="row mb-2">
@@ -102,7 +102,7 @@
                     name="repetition_type_invoicing"
                     class="form-check-input"
                     :id="'invoicing_' + repetition_type.key" 
-                    :value="repetition_type.key" 
+                    :value="repetition_type" 
                     v-model="invoicing_details.invoicing_repetition_type"
                 />
                 <label :for="'invoicing_' + repetition_type.key" class="form-check-label">{{ repetition_type.display_name }}</label>
@@ -119,17 +119,19 @@ import CrownLandRentReviewDate from '@/components/common/component_crown_land_re
 
 export default {
     name: 'InvoicingDetails',
+    props: {
+        invoicing_details: {
+            type: Object,
+            default(rawProps){
+                return {}
+            }
+        }
+    },
     data: function() {
         let vm = this;
         return {
-            charge_methods: [],
-            repetition_types: [],
-            invoicing_details: {},
-
-            years_array_increment: [],
-            years_array_percentage: [],
-            percentage_of_gross_turnover: [],
-            review_dates: [],
+            charge_methods: [],  // For radio button options
+            repetition_types: [],  // For radio button options
         }
     },
     components: {
@@ -145,23 +147,26 @@ export default {
     },
     computed: {
         show_once_off_charge_amount: function(){
-            if (this.invoicing_details && this.invoicing_details.charge_method === 'once_off_charge')
-                return true
+            if (this.invoicing_details && this.invoicing_details.charge_method)
+                if (this.invoicing_details.charge_method.key === 'once_off_charge')
+                    return true
             return false
         },
         show_fixed_annual_increment: function(){
-            if (this.invoicing_details && this.invoicing_details.charge_method === 'base_fee_plus_fixed_annual_increment')
+            if (this.invoicing_details && this.invoicing_details.charge_method)
+                if (this.invoicing_details.charge_method.key === 'base_fee_plus_fixed_annual_increment')
                 return true
             return false
         },
         show_fixed_annual_percentage: function(){
-            if (this.invoicing_details && this.invoicing_details.charge_method === 'base_fee_plus_fixed_annual_percentage')
+            if (this.invoicing_details && this.invoicing_details.charge_method)
+                if (this.invoicing_details.charge_method.key === 'base_fee_plus_fixed_annual_percentage')
                 return true
             return false
         },
         show_base_fee: function(){
             if (this.show_fixed_annual_increment || this.show_fixed_annual_percentage || (
-                this.invoicing_details && this.invoicing_details.charge_method === 'base_fee_plus_annual_cpi'
+                this.invoicing_details && this.invoicing_details.charge_method && this.invoicing_details.charge_method.key === 'base_fee_plus_annual_cpi'
             ))
                 return true
             return false
@@ -170,8 +175,9 @@ export default {
             return this.show_base_fee
         },
         show_percentage_of_gross_turnover: function(){
-            if (this.invoicing_details && this.invoicing_details.charge_method === 'percentage_of_gross_turnover')
-                return true
+            if (this.invoicing_details && this.invoicing_details.charge_method)
+                if (this.invoicing_details.charge_method.key === 'percentage_of_gross_turnover')
+                    return true
             return false
         },
         show_crown_land_rent_review_date: function(){
@@ -179,7 +185,7 @@ export default {
         },
         show_invoicing_frequency: function(){
             if (this.invoicing_details){
-                if (['base_fee_plus_fixed_annual_increment', 'base_fee_plus_fixed_annual_percentage', 'base_fee_plus_annual_cpi', 'percentage_of_gross_turnover'].includes(this.invoicing_details.charge_method))
+                if (['base_fee_plus_fixed_annual_increment', 'base_fee_plus_fixed_annual_percentage', 'base_fee_plus_annual_cpi', 'percentage_of_gross_turnover'].includes(this.invoicing_details.charge_method.key))
                     return true
                 return false
             }

@@ -382,7 +382,7 @@ export default {
         displaySaveBtns: function(){
             let display = false
 
-            if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
+            if ([constants.PROPOSAL_STATUS.WITH_ASSESSOR.ID, constants.PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID].includes(this.proposal.processing_status_id)){
                 if (this.proposal.application_type === constants.APPLICATION_TYPES.LEASE_LICENCE){
                     if (this.proposal.accessing_user_roles.includes(constants.ROLES.LEASE_LICENCE_ASSESSOR.ID)){
                         display = true
@@ -392,8 +392,12 @@ export default {
                         display = true
                     }
                 }
-            } else if ([constants.WITH_REFERRAL, constants.WITH_REFERRAL_CONDITIONS].includes(this.proposal.processing_status)){
+            } else if ([constants.PROPOSAL_STATUS.WITH_REFERRAL.ID, constants.PROPOSAL_STATUS.WITH_REFERRAL_CONDITIONS.ID].includes(this.proposal.processing_status_id)){
                 if (this.proposal.accessing_user_roles.includes(constants.ROLES.REFERRAL.ID)){
+                    display = true
+                }
+            } else if ([constants.PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID].includes(this.proposal.processing_status_id)){
+                if (this.proposal.accessing_user_roles.includes(constants.ROLES.FINANCE.ID)){
                     display = true
                 }
             }
@@ -401,10 +405,10 @@ export default {
             return display
         },
         disableSaveAndContinueBtn: function(){  // Is this needed?
-            return !this.displaySaveBtns()
+            return !this.displaySaveBtns
         },
         disableSaveAndExitBtn: function(){  // Is this needed?
-            return !this.displaySaveBtns()
+            return !this.displaySaveBtns
         },
         submitter_first_name: function(){
             if (this.proposal.submitter){
@@ -435,9 +439,9 @@ export default {
             }
         },
         proposal_form_url: function() {
-            if ([constants.WITH_ASSESSOR, constants.WITH_ASSESSOR_CONDITIONS].includes(this.proposal.processing_status)){
+            if ([constants.PROPOSAL_STATUS.WITH_ASSESSOR.ID, constants.PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID].includes(this.proposal.processing_status_id)){
                 return `/api/proposal/${this.proposal.id}/assessor_save.json`
-            } else if ([constants.WITH_REFERRAL, constants.WITH_REFERRAL_CONDITIONS].includes(this.proposal.processing_status)){
+            } else if ([constants.PROPOSAL_STATUS.WITH_REFERRAL.ID, constants.PROPOSAL_STATUS.WITH_REFERRAL_CONDITIONS.ID].includes(this.proposal.processing_status_id)){
                 return `/api/proposal/${this.proposal.id}/referral_save.json`
             } else {
                 // Should not reach here
@@ -603,12 +607,6 @@ export default {
                 return []
             }
         },
-        debug: function(){
-            if (this.$route.query.debug){
-                return this.$route.query.debug == 'true'
-            }
-            return false
-        },
         proposedApprovalKey: function() {
             return "proposed_approval_" + this.uuid;
         },
@@ -627,16 +625,15 @@ export default {
             if (this.debug)
                 return true
             let ret_val =
-                this.proposal.processing_status == constants.WITH_APPROVER ||
-                this.proposal.processing_status == constants.AWAITING_STICKER ||
-                this.proposal.processing_status == constants.AWAITING_PAYMENT ||
+                this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_APPROVER.ID ||
+                this.proposal.processing_status_id == constants.PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID ||
                 this.isFinalised
             return ret_val
         },
         display_requirements: function(){
             let ret_val =
-                this.proposal.processing_status == constants.WITH_ASSESSOR_CONDITIONS ||
-                ((this.proposal.processing_status == constants.WITH_APPROVER || this.isFinalised) && this.showingRequirements)
+                this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID ||
+                ((this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_APPROVER.ID || this.isFinalised) && this.showingRequirements)
             return ret_val
         },
         /*
