@@ -2,6 +2,8 @@ from django.conf import settings
 from ledger_api_client.ledger_models import (
     EmailUserRO as EmailUser,
 )
+
+from leaseslicensing.components.invoicing.serializers import InvoicingDetailsSerializer
 from leaseslicensing.components.main.models import ApplicationType
 from leaseslicensing.components.organisations.models import Organisation
 from leaseslicensing.components.proposals.models import (
@@ -815,6 +817,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     approval_issue_date = (
         serializers.SerializerMethodField()
     )  # Accessing user's roles for this proposal.
+    invoicing_details = InvoicingDetailsSerializer()
 
     class Meta:
         model = Proposal
@@ -907,6 +910,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
             "legislative_requirements_text",
             "accessing_user_roles",
             "approval_issue_date",
+            "invoicing_details",
         )
         read_only_fields = ("requirements",)
 

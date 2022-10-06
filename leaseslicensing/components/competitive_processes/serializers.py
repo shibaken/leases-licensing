@@ -198,6 +198,8 @@ class CompetitiveProcessGeometrySerializer(GeoFeatureModelSerializer):
 class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
     registration_of_interest = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    status_id = serializers.CharField(source='status')
+    # status = serializers.ChoiceField(choices=CompetitiveProcess.STATUS_CHOICES)
     assigned_officer = serializers.SerializerMethodField()
     site = serializers.CharField(read_only=True)  # For property
     group = serializers.CharField(read_only=True)  # For property
@@ -235,6 +237,7 @@ class CompetitiveProcessSerializerBase(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return obj.get_status_display()  # https://docs.djangoproject.com/en/3.2/ref/models/instances/#django.db.models.Model.get_FOO_display
+        # return {'key': obj.status, 'text': obj.get_status_display()}
 
     def get_assigned_officer(self, obj):
         if obj.is_assigned:
