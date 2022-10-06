@@ -14,8 +14,6 @@ class BaseModel(models.Model):
 
 
 class ChargeMethod(models.Model):
-    """A class to represent a competitive process"""
-
     key = models.CharField(max_length=200, unique=True)
     display_name = models.CharField(max_length=200,)
 
@@ -250,7 +248,6 @@ class InvoicingDetails(BaseModel):
     invoicing_once_every = models.PositiveSmallIntegerField(null=True, blank=True)
     review_repetition_type = models.ForeignKey(RepetitionType, null=True, blank=True, on_delete=models.SET_NULL, related_name='invoicing_details_set_for_review')
     invoicing_repetition_type = models.ForeignKey(RepetitionType, null=True, blank=True, on_delete=models.SET_NULL, related_name='invoicing_details_set_for_invoicing')
-
     approval = models.ForeignKey('Approval', null=True, blank=True, on_delete=models.SET_NULL)
     previous_invoicing_details = models.OneToOneField('self', null=True, blank=True, related_name='next_invoicing_details', on_delete=models.SET_NULL)
 
@@ -276,7 +273,7 @@ class FixedAnnualIncrementAmount(BaseModel):
 
 class FixedAnnualIncrementPercentage(BaseModel):
     year = models.PositiveSmallIntegerField(null=True, blank=True)
-    percentage = models.FloatField(default=0)
+    increment_percentage = models.FloatField(default=0)
     invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.CASCADE, related_name="annual_increment_percentages")
 
     class Meta:

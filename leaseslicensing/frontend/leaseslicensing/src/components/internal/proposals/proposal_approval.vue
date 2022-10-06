@@ -68,8 +68,8 @@
         </FormSection>
 
         <FormSection :formCollapse="false" label="Invoicing Details" Index="proposal_invoicing_details">
-            <!-- TODO -->
             <InvoicingDetails
+                :invoicing_details="proposal.invoicing_details"
             />
         </FormSection>
     </div>
