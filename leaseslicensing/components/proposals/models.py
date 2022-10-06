@@ -26,6 +26,7 @@ from ledger_api_client.country_models import Country
 from ledger_api_client.managed_models import SystemGroup
 from leaseslicensing import exceptions
 from leaseslicensing.components.competitive_processes.models import CompetitiveProcess
+from leaseslicensing.components.invoicing.models import InvoicingDetails
 from leaseslicensing.components.main.related_item import RelatedItem
 from leaseslicensing.components.main.utils import get_department_user
 from leaseslicensing.components.organisations.models import (
@@ -1125,6 +1126,12 @@ class Proposal(DirtyFieldsMixin, models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name='generated_proposal'
+    )
+    invoicing_details = models.OneToOneField(
+        InvoicingDetails,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
     # Registration of Interest additional form fields
     # proposal details

@@ -168,20 +168,20 @@ export default {
             // TOOD: refer to proposal_apiary.vue
             return true
         },
-        show_toggle_proposal: function(){
-            if(this.competitive_process.status == constants.WITH_ASSESSOR_CONDITIONS || this.competitive_process.status == constants.WITH_APPROVER || this.isFinalised){
-                return true
-            } else {
-                return false
-            }
-        },
-        show_toggle_requirements: function(){
-            if(this.competitive_process.status == constants.WITH_APPROVER || this.isFinalised){
-                return true
-            } else {
-                return false
-            }
-        },
+        // show_toggle_proposal: function(){
+        //     if(this.competitive_process.status.id == constants.WITH_ASSESSOR_CONDITIONS || this.competitive_process.status.id == constants.WITH_APPROVER || this.isFinalised){
+        //         return true
+        //     } else {
+        //         return false
+        //     }
+        // },
+        // show_toggle_requirements: function(){
+        //     if(this.competitive_process.status.id == constants.WITH_APPROVER || this.isFinalised){
+        //         return true
+        //     } else {
+        //         return false
+        //     }
+        // },
         debug: function(){
             return (this.$route.query.debug && this.$route.query.debug == 'true') ? true : false
         },
@@ -197,18 +197,18 @@ export default {
         }
     },
     methods: {
-        check_role_conditions: function(condition_to_display){
-            let condition = false
-            if (this.competitive_process.application_type.name in condition_to_display){
-                if (this.competitive_process.status_id in condition_to_display[this.competitive_process.application_type.name]){
-                    let roles = condition_to_display[this.competitive_process.application_type.name][this.competitive_process.status_id]
-                    const intersection = roles.filter(role => this.competitive_process.accessing_user_roles.includes(role.ID));
-                    if (intersection.length > 0)
-                        condition = true
-                }
-            }
-            return condition
-        },
+        // check_role_conditions: function(condition_to_display){
+        //     let condition = false
+        //     if (this.competitive_process.application_type.name in condition_to_display){
+        //         if (this.competitive_process.status_id in condition_to_display[this.competitive_process.application_type.name]){
+        //             let roles = condition_to_display[this.competitive_process.application_type.name][this.competitive_process.status_id]
+        //             const intersection = roles.filter(role => this.competitive_process.accessing_user_roles.includes(role.ID));
+        //             if (intersection.length > 0)
+        //                 condition = true
+        //         }
+        //     }
+        //     return condition
+        // },
         get_allowed_ids: function(ids){
             let me = this
 
@@ -257,7 +257,8 @@ export default {
             }).
             on("select2:select",function (e) {
                 var selected = $(e.currentTarget);
-                if (vm.competitive_process.status == 'With Approver'){
+                // if (vm.competitive_process.status.id == 'With Approver'){
+                if (vm.competitive_process.status_id == constants.COMPETITIVE_PROCESS_STATUS.IN_PROGRESS.ID){
                     vm.competitive_process.assigned_approver = selected.val();
                 }
                 else{
@@ -271,7 +272,7 @@ export default {
                 }, 0);
             }).on("select2:unselect",function (e) {
                 var selected = $(e.currentTarget);
-                if (vm.competitive_process.status == 'With Approver'){
+                if (vm.competitive_process.status_id == constants.COMPETITIVE_PROCESS_STATUS.IN_PROGRESS.ID){
                     vm.competitive_process.assigned_approver = null;
                 }
                 else{
