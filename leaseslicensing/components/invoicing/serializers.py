@@ -94,10 +94,10 @@ class CrownLandRentReviewDateSerializer(serializers.ModelSerializer):
 
 
 class InvoicingDetailsSerializer(serializers.ModelSerializer):
-    annual_increment_amounts = FixedAnnualIncrementAmountSerializer(many=True)
-    annual_increment_percentages = FixedAnnualIncrementPercentageSerializer(many=True)
-    gross_turnover_percentages = PercentageOfGrossTurnoverSerializer(many=True)
-    crown_land_rent_review_dates = CrownLandRentReviewDateSerializer(many=True)
+    annual_increment_amounts = FixedAnnualIncrementAmountSerializer(many=True, required=False)
+    annual_increment_percentages = FixedAnnualIncrementPercentageSerializer(many=True, required=False)
+    gross_turnover_percentages = PercentageOfGrossTurnoverSerializer(many=True, required=False)
+    crown_land_rent_review_dates = CrownLandRentReviewDateSerializer(many=True, required=False)
 
     class Meta:
         model = InvoicingDetails
@@ -122,6 +122,10 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
         annual_increment_percentages_data = validated_data.pop('annual_increment_percentages')
         gross_turnover_percentages_data = validated_data.pop('gross_turnover_percentages')
         crown_land_rent_review_dates_data = validated_data.pop('crown_land_rent_review_dates')
+
+        serializer = InvoicingDetailsSerializer(instance, data=validated_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         self.update_annual_increment_amounts(annual_increment_amounts_data, instance)
         self.update_annual_increment_percentages(annual_increment_percentages_data, instance)
@@ -153,10 +157,44 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                 new_record.save()
 
     def update_annual_increment_percentages(self, annual_increment_percentages_data, instance):
-        pass
+        for annual_increment_percentage_data in annual_increment_percentages_data:
+            if annual_increment_percentage_data.get('id', 0):
+                # Existing
+                annual_increment_percentage = FixedAnnualIncrementPercentage.objects.get(id=int(annual_increment_percentage_data.get('id')))
+                serializer = FixedAnnualIncrementPercentageSerializer(
+                    annual_increment_percentage, annual_increment_percentage_data, context={'invoicing_details': instance}
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            else:
+                # New
+                if 'id' in annual_increment_percentage_data:
+                    annual_increment_percentage_data.pop('id')  # Delete the item 'id: 0' from the dictionary because we don't want to save a new record with id=0
+                serializer = FixedAnnualIncrementPercentageSerializer(data=annual_increment_percentage_data, context={'invoicing_details': instance})
+                serializer.is_valid(raise_exception=True)
+                new_record = serializer.save()
+                new_record.invoicing_details = instance
+                new_record.save()
 
     def update_gross_turnover_percentages(self, gross_turnover_percentages_data, instance):
-        pass
+        for gross_turnover_percentage_data in gross_turnover_percentages_data:
+            if gross_turnover_percentage_data.get('id', 0):
+                # Existing
+                gross_turnover_percentage = PercentageOfGrossTurnover.objects.get(id=int(gross_turnover_percentage_data.get('id')))
+                serializer = PercentageOfGrossTurnoverSerializer(
+                    gross_turnover_percentage, gross_turnover_percentage_data, context={'invoicing_details': instance}
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            else:
+                # New
+                if 'id' in gross_turnover_percentage_data:
+                    gross_turnover_percentage_data.pop('id')  # Delete the item 'id: 0' from the dictionary because we don't want to save a new record with id=0
+                serializer = PercentageOfGrossTurnoverSerializer(data=gross_turnover_percentage_data, context={'invoicing_details': instance})
+                serializer.is_valid(raise_exception=True)
+                new_record = serializer.save()
+                new_record.invoicing_details = instance
+                new_record.save()
 
     def update_crown_land_rent_review_dates(self, crown_land_rent_review_dates_date, instance):
         pass

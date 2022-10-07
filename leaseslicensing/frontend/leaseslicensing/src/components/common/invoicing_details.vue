@@ -147,6 +147,12 @@ export default {
 
     },
     computed: {
+        debug: function(){
+            if (this.$route.query.debug){
+                return this.$route.query.debug === 'true'
+            }
+            return false
+        },
         show_once_off_charge_amount: function(){
             if (this.invoicing_details && this.invoicing_details.charge_method)
                 if (this.invoicing_details.charge_method === this.getChargeMethodIdByKey('once_off_charge'))
