@@ -103,36 +103,45 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
         model = InvoicingDetails
         fields = (
             'id',
-            'charge_method',
+            'charge_method',                    # FK
             'base_fee_amount',
             'once_off_charge_amount',
             'review_once_every',
-            'review_repetition_type',
+            'review_repetition_type',           # FK
             'invoicing_once_every',
-            'invoicing_repetition_type',
-            'annual_increment_amounts',
-            'annual_increment_percentages',
-            'gross_turnover_percentages',
-            'crown_land_rent_review_dates',
+            'invoicing_repetition_type',        # FK
+            'annual_increment_amounts',         # ReverseFK
+            'annual_increment_percentages',     # ReverseFK
+            'gross_turnover_percentages',       # ReverseFK
+            'crown_land_rent_review_dates',     # ReverseFK
         )
 
     def update(self, instance, validated_data):
-        # Update nested serializers
+        # Local fields
+        instance.base_fee_amount = validated_data.get('base_fee_amount', instance.base_fee_amount)
+        instance.once_off_charge_amount = validated_data.get('once_off_charge_amount', instance.once_off_charge_amount)
+        instance.review_once_every = validated_data.get('review_once_every', instance.review_once_every)
+        instance.invoicing_once_every = validated_data.get('invoicing_once_every', instance.invoicing_once_every)
+
+        # FK fields
+        instance.charge_method = validated_data.get('charge_method', instance.charge_method)
+        instance.review_repetition_type = validated_data.get('review_repetition_type', instance.review_repetition_type)
+        instance.invoicing_repetition_type = validated_data.get('invoicing_repetition_type', instance.invoicing_repetition_type)
+
+        # Update local and FK fields
+        instance.save()
+
+        # Reverse FKs
         annual_increment_amounts_data = validated_data.pop('annual_increment_amounts')
         annual_increment_percentages_data = validated_data.pop('annual_increment_percentages')
         gross_turnover_percentages_data = validated_data.pop('gross_turnover_percentages')
         crown_land_rent_review_dates_data = validated_data.pop('crown_land_rent_review_dates')
-
-        serializer = InvoicingDetailsSerializer(instance, data=validated_data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
         self.update_annual_increment_amounts(annual_increment_amounts_data, instance)
         self.update_annual_increment_percentages(annual_increment_percentages_data, instance)
         self.update_gross_turnover_percentages(gross_turnover_percentages_data, instance)
         self.update_crown_land_rent_review_dates(crown_land_rent_review_dates_data, instance)
 
-        # TODO: Do we allow to delete the existing items...?
+        # TODO: Do we allow to delete the existing items if it's allowed...?
 
         return instance
 
@@ -196,6 +205,24 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                 new_record.invoicing_details = instance
                 new_record.save()
 
-    def update_crown_land_rent_review_dates(self, crown_land_rent_review_dates_date, instance):
-        pass
+    def update_crown_land_rent_review_dates(self, crown_land_rent_review_dates_data, instance):
+        for crown_land_rent_review_date_data in crown_land_rent_review_dates_data:
+            if crown_land_rent_review_date_data.get('id', 0):
+                # Existing
+                crown_land_rent_review_date = CrownLandRentReviewDate.objects.get(id=int(crown_land_rent_review_date_data.get('id')))
+                serializer = CrownLandRentReviewDateSerializer(
+                    crown_land_rent_review_date, crown_land_rent_review_date_data, context={'invoicing_details': instance}
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            else:
+                # New
+                if 'id' in crown_land_rent_review_date_data:
+                    crown_land_rent_review_date_data.pop('id')  # Delete the item 'id: 0' from the dictionary because we don't want to save a new record with id=0
+                serializer = CrownLandRentReviewDateSerializer(data=crown_land_rent_review_date_data, context={'invoicing_details': instance})
+                serializer.is_valid(raise_exception=True)
+                new_record = serializer.save()
+                new_record.invoicing_details = instance
+                new_record.save()
+
 
