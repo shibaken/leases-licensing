@@ -154,7 +154,7 @@ export default {
           return helpers.getCookie('csrftoken')
         },
         isFinalised: function(){
-            return this.proposal.processing_status == 'Declined' || this.proposal.processing_status == 'Approved';
+            return this.proposal.processing_status_id === constants.PROPOSAL_STATUS.DECLINED.ID || this.proposal.processing_status_id === constants.PROPOSAL_STATUS.APPROVED.ID;
         },
         canAssess: function(){
             return true  // TODO: Implement correctly.  May not be needed though
@@ -230,7 +230,12 @@ export default {
                 return true
 
             let display = false
-
+            if (this.proposal && 
+                this.proposal.application_type && 
+                this.proposal.application_type.name === constants.APPLICATION_TYPES.LEASE_LICENCE && 
+                this.proposal.processing_status_id === constants.PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID &&
+                this.proposal.accessing_user_roles.includes(constants.ROLES.FINANCE.ID))
+                    display = true
             return display
         },
         applicationTypeNameDisplay: function() {

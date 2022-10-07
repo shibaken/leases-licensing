@@ -117,12 +117,6 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
-        # Update nested serializers
-        annual_increment_amounts_data = validated_data.pop('annual_increment_amounts')
-        annual_increment_percentages_data = validated_data.pop('annual_increment_percentages')
-        gross_turnover_percentages_data = validated_data.pop('gross_turnover_percentages')
-        crown_land_rent_review_dates_data = validated_data.pop('crown_land_rent_review_dates')
-
         # Local fields
         instance.base_fee_amount = validated_data.get('base_fee_amount', instance.base_fee_amount)
         instance.once_off_charge_amount = validated_data.get('once_off_charge_amount', instance.once_off_charge_amount)
@@ -138,12 +132,16 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
         instance.save()
 
         # Reverse FKs
+        annual_increment_amounts_data = validated_data.pop('annual_increment_amounts')
+        annual_increment_percentages_data = validated_data.pop('annual_increment_percentages')
+        gross_turnover_percentages_data = validated_data.pop('gross_turnover_percentages')
+        crown_land_rent_review_dates_data = validated_data.pop('crown_land_rent_review_dates')
         self.update_annual_increment_amounts(annual_increment_amounts_data, instance)
         self.update_annual_increment_percentages(annual_increment_percentages_data, instance)
         self.update_gross_turnover_percentages(gross_turnover_percentages_data, instance)
         self.update_crown_land_rent_review_dates(crown_land_rent_review_dates_data, instance)
 
-        # TODO: Do we allow to delete the existing items...?
+        # TODO: Do we allow to delete the existing items if it's allowed...?
 
         return instance
 
