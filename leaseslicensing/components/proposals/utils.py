@@ -6,6 +6,9 @@ from django.conf import settings
 
 # from preserialize.serialize import serialize
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser  # , Document
+
+from leaseslicensing.components.invoicing.models import InvoicingDetails
+from leaseslicensing.components.invoicing.serializers import InvoicingDetailsSerializer
 from leaseslicensing.components.proposals.models import (
     ProposalDocument,
     ProposalOtherDetails,
@@ -520,6 +523,24 @@ def save_referral_data(proposal, request, referral_completed=False):
                             assessment.referral.complete(request)
 
             # Referrals are not allowed to edit geometry
+
+        except Exception as e:
+            raise
+
+
+def save_invoicing_details(proposal, request, viewset):
+    with transaction.atomic():
+        try:
+            # Retrieve invoicing_details data
+            proposal_data = request.data.get('proposal', {})
+            invoicing_details_data = proposal_data.get('invoicing_details', {}) if proposal_data else {}
+
+            invoicing_details = InvoicingDetails.objects.get(id=invoicing_details_data.get('id'))
+            serializer = InvoicingDetailsSerializer(invoicing_details, data=invoicing_details_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            print(invoicing_details_data)
 
         except Exception as e:
             raise
