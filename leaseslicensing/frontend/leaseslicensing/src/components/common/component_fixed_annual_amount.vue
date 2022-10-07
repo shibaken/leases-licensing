@@ -6,7 +6,7 @@
                 <template v-for="item in years_array" :key="item.key">
                     <div class="row mb-2 row_wrapper">
                         <div class="col-sm-2">
-                            Increment
+                            Increment <span v-if="debug" class="debug_msg">id:{{ item.id }}</span>
                         </div>
                         <div class="col-sm-1 text-end">year</div>
                         <div class="col-sm-2">
@@ -101,6 +101,12 @@ export default {
 
     },
     computed: {
+        debug: function(){
+            if (this.$route.query.debug){
+                return this.$route.query.debug === 'true'
+            }
+            return false
+        },
         // temp: function(){
         //     if (this.increment_type === 'annual_increment_amount')
         //         return this.years_array.increment_amount
@@ -161,5 +167,9 @@ export default {
 <style>
 .remove_a_row{
     cursor: pointer;
+}
+.debug_msg {
+    font-size: 0.6em;
+    color: darkgray;
 }
 </style>

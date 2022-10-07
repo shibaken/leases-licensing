@@ -443,6 +443,8 @@ export default {
                 return `/api/proposal/${this.proposal.id}/assessor_save.json`
             } else if ([constants.PROPOSAL_STATUS.WITH_REFERRAL.ID, constants.PROPOSAL_STATUS.WITH_REFERRAL_CONDITIONS.ID].includes(this.proposal.processing_status_id)){
                 return `/api/proposal/${this.proposal.id}/referral_save.json`
+            } else if ([constants.PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID,].includes(this.proposal.processing_status_id)){
+                return `/api/proposal/${this.proposal.id}/finance_save.json`
             } else {
                 // Should not reach here
                 return ''
@@ -846,7 +848,7 @@ export default {
                     //this.proposal.proposal_geometry = this.$refs.application_form.$refs.component_map.getJSONFeatures();
                     payload['proposal_geometry'] = vm.$refs.application_form.$refs.component_map.getJSONFeatures();
                 }
-                console.log({payload})
+
                 const res = await fetch(vm.proposal_form_url, { body: JSON.stringify(payload), method: 'POST' })
 
                 if(res.ok){
