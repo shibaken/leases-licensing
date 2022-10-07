@@ -7,7 +7,7 @@
             <template v-for="item in review_dates" :key="item.key">
                 <div class="row mb-2 row_wrapper">
                     <div class="col-sm-3">
-                        <input type="date" class="form-control w-auto" placeholder="DD/MM/YYYY" v-model="item.date" />
+                        <input type="date" class="form-control w-auto" placeholder="DD/MM/YYYY" v-model="item.review_date" />
                     </div>
                     <div v-if="item.id === 0" class="col-sm-1">
                         <span class="remove_a_row text-danger" @click="remove_a_row(item, $event)"><i class="bi bi-x-circle-fill"></i></span>
@@ -42,7 +42,7 @@ export default {
             this.review_dates.push({
                 'id': 0,
                 'key': uuid(),
-                'date': null,
+                'review_date': null,
             })
         },
         remove_a_row: function(item, e){
