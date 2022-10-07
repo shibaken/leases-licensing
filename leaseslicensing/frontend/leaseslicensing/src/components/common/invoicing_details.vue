@@ -10,7 +10,7 @@
                     class="form-check-input"
                     name="charge_method"
                     :id="charge_method.key" 
-                    :value="charge_method" 
+                    :value="charge_method.id" 
                     v-model="invoicing_details.charge_method"
                 />
                 <label :for="charge_method.key" class="form-check-label">{{ charge_method.display_name }}</label>
@@ -73,7 +73,7 @@
                     name="repetition_type_review"
                     class="form-check-input"
                     :id="'review_' + repetition_type.key" 
-                    :value="repetition_type" 
+                    :value="repetition_type.id" 
                     v-model="invoicing_details.review_repetition_type"
                 />
                 <label :for="'review_' + repetition_type.key" class="form-check-label">{{ repetition_type.display_name }}</label>
@@ -102,7 +102,7 @@
                     name="repetition_type_invoicing"
                     class="form-check-input"
                     :id="'invoicing_' + repetition_type.key" 
-                    :value="repetition_type" 
+                    :value="repetition_type.id" 
                     v-model="invoicing_details.invoicing_repetition_type"
                 />
                 <label :for="'invoicing_' + repetition_type.key" class="form-check-label">{{ repetition_type.display_name }}</label>
@@ -139,6 +139,7 @@ export default {
         CrownLandRentReviewDate,
     },
     created: function(){
+        console.log('created')
         this.fetchChargeMethods()
         this.fetchRepetitionTypes()
     },
@@ -148,26 +149,26 @@ export default {
     computed: {
         show_once_off_charge_amount: function(){
             if (this.invoicing_details && this.invoicing_details.charge_method)
-                if (this.invoicing_details.charge_method.key === 'once_off_charge')
+                if (this.invoicing_details.charge_method === this.getChargeMethodIdByKey('once_off_charge'))
                     return true
             return false
         },
         show_fixed_annual_increment: function(){
             if (this.invoicing_details && this.invoicing_details.charge_method)
-                if (this.invoicing_details.charge_method.key === 'base_fee_plus_fixed_annual_increment')
-                return true
+                if (this.invoicing_details.charge_method === this.getChargeMethodIdByKey('base_fee_plus_fixed_annual_increment'))
+                    return true
             return false
         },
         show_fixed_annual_percentage: function(){
             if (this.invoicing_details && this.invoicing_details.charge_method)
-                if (this.invoicing_details.charge_method.key === 'base_fee_plus_fixed_annual_percentage')
-                return true
+                if (this.invoicing_details.charge_method === this.getChargeMethodIdByKey('base_fee_plus_fixed_annual_percentage'))
+                    return true
             return false
         },
         show_base_fee: function(){
             if (this.show_fixed_annual_increment || this.show_fixed_annual_percentage || (
-                this.invoicing_details && this.invoicing_details.charge_method && this.invoicing_details.charge_method.key === 'base_fee_plus_annual_cpi'
-            ))
+                this.invoicing_details && this.invoicing_details.charge_method && this.invoicing_details.charge_method === this.getChargeMethodIdByKey('base_fee_plus_annual_cpi'
+            )))
                 return true
             return false
         },
@@ -176,7 +177,7 @@ export default {
         },
         show_percentage_of_gross_turnover: function(){
             if (this.invoicing_details && this.invoicing_details.charge_method)
-                if (this.invoicing_details.charge_method.key === 'percentage_of_gross_turnover')
+                if (this.invoicing_details.charge_method === this.getChargeMethodIdByKey('percentage_of_gross_turnover'))
                     return true
             return false
         },
@@ -185,13 +186,24 @@ export default {
         },
         show_invoicing_frequency: function(){
             if (this.invoicing_details){
-                if (['base_fee_plus_fixed_annual_increment', 'base_fee_plus_fixed_annual_percentage', 'base_fee_plus_annual_cpi', 'percentage_of_gross_turnover'].includes(this.invoicing_details.charge_method.key))
+                if ([
+                    this.getChargeMethodIdByKey('base_fee_plus_fixed_annual_increment'),
+                    this.getChargeMethodIdByKey('base_fee_plus_fixed_annual_percentage'),
+                    this.getChargeMethodIdByKey('base_fee_plus_annual_cpi'),
+                    this.getChargeMethodIdByKey('percentage_of_gross_turnover')].includes(this.invoicing_details.charge_method))
                     return true
                 return false
             }
         },
     },
     methods: {
+        getChargeMethodIdByKey: function(key){
+            let charge_method = this.charge_methods.find(charge_method => charge_method.key === key)
+            if (charge_method)
+                return charge_method.id
+            else
+                return 0
+        },
         fetchChargeMethods: async function(){
             let vm = this
             try {
