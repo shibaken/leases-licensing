@@ -67,7 +67,7 @@
             <!-- TODO -->
         </FormSection>
 
-        <FormSection :formCollapse="false" label="Invoicing Details" Index="proposal_invoicing_details">
+        <FormSection v-if="show_invoicing_details" :formCollapse="false" label="Invoicing Details" Index="proposal_invoicing_details">
             <InvoicingDetails
                 :invoicing_details="proposal.invoicing_details"
             />
@@ -107,6 +107,112 @@ export default {
         InvoicingDetails,
     },
     computed:{
+        debug: function(){
+            if (this.$route.query.debug){
+                return this.$route.query.debug === 'true'
+            }
+            return false
+        },
+        display_approval_screen: function(){
+            if (this.debug)
+                return true
+            let ret_val =
+                this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_APPROVER.ID ||
+                this.proposal.processing_status_id == constants.PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID ||
+                this.isFinalised
+            return ret_val
+        },
+        display_requirements: function(){
+            let ret_val =
+                this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID ||
+                ((this.proposal.processing_status_id == constants.PROPOSAL_STATUS.WITH_APPROVER.ID || this.isFinalised) && this.showingRequirements)
+            return ret_val
+        },
+        /*
+        showElectoralRoll: function(){
+            // TODO: implement
+            return true
+        },
+        */
+        showElectoralRoll: function() {
+            let show = false;
+            if (this.proposal && ['wla', 'mla'].includes(this.proposal.application_type_code)) {
+                show = true;
+            }
+            return show;
+        },
+        readonly: function() {
+            return true
+        },
+        contactsURL: function(){
+            return this.proposal!= null ? helpers.add_endpoint_json(api_endpoints.organisations, this.proposal.applicant.id + '/contacts') : '';
+        },
+        isLoading: function() {
+          return this.loading.length > 0
+        },
+        csrf_token: function() {
+          return helpers.getCookie('csrftoken')
+        },
+        isFinalised: function(){
+            return this.proposal.processing_status_id === constants.PROPOSAL_STATUS.DECLINED.ID || this.proposal.processing_status_id === constants.PROPOSAL_STATUS.APPROVED.ID;
+        },
+        canAssess: function(){
+            return true  // TODO: Implement correctly.  May not be needed though
+
+            //return this.proposal && this.proposal.assessor_mode.assessor_can_assess ? true : false;
+        },
+        hasAssessorMode:function(){
+            return this.proposal && this.proposal.assessor_mode.has_assessor_mode ? true : false;
+        },
+        canAction: function(){
+
+            return true  // TODO: implement this.  This is just temporary solution
+
+            //if (this.proposal.processing_status == 'With Approver'){
+            //    return this.proposal && (this.proposal.processing_status == 'With Approver' || this.proposal.processing_status == 'With Assessor' || this.proposal.processing_status == 'With Assessor (Requirements)') && !this.isFinalised && !this.proposal.can_user_edit && (this.proposal.current_assessor.id == this.proposal.assigned_approver || this.proposal.assigned_approver == null ) && this.proposal.assessor_mode.assessor_can_assess? true : false;
+            //}
+            //else{
+            //    return this.proposal && (this.proposal.processing_status == 'With Approver' || this.proposal.processing_status == 'With Assessor' || this.proposal.processing_status == 'With Assessor (Requirements)') && !this.isFinalised && !this.proposal.can_user_edit && (this.proposal.current_assessor.id == this.proposal.assigned_officer || this.proposal.assigned_officer == null ) && this.proposal.assessor_mode.assessor_can_assess? true : false;
+            //}
+        },
+        //canLimitedAction: function(){
+
+        //    //return false  // TODO: implement this.  This is just temporary solution
+
+        //    if (this.proposal.processing_status == 'With Approver'){
+        //        return
+        //            this.proposal
+        //            && (
+        //                this.proposal.processing_status == 'With Assessor' ||
+        //                //this.proposal.processing_status == 'With Referral' ||
+        //                this.proposal.processing_status == 'With Assessor (Requirements)'
+        //            )
+        //            && !this.isFinalised && !this.proposal.can_user_edit
+        //            && (
+        //                this.proposal.current_assessor.id == this.proposal.assigned_approver ||
+        //                this.proposal.assigned_approver == null
+        //            ) && this.proposal.assessor_mode.assessor_can_assess? true : false;
+        //    }
+        //    else{
+        //        return
+        //            this.proposal
+        //            && (
+        //                this.proposal.processing_status == 'With Assessor' ||
+        //                //this.proposal.processing_status == 'With Referral' ||
+        //                this.proposal.processing_status == 'With Assessor (Requirements)'
+        //            ) && !this.isFinalised && !this.proposal.can_user_edit
+        //            && (
+        //                this.proposal.current_assessor.id == this.proposal.assigned_officer ||
+        //                this.proposal.assigned_officer == null
+        //            ) && this.proposal.assessor_mode.assessor_can_assess? true : false;
+        //    }
+        //},
+        canSeeSubmission: function(){
+            return this.proposal && (this.proposal.processing_status != 'With Assessor (Requirements)' && this.proposal.processing_status != 'With Approver' && !this.isFinalised)
+        },
+        isApprovalLevelDocument: function(){
+            return this.proposal && this.proposal.processing_status == 'With Approver' && this.proposal.approval_level != null && this.proposal.approval_level_document == null ? true : false;
+        },
         approvalIssueDate: function() {
             if (this.proposal) {
                 return this.proposal.approval_issue_date;
@@ -118,6 +224,19 @@ export default {
             } else if (this.proposal.proposed_issuance_approval.decision === 'approve_competitive_process') {
                 return 'Competitive Process';
             }
+        },
+        show_invoicing_details: function() {
+            if (this.debug)
+                return true
+
+            let display = false
+            if (this.proposal && 
+                this.proposal.application_type && 
+                this.proposal.application_type.name === constants.APPLICATION_TYPES.LEASE_LICENCE && 
+                this.proposal.processing_status_id === constants.PROPOSAL_STATUS.APPROVED_EDITING_INVOICING.ID &&
+                this.proposal.accessing_user_roles.includes(constants.ROLES.FINANCE.ID))
+                    display = true
+            return display
         },
         applicationTypeNameDisplay: function() {
             if (this.proposal) {
