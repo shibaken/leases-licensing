@@ -2402,69 +2402,44 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                 self.store_proposed_approval_data(request, details)
 
-                self.processing_status = "approved"
+                # self.processing_status = "approved"
+
                 # Log proposal action
-                self.log_user_action(
-                    ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id), request
-                )
+                self.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id), request)
                 # Log entry for organisation
                 # applicant_field=getattr(self, self.applicant_field)
                 # applicant_field.log_user_action(ProposalUserAction.ACTION_ISSUE_APPROVAL_.format(self.id),request)
 
-                if self.processing_status == self.PROCESSING_STATUS_APPROVED:
-                    # TODO if it is an ammendment proposal then check appropriately
-                    checking_proposal = self
-                    if (
-                        self.proposal_type == "renewal"
-                        and self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE
-                    ):
-                        if self.previous_application:
-                            previous_approval = self.previous_application.approval
-                            approval, created = Approval.objects.update_or_create(
-                                current_proposal=checking_proposal,
-                                defaults={
-                                    "issue_date": timezone.now(),
-                                    #'expiry_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('expiry_date'), '%d/%m/%Y').date(),
-                                    #'start_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('start_date'), '%d/%m/%Y').date(),
-                                    "expiry_date": timezone.now().date()
-                                    + relativedelta(years=1),
-                                    "start_date": timezone.now().date(),
-                                    "submitter": self.submitter,
-                                    "org_applicant": self.org_applicant,
-                                    "proxy_applicant": self.proxy_applicant,
-                                    "lodgement_number": previous_approval.lodgement_number,
-                                },
-                            )
-                            if created:
-                                previous_approval.replaced_by = approval
-                                previous_approval.save()
+                # if self.processing_status == self.PROCESSING_STATUS_APPROVED:
+                # TODO if it is an ammendment proposal then check appropriately
+                checking_proposal = self
+                if self.proposal_type == "renewal" and self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+                    if self.previous_application:
+                        previous_approval = self.previous_application.approval
+                        approval, created = Approval.objects.update_or_create(
+                            current_proposal=checking_proposal,
+                            defaults={
+                                "issue_date": timezone.now(),
+                                #'expiry_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('expiry_date'), '%d/%m/%Y').date(),
+                                #'start_date' : datetime.datetime.strptime(self.proposed_issuance_approval.get('start_date'), '%d/%m/%Y').date(),
+                                "expiry_date": timezone.now().date()
+                                + relativedelta(years=1),
+                                "start_date": timezone.now().date(),
+                                "submitter": self.submitter,
+                                "org_applicant": self.org_applicant,
+                                "proxy_applicant": self.proxy_applicant,
+                                "lodgement_number": previous_approval.lodgement_number,
+                            },
+                        )
+                        if created:
+                            previous_approval.replaced_by = approval
+                            previous_approval.save()
 
-                            self.reset_licence_discount(request.user)
+                        self.reset_licence_discount(request.user)
 
-                    elif (
-                        self.proposal_type == "amendment"
-                        and self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE
-                    ):
-                        if self.previous_application:
-                            previous_approval = self.previous_application.approval
-                            approval, created = Approval.objects.update_or_create(
-                                current_proposal=checking_proposal,
-                                defaults={
-                                    "issue_date": timezone.now(),
-                                    "expiry_date": timezone.now().date()
-                                    + relativedelta(years=1),
-                                    "start_date": timezone.now().date(),
-                                    "submitter": self.submitter,
-                                    "org_applicant": self.org_applicant,
-                                    "proxy_applicant": self.proxy_applicant,
-                                    "lodgement_number": previous_approval.lodgement_number,
-                                },
-                            )
-                            if created:
-                                previous_approval.replaced_by = approval
-                                previous_approval.save()
-                    else:
-                        # can be rog, ll or cp
+                elif self.proposal_type == "amendment" and self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+                    if self.previous_application:
+                        previous_approval = self.previous_application.approval
                         approval, created = Approval.objects.update_or_create(
                             current_proposal=checking_proposal,
                             defaults={
@@ -2475,39 +2450,53 @@ class Proposal(DirtyFieldsMixin, models.Model):
                                 "submitter": self.submitter,
                                 "org_applicant": self.org_applicant,
                                 "proxy_applicant": self.proxy_applicant,
+                                "lodgement_number": previous_approval.lodgement_number,
                             },
                         )
-                    ## Registration of interest
-                    if (
-                        self.application_type.name
-                        == APPLICATION_TYPE_REGISTRATION_OF_INTEREST
-                    ):
-                        if (
-                            self.proposed_issuance_approval.get("decision")
-                            == "approve_lease_licence"
-                            and not self.generated_proposal
-                        ):
-                            lease_licence = (
-                                self.create_lease_licence_from_registration_of_interest()
-                            )
-                            self.generated_proposal = lease_licence
-                            self.save()
-                        elif (
-                            self.proposed_issuance_approval.get("decision")
-                            == "approve_competitive_process"
-                            and not self.generated_proposal
-                        ):
-                            self.generate_competitive_process()
-                    # Lease Licence
-                    elif (
-                        self.application_type.name
-                        == APPLICATION_TYPE_LEASE_LICENCE
-                    ):
-                        pass
+                        if created:
+                            previous_approval.replaced_by = approval
+                            previous_approval.save()
+                else:
+                    # registration_of_interest / lease_licence (new)
+                    # approval, created = Approval.objects.update_or_create(
+                    #     current_proposal=checking_proposal,
+                    #     defaults={
+                    #           "issue_date": timezone.now(),
+                    #           "expiry_date": timezone.now().date()
+                    #           + relativedelta(years=1),
+                    #           "start_date": timezone.now().date(),
+                    #           "submitter": self.submitter,
+                    #           "org_applicant": self.org_applicant,
+                    #           "proxy_applicant": self.proxy_applicant,
+                    #              },
+                    # )
 
-                    self.approval = approval
+                    # TODO: could be PROCESSING_STATUS_APPROVED_APPLICATION or PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS or PROCESSING_STATUS_APPROVED_EDITING_INVOICING
+                    # When Registration_of_Interest
+                    #     self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_APPLICATION
+                    #     or
+                    #     self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS
+                    # When Lease Licence
+                    #     self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_EDITING_INVOICING
+
+                    if self.application_type.name == APPLICATION_TYPE_REGISTRATION_OF_INTEREST:
+                        # Registration of interest
+                        if self.proposed_issuance_approval.get("decision") == "approve_lease_licence" and not self.generated_proposal:
+                            lease_licence = self.create_lease_licence_from_registration_of_interest()
+                            self.generated_proposal = lease_licence
+                            self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_APPLICATION
+                        elif self.proposed_issuance_approval.get("decision") == "approve_competitive_process" and not self.generated_proposal:
+                            self.generate_competitive_process()
+                            self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS
+                    elif self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+                        # Lease Licence (New)
+                        self.generate_invoicing_details()
+                        self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_EDITING_INVOICING
+                    self.save()
+
+                    # self.approval = approval
                     # TODO: additional logic required for amendment, reissue, etc?
-                    self.generate_compliances(approval, request)
+                    # self.generate_compliances(approval, request)
 
                     # send Proposal approval email with attachment
                     # TODO: generate doc, then email
@@ -2912,6 +2901,52 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
         new_competitive_process = CompetitiveProcess.objects.create()
         self.generated_competitive_process = new_competitive_process
+        self.save()
+
+    def generate_invoicing_details(self):
+        if self.invoicing_details:
+            raise ValidationError('Couldn\'t generate an invoicing details.  Proposal {} has already generated a Invoicing Details: {}'.format(self, self.generated_competitive_process))
+
+        new_invoicing_details = InvoicingDetails.objects.create()
+        self.invoicing_details = new_invoicing_details
+        self.save()
+
+    def save_invoicing_details(self, request, action):
+        from leaseslicensing.components.invoicing.serializers import InvoicingDetailsSerializer
+
+        with transaction.atomic():
+            try:
+                # Retrieve invoicing_details data
+                proposal_data = request.data.get('proposal', {})
+                invoicing_details_data = proposal_data.get('invoicing_details', {}) if proposal_data else {}
+
+                # Save invoicing details
+                invoicing_details = InvoicingDetails.objects.get(id=invoicing_details_data.get('id'))
+                serializer = InvoicingDetailsSerializer(invoicing_details, data=invoicing_details_data, context={'action': action})
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            except Exception as e:
+                raise
+
+    def finance_complete_editing(self, request, action):
+        from leaseslicensing.components.approvals.models import Approval
+
+        self.save_invoicing_details(request, action)
+        self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
+
+        approval, created = Approval.objects.update_or_create(
+            current_proposal=self,
+            defaults={
+                "issue_date": timezone.now(),
+                "expiry_date": timezone.now().date() + relativedelta(years=1),
+                "start_date": timezone.now().date(),
+                "submitter": self.submitter,
+                "org_applicant": self.org_applicant,
+                "proxy_applicant": self.proxy_applicant,
+            },
+        )
+
+        self.generate_compliances(approval, request)
         self.save()
 
 
