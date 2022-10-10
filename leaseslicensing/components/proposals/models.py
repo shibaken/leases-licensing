@@ -2503,7 +2503,7 @@ class Proposal(DirtyFieldsMixin, models.Model):
                         self.application_type.name
                         == APPLICATION_TYPE_LEASE_LICENCE
                     ):
-                        pass
+                        self.generate_invoicing_details()
 
                     self.approval = approval
                     # TODO: additional logic required for amendment, reissue, etc?
@@ -2912,6 +2912,14 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
         new_competitive_process = CompetitiveProcess.objects.create()
         self.generated_competitive_process = new_competitive_process
+        self.save()
+
+    def generate_invoicing_details(self):
+        if self.invoicing_details:
+            raise ValidationError('Couldn\'t generate an invoicing details.  Proposal {} has already generated a Invoicing Details: {}'.format(self, self.generated_competitive_process))
+
+        new_invoicing_details = InvoicingDetails.objects.create()
+        self.invoicing_details = new_invoicing_details
         self.save()
 
 
