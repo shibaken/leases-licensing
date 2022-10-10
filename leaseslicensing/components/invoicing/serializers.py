@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from leaseslicensing import settings
 from leaseslicensing.components.invoicing.models import ChargeMethod, RepetitionType, InvoicingDetails, \
     FixedAnnualIncrementAmount, FixedAnnualIncrementPercentage, PercentageOfGrossTurnover, CrownLandRentReviewDate
 
@@ -115,6 +116,31 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
             'gross_turnover_percentages',       # ReverseFK
             'crown_land_rent_review_dates',     # ReverseFK
         )
+
+    def validate(self, attrs):
+        action = self.context.get('action')
+
+        # TODO: conditional based on viewset.action?
+        if action.action == 'finance_save':
+            pass
+        elif action.action == 'finance_complete_edition':
+            pass
+
+        charge_method = attrs.get('charge_method')
+        if charge_method.key == settings.CHARGE_METHOD_ONCE_OFF_CHARGE:
+            pass
+        elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_INCREMENT:
+            pass
+        elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_PERCENTAGE:
+            pass
+        elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_ANNUAL_CPI:
+            pass
+        elif charge_method.key == settings.CHARGE_METHOD_PERCENTAGE_OF_GROSS_TURNOVER:
+            pass
+        elif charge_method.key == settings.CHARGE_METHOD_NO_RENT_OR_LICENCE_CHARGE:
+            pass
+
+        return attrs
 
     def update(self, instance, validated_data):
         # Local fields
