@@ -242,8 +242,8 @@ class InvoicingDetails(BaseModel):
     objects = InvoicingDetailsManager()
 
     charge_method = models.ForeignKey(ChargeMethod, null=True, blank=True, on_delete=models.SET_NULL)
-    base_fee_amount = models.DecimalField(max_digits=10, decimal_places=2, default="0.00")
-    once_off_charge_amount = models.DecimalField(max_digits=10, decimal_places=2, default="0.00")
+    base_fee_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    once_off_charge_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     review_once_every = models.PositiveSmallIntegerField(null=True, blank=True)
     review_repetition_type = models.ForeignKey(RepetitionType, null=True, blank=True, on_delete=models.SET_NULL, related_name='invoicing_details_set_for_review')
     invoicing_once_every = models.PositiveSmallIntegerField(null=True, blank=True)

@@ -729,8 +729,25 @@ export default {
         },
     },
     methods: {
-        completeEditing: function(){
-            console.log('completeEditing')
+        completeEditing: async function(){
+            let vm = this
+            let payload = {'proposal': this.proposal}
+
+            const res = await fetch('/api/proposal/' + this.proposal.id + '/finance_complete_editing.json', { body: JSON.stringify(payload), method: 'POST' })
+
+            if(res.ok){
+                await new swal({
+                    title: 'Saved',
+                    text: 'Your proposal has been saved',
+                    type: 'success',
+                })
+            } else {
+                await new swal({
+                    title: "Please fix following errors before saving",
+                    text: err.bodyText,
+                    type:'error',
+                })
+            }
         },
         applicationFormMounted: function(){
             this.fetchAdditionalDocumentTypesDict()  // <select> element for the additional document type exists in the ApplicationForm component, which is a child component of this component.

@@ -121,24 +121,33 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
         action = self.context.get('action')
 
         # TODO: conditional based on viewset.action?
-        if action.action == 'finance_save':
+        if action == 'finance_save':
+            # When "Save and Continue"/"Save and Exit" button clicked
             pass
-        elif action.action == 'finance_complete_edition':
-            pass
+        elif action == 'finance_complete_editing':
+            # When "Complete Editing" clicked
+            charge_method = attrs.get('charge_method')
 
-        charge_method = attrs.get('charge_method')
-        if charge_method.key == settings.CHARGE_METHOD_ONCE_OFF_CHARGE:
-            pass
-        elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_INCREMENT:
-            pass
-        elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_PERCENTAGE:
-            pass
-        elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_ANNUAL_CPI:
-            pass
-        elif charge_method.key == settings.CHARGE_METHOD_PERCENTAGE_OF_GROSS_TURNOVER:
-            pass
-        elif charge_method.key == settings.CHARGE_METHOD_NO_RENT_OR_LICENCE_CHARGE:
-            pass
+            if charge_method.key == settings.CHARGE_METHOD_ONCE_OFF_CHARGE:
+                attrs['base_fee_amount'] = None
+                attrs['review_once_every'] = None
+                attrs['review_repetition_type'] = None
+                attrs['invoicing_once_every'] = None
+                attrs['invoicing_repetition_type'] = None
+                attrs['annual_increment_amounts'] = None
+                attrs['annual_increment_percentages'] = None
+                attrs['gross_turnover_percentages'] = None
+                attrs['crown_land_rent_review_dates'] = None
+            elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_INCREMENT:
+                pass
+            elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_PERCENTAGE:
+                pass
+            elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_ANNUAL_CPI:
+                pass
+            elif charge_method.key == settings.CHARGE_METHOD_PERCENTAGE_OF_GROSS_TURNOVER:
+                pass
+            elif charge_method.key == settings.CHARGE_METHOD_NO_RENT_OR_LICENCE_CHARGE:
+                pass
 
         return attrs
 
