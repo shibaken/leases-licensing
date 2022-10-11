@@ -28,6 +28,8 @@ class RepetitionTypeSerializer(serializers.ModelSerializer):
 
 
 class FixedAnnualIncrementAmountSerializer(serializers.ModelSerializer):
+    readonly = serializers.BooleanField(read_only=True)
+    to_be_deleted = serializers.SerializerMethodField()
 
     class Meta:
         model = FixedAnnualIncrementAmount
@@ -35,6 +37,8 @@ class FixedAnnualIncrementAmountSerializer(serializers.ModelSerializer):
             'id',
             'year',
             'increment_amount',
+            'readonly',
+            'to_be_deleted',
         )
         extra_kwargs = {
             'id': {
@@ -43,8 +47,13 @@ class FixedAnnualIncrementAmountSerializer(serializers.ModelSerializer):
             },
         }
 
+    def get_to_be_deleted(self, instance):
+        return False
+
 
 class FixedAnnualIncrementPercentageSerializer(serializers.ModelSerializer):
+    readonly = serializers.BooleanField(read_only=True)
+    to_be_deleted = serializers.SerializerMethodField()
 
     class Meta:
         model = FixedAnnualIncrementPercentage
@@ -52,6 +61,8 @@ class FixedAnnualIncrementPercentageSerializer(serializers.ModelSerializer):
             'id',
             'year',
             'increment_percentage',
+            'readonly',
+            'to_be_deleted',
         )
         extra_kwargs = {
             'id': {
@@ -60,8 +71,13 @@ class FixedAnnualIncrementPercentageSerializer(serializers.ModelSerializer):
             },
         }
 
+    def get_to_be_deleted(self, instance):
+        return False
+
 
 class PercentageOfGrossTurnoverSerializer(serializers.ModelSerializer):
+    readonly = serializers.BooleanField(read_only=True)
+    to_be_deleted = serializers.SerializerMethodField()
 
     class Meta:
         model = PercentageOfGrossTurnover
@@ -69,6 +85,8 @@ class PercentageOfGrossTurnoverSerializer(serializers.ModelSerializer):
             'id',
             'year',
             'percentage',
+            'readonly',
+            'to_be_deleted',
         )
         extra_kwargs = {
             'id': {
@@ -77,14 +95,21 @@ class PercentageOfGrossTurnoverSerializer(serializers.ModelSerializer):
             },
         }
 
+    def get_to_be_deleted(self, instance):
+        return False
+
 
 class CrownLandRentReviewDateSerializer(serializers.ModelSerializer):
+    readonly = serializers.BooleanField(read_only=True)
+    to_be_deleted = serializers.SerializerMethodField()
 
     class Meta:
         model = CrownLandRentReviewDate
         fields = (
             'id',
             'review_date',
+            'readonly',
+            'to_be_deleted',
         )
         extra_kwargs = {
             'id': {
@@ -92,6 +117,9 @@ class CrownLandRentReviewDateSerializer(serializers.ModelSerializer):
                 'required': False,
             },
         }
+
+    def get_to_be_deleted(self, instance):
+        return False
 
 
 class InvoicingDetailsSerializer(serializers.ModelSerializer):
@@ -129,7 +157,9 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
             charge_method = attrs.get('charge_method')
 
             if charge_method.key == settings.CHARGE_METHOD_ONCE_OFF_CHARGE:
+                # attrs['charge_method'] = ''
                 attrs['base_fee_amount'] = None
+                # attrs['once_off_charge_amount'] = None
                 attrs['review_once_every'] = None
                 attrs['review_repetition_type'] = None
                 attrs['invoicing_once_every'] = None
@@ -180,16 +210,32 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
 
         return instance
 
-    def update_annual_increment_amounts(self, annual_increment_amounts_data, instance):
-        for annual_increment_amount_data in annual_increment_amounts_data:
+    def update_annual_increment_amounts(self, validated_annual_increment_amounts_data, instance):
+        initial_data = self.initial_data.get('annual_increment_amounts')
+
+        for annual_increment_amount_data in validated_annual_increment_amounts_data:
             if annual_increment_amount_data.get('id', 0):
                 # Existing
+
+                # Check if it is marked as to_be_deleted
+                to_be_deleted = False
+                for initial_data_row in initial_data:
+                    if initial_data_row.get('id') == annual_increment_amount_data.get('id'):
+                        if initial_data_row.get('to_be_deleted'):
+                            to_be_deleted = True
+
                 annual_increment_amount = FixedAnnualIncrementAmount.objects.get(id=int(annual_increment_amount_data.get('id')))
-                serializer = FixedAnnualIncrementAmountSerializer(
-                    annual_increment_amount, annual_increment_amount_data, context={'invoicing_details': instance}
-                    )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
+                if to_be_deleted:
+                    # Data is marked as to_be_deleted
+                    if not annual_increment_amount.readonly:
+                        annual_increment_amount.delete()
+                else:
+                    # Update data
+                    serializer = FixedAnnualIncrementAmountSerializer(
+                        annual_increment_amount, annual_increment_amount_data, context={'invoicing_details': instance}
+                        )
+                    serializer.is_valid(raise_exception=True)
+                    serializer.save()
             else:
                 # New
                 if 'id' in annual_increment_amount_data:
@@ -200,16 +246,32 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                 new_record.invoicing_details = instance
                 new_record.save()
 
-    def update_annual_increment_percentages(self, annual_increment_percentages_data, instance):
-        for annual_increment_percentage_data in annual_increment_percentages_data:
+    def update_annual_increment_percentages(self, validated_annual_increment_percentages_data, instance):
+        initial_data = self.initial_data.get('annual_increment_percentages')
+
+        for annual_increment_percentage_data in validated_annual_increment_percentages_data:
             if annual_increment_percentage_data.get('id', 0):
                 # Existing
+
+                # Check if it is marked as to_be_deleted
+                to_be_deleted = False
+                for initial_data_row in initial_data:
+                    if initial_data_row.get('id') == annual_increment_percentage_data.get('id'):
+                        if initial_data_row.get('to_be_deleted'):
+                            to_be_deleted = True
+
                 annual_increment_percentage = FixedAnnualIncrementPercentage.objects.get(id=int(annual_increment_percentage_data.get('id')))
-                serializer = FixedAnnualIncrementPercentageSerializer(
-                    annual_increment_percentage, annual_increment_percentage_data, context={'invoicing_details': instance}
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
+                if to_be_deleted:
+                    # Data is marked as to_be_deleted
+                    if not annual_increment_percentage.readonly:
+                        annual_increment_percentage.delete()
+                else:
+                    # Update data
+                    serializer = FixedAnnualIncrementPercentageSerializer(
+                        annual_increment_percentage, annual_increment_percentage_data, context={'invoicing_details': instance}
+                    )
+                    serializer.is_valid(raise_exception=True)
+                    serializer.save()
             else:
                 # New
                 if 'id' in annual_increment_percentage_data:
@@ -220,16 +282,32 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                 new_record.invoicing_details = instance
                 new_record.save()
 
-    def update_gross_turnover_percentages(self, gross_turnover_percentages_data, instance):
-        for gross_turnover_percentage_data in gross_turnover_percentages_data:
+    def update_gross_turnover_percentages(self, validated_gross_turnover_percentages_data, instance):
+        initial_data = self.initial_data.get('gross_turnover_percentages')
+
+        for gross_turnover_percentage_data in validated_gross_turnover_percentages_data:
             if gross_turnover_percentage_data.get('id', 0):
                 # Existing
+
+                # Check if it is marked as to_be_deleted
+                to_be_deleted = False
+                for initial_data_row in initial_data:
+                    if initial_data_row.get('id') == gross_turnover_percentage_data.get('id'):
+                        if initial_data_row.get('to_be_deleted'):
+                            to_be_deleted = True
+
                 gross_turnover_percentage = PercentageOfGrossTurnover.objects.get(id=int(gross_turnover_percentage_data.get('id')))
-                serializer = PercentageOfGrossTurnoverSerializer(
-                    gross_turnover_percentage, gross_turnover_percentage_data, context={'invoicing_details': instance}
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
+                if to_be_deleted:
+                    # Data is marked as to_be_deleted
+                    if not gross_turnover_percentage.readonly:
+                        gross_turnover_percentage.delete()
+                else:
+                    # Update data
+                    serializer = PercentageOfGrossTurnoverSerializer(
+                        gross_turnover_percentage, gross_turnover_percentage_data, context={'invoicing_details': instance}
+                    )
+                    serializer.is_valid(raise_exception=True)
+                    serializer.save()
             else:
                 # New
                 if 'id' in gross_turnover_percentage_data:
@@ -240,16 +318,30 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                 new_record.invoicing_details = instance
                 new_record.save()
 
-    def update_crown_land_rent_review_dates(self, crown_land_rent_review_dates_data, instance):
-        for crown_land_rent_review_date_data in crown_land_rent_review_dates_data:
+    def update_crown_land_rent_review_dates(self, validated_crown_land_rent_review_dates_data, instance):
+        initial_data = self.initial_data.get('crown_land_rent_review_dates')
+
+        for crown_land_rent_review_date_data in validated_crown_land_rent_review_dates_data:
             if crown_land_rent_review_date_data.get('id', 0):
                 # Existing
+
+                # Check if it is marked as to_be_deleted
+                to_be_deleted = False
+                for initial_data_row in initial_data:
+                    if initial_data_row.get('id') == crown_land_rent_review_date_data.get('id'):
+                        if initial_data_row.get('to_be_deleted'):
+                            to_be_deleted = True
+
                 crown_land_rent_review_date = CrownLandRentReviewDate.objects.get(id=int(crown_land_rent_review_date_data.get('id')))
-                serializer = CrownLandRentReviewDateSerializer(
-                    crown_land_rent_review_date, crown_land_rent_review_date_data, context={'invoicing_details': instance}
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
+                if to_be_deleted:
+                    if not crown_land_rent_review_date.readonly:
+                        crown_land_rent_review_date.delete()
+                else:
+                    serializer = CrownLandRentReviewDateSerializer(
+                        crown_land_rent_review_date, crown_land_rent_review_date_data, context={'invoicing_details': instance}
+                    )
+                    serializer.is_valid(raise_exception=True)
+                    serializer.save()
             else:
                 # New
                 if 'id' in crown_land_rent_review_date_data:
@@ -259,5 +351,3 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                 new_record = serializer.save()
                 new_record.invoicing_details = instance
                 new_record.save()
-
-

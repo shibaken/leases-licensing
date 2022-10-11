@@ -139,7 +139,6 @@ export default {
         CrownLandRentReviewDate,
     },
     created: function(){
-        console.log('created')
         this.fetchChargeMethods()
         this.fetchRepetitionTypes()
     },

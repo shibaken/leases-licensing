@@ -271,6 +271,11 @@ class FixedAnnualIncrementAmount(BaseModel):
         app_label = "leaseslicensing"
         ordering = ["year",]
 
+    @property
+    def readonly(self):
+        # TODO: implement
+        return False
+
 
 class FixedAnnualIncrementPercentage(BaseModel):
     year = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -280,6 +285,11 @@ class FixedAnnualIncrementPercentage(BaseModel):
     class Meta:
         app_label = "leaseslicensing"
         ordering = ["year",]
+
+    @property
+    def readonly(self):
+        # TODO: implement
+        return False
 
 
 class PercentageOfGrossTurnover(BaseModel):
@@ -291,6 +301,11 @@ class PercentageOfGrossTurnover(BaseModel):
         app_label = "leaseslicensing"
         ordering = ["year",]
 
+    @property
+    def readonly(self):
+        # TODO: implement
+        return False
+
 
 class CrownLandRentReviewDate(BaseModel):
     review_date = models.DateField(null=True, blank=True)
@@ -299,3 +314,8 @@ class CrownLandRentReviewDate(BaseModel):
     class Meta:
         app_label = "leaseslicensing"
         ordering = ["review_date",]
+
+    @property
+    def readonly(self):
+        # TODO: implement
+        return False
