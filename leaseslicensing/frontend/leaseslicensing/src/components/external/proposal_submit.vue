@@ -19,7 +19,7 @@
                     <tr>
                         <td><strong>Date / Time:</strong></td>
                         <!--td> {{proposal.lodgement_date|formatDate}}</td-->
-                        <td> {{ proposal.lodgement_date }}</td>
+                        <td> {{ proposal.lodgement_date_display }}</td>
                     </tr>
                 </table>
               </div>
@@ -36,21 +36,25 @@
     </div>
 </template>
 <script>
-/*
-import Vue from 'vue'
 import {
   api_endpoints,
   helpers
 }
 from '@/utils/hooks'
-import utils from './utils'
-*/
 export default {
   data: function() {
     return {
         "proposal": {},
     }
   },
+    /*
+  props: {
+      proposal: {
+          type: Object,
+      },
+  },
+  */
+
   components: {
   },
   computed: {
@@ -77,12 +81,19 @@ export default {
     //vm.form = document.forms.new_proposal;
   },
   beforeRouteEnter: function(to, from, next) {
-    next(vm => {
-        vm.proposal.lodgement_date = to.params.lodgement_date;
-        vm.proposal.id = to.params.proposal_id;
-        vm.proposal.lodgement_number = to.params.lodgement_number;
-        vm.proposal.application_type_text = to.params.application_type_text;
-    })
+    if (to.params.proposal_id) {
+      fetch(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
+          next(async (vm) => {
+              console.log(vm)
+              const proposalData = await res.json()
+              console.log(proposalData)
+              vm.proposal = proposalData;
+              });
+          },
+        err => {
+          console.log(err);
+        });
+    }
   }
 }
 </script>

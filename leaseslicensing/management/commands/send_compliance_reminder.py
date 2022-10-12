@@ -2,7 +2,8 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.conf import settings
 from leaseslicensing.components.compliances.models import Compliance
-from ledger.accounts.models import EmailUser
+#from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 import datetime
 
 import itertools
@@ -23,7 +24,7 @@ class Command(BaseCommand):
 
         errors = []
         updates = []
-        today = timezone.localtime(timezone.now()).date()
+        #today = timezone.localtime(timezone.now()).date()
         logger.info("Running command {}".format(__name__))
         for c in Compliance.objects.filter(processing_status="due"):
             try:

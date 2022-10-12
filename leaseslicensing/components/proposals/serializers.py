@@ -326,6 +326,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     # is_qa_officer = serializers.SerializerMethodField()
     proposalgeometry = ProposalGeometrySerializer(many=True, read_only=True)
     applicant = serializers.SerializerMethodField()
+    lodgement_date_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -399,8 +400,13 @@ class BaseProposalSerializer(serializers.ModelSerializer):
             "key_milestones_text",
             "risk_factors_text",
             "legislative_requirements_text",
+            "lodgement_date_display",
         )
         read_only_fields = ("supporting_documents",)
+
+    def get_lodgement_date_display(self, obj):
+        if obj.lodgement_date:
+            return obj.lodgement_date.strftime("%d/%m/%Y %I:%M %p")
 
     def get_applicant(self, obj):
         if isinstance(obj, Organisation):
