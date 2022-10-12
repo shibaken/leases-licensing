@@ -269,6 +269,7 @@ class FixedAnnualIncrementAmount(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        ordering = ["year",]
 
 
 class FixedAnnualIncrementPercentage(BaseModel):
@@ -278,6 +279,7 @@ class FixedAnnualIncrementPercentage(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        ordering = ["year",]
 
 
 class PercentageOfGrossTurnover(BaseModel):
@@ -287,6 +289,7 @@ class PercentageOfGrossTurnover(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        ordering = ["year",]
 
 
 class CrownLandRentReviewDate(BaseModel):
@@ -295,3 +298,4 @@ class CrownLandRentReviewDate(BaseModel):
 
     class Meta:
         app_label = "leaseslicensing"
+        ordering = ["review_date",]

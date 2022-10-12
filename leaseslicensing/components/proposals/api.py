@@ -42,7 +42,7 @@ from leaseslicensing.components.proposals.utils import (
     save_proponent_data,
     save_assessor_data,
     proposal_submit,
-    save_referral_data, save_invoicing_details,
+    save_referral_data
 )
 from leaseslicensing.components.proposals.models import (
     searchKeyWords,
@@ -2025,8 +2025,18 @@ class ProposalViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def finance_save(self, request, *args, **kwargs):
         instance = self.get_object()
-        save_invoicing_details(instance, request, self)
+        instance.save_invoicing_details(request, self.action)
         return Response({})
+
+
+    @detail_route(methods=["post"], detail=True)
+    @renderer_classes((JSONRenderer,))
+    @basic_exception_handler
+    def finance_complete_editing(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.finance_complete_editing(request, self.action)
+        return Response({})
+
 
     @detail_route(methods=["post"], detail=True)
     @basic_exception_handler

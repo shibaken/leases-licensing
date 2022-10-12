@@ -37,6 +37,7 @@
                     @declineProposal="declineProposal"
                     @assignRequestUser="assignRequestUser"
                     @assignTo="assignTo"
+                    @completeEditing="completeEditing"
                     class="mt-2"
                 />
             </div>
@@ -728,6 +729,9 @@ export default {
         },
     },
     methods: {
+        completeEditing: function(){
+            console.log('completeEditing')
+        },
         applicationFormMounted: function(){
             this.fetchAdditionalDocumentTypesDict()  // <select> element for the additional document type exists in the ApplicationForm component, which is a child component of this component.
                                                      // Therefore to apply select2 to the element inside child component, we have to make sure the childcomponent has been mounted.  Then select2 can be applied.
