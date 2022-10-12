@@ -333,7 +333,8 @@ export default {
                 this.compliance = Object.assign({}, resData);
                 this.$router.push({
                     name: 'submit_compliance',
-                    params: { compliance: this.compliance.id }
+                    //query: this.compliance,
+                    params: { compliance_id: this.compliance.id }
                 });
 
             },(error)=>{

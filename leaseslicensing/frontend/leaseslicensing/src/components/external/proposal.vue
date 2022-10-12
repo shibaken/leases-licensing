@@ -547,12 +547,21 @@ export default {
                 const lodgementDate = new Date(this.proposal.lodgement_date)
                 this.$router.push({
                     name: 'submit-proposal',
+                    /*
                     params: {
+                        proposal_id: this.proposal,
+                    },
+                    */
+                    params: this.proposal,
+                    //query: this.proposal,
+                    /*
+                    meta: {
                         proposal_id: this.proposal.id,
                         lodgement_number: this.proposal.lodgement_number,
                         lodgement_date: lodgementDate.toLocaleDateString("en-AU"),
                         application_type_text: this.proposal.application_type.confirmation_text
                     },
+                    */
                 });
             })
             /*
@@ -592,9 +601,6 @@ export default {
 
 
   beforeRouteEnter: function(to, from, next) {
-      console.log(to)
-      console.log(from)
-      //console.log(next)
     if (to.params.proposal_id) {
       let vm = this;
       fetch(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
