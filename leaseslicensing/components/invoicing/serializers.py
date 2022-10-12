@@ -156,6 +156,9 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                         item['to_be_deleted'] = True  # Mark as "to_be_deleted" to the initial value so that item is deleted at the update()
 
     def validate(self, attrs):
+        field_errors = {}
+        non_field_errors = []
+
         action = self.context.get('action')
 
         if action == 'finance_save':
@@ -183,8 +186,8 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                 ])
 
                 annual_increment_amounts_data = attrs.get('annual_increment_amounts')
-                self.validate_annual_increment(annual_increment_amounts_data)
-                self.validate_crown_land_rent_review_dates(attrs)
+                self._validate_annual_increment(annual_increment_amounts_data, field_errors, non_field_errors)
+                self._validate_crown_land_rent_review_dates(attrs, field_errors, non_field_errors)
 
             elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_PERCENTAGE:
                 self.set_default_values(attrs, [
@@ -198,8 +201,8 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                     'invoicing_repetition_type',
                 ])
                 annual_increment_percentages_data = attrs.get('annual_increment_percentages')
-                self.validate_annual_increment(annual_increment_percentages_data)
-                self.validate_crown_land_rent_review_dates(attrs)
+                self._validate_annual_increment(annual_increment_percentages_data)
+                self._validate_crown_land_rent_review_dates(attrs)
             elif charge_method.key == settings.CHARGE_METHOD_BASE_FEE_PLUS_ANNUAL_CPI:
                 self.set_default_values(attrs, [
                     'charge_method',
@@ -210,7 +213,7 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                     'invoicing_once_every',
                     'invoicing_repetition_type',
                 ])
-                self.validate_crown_land_rent_review_dates(attrs)
+                self._validate_crown_land_rent_review_dates(attrs)
             elif charge_method.key == settings.CHARGE_METHOD_PERCENTAGE_OF_GROSS_TURNOVER:
                 self.set_default_values(attrs, [
                     'charge_method',
@@ -219,30 +222,37 @@ class InvoicingDetailsSerializer(serializers.ModelSerializer):
                     'invoicing_repetition_type',
                 ])
                 gross_turnover_percentages_data = attrs.get('gross_turnover_percentages')
-                self.validate_annual_increment(gross_turnover_percentages_data)
+                self._validate_annual_increment(gross_turnover_percentages_data)
             elif charge_method.key == settings.CHARGE_METHOD_NO_RENT_OR_LICENCE_CHARGE:
                 self.set_default_values(attrs, [])
 
+        # Raise errors
+        if field_errors:
+            raise serializers.ValidationError(field_errors)
+        # Raise errors
+        if non_field_errors:
+            raise serializers.ValidationError(non_field_errors)
+
         return attrs
 
-    def validate_annual_increment(self, annual_increment_data):
+    def _validate_annual_increment(self, annual_increment_data, field_errors, non_field_errors):
         # Make sure there are no duplication of 'year'
         years = []
         for data in annual_increment_data:
             a_year = data.get('year')
             if a_year in years:
-                raise Exception
+                non_field_errors.append('Year: {} is duplicated. It must be unique.'.format(str(a_year)))
             else:
                 years.append(a_year)
 
-    def validate_crown_land_rent_review_dates(self, attrs):
+    def _validate_crown_land_rent_review_dates(self, attrs, field_errors, non_field_errors):
         # Make sure there are no duplication of 'date'
         crown_land_rent_review_dates_data = attrs.get('crown_land_rent_review_dates')
         dates = []
         for crown_land_rent_review_date_data in crown_land_rent_review_dates_data:
             date = crown_land_rent_review_date_data.get('review_date')
             if date in dates:
-                raise Exception('Review data duplicated')
+                non_field_errors.append('Review date: {} is duplicated. It must be unique.'.format(str(date)))
             else:
                 dates.append(date)
 

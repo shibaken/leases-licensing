@@ -744,7 +744,7 @@ export default {
             } else {
                 await new swal({
                     title: "Please fix following errors before saving",
-                    text: err.bodyText,
+                    text: await res.json(),
                     type:'error',
                 })
             }
