@@ -31,9 +31,10 @@ export default
             component: Compliance
         },
         {
-            path: 'compliance/submit',
+            path: 'compliance/submit/:compliance_id',
             component: ComplianceSubmit,
-            name:"submit_compliance"
+            name:"submit_compliance",
+            //props: (route) => ({ query: route.query.compliance }),
         },
         {
             path: 'proposal/',
@@ -41,9 +42,11 @@ export default
             name:"apply_proposal"
         },
         {
-            path: 'proposal/submit',
+            path: 'proposal/submit/:proposal_id',
             component: ProposalSubmit,
-            name:"submit-proposal"
+            name:"submit-proposal",
+            //props: (route) => ({ query: route.query.proposal }),
+            //props: true,
         },
         {
             path: 'proposal/:proposal_id',
