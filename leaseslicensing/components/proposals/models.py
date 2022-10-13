@@ -2504,7 +2504,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     # TODO: add reversion
                     # self.save(version_comment='Final Approval: {}'.format(self.approval.lodgement_number))
                     self.save()
-                    self.approval.documents.all().update(can_delete=False)
+                    if self.approval and self.approval.documents:
+                        self.approval.documents.all().update(can_delete=False)
 
             except:
                 raise
