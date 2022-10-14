@@ -34,6 +34,7 @@ class ComplianceSerializer(serializers.ModelSerializer):
     approval_lodgement_number = serializers.SerializerMethodField()
     application_type = serializers.SerializerMethodField(read_only=True)
     due_date = serializers.SerializerMethodField(read_only=True)
+    lodgement_date_display = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Compliance
@@ -66,6 +67,7 @@ class ComplianceSerializer(serializers.ModelSerializer):
             "fee_invoice_reference",
             "fee_paid",
             "application_type",
+            "lodgement_date_display",
         )
         datatables_always_serialize = (
             "id",
@@ -131,6 +133,9 @@ class ComplianceSerializer(serializers.ModelSerializer):
             return obj.proposal.application_type.name
         return None
 
+    def get_lodgement_date_display(self, obj):
+        if obj.lodgement_date:
+            return obj.lodgement_date.strftime("%d/%m/%Y %I:%M %p")
 
 class InternalComplianceSerializer(serializers.ModelSerializer):
     #regions = serializers.CharField(source="proposal.region")

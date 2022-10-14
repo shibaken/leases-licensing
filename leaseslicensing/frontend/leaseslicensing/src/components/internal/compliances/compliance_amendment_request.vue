@@ -91,11 +91,13 @@ export default {
                 reason: '',
                 compliance: this.compliance_id
             };
+            /*
             this.errors = false;
             $(this.$refs.reasons).val(null).trigger('change');
             $('.has-error').removeClass('has-error');
             
             this.validation_form.resetForm();
+            */
         },
         fetchAmendmentChoices: async function(){
             const url = '/api/compliance_amendment_reason_choices.json';
@@ -135,7 +137,8 @@ export default {
                         );
                 vm.amendingcompliance = true;
                 vm.close();
-                vm.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
+                //vm.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
+                vm.$router.push({ name: 'internal-dashboard' }); //Navigate to dashboard after creating Amendment request
             }
             /*
             vm.$http.post('/api/compliance_amendment_request.json',JSON.stringify(amendment),{
