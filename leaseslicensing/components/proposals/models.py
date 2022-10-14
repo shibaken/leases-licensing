@@ -2492,10 +2492,10 @@ class Proposal(DirtyFieldsMixin, models.Model):
 
                         # Lease Licence (New)
                         self.approval = approval
+                        self.save()
                         self.generate_compliances(approval, request)
                         self.generate_invoicing_details()
                         self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_EDITING_INVOICING
-                    self.save()
 
                     # TODO: additional logic required for amendment, reissue, etc?
 
