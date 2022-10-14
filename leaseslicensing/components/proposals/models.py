@@ -2457,19 +2457,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
                             previous_approval.replaced_by = approval
                             previous_approval.save()
                 else:
-                    # registration_of_interest / lease_licence (new)
-                    # approval, created = Approval.objects.update_or_create(
-                    #     current_proposal=checking_proposal,
-                    #     defaults={
-                    #           "issue_date": timezone.now(),
-                    #           "expiry_date": timezone.now().date()
-                    #           + relativedelta(years=1),
-                    #           "start_date": timezone.now().date(),
-                    #           "submitter": self.submitter,
-                    #           "org_applicant": self.org_applicant,
-                    #           "proxy_applicant": self.proxy_applicant,
-                    #              },
-                    # )
 
                     # TODO: could be PROCESSING_STATUS_APPROVED_APPLICATION or PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS or PROCESSING_STATUS_APPROVED_EDITING_INVOICING
                     # When Registration_of_Interest
@@ -2489,14 +2476,28 @@ class Proposal(DirtyFieldsMixin, models.Model):
                             self.generate_competitive_process()
                             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_COMPETITIVE_PROCESS
                     elif self.application_type.name == APPLICATION_TYPE_LEASE_LICENCE:
+                        # lease_licence (new)
+                        approval, created = Approval.objects.update_or_create(
+                            current_proposal=checking_proposal,
+                            defaults={
+                                  "issue_date": timezone.now(),
+                                  "expiry_date": timezone.now().date()
+                                  + relativedelta(years=1),
+                                  "start_date": timezone.now().date(),
+                                  "submitter": self.submitter,
+                                  "org_applicant": self.org_applicant,
+                                  "proxy_applicant": self.proxy_applicant,
+                                     },
+                        )
+
                         # Lease Licence (New)
+                        self.approval = approval
+                        self.save()
+                        self.generate_compliances(approval, request)
                         self.generate_invoicing_details()
                         self.processing_status = Proposal.PROCESSING_STATUS_APPROVED_EDITING_INVOICING
-                    self.save()
 
-                    # self.approval = approval
                     # TODO: additional logic required for amendment, reissue, etc?
-                    # self.generate_compliances(approval, request)
 
                     # send Proposal approval email with attachment
                     # TODO: generate doc, then email
@@ -2504,7 +2505,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
                     # TODO: add reversion
                     # self.save(version_comment='Final Approval: {}'.format(self.approval.lodgement_number))
                     self.save()
-                    self.approval.documents.all().update(can_delete=False)
+                    if self.approval and self.approval.documents:
+                        self.approval.documents.all().update(can_delete=False)
 
             except:
                 raise

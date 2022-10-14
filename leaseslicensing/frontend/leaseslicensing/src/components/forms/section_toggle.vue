@@ -10,7 +10,7 @@
                 :aria-controls="section_body_id"
                 @click="toggle_show_hide"
             >
-                <div class='col-6'>
+                <div class='col-6' :style="'color:' + customColor">
                     {{ label }}
                 </div>
                 <div class='col-6 text-end'>
@@ -18,7 +18,7 @@
                 </div>
             </div>
         </div>
-        <div class="card-body collapse show" :id='section_body_id' >
+        <div class="card-body collapse show" :id='section_body_id' :style="'color:' + customColor">
             <!--div id="ledger_ui_contact_details"></div-->
             <slot></slot>
         </div>
@@ -38,6 +38,7 @@ export default {
         },
         Index: {},
         hideHeader: {},
+        customColor: '',
     },
     data:function () {
         return {
