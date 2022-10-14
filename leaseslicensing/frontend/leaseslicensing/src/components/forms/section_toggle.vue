@@ -4,21 +4,26 @@
             <div 
                 class='row show_hide_switch' 
                 :id="'show_hide_switch_' + section_body_id" 
-                data-bs-toggle="collapse" 
-                :data-bs-target="'#' +section_body_id" 
                 aria-expanded="true" 
                 :aria-controls="section_body_id"
                 @click="toggle_show_hide"
             >
-                <div class='col-6' :style="'color:' + customColor">
+                <div class='col-11' :style="'color:' + customColor">
                     {{ label }}
                 </div>
-                <div class='col-6 text-end'>
-                    <i :id="chevron_elem_id" class="rotate_icon fa-solid fa-chevron-right"></i>
+                <div class='col-1 text-end'>
+                    <!--i :id="chevron_elem_id" class="rotate_icon fa-solid fa-chevron-right"></i-->
+                    <i 
+                        :id="chevron_elem_id" 
+                        class="bi fw-bold chevron-toggle"
+                        :data-bs-target="'#' + section_body_id" 
+                    >
+                    </i>
                 </div>
             </div>
         </div>
-        <div class="card-body collapse show" :id='section_body_id' :style="'color:' + customColor">
+        <!--div :class="detailsClass" :id='section_body_id' :style="'color:' + customColor +';display:none;'"-->
+        <div :class="detailsClass" :id='section_body_id' :style="'color:' + customColor">
             <!--div id="ledger_ui_contact_details"></div-->
             <slot></slot>
         </div>
@@ -39,14 +44,19 @@ export default {
         Index: {},
         hideHeader: {},
         customColor: '',
+        formCollapse: {
+            type: Boolean,
+            default: false,
+        },
     },
     data:function () {
         return {
             custom_id: uuid(),
             chevron_elem_id: 'chevron_elem_' + uuid(),
-            elem_expanded: null,
+            //elem_expanded: null,
         }
     },
+    /*
     watch: {
         elem_expanded: function(){
             let chevron_icon = $('#' + this.chevron_elem_id)
@@ -57,7 +67,15 @@ export default {
             }
         }
     },
+    */
     computed:{
+        detailsClass: function() {
+            let classText = 'card-body';
+            if (this.formCollapse) {
+                classText = 'card-body collapse';
+            }
+            return classText;
+        },
         section_header_id: function () {
             return "section_header_"+this.Index;
         },
@@ -66,14 +84,17 @@ export default {
         },
     },
     methods: {
+        /*
         toggle_show_hide: function(){
             // Bootstrap add a 'collapsed' class name to the element
             let elem_expanded_when_clicked = $('#show_hide_switch_' + this.section_body_id).hasClass('collapsed')
             this.elem_expanded = !elem_expanded_when_clicked
         }
+        */
     },
     mounted: function() {
-        this.toggle_show_hide()
+        //this.toggle_show_hide()
+        chevron_toggle.init()
     },
     created: function() {
     },

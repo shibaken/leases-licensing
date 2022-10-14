@@ -6,10 +6,14 @@
     <div v-else class="row">
         <div v-if="!isFinalised">
             <div v-if="hasAmendmentRequest">
-                <FormSection :formCollapse="false" customColor="red" label="An amendment has been requested for this Compliance with Requirements" Index="amendment_compliance_with_requirements">
-                    <div v-for="a in amendment_request">
-                      <p>Reason: {{a.reason}}</p>
-                      <p>Details: {{a.text}}</p>
+                <FormSection :formCollapse="true" customColor="red" label="An amendment has been requested for this Compliance with Requirements" Index="amendment_compliance_with_requirements">
+                    <div class="row">
+                        <div class="col-12">
+                            <div v-for="a in amendment_request">
+                              <p>Reason: {{a.reason}}</p>
+                              <p>Details: {{a.text}}</p>
+                            </div>
+                        </div>
                     </div>
                 </FormSection>
             </div>
