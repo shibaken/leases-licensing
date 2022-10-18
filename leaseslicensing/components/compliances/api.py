@@ -36,6 +36,9 @@ from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from leaseslicensing.components.main.decorators import basic_exception_handler
 from leaseslicensing.components.compliances.models import (
     Compliance,
     ComplianceAmendmentRequest,
@@ -275,34 +278,35 @@ class ComplianceViewSet(viewsets.ModelViewSet):
                 instance = self.get_object()
                 data = {
                     "text": request.data.get("detail"),
-                    "num_participants": request.data.get("num_participants"),
                 }
 
                 serializer = SaveComplianceSerializer(instance, data=data)
                 serializer.is_valid(raise_exception=True)
                 instance = serializer.save()
 
-                # if request.data.has_key('num_participants'):
-                if "num_participants" in request.data:
-                    if request.FILES:
-                        # if num_adults is present instance.submit is executed after payment in das_payment/views.py
-                        for f in request.FILES:
-                            document = instance.documents.create(
-                                name=str(request.FILES[f])
-                            )
-                            document._file = request.FILES[f]
-                            document.save()
-                else:
-                    instance.submit(request)
-
                 serializer = self.get_serializer(instance)
                 # Save the files
-                """for f in request.FILES:
-                    document = instance.documents.create()
-                    document.name = str(request.FILES[f])
-                    document._file = request.FILES[f]
+                #for f in request.FILES:
+                for f in request.data.get("files"):
+                    filename = str(f.get("name"))
+                    _file = f.get("file")
+
+                    document = instance.documents.get_or_create(name=filename)[0]
+                    path = default_storage.save(
+                        "{}/{}/documents/{}".format(
+                            instance._meta.model_name, instance.id, filename
+                        ),
+                        ContentFile(_file.read()),
+                    )
+
+                    document._file = path
                     document.save()
-                # End Save Documents"""
+
+                #    document = instance.documents.create()
+                #    document.name = str(f.get("name"))
+                #    document._file = f.get("file")
+                #    document.save()
+                # End Save Documents
                 return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
