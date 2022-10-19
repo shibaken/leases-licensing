@@ -6,7 +6,7 @@
     <div v-else class="row">
         <div v-if="!isFinalised">
             <div v-if="hasAmendmentRequest">
-                <FormSection :formCollapse="true" customColor="red" label="An amendment has been requested for this Compliance with Requirements" Index="amendment_compliance_with_requirements">
+                <FormSection customColor="red" label="An amendment has been requested for this Compliance with Requirements" Index="amendment_compliance_with_requirements">
                     <div class="row">
                         <div class="col-12">
                             <div v-for="a in amendment_request">
@@ -22,7 +22,7 @@
         <!--h3><strong>Compliance with Requirements: {{ compliance.reference }}</strong></h3-->
 
         <div class="col-md-12">
-            <FormSection :formCollapse="false" label="Compliance with Requirements" Index="compliance_with_requirements">
+            <FormSection label="Compliance with Requirements" Index="compliance_with_requirements">
                 <form class="form-horizontal" name="complianceForm" method="post">
                     <alert :show.sync="showError" type="danger">
                         <strong>{{errorString}}</strong>
