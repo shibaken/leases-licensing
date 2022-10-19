@@ -287,9 +287,13 @@ class ComplianceViewSet(viewsets.ModelViewSet):
                 serializer = self.get_serializer(instance)
                 # Save the files
                 #for f in request.FILES:
-                for f in request.data.get("files"):
-                    filename = str(f.get("name"))
-                    _file = f.get("file")
+                # for f in request.data.get("files"):
+                num_files = request.data.get("num_files")
+                for i in range(int(num_files)):
+                    #filename = str(f.get("name"))
+                    #_file = f.get("file")
+                    filename = request.data.get("name" + str(i))
+                    _file = request.data.get("file" + str(i))
 
                     document = instance.documents.get_or_create(name=filename)[0]
                     path = default_storage.save(

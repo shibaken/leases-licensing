@@ -295,17 +295,29 @@ export default {
     sendData:function(){
         this.$nextTick(() => {
             this.errors = false;
-            //let data = new FormData(this.form);
+            //let formData = new FormData(this.form);
+            let formData = new FormData();
+            formData.append('detail', this.compliance.text);
+            let numFiles = 0;
+            for (let i = 0; i < this.files.length; i++) {
+                formData.append('file'+i, this.files[i].file);
+                formData.append('name'+i, this.files[i].name);
+                numFiles++;
+            }
+            formData.append('num_files', numFiles);
+            //formData.append('files', JSON.stringify(this.files));
+            /*
             const payload = {
                 "detail": this.compliance.text,
                 "files": this.files,
             }
+            */
             this.addingComms = true;
             fetch(helpers.add_endpoint_json(api_endpoints.compliances,this.compliance.id+'/submit'),{
                 method: 'POST',
                 //body: JSON.stringify(this.compliance),
-                body: JSON.stringify(payload),
-                //body: data
+                //body: JSON.stringify(payload),
+                body: formData
             }).then(async (response)=>{
                 const resData = await response.json()
                 this.addingCompliance = false;
