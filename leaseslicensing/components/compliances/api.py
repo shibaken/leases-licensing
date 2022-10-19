@@ -36,6 +36,9 @@ from ledger_api_client.country_models import Country
 from datetime import datetime, timedelta, date
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from leaseslicensing.components.main.decorators import basic_exception_handler
 from leaseslicensing.components.compliances.models import (
     Compliance,
     ComplianceAmendmentRequest,
@@ -53,6 +56,7 @@ from leaseslicensing.components.compliances.serializers import (
 )
 from leaseslicensing.helpers import is_customer, is_internal
 from rest_framework_datatables.pagination import DatatablesPageNumberPagination
+from rest_framework_datatables.filters import DatatablesFilterBackend
 from leaseslicensing.components.proposals.api import (
     ProposalFilterBackend,
     ProposalRenderer,
@@ -72,8 +76,46 @@ class GetComplianceStatusesDict(views.APIView):
         return Response(data)
 
 
+class ComplianceFilterBackend(DatatablesFilterBackend):
+    """
+    Custom filters
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        total_count = queryset.count()
+
+        filter_lodged_from = request.GET.get("filter_lodged_from")
+        filter_lodged_to = request.GET.get("filter_lodged_to")
+        filter_compliance_status = (
+            request.GET.get("filter_compliance_status")
+            if request.GET.get("filter_compliance_status") != "all"
+            else ""
+        )
+
+        if filter_lodged_from:
+            filter_lodged_from = datetime.strptime(filter_lodged_from, "%Y-%m-%d")
+            queryset = queryset.filter(lodgement_date__gte=filter_lodged_from)
+        if filter_lodged_to:
+            filter_lodged_to = datetime.strptime(filter_lodged_to, "%Y-%m-%d")
+            queryset = queryset.filter(lodgement_date__lte=filter_lodged_to)
+        if filter_compliance_status:
+            queryset = queryset.filter(processing_status=filter_compliance_status)
+
+        fields = self.get_fields(request)
+        ordering = self.get_ordering(request, view, fields)
+        queryset = queryset.order_by(*ordering)
+        if len(ordering):
+            queryset = queryset.order_by(*ordering)
+
+        queryset = super(ComplianceFilterBackend, self).filter_queryset(
+            request, queryset, view
+        )
+        setattr(view, "_datatables_total_count", total_count)
+        return queryset
+
+
 class CompliancePaginatedViewSet(viewsets.ModelViewSet):
-    filter_backends = (ProposalFilterBackend,)
+    filter_backends = (ComplianceFilterBackend,)
     pagination_class = DatatablesPageNumberPagination
     renderer_classes = (ProposalRenderer,)
     page_size = 10
@@ -236,34 +278,35 @@ class ComplianceViewSet(viewsets.ModelViewSet):
                 instance = self.get_object()
                 data = {
                     "text": request.data.get("detail"),
-                    "num_participants": request.data.get("num_participants"),
                 }
 
                 serializer = SaveComplianceSerializer(instance, data=data)
                 serializer.is_valid(raise_exception=True)
                 instance = serializer.save()
 
-                # if request.data.has_key('num_participants'):
-                if "num_participants" in request.data:
-                    if request.FILES:
-                        # if num_adults is present instance.submit is executed after payment in das_payment/views.py
-                        for f in request.FILES:
-                            document = instance.documents.create(
-                                name=str(request.FILES[f])
-                            )
-                            document._file = request.FILES[f]
-                            document.save()
-                else:
-                    instance.submit(request)
-
                 serializer = self.get_serializer(instance)
                 # Save the files
-                """for f in request.FILES:
-                    document = instance.documents.create()
-                    document.name = str(request.FILES[f])
-                    document._file = request.FILES[f]
+                #for f in request.FILES:
+                for f in request.data.get("files"):
+                    filename = str(f.get("name"))
+                    _file = f.get("file")
+
+                    document = instance.documents.get_or_create(name=filename)[0]
+                    path = default_storage.save(
+                        "{}/{}/documents/{}".format(
+                            instance._meta.model_name, instance.id, filename
+                        ),
+                        ContentFile(_file.read()),
+                    )
+
+                    document._file = path
                     document.save()
-                # End Save Documents"""
+
+                #    document = instance.documents.create()
+                #    document.name = str(f.get("name"))
+                #    document._file = f.get("file")
+                #    document.save()
+                # End Save Documents
                 return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())

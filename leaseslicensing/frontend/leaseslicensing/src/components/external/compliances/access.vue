@@ -295,12 +295,17 @@ export default {
     sendData:function(){
         this.$nextTick(() => {
             this.errors = false;
-            let data = new FormData(this.form);
+            //let data = new FormData(this.form);
+            const payload = {
+                "detail": this.compliance.text,
+                "files": this.files,
+            }
             this.addingComms = true;
             fetch(helpers.add_endpoint_json(api_endpoints.compliances,this.compliance.id+'/submit'),{
                 method: 'POST',
                 //body: JSON.stringify(this.compliance),
-                body: data
+                body: JSON.stringify(payload),
+                //body: data
             }).then(async (response)=>{
                 const resData = await response.json()
                 this.addingCompliance = false;
