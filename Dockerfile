@@ -1,5 +1,6 @@
 # Prepare the base environment.
-FROM ubuntu:20.04 as builder_base_oim_licensing
+#FROM ubuntu:20.04 as builder_base_oim_licensing
+FROM ubuntu:22.04 as builder_base_oim_licensing
 MAINTAINER asi@dbca.wa.gov.au
 
 ENV DEBIAN_FRONTEND=noninteractive
