@@ -384,6 +384,8 @@ export default {
                     "data": function ( d ) {
                         // Add filters selected
                         d.filter_compliance_status = vm.filterComplianceStatus;
+                        d.filter_lodged_from = vm.filterProposalLodgedFrom;
+                        d.filter_lodged_to = vm.filterProposalLodgedTo;
                     }
                 },
                 //dom: 'lBfrtip',
@@ -422,8 +424,8 @@ export default {
             let vm = this;
 
             // Statuses
-            fetch(api_endpoints.compliance_statuses_dict).then((response) => {
-                vm.compliance_statuses = response.body
+            fetch(api_endpoints.compliance_statuses_dict).then(async(response) => {
+                vm.compliance_statuses = await response.json();
             },(error) => {
                 console.log(error);
             })
