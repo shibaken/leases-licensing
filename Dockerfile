@@ -1,6 +1,5 @@
 # Prepare the base environment.
-#FROM ubuntu:20.04 as builder_base_oim_licensing
-FROM ubuntu:22.04 as builder_base_oim_licensing
+FROM ubuntu:20.04 as builder_base_oim_licensing
 MAINTAINER asi@dbca.wa.gov.au
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -30,7 +29,7 @@ RUN apt-get upgrade -y
 RUN apt-get install --no-install-recommends -y curl wget git libmagic-dev gcc binutils libproj-dev gdal-bin
 RUN apt-get -y install ca-certificates
 RUN apt-get install --no-install-recommends -y sqlite3 vim postgresql-client ssh htop libspatialindex-dev
-RUN apt-get install --no-install-recommends -y python3-setuptools python3-dev python3-pip tzdata libreoffice cron rsyslog python3.10-venv gunicorn
+RUN apt-get install --no-install-recommends -y python3-setuptools python3-dev python3-pip tzdata libreoffice cron rsyslog python3.8-venv gunicorn
 RUN apt-get install --no-install-recommends -y libpq-dev patch
 RUN apt-get install --no-install-recommends -y postgresql-client mtr
 
