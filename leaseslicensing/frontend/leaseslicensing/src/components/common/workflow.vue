@@ -496,24 +496,7 @@ export default {
             return ret_value
         },
         completeEditing: async function(){
-            let vm = this
-            let payload = {'proposal': this.proposal}
-
-            const res = await fetch(vm.proposal_form_url, { body: JSON.stringify(payload), method: 'POST' })
-
-            if(res.ok){
-                await new swal({
-                    title: 'Saved',
-                    text: 'Your proposal has been saved',
-                    type: 'success',
-                })
-            } else {
-                await new swal({
-                    title: "Please fix following errors before saving",
-                    text: err.bodyText,
-                    type:'error',
-                })
-            }
+            this.$emit('completeEditing')
         },
         requireDas: function(){
         },
