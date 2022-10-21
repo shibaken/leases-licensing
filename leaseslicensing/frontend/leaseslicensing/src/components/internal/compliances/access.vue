@@ -65,39 +65,31 @@
         <div class="col-md-1"></div>
         <div class="col-md-8">
             <div class="row">
-                <div class="card card-default">
-                    <div class="card-header">
-                        <h3>Compliance with Requirements</h3>
+                <FormSection :formCollapse="false" label="Compliance with Requirements" Index="compliance_with_requirements">
+                    <CollapsibleFilters component_title="Assessor comments" ref="collapsible_filters" @created="collapsible_component_mounted" class="mb-2">
+                    </CollapsibleFilters>
+
+                    <div class="row mb-3">
+                        <label for="" class="col-sm-3 col-form-label">Requirement</label>
+                        <div class="col-sm-6">
+                            {{compliance.requirement}}
+                        </div>
                     </div>
-                    <div class="card-body card-collapse">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <form class="form-horizontal" name="compliance_form">
-                                    <div class="form-group">
-                                        <label for="" class="col-sm-3 control-label">Requirement</label>
-                                        <div class="col-sm-6">
-                                            {{compliance.requirement}}
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="" class="col-sm-3 control-label">Details</label>
-                                        <div class="col-sm-6">
-                                            <textarea disabled class="form-control" name="details" placeholder="" v-model="compliance.text"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="" class="col-sm-3 control-label">Documents</label>
-                                        <div class="col-sm-6">
-                                            <div class="row" v-for="d in compliance.documents">
-                                                    <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]}}</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                    <div class="row mb-3">
+                        <label for="" class="col-sm-3 col-form-label">Details</label>
+                        <div class="col-sm-6">
+                            <textarea disabled class="form-control" name="details" placeholder="" v-model="compliance.text"></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="" class="col-sm-3 col-form-label">Attachments</label>
+                        <div class="col-sm-6">
+                            <div class="row" v-for="d in compliance.documents">
+                                    <a :href="d[1]" target="_blank" class="col-form-label pull-left">{{d[0]}}</a>
                             </div>
                         </div>
                     </div>
-                </div>
+                </FormSection>
             </div>
         </div>
     </div>
@@ -109,11 +101,11 @@
 </div>
 </template>
 <script>
-import $ from 'jquery'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import ComplianceAmendmentRequest from './compliance_amendment_request.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
+import CollapsibleFilters from '@/components/forms/collapsible_component.vue'
 //import ResponsiveDatatablesHelper from "@/utils/responsive_datatable_helper.js"
 import {
     api_endpoints,
@@ -164,11 +156,14 @@ export default {
     CommsLogs,
     ComplianceAmendmentRequest,
     FormSection,
+    CollapsibleFilters,
   },
   computed: {
+      /*
     members: function() {
         return this.compliance.allowed_assessors ? this.compliance : [];
     },
+    */
     isLoading: function () {
       return this.loading.length > 0;
     },
@@ -177,6 +172,9 @@ export default {
     },
   },
   methods: {
+    collapsible_component_mounted: function(){
+        this.$refs.collapsible_filters.show_warning_icon(this.filterApplied)
+    },
     commaToNewline(s){
         return s.replace(/[,;]/g, '\n');
     },
