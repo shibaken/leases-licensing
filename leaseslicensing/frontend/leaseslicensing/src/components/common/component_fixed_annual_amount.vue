@@ -17,6 +17,7 @@
                                 :step="step_year" 
                                 class="form-control"
                                 v-model="item.year"
+                                :disabled="item.readonly"
                             />
                         </div>
                         <div class="col-sm-3 text-end">{{ value_title }}</div>
@@ -29,6 +30,7 @@
                                 :step="step_increment" 
                                 class="form-control"
                                 v-model="item.increment_amount"
+                                :disabled="item.readonly"
                             />
                             <input 
                                 v-else-if="increment_type === 'annual_increment_percentage'"
@@ -38,6 +40,7 @@
                                 :step="step_increment" 
                                 class="form-control"
                                 v-model="item.increment_percentage"
+                                :disabled="item.readonly"
                             />
                             <input 
                                 v-else-if="increment_type === 'gross_turnover_percentage'"
@@ -47,10 +50,11 @@
                                 :step="step_increment" 
                                 class="form-control"
                                 v-model="item.percentage"
+                                :disabled="item.readonly"
                             />
                         </div>
                         <div class="col-sm-1">
-                            <template v-if="item.id === 0">
+                            <template v-if="deletable(item)">
                                 <span class="remove_a_row text-danger" @click="remove_a_row(item, $event)"><i class="bi bi-x-circle-fill"></i></span>
                             </template>
                         </div>
@@ -130,6 +134,12 @@ export default {
         },
     },
     methods: {
+        deletable: function(item){
+            if (item.id === 0 || !item.readonly)
+                // If the date is a newly added one, or not readonly, it is deletable.
+                return true
+            return false
+        },
         addAnotherYearClicked: function(e){
             e.preventDefault()
 
@@ -146,6 +156,7 @@ export default {
                 'key': uuid(),
                 'year': null,
                 [key_name]: null,
+                'readonly': false,
             })
             
         },
@@ -153,10 +164,17 @@ export default {
             let vm = this
             let $elem = $(e.target)
 
+            // Fade out a row
             $elem.closest('.row_wrapper').fadeOut(500, function(){
-                const index = vm.years_array.indexOf(item)
-                if (index > -1){
-                    vm.years_array.splice(index, 1)
+                if (item.id === 0){
+                    // When a row is newly added one (not stored in the database yet), just remove it from the array
+                    const index = vm.years_array.indexOf(item)
+                    if (index > -1){
+                        vm.years_array.splice(index, 1)
+                    }
+                } else {
+                    // When a row is the one already stored in the database, flag it to be deleted.
+                    item.to_be_deleted = true
                 }
             })
         },
