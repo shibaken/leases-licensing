@@ -97,6 +97,30 @@
 
                         <template v-slot:slot_proposal_details_checklist_questions>
                             <CollapsibleQuestions component_title="Comments" ref="collapsible_proposal_details_comments" @created="collapsible_proposal_details_comments_component_mounted" class="mb-2">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label for="assessor_comment_proposal_details">Assessor Comment</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" v-model="proposal.assessor_comment_proposal_details" id="assessor_comment_proposal_details"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label for="deficiency_comment_proposal_details">Deficiency Comment</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" v-model="proposal.deficiency_comment_proposal_details" id="deficiency_comment_proposal_details"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label for="referrer_comment_proposal_details">Referrer Comment</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" v-model="proposal.referrer_comment_proposal_details" id="referrer_comment_proposal_details"/>
+                                    </div>
+                                </div>
                             </CollapsibleQuestions>
                             <CollapsibleQuestions component_title="Checklist Questions" ref="collapsible_proposal_details_checklist_questions" @created="collapsible_proposal_details_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_proposal_details.length > 0">

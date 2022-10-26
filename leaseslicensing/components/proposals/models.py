@@ -1179,6 +1179,10 @@ class Proposal(DirtyFieldsMixin, models.Model):
     risk_factors_text = models.TextField(blank=True)
     legislative_requirements_text = models.TextField(blank=True)
     shapefile_json = JSONField(blank=True, null=True)
+    # comments and deficiencies
+    assessor_comment_proposal_details = models.TextField(blank=True)
+    deficiency_comment_proposal_details = models.TextField(blank=True)
+    referrer_comment_proposal_details = models.TextField(blank=True)
 
     class Meta:
         app_label = "leaseslicensing"

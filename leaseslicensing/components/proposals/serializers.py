@@ -687,6 +687,17 @@ class SaveRegistrationOfInterestSerializer(BaseProposalSerializer):
         read_only_fields = ("id",)
 
 
+class InternalSaveProposalSerializer(BaseProposalSerializer):
+
+    class Meta:
+        model = Proposal
+        fields = (
+            "assessor_comment_proposal_details",
+            "deficiency_comment_proposal_details",
+            "referrer_comment_proposal_details",
+        )
+
+
 class SaveProposalSerializer(BaseProposalSerializer):
     proxy_applicant = serializers.IntegerField(required=False)
     assigned_officer = serializers.IntegerField(required=False)
@@ -718,6 +729,9 @@ class SaveProposalSerializer(BaseProposalSerializer):
             "can_officer_process",
             "applicant_details",
             "details_text",
+            "assessor_comment_proposal_details",
+            "deficiency_comment_proposal_details",
+            "referrer_comment_proposal_details",
         )
         read_only_fields = ("requirements",)
 
