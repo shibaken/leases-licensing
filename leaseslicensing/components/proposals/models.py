@@ -4283,13 +4283,14 @@ class ProposalAssessment(RevisionedMixin):
     )
     completed = models.BooleanField(default=False)
     submitter = models.IntegerField(blank=True, null=True)  # EmailUserRO
-    referral = models.ForeignKey(
-        Referral,
-        related_name="assessment",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-    )  # When referral is none, this ProposalAssessment is for assessor.
+    # referral assessment needs to be a different object
+    #referral = models.ForeignKey(
+    #    Referral,
+    #    related_name="assessment",
+    #    blank=True,
+    #    null=True,
+    #    on_delete=models.SET_NULL,
+    #)  # When referral is none, this ProposalAssessment is for assessor.
 
     class Meta:
         app_label = "leaseslicensing"
@@ -4298,10 +4299,10 @@ class ProposalAssessment(RevisionedMixin):
     def checklist(self):
         return self.answers.all()
 
-    @property
-    def referral_assessment(self):
-        # When self.referral != null, this assessment is for referral, otherwise this assessment is for assessor.
-        return True if self.referral else False
+    #@property
+    #def referral_assessment(self):
+    #    # When self.referral != null, this assessment is for referral, otherwise this assessment is for assessor.
+    #    return True if self.referral else False
 
 
 class ProposalAssessmentAnswer(RevisionedMixin):
