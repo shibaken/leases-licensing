@@ -112,6 +112,7 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalAssessmentAnswerSerializer,
     ListProposalMinimalSerializer,
     AdditionalDocumentTypeSerializer,
+    InternalSaveProposalSerializer,
 )
 from leaseslicensing.components.main.process_document import (
     process_generic_document,
@@ -1773,6 +1774,24 @@ class ProposalViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             if hasattr(e, "message"):
                 raise serializers.ValidationError(e.message)
+
+    @basic_exception_handler
+    @detail_route(
+        methods=[
+            "POST",
+        ],
+        detail=True,
+    )
+    # store comments, deficiencies, etc
+    def internal_save(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = InternalSaveProposalSerializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        #serializer_class = self.internal_serializer_class()
+        #serializer = serializer_class(instance, context={"request": request})
+        #return Response(serializer.data)
+        return Response()
 
     @basic_exception_handler
     @detail_route(

@@ -76,6 +76,8 @@
                     >
                         <!-- Inserted into the slot on the form.vue: Collapsible Assessor Questions -->
                         <template v-slot:slot_map_checklist_questions>
+                            <CollapsibleQuestions component_title="Comments" ref="collapsible_map_comments" @created="collapsible_map_comments_component_mounted" class="mb-2">
+                            </CollapsibleQuestions>
                             <CollapsibleQuestions component_title="Checklist Questions" ref="collapsible_map_checklist_questions" @created="collapsible_map_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_map.length > 0">
                                     <div class="assessment_title">Assessor</div>
@@ -94,6 +96,32 @@
                         </template>
 
                         <template v-slot:slot_proposal_details_checklist_questions>
+                            <CollapsibleQuestions component_title="Comments" ref="collapsible_proposal_details_comments" @created="collapsible_proposal_details_comments_component_mounted" class="mb-2">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label for="assessor_comment_proposal_details">Assessor Comment</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" v-model="proposal.assessor_comment_proposal_details" id="assessor_comment_proposal_details"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label for="deficiency_comment_proposal_details">Deficiency Comment</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" v-model="proposal.deficiency_comment_proposal_details" id="deficiency_comment_proposal_details"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label for="referrer_comment_proposal_details">Referrer Comment</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" v-model="proposal.referrer_comment_proposal_details" id="referrer_comment_proposal_details"/>
+                                    </div>
+                                </div>
+                            </CollapsibleQuestions>
                             <CollapsibleQuestions component_title="Checklist Questions" ref="collapsible_proposal_details_checklist_questions" @created="collapsible_proposal_details_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_proposal_details.length > 0">
                                     <div class="assessment_title">Assessor</div>
@@ -112,6 +140,8 @@
                         </template>
 
                         <template v-slot:slot_proposal_impact_checklist_questions>
+                            <CollapsibleQuestions component_title="Comments" ref="collapsible_proposal_impact_comments" @created="collapsible_proposal_impact_comments_component_mounted" class="mb-2">
+                            </CollapsibleQuestions>
                             <CollapsibleQuestions component_title="Checklist Questions" ref="collapsible_proposal_impact_checklist_questions" @created="collapsible_proposal_impact_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_proposal_impact.length > 0">
                                     <div class="assessment_title">Assessor</div>
@@ -130,6 +160,8 @@
                         </template>
 
                         <template v-slot:slot_other_checklist_questions>
+                            <CollapsibleQuestions component_title="Comments" ref="collapsible_other_comments" @created="collapsible_other_comments_component_mounted" class="mb-2">
+                            </CollapsibleQuestions>
                             <CollapsibleQuestions component_title="Checklist Questions" ref="collapsible_other_checklist_questions" @created="collapsible_other_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_other.length > 0">
                                     <div class="assessment_title">Assessor</div>
@@ -148,6 +180,8 @@
                         </template>
 
                         <template v-slot:slot_deed_poll_checklist_questions>
+                            <CollapsibleQuestions component_title="Comments" ref="collapsible_deed_poll_comments" @created="collapsible_deed_poll_comments_component_mounted" class="mb-2">
+                            </CollapsibleQuestions>
                             <CollapsibleQuestions component_title="Checklist Questions" ref="collapsible_deed_poll_checklist_questions" @created="collapsible_deed_poll_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_deed_poll.length > 0">
                                     <div class="assessment_title">Assessor</div>
@@ -166,6 +200,8 @@
                         </template>
 
                         <template v-slot:slot_additional_documents_checklist_questions>
+                            <CollapsibleQuestions component_title="Comments" ref="collapsible_additional_documents_comments" @created="collapsible_additional_documents_comments_component_mounted" class="mb-2">
+                            </CollapsibleQuestions>
                             <CollapsibleQuestions component_title="Checklist Questions" ref="collapsible_additional_documents_checklist_questions" @created="collapsible_additional_documents_checklist_questions_component_mounted" class="mb-2">
                                 <template v-if="assessment_for_assessor_additional_documents.length > 0">
                                     <div class="assessment_title">Assessor</div>
@@ -815,6 +851,24 @@ export default {
         },
         collapsible_proposal_impact_checklist_questions_component_mounted: function(){
             this.$refs.collapsible_proposal_impact_checklist_questions.show_warning_icon(false)
+        },
+        collapsible_map_comments_component_mounted: function(){
+            this.$refs.collapsible_map_comments.show_warning_icon(false)
+        },
+        collapsible_other_comments_component_mounted: function(){
+            this.$refs.collapsible_other_comments.show_warning_icon(false)
+        },
+        collapsible_deed_poll_comments_component_mounted: function(){
+            this.$refs.collapsible_deed_poll_comments.show_warning_icon(false)
+        },
+        collapsible_additional_documents_comments_component_mounted: function(){
+            this.$refs.collapsible_additional_documents_comments.show_warning_icon(false)
+        },
+        collapsible_proposal_details_comments_component_mounted: function(){
+            this.$refs.collapsible_proposal_details_comments.show_warning_icon(false)
+        },
+        collapsible_proposal_impact_comments_component_mounted: function(){
+            this.$refs.collapsible_proposal_impact_comments.show_warning_icon(false)
         },
         locationUpdated: function(){
             console.log('in locationUpdated()');
