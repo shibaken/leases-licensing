@@ -931,6 +931,9 @@ class InternalProposalSerializer(BaseProposalSerializer):
             "accessing_user_roles",
             "approval_issue_date",
             "invoicing_details",
+            "assessor_comment_proposal_details",
+            "deficiency_comment_proposal_details",
+            "referrer_comment_proposal_details",
         )
         read_only_fields = ("requirements",)
 

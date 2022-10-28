@@ -1687,7 +1687,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         Assessment instance already exits then skip.
         """
         proposal_assessment, created = ProposalAssessment.objects.get_or_create(
-            proposal=self, referral=referral
+            #proposal=self, referral=referral
+            proposal=self
         )
         if created:
             for_referral_or_assessor = (
