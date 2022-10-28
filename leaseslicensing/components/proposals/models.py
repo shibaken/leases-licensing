@@ -1180,9 +1180,20 @@ class Proposal(DirtyFieldsMixin, models.Model):
     legislative_requirements_text = models.TextField(blank=True)
     shapefile_json = JSONField(blank=True, null=True)
     # comments and deficiencies
+    assessor_comment_map = models.TextField(blank=True)
+    deficiency_comment_map = models.TextField(blank=True)
     assessor_comment_proposal_details = models.TextField(blank=True)
     deficiency_comment_proposal_details = models.TextField(blank=True)
-    referrer_comment_proposal_details = models.TextField(blank=True)
+    assessor_comment_proposal_impact = models.TextField(blank=True)
+    deficiency_comment_proposal_impact = models.TextField(blank=True)
+    assessor_comment_other = models.TextField(blank=True)
+    deficiency_comment_other = models.TextField(blank=True)
+    assessor_comment_deed_poll = models.TextField(blank=True)
+    deficiency_comment_deed_poll = models.TextField(blank=True)
+    assessor_comment_additional_documents = models.TextField(blank=True)
+    deficiency_comment_additional_documents = models.TextField(blank=True)
+    assessor_comment_proposal_details = models.TextField(blank=True)
+    deficiency_comment_proposal_details = models.TextField(blank=True)
 
     class Meta:
         app_label = "leaseslicensing"
@@ -1687,7 +1698,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
         Assessment instance already exits then skip.
         """
         proposal_assessment, created = ProposalAssessment.objects.get_or_create(
-            proposal=self, referral=referral
+            #proposal=self, referral=referral
+            proposal=self
         )
         if created:
             for_referral_or_assessor = (
@@ -3595,6 +3607,7 @@ class Referral(RevisionedMixin):
         on_delete=models.SET_NULL,
     )
     assigned_officer = models.IntegerField()  # EmailUserRO
+    referrer_comment_proposal_details = models.TextField(blank=True)
 
     class Meta:
         app_label = "leaseslicensing"

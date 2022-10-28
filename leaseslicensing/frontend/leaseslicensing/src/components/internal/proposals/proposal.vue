@@ -102,7 +102,7 @@
                                         <label for="assessor_comment_proposal_details">Assessor Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.assessor_comment_proposal_details" id="assessor_comment_proposal_details"/>
+                                        <textarea class="form-control" v-model="proposal.assessor_comment_proposal_details" id="assessor_comment_proposal_details" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -110,7 +110,7 @@
                                         <label for="deficiency_comment_proposal_details">Deficiency Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.deficiency_comment_proposal_details" id="deficiency_comment_proposal_details"/>
+                                        <textarea class="form-control" v-model="proposal.deficiency_comment_proposal_details" id="deficiency_comment_proposal_details" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -118,7 +118,7 @@
                                         <label for="referrer_comment_proposal_details">Referrer Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.referrer_comment_proposal_details" id="referrer_comment_proposal_details"/>
+                                        <textarea class="form-control" v-model="proposal.referrer_comment_proposal_details" id="referrer_comment_proposal_details" />
                                     </div>
                                 </div>
                             </CollapsibleQuestions>
@@ -415,6 +415,23 @@ export default {
         requirementsKey: function() {
             const req = "proposal_requirements_" + this.uuid;
             return req;
+        },
+        canEditComments: function() {
+            let canEdit = false;
+            if ([constants.PROPOSAL_STATUS.WITH_ASSESSOR.ID, constants.PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID].includes(this.proposal.processing_status_id)){
+                console.log("correct status")
+                if (this.proposal.application_type.name === constants.APPLICATION_TYPES.LEASE_LICENCE){
+                    if (this.proposal.accessing_user_roles.includes(constants.ROLES.LEASE_LICENCE_ASSESSOR.ID)){
+                        canEdit = true;
+                    }
+                } else if (this.proposal.application_type.name === constants.APPLICATION_TYPES.REGISTRATION_OF_INTEREST){
+                    console.log("ROG");
+                    if (this.proposal.accessing_user_roles.includes(constants.ROLES.REGISTRATION_OF_INTEREST_ASSESSOR.ID)){
+                        canEdit = true;
+                    }
+                }
+            }
+            return canEdit;
         },
         displaySaveBtns: function(){
             let display = false
@@ -755,7 +772,8 @@ export default {
         //    }
         //},
         canSeeSubmission: function(){
-            return this.proposal && (this.proposal.processing_status != 'With Assessor (Requirements)' && this.proposal.processing_status != 'With Approver' && !this.isFinalised)
+            //return this.proposal && (this.proposal.processing_status != 'With Assessor (Requirements)' && this.proposal.processing_status != 'With Approver' && !this.isFinalised)
+            return this.proposal && (this.proposal.processing_status != 'With Assessor (Requirements)')
         },
         isApprovalLevelDocument: function(){
             return this.proposal && this.proposal.processing_status == 'With Approver' && this.proposal.approval_level != null && this.proposal.approval_level_document == null ? true : false;
