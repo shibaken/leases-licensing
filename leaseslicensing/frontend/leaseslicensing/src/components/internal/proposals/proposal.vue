@@ -1432,10 +1432,10 @@ export default {
     created: async function() {
         console.log('in created')
         try {
-        const res = await fetch(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`);
-        const resData = await res.json();
-        this.proposal = Object.assign({}, resData);
-        this.hasAmendmentRequest=this.proposal.hasAmendmentRequest;
+            const res = await fetch(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`);
+            const resData = await res.json();
+            this.proposal = Object.assign({}, resData);
+            this.hasAmendmentRequest=this.proposal.hasAmendmentRequest;
         } catch (err) {
           console.log(err);
         }
