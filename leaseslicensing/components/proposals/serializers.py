@@ -743,7 +743,6 @@ class SaveProposalSerializer(BaseProposalSerializer):
             "details_text",
             "assessor_comment_proposal_details",
             "deficiency_comment_proposal_details",
-            "referrer_comment_proposal_details",
         )
         read_only_fields = ("requirements",)
 
