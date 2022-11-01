@@ -4295,8 +4295,9 @@ class ChecklistQuestion(RevisionedMixin):
 
 
 class ProposalAssessment(RevisionedMixin):
-    proposal = models.OneToOneField(
-        Proposal, related_name="assessment", on_delete=models.CASCADE
+    # proposal = models.OneToOneField(
+    proposal = models.ForeignKey(
+            Proposal, related_name="assessment", on_delete=models.CASCADE
     )
     completed = models.BooleanField(default=False)
     submitter = models.IntegerField(blank=True, null=True)  # EmailUserRO
