@@ -1182,8 +1182,8 @@ class Proposal(DirtyFieldsMixin, models.Model):
     # comments and deficiencies
     assessor_comment_map = models.TextField(blank=True)
     deficiency_comment_map = models.TextField(blank=True)
-    assessor_comment_proposal_details = models.TextField(blank=True)
-    deficiency_comment_proposal_details = models.TextField(blank=True)
+    # assessor_comment_proposal_details = models.TextField(blank=True)
+    # deficiency_comment_proposal_details = models.TextField(blank=True)
     assessor_comment_proposal_impact = models.TextField(blank=True)
     deficiency_comment_proposal_impact = models.TextField(blank=True)
     assessor_comment_other = models.TextField(blank=True)
