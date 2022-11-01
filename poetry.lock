@@ -747,18 +747,14 @@ python-versions = "*"
 
 [[package]]
 name = "reportlab"
-version = "3.6.12"
+version = "3.5.55"
 description = "The Reportlab Toolkit"
 category = "main"
 optional = false
-python-versions = ">=3.7,<4"
+python-versions = "*"
 
 [package.dependencies]
-pillow = ">=9.0.0"
-
-[package.extras]
-fttextpath = ["freetype-py (>=2.3.0,<2.4)"]
-rlpycairo = ["rlPyCairo (>=0.1.0)"]
+pillow = ">=4.0.0"
 
 [[package]]
 name = "requests"
@@ -907,7 +903,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "3.8.*"
-content-hash = "f645b932e114b227591e8d901d4e779034c687efc80bfab431f199a903354a5b"
+content-hash = "278b5d0f2cc160bbedb26e3095d343e1eaa600d671b69be1a140c56405040def"
 
 [metadata.files]
 appnope = [
