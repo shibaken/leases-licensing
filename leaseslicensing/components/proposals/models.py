@@ -3155,7 +3155,7 @@ class ProposalRequest(models.Model):
     subject = models.CharField(max_length=200, blank=True)
     text = models.TextField(blank=True)
     # fficer = models.ForeignKey(EmailUser, null=True, on_delete=models.SET_NULL)
-    officer = models.IntegerField()  # EmailUserRO
+    officer = models.IntegerField(null=True)  # EmailUserRO
 
     def __str__(self):
         return "{} - {}".format(self.subject, self.text)
@@ -3233,21 +3233,21 @@ class AmendmentRequest(ProposalRequest):
                         proposal.processing_status = "draft"
                         proposal.customer_status = "draft"
                         proposal.save()
-                        proposal.documents.all().update(can_hide=True)
-                        proposal.required_documents.all().update(can_hide=True)
+                        #proposal.documents.all().update(can_hide=True)
+                        #proposal.required_documents.all().update(can_hide=True)
                     # Create a log entry for the proposal
                     proposal.log_user_action(
                         ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request
                     )
                     # Create a log entry for the organisation
-                    applicant_field = getattr(proposal, proposal.applicant_field)
-                    applicant_field.log_user_action(
-                        ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request
-                    )
+                    #applicant_field = getattr(proposal, proposal.applicant_field)
+                    #applicant_field.log_user_action(
+                    #    ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request
+                    #)
 
                     # send email
 
-                    send_amendment_email_notification(self, request, proposal)
+                    #send_amendment_email_notification(self, request, proposal)
 
                 self.save()
             except:

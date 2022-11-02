@@ -2651,13 +2651,14 @@ class AmendmentRequestViewSet(viewsets.ModelViewSet):
             data = {
                 #'schema': qs_proposal_type.order_by('-version').first().schema,
                 "text": request.data.get("text"),
-                "proposal": request.data.get("proposal"),
+                "proposal": request.data.get("proposal_id"),
+                "officer": request.user.id,
                 "reason": AmendmentReason.objects.get(id=reason_id)
                 if reason_id
                 else None,
             }
-            serializer = self.get_serializer(data=request.data)
-            # serializer = self.get_serializer(data=data)
+            #serializer = self.get_serializer(data=request.data)
+            serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
             instance.generate_amendment(request)
