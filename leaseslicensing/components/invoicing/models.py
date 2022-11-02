@@ -261,6 +261,10 @@ class InvoicingDetails(BaseModel):
         #     )
         # ]
 
+    def calculate_amounts(self, target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date(), span=relativedelta(years=1)):
+        pass
+        # TODO: Calculate invoice amounts annually
+
 
 class FixedAnnualIncrementAmount(BaseModel):
     year = models.PositiveSmallIntegerField(null=True, blank=True)

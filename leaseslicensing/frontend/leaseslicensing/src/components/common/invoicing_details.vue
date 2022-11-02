@@ -4,7 +4,7 @@
             <label for="" class="control-label">Rent or licence charge method</label>
         </div>
         <div class="col-sm-9">
-            <div v-for="charge_method in charge_methods" class="form-check" :id="invoicing_details.charge_method.id">
+            <div v-for="charge_method in charge_methods" class="form-check" :id="charge_method.id">
                 <input 
                     type="radio" 
                     class="form-check-input"
