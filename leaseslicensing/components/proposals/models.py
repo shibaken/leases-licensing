@@ -1179,21 +1179,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
     risk_factors_text = models.TextField(blank=True)
     legislative_requirements_text = models.TextField(blank=True)
     shapefile_json = JSONField(blank=True, null=True)
-    # comments and deficiencies
-    assessor_comment_map = models.TextField(blank=True)
-    deficiency_comment_map = models.TextField(blank=True)
-    # assessor_comment_proposal_details = models.TextField(blank=True)
-    # deficiency_comment_proposal_details = models.TextField(blank=True)
-    assessor_comment_proposal_impact = models.TextField(blank=True)
-    deficiency_comment_proposal_impact = models.TextField(blank=True)
-    assessor_comment_other = models.TextField(blank=True)
-    deficiency_comment_other = models.TextField(blank=True)
-    assessor_comment_deed_poll = models.TextField(blank=True)
-    deficiency_comment_deed_poll = models.TextField(blank=True)
-    assessor_comment_additional_documents = models.TextField(blank=True)
-    deficiency_comment_additional_documents = models.TextField(blank=True)
-    assessor_comment_proposal_details = models.TextField(blank=True)
-    deficiency_comment_proposal_details = models.TextField(blank=True)
 
     class Meta:
         app_label = "leaseslicensing"
@@ -4309,6 +4294,25 @@ class ProposalAssessment(RevisionedMixin):
        null=True,
        on_delete=models.SET_NULL,
     )  # When referral is none, this ProposalAssessment is for assessor.
+    # comments and deficiencies
+    assessor_comment_map = models.TextField(blank=True)
+    deficiency_comment_map = models.TextField(blank=True)
+    referrer_comment_map = models.TextField(blank=True)
+    assessor_comment_proposal_details = models.TextField(blank=True)
+    deficiency_comment_proposal_details = models.TextField(blank=True)
+    referrer_comment_proposal_details = models.TextField(blank=True)
+    assessor_comment_proposal_impact = models.TextField(blank=True)
+    deficiency_comment_proposal_impact = models.TextField(blank=True)
+    referrer_comment_proposal_impact = models.TextField(blank=True)
+    assessor_comment_other = models.TextField(blank=True)
+    deficiency_comment_other = models.TextField(blank=True)
+    referrer_comment_other = models.TextField(blank=True)
+    assessor_comment_deed_poll = models.TextField(blank=True)
+    deficiency_comment_deed_poll = models.TextField(blank=True)
+    referrer_comment_deed_poll = models.TextField(blank=True)
+    assessor_comment_additional_documents = models.TextField(blank=True)
+    deficiency_comment_additional_documents = models.TextField(blank=True)
+    referrer_comment_additional_documents = models.TextField(blank=True)
 
     class Meta:
         app_label = "leaseslicensing"

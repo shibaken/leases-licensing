@@ -82,7 +82,7 @@
                                         <label for="assessor_comment_map">Assessor Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.assessor_comment_map" id="assessor_comment_map" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.assessor_comment_map" id="assessor_comment_map" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -90,7 +90,7 @@
                                         <label for="deficiency_comment_map">Deficiency Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.deficiency_comment_map" id="deficiency_comment_map" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.deficiency_comment_map" id="deficiency_comment_map" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
 
@@ -119,7 +119,7 @@
                                         <label for="assessor_comment_proposal_details">Assessor Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.assessor_comment_proposal_details" id="assessor_comment_proposal_details" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.assessor_comment_proposal_details" id="assessor_comment_proposal_details" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -127,7 +127,7 @@
                                         <label for="deficiency_comment_proposal_details">Deficiency Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.deficiency_comment_proposal_details" id="deficiency_comment_proposal_details" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.deficiency_comment_proposal_details" id="deficiency_comment_proposal_details" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -135,7 +135,7 @@
                                         <label for="referrer_comment_proposal_details">Referrer Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.referrer_comment_proposal_details" id="referrer_comment_proposal_details" />
+                                        <textarea class="form-control" v-model="assessment.referrer_comment_proposal_details" id="referrer_comment_proposal_details" />
                                     </div>
                                 </div>
                             </CollapsibleQuestions>
@@ -163,7 +163,7 @@
                                         <label for="assessor_comment_proposal_impact">Assessor Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.assessor_comment_proposal_impact" id="assessor_comment_proposal_impact" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.assessor_comment_proposal_impact" id="assessor_comment_proposal_impact" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -171,7 +171,7 @@
                                         <label for="deficiency_comment_proposal_impact">Deficiency Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.deficiency_comment_proposal_impact" id="deficiency_comment_proposal_impact" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.deficiency_comment_proposal_impact" id="deficiency_comment_proposal_impact" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
 
@@ -200,7 +200,7 @@
                                         <label for="assessor_comment_other">Assessor Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.assessor_comment_other" id="assessor_comment_other" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.assessor_comment_other" id="assessor_comment_other" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -208,7 +208,7 @@
                                         <label for="deficiency_comment_other">Deficiency Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.deficiency_comment_other" id="deficiency_comment_other" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.deficiency_comment_other" id="deficiency_comment_other" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
 
@@ -237,7 +237,7 @@
                                         <label for="assessor_comment_deed_poll">Assessor Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.assessor_comment_deed_poll" id="assessor_comment_deed_poll" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.assessor_comment_deed_poll" id="assessor_comment_deed_poll" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -245,7 +245,7 @@
                                         <label for="deficiency_comment_deed_poll">Deficiency Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.deficiency_comment_deed_poll" id="deficiency_comment_deed_poll" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.deficiency_comment_deed_poll" id="deficiency_comment_deed_poll" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
 
@@ -274,7 +274,7 @@
                                         <label for="assessor_comment_additional_documents">Assessor Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.assessor_comment_additional_documents" id="assessor_comment_additional_documents" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.assessor_comment_additional_documents" id="assessor_comment_additional_documents" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -282,7 +282,7 @@
                                         <label for="deficiency_comment_additional_documents">Deficiency Comment</label>
                                     </div>
                                     <div class="col-md-8">
-                                        <textarea class="form-control" v-model="proposal.deficiency_comment_additional_documents" id="deficiency_comment_additional_documents" :readonly="!canEditComments"/>
+                                        <textarea class="form-control" v-model="assessment.deficiency_comment_additional_documents" id="deficiency_comment_additional_documents" :readonly="!canEditComments"/>
                                     </div>
                                 </div>
 
@@ -337,6 +337,7 @@
             :key="proposedApprovalKey"
             :proposedApprovalKey="proposedApprovalKey"
             :proposedApprovalState="proposedApprovalState"
+            :assessment="assessment"
         />
         <ProposedDecline
             ref="proposed_decline"
@@ -397,6 +398,7 @@ export default {
             related_items_datatable_id: 'related_items_datatable' + vm._uid,
             defaultKey: "aho",
             "proposal": null,
+            assessment: {},
             "loading": [],
             //selected_referral: '',
             //referral_text: '',
