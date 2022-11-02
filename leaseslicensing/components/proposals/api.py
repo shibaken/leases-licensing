@@ -112,7 +112,7 @@ from leaseslicensing.components.proposals.serializers import (
     ProposalAssessmentAnswerSerializer,
     ListProposalMinimalSerializer,
     AdditionalDocumentTypeSerializer,
-    InternalSaveProposalSerializer,
+    #InternalSaveProposalSerializer,
 )
 from leaseslicensing.components.main.process_document import (
     process_generic_document,
