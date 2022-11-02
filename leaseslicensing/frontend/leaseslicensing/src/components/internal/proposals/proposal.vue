@@ -524,12 +524,12 @@ export default {
             let display = false
 
             if ([constants.PROPOSAL_STATUS.WITH_ASSESSOR.ID, constants.PROPOSAL_STATUS.WITH_ASSESSOR_CONDITIONS.ID].includes(this.proposal.processing_status_id)){
-                if (this.proposal.application_type === constants.APPLICATION_TYPES.LEASE_LICENCE){
+                if (this.proposal.application_type.name === constants.APPLICATION_TYPES.LEASE_LICENCE){
                     if (this.proposal.accessing_user_roles.includes(constants.ROLES.LEASE_LICENCE_ASSESSOR.ID)){
                         display = true
                     }
-                } else if (this.proposal.application_type === constants.APPLICATION_TYPES.REGISTRATION_OF_INTEREST){
-                    if (this.proposal.accessing_user_roles.includes(constants.ROLES.REGISTRATION_OF_INTEREST.ID)){
+                } else if (this.proposal.application_type.name === constants.APPLICATION_TYPES.REGISTRATION_OF_INTEREST){
+                    if (this.proposal.accessing_user_roles.includes(constants.ROLES.REGISTRATION_OF_INTEREST_ASSESSOR.ID)){
                         display = true
                     }
                 }
