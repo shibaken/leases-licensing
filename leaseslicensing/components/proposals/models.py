@@ -1179,21 +1179,6 @@ class Proposal(DirtyFieldsMixin, models.Model):
     risk_factors_text = models.TextField(blank=True)
     legislative_requirements_text = models.TextField(blank=True)
     shapefile_json = JSONField(blank=True, null=True)
-    # comments and deficiencies
-    assessor_comment_map = models.TextField(blank=True)
-    deficiency_comment_map = models.TextField(blank=True)
-    # assessor_comment_proposal_details = models.TextField(blank=True)
-    # deficiency_comment_proposal_details = models.TextField(blank=True)
-    assessor_comment_proposal_impact = models.TextField(blank=True)
-    deficiency_comment_proposal_impact = models.TextField(blank=True)
-    assessor_comment_other = models.TextField(blank=True)
-    deficiency_comment_other = models.TextField(blank=True)
-    assessor_comment_deed_poll = models.TextField(blank=True)
-    deficiency_comment_deed_poll = models.TextField(blank=True)
-    assessor_comment_additional_documents = models.TextField(blank=True)
-    deficiency_comment_additional_documents = models.TextField(blank=True)
-    assessor_comment_proposal_details = models.TextField(blank=True)
-    deficiency_comment_proposal_details = models.TextField(blank=True)
 
     class Meta:
         app_label = "leaseslicensing"
@@ -3155,7 +3140,7 @@ class ProposalRequest(models.Model):
     subject = models.CharField(max_length=200, blank=True)
     text = models.TextField(blank=True)
     # fficer = models.ForeignKey(EmailUser, null=True, on_delete=models.SET_NULL)
-    officer = models.IntegerField()  # EmailUserRO
+    officer = models.IntegerField(null=True)  # EmailUserRO
 
     def __str__(self):
         return "{} - {}".format(self.subject, self.text)
@@ -3233,21 +3218,21 @@ class AmendmentRequest(ProposalRequest):
                         proposal.processing_status = "draft"
                         proposal.customer_status = "draft"
                         proposal.save()
-                        proposal.documents.all().update(can_hide=True)
-                        proposal.required_documents.all().update(can_hide=True)
+                        #proposal.documents.all().update(can_hide=True)
+                        #proposal.required_documents.all().update(can_hide=True)
                     # Create a log entry for the proposal
                     proposal.log_user_action(
                         ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request
                     )
                     # Create a log entry for the organisation
-                    applicant_field = getattr(proposal, proposal.applicant_field)
-                    applicant_field.log_user_action(
-                        ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request
-                    )
+                    #applicant_field = getattr(proposal, proposal.applicant_field)
+                    #applicant_field.log_user_action(
+                    #    ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request
+                    #)
 
                     # send email
 
-                    send_amendment_email_notification(self, request, proposal)
+                    #send_amendment_email_notification(self, request, proposal)
 
                 self.save()
             except:
@@ -4307,6 +4292,25 @@ class ProposalAssessment(RevisionedMixin):
        null=True,
        on_delete=models.SET_NULL,
     )  # When referral is none, this ProposalAssessment is for assessor.
+    # comments and deficiencies
+    assessor_comment_map = models.TextField(blank=True)
+    deficiency_comment_map = models.TextField(blank=True)
+    referrer_comment_map = models.TextField(blank=True)
+    assessor_comment_proposal_details = models.TextField(blank=True)
+    deficiency_comment_proposal_details = models.TextField(blank=True)
+    referrer_comment_proposal_details = models.TextField(blank=True)
+    assessor_comment_proposal_impact = models.TextField(blank=True)
+    deficiency_comment_proposal_impact = models.TextField(blank=True)
+    referrer_comment_proposal_impact = models.TextField(blank=True)
+    assessor_comment_other = models.TextField(blank=True)
+    deficiency_comment_other = models.TextField(blank=True)
+    referrer_comment_other = models.TextField(blank=True)
+    assessor_comment_deed_poll = models.TextField(blank=True)
+    deficiency_comment_deed_poll = models.TextField(blank=True)
+    referrer_comment_deed_poll = models.TextField(blank=True)
+    assessor_comment_additional_documents = models.TextField(blank=True)
+    deficiency_comment_additional_documents = models.TextField(blank=True)
+    referrer_comment_additional_documents = models.TextField(blank=True)
 
     class Meta:
         app_label = "leaseslicensing"
