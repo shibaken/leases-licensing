@@ -332,6 +332,10 @@ export default {
             type: Object,
             required: true,
         },
+        assessment: {
+            type: Object,
+            required: true,
+        },
     },
     data:function () {
         return {
@@ -551,6 +555,7 @@ export default {
             this.errors = false;
             this.issuingApproval = true;
             //let approval = JSON.parse(JSON.stringify(vm.approval));
+            this.approval.assessment = this.assessment;
             this.$nextTick(async () => {
                 if (this.registrationOfInterest) {
                     this.approval.details = this.$refs.registration_of_interest_details.detailsText;
@@ -562,11 +567,13 @@ export default {
                     this.approval.approval_sub_type = this.selectedApprovalSubType ? this.selectedApprovalSubType.id : null;
                     this.approval.selected_document_types = this.selectedDocumentTypes;
                 }
+                /*
                 // internal proposal save
                 await fetch(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/internal_save'),{
                     body: JSON.stringify(this.proposal),
                     method: 'POST',
                 })
+                */
 
                 if (this.proposedApprovalState == 'proposed_approval'){
                     const response = await fetch(helpers.add_endpoint_json(api_endpoints.proposals,this.proposal_id+'/proposed_approval'),{
