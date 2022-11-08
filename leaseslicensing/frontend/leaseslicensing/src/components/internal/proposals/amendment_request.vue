@@ -93,7 +93,8 @@ export default {
                 reason:'',
                 reason_id: null,
                 amendingProposal: false,
-                proposal: vm.proposal,
+                //proposal: vm.proposal,
+                proposal_id: vm.proposal.id,
                 num_files: 0,
                 input_name: 'amendment_request_doc',
                 requirement_documents: [],
@@ -132,11 +133,13 @@ export default {
                 reason_id: null,
                 proposal_id: this.proposal.id
             };
+            /*
             this.errors = false;
             $(this.$refs.reason).val(null).trigger('change');
             $('.has-error').removeClass('has-error');
 
             this.validation_form.resetForm();
+            */
         },
         fetchAmendmentChoices: async function(){
             try {
@@ -150,24 +153,26 @@ export default {
         sendData:async function(){
             this.errors = false;
             try {
-                const res = await fetch('/api/amendment_request.json', 
-                    { body: vm.amendment,
+                await fetch('/api/amendment_request.json', 
+                    { body: JSON.stringify(this.amendment),
                         method: 'POST'
                     })
-                swal(
+                await new swal(
                      'Sent',
                      'An email has been sent to the applicant with the request to amend this application',
                      'success'
                 );
                 this.amendingProposal = true;
                 this.close();
+                /*
                 try {
-                    const res = await fetch(`/api/proposal/${vm.proposal.id}/internal_proposal.json`)
+                    const res = await fetch(`/api/proposal/${this.proposal.id}/internal_proposal.json`)
                     const resData = await res.json()
                     await this.$emit('refreshFromResponse', response);
                 } catch (error) {
                     console.log(error);
                 }
+                */
                 this.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
             } catch (error) {
                 console.log(error);
@@ -176,6 +181,7 @@ export default {
                 this.amendingProposal = true;
             }
         },
+        /*
         addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
@@ -205,6 +211,7 @@ export default {
                 }
             });
        },
+       */
        eventListerners:function () {
             let vm = this;
 
@@ -230,7 +237,7 @@ export default {
        let vm =this;
        vm.form = document.forms.amendForm;
        vm.fetchAmendmentChoices();
-       vm.addFormValidations();
+       //vm.addFormValidations();
        this.$nextTick(()=>{
             vm.eventListerners();
         });

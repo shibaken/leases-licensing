@@ -248,6 +248,24 @@ class ProposalAssessmentSerializer(serializers.ModelSerializer):
             "section_answers",
             "answerable_by_accessing_user",
             "belongs_to_accessing_user",
+            "assessor_comment_map",
+            "deficiency_comment_map",
+            "referrer_comment_map",
+            "assessor_comment_proposal_details",
+            "deficiency_comment_proposal_details",
+            "referrer_comment_proposal_details",
+            "assessor_comment_proposal_impact",
+            "deficiency_comment_proposal_impact",
+            "referrer_comment_proposal_impact",
+            "assessor_comment_other",
+            "deficiency_comment_other",
+            "referrer_comment_other",
+            "assessor_comment_deed_poll",
+            "deficiency_comment_deed_poll",
+            "referrer_comment_deed_poll",
+            "assessor_comment_additional_documents",
+            "deficiency_comment_additional_documents",
+            "referrer_comment_additional_documents",
         )
 
     def get_answerable_by_accessing_user(self, proposal_assessment):
@@ -687,27 +705,27 @@ class SaveRegistrationOfInterestSerializer(BaseProposalSerializer):
         read_only_fields = ("id",)
 
 
-class InternalSaveProposalSerializer(BaseProposalSerializer):
-
-    class Meta:
-        model = Proposal
-        fields = (
-            "assessor_comment_map",
-            "deficiency_comment_map",
-            "assessor_comment_proposal_details",
-            "deficiency_comment_proposal_details",
-            "assessor_comment_proposal_impact",
-            "deficiency_comment_proposal_impact",
-            "assessor_comment_other",
-            "deficiency_comment_other",
-            "assessor_comment_deed_poll",
-            "deficiency_comment_deed_poll",
-            "assessor_comment_additional_documents",
-            "deficiency_comment_additional_documents",
-            "assessor_comment_proposal_details",
-            "deficiency_comment_proposal_details",
-
-        )
+#class InternalSaveProposalSerializer(BaseProposalSerializer):
+#
+#    class Meta:
+#        model = Proposal
+#        fields = (
+#            "assessor_comment_map",
+#            "deficiency_comment_map",
+#            "assessor_comment_proposal_details",
+#            "deficiency_comment_proposal_details",
+#            "assessor_comment_proposal_impact",
+#            "deficiency_comment_proposal_impact",
+#            "assessor_comment_other",
+#            "deficiency_comment_other",
+#            "assessor_comment_deed_poll",
+#            "deficiency_comment_deed_poll",
+#            "assessor_comment_additional_documents",
+#            "deficiency_comment_additional_documents",
+#            "assessor_comment_proposal_details",
+#            "deficiency_comment_proposal_details",
+#
+#        )
 
 
 class SaveProposalSerializer(BaseProposalSerializer):
@@ -741,8 +759,8 @@ class SaveProposalSerializer(BaseProposalSerializer):
             "can_officer_process",
             "applicant_details",
             "details_text",
-            "assessor_comment_proposal_details",
-            "deficiency_comment_proposal_details",
+            #"assessor_comment_proposal_details",
+            #"deficiency_comment_proposal_details",
         )
         read_only_fields = ("requirements",)
 
@@ -942,20 +960,20 @@ class InternalProposalSerializer(BaseProposalSerializer):
             "accessing_user_roles",
             "approval_issue_date",
             "invoicing_details",
-            "assessor_comment_map",
-            "deficiency_comment_map",
-            "assessor_comment_proposal_details",
-            "deficiency_comment_proposal_details",
-            "assessor_comment_proposal_impact",
-            "deficiency_comment_proposal_impact",
-            "assessor_comment_other",
-            "deficiency_comment_other",
-            "assessor_comment_deed_poll",
-            "deficiency_comment_deed_poll",
-            "assessor_comment_additional_documents",
-            "deficiency_comment_additional_documents",
-            "assessor_comment_proposal_details",
-            "deficiency_comment_proposal_details",
+            #"assessor_comment_map",
+            #"deficiency_comment_map",
+            #"assessor_comment_proposal_details",
+            #"deficiency_comment_proposal_details",
+            #"assessor_comment_proposal_impact",
+            #"deficiency_comment_proposal_impact",
+            #"assessor_comment_other",
+            #"deficiency_comment_other",
+            #"assessor_comment_deed_poll",
+            #"deficiency_comment_deed_poll",
+            #"assessor_comment_additional_documents",
+            #"deficiency_comment_additional_documents",
+            #"assessor_comment_proposal_details",
+            #"deficiency_comment_proposal_details",
         )
         read_only_fields = ("requirements",)
 
