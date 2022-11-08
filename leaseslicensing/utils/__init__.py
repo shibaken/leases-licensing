@@ -445,3 +445,20 @@ def create_dummy_history(proposal_id):
     p.previous_application = prev_proposal
     p.save()
     return p.id, p.get_history
+
+
+def suffix_for_date(date):
+    """
+    English ordinal suffix for the day of the month, 2 characters; i.e.
+    'st', 'nd', 'rd' or 'th'.
+    """
+    if date in (11, 12, 13):  # Special case
+        return "th"
+    last = date % 10
+    if last == 1:
+        return "st"
+    if last == 2:
+        return "nd"
+    if last == 3:
+        return "rd"
+    return "th"

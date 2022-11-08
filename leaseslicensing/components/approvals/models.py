@@ -129,7 +129,6 @@ class ApprovalTypeDocumentTypeOnApprovalType(RevisionedMixin):
         unique_together = ("approval_type", "approval_type_document_type")
 
 
-# class Approval(models.Model):
 class Approval(RevisionedMixin):
     APPROVAL_STATUS_CURRENT = "current"
     APPROVAL_STATUS_EXPIRED = "expired"

@@ -33,18 +33,34 @@ class ReviewDateMonthlyAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.InvoicingDateAnnually)
-class InvoicingDateAnnuallAdmin(admin.ModelAdmin):
-    pass
+class InvoicingDateAnnuallyAdmin(admin.ModelAdmin):
+    list_display = [
+        # 'invoicing_date',
+        'invoicing_date_display',
+        'date_of_enforcement',
+        'is_currently_activated',
+    ]
 
 
 @admin.register(models.InvoicingDateQuarterly)
 class InvoicingDateQuarterlyAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        'invoicing_date_q1_display',
+        'invoicing_date_q2_display',
+        'invoicing_date_q3_display',
+        'invoicing_date_q4_display',
+        'date_of_enforcement',
+        'is_currently_activated',
+    ]
 
 
 @admin.register(models.InvoicingDateMonthly)
 class InvoicingDateMonthlyAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        'invoicing_date_display',
+        'date_of_enforcement',
+        'is_currently_activated',
+    ]
 
 
 @admin.register(models.ConsumerPriceIndex)

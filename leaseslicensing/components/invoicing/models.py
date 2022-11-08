@@ -47,7 +47,7 @@ class ReviewDateAnnually(BaseModel):
     @staticmethod
     def get_review_date_annually_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
         """
-        Return an setting object which is enabled at the target_date
+        Return a setting object which is enabled at the target_date
         """
         review_date_annually = ReviewDateAnnually.objects.filter(
             date_of_enforcement__lte=target_date,
@@ -69,7 +69,7 @@ class ReviewDateQuarterly(BaseModel):
     @staticmethod
     def get_review_date_quarterly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
         """
-        Return an setting object which is enabled at the target_date
+        Return a setting object which is enabled at the target_date
         """
         review_date_quarterly = ReviewDateQuarterly.objects.filter(
             date_of_enforcement__lte=target_date,
@@ -88,7 +88,7 @@ class ReviewDateMonthly(BaseModel):
     @staticmethod
     def get_review_date_monthly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
         """
-        Return an setting object which is enabled at the target_date
+        Return a setting object which is enabled at the target_date
         """
         review_date_monthly = ReviewDateMonthly.objects.filter(
             date_of_enforcement__lte=target_date,
@@ -107,12 +107,33 @@ class InvoicingDateAnnually(BaseModel):
     @staticmethod
     def get_invoicing_date_annually_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
         """
-        Return an setting object which is enabled at the target_date
+        Return a setting object which is enabled at the target_date
         """
         invoicing_date_annually = InvoicingDateAnnually.objects.filter(
             date_of_enforcement__lte=target_date,
         ).order_by('date_of_enforcement').last()
         return invoicing_date_annually
+
+    @staticmethod
+    def is_invoicing_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
+        invoicing_date_annually_obj = InvoicingDateAnnually.get_invoicing_date_annually_by_date(target_date)
+        invoicing_date = invoicing_date_annually_obj.invoicing_date.replace(year=target_date.year)
+        if invoicing_date == target_date:
+            return True
+        return False
+
+    def is_currently_activated(self):
+        if self == InvoicingDateAnnually.get_invoicing_date_annually_by_date():
+            return True
+        return False
+
+    def invoicing_date_display(self):
+        from leaseslicensing.utils import suffix_for_date
+        return self.invoicing_date.strftime('%-d{} of %b'.format(suffix_for_date(self.invoicing_date.day)))
+
+    is_currently_activated.boolean = True
+    is_currently_activated.short_description = 'activated'
+    invoicing_date_display.short_description = 'invoicing date'
 
 
 class InvoicingDateQuarterly(BaseModel):
@@ -129,12 +150,40 @@ class InvoicingDateQuarterly(BaseModel):
     @staticmethod
     def get_invoicing_date_quarterly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
         """
-        Return an setting object which is enabled at the target_date
+        Return a setting object which is enabled at the target_date
         """
         invoicing_date_quarterly = InvoicingDateQuarterly.objects.filter(
             date_of_enforcement__lte=target_date,
         ).order_by('date_of_enforcement').last()
         return invoicing_date_quarterly
+
+    def is_currently_activated(self):
+        if self == InvoicingDateQuarterly.get_invoicing_date_quarterly_by_date():
+            return True
+        return False
+
+    def invoicing_date_q1_display(self):
+        from leaseslicensing.utils import suffix_for_date
+        return self.invoicing_date_q1.strftime('%-d{} of %b'.format(suffix_for_date(self.invoicing_date_q1.day)))
+
+    def invoicing_date_q2_display(self):
+        from leaseslicensing.utils import suffix_for_date
+        return self.invoicing_date_q2.strftime('%-d{} of %b'.format(suffix_for_date(self.invoicing_date_q1.day)))
+
+    def invoicing_date_q3_display(self):
+        from leaseslicensing.utils import suffix_for_date
+        return self.invoicing_date_q3.strftime('%-d{} of %b'.format(suffix_for_date(self.invoicing_date_q1.day)))
+
+    def invoicing_date_q4_display(self):
+        from leaseslicensing.utils import suffix_for_date
+        return self.invoicing_date_q4.strftime('%-d{} of %b'.format(suffix_for_date(self.invoicing_date_q1.day)))
+
+    is_currently_activated.boolean = True
+    is_currently_activated.short_description = 'activated'
+    invoicing_date_q1_display.short_description = 'Q1 invoicing date'
+    invoicing_date_q2_display.short_description = 'Q2 invoicing date'
+    invoicing_date_q3_display.short_description = 'Q3 invoicing date'
+    invoicing_date_q4_display.short_description = 'Q4 invoicing date'
 
 
 class InvoicingDateMonthly(BaseModel):
@@ -148,12 +197,25 @@ class InvoicingDateMonthly(BaseModel):
     @staticmethod
     def get_invoicing_date_monthly_by_date(target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date()):
         """
-        Return an setting object which is enabled at the target_date
+        Return a setting object which is enabled at the target_date
         """
         invoicing_date_monthly = InvoicingDateMonthly.objects.filter(
             date_of_enforcement__lte=target_date,
         ).order_by('date_of_enforcement').last()
         return invoicing_date_monthly
+
+    def is_currently_activated(self):
+        if self == InvoicingDateMonthly.get_invoicing_date_monthly_by_date():
+            return True
+        return False
+
+    def invoicing_date_display(self):
+        from leaseslicensing.utils import suffix_for_date
+        return '{}{} of each month'.format(self.invoicing_date, suffix_for_date(self.invoicing_date))
+
+    is_currently_activated.boolean = True
+    is_currently_activated.short_description = 'activated'
+    invoicing_date_display.short_description = 'invoicing date'
 
 
 def get_year():
