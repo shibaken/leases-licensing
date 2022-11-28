@@ -60,6 +60,9 @@ RUN poetry install --no-dev --no-interaction --no-ansi
 #RUN npm install --production
 #RUN npm install --omit=dev
 COPY leaseslicensing ./leaseslicensing
+COPY gunicorn.ini manage.py ./
+COPY startup.sh /
+
 RUN cd /app/leaseslicensing/frontend/leaseslicensing ; npm install
 RUN cd /app/leaseslicensing/frontend/leaseslicensing ; npm run build
 
@@ -76,7 +79,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # (in local) patch /home/<username>/park-passes/.venv/lib/python3.8/site-packages/django/contrib/admin/migrations/0001_initial.py admin.patch.additional
 RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
 
-COPY gunicorn.ini manage.py ./
+
 
 RUN touch /app/rand_hash
 COPY ./cron /etc/cron.d/dockercron
