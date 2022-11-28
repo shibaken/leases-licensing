@@ -52,8 +52,9 @@ WORKDIR /app
 
 ENV POETRY_VERSION=1.1.13
 RUN pip install "poetry==$POETRY_VERSION"
-RUN poetry config virtualenvs.create false \
-  && poetry install --no-dev --no-interaction --no-ansi
+RUN poetry config virtualenvs.create false
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-dev --no-interaction --no-ansi
 
 WORKDIR leaseslicensing/frontend/leaseslicensing/
 #RUN npm install --production
