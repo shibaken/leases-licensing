@@ -2,7 +2,7 @@
 FROM dbcawa/leaseslicensing:latest as builder_base_leaseslicensingdev
 
 RUN apt-get update
-RUN apt-get install --no-install-recommends -y npm patch
+#RUN apt-get install --no-install-recommends -y npm patch
 RUN apt-get install --no-install-recommends -y libpq-dev git ssh sudo 
 RUN apt-get install --no-install-recommends -y screen
 RUN apt-get install --no-install-recommends -y virtualenv
