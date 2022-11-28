@@ -48,14 +48,14 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip install --upgrade pip
 
 WORKDIR /app
-RUN git clone -v -b $BRANCH https://github.com/dbca-wa/$REPO.git .
+#RUN git clone -v -b $BRANCH https://github.com/dbca-wa/$REPO.git .
 
 ENV POETRY_VERSION=1.1.13
 RUN pip install "poetry==$POETRY_VERSION"
 RUN poetry config virtualenvs.create false \
   && poetry install --no-dev --no-interaction --no-ansi
 
-WORKDIR $REPO_NO_DASH/frontend/$REPO_NO_DASH/
+WORKDIR leaseslicensing/frontend/leaseslicensing/
 #RUN npm install --production
 #RUN npm install --omit=dev
 RUN npm install
