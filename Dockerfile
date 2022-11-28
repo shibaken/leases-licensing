@@ -60,8 +60,8 @@ RUN poetry install --no-dev --no-interaction --no-ansi
 #RUN npm install --production
 #RUN npm install --omit=dev
 COPY leaseslicensing ./leaseslicensing
-RUN cd /app/leaseslicensing/frontend/ ; npm install
-RUN cd /app/leaseslicensing/frontend/ ; npm run build
+RUN cd /app/leaseslicensing/frontend/leaseslicensing ; npm install
+RUN cd /app/leaseslicensing/frontend/leaseslicensing ; npm run build
 
 RUN touch /app/.env
 RUN python manage.py collectstatic --no-input
