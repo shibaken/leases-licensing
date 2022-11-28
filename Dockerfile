@@ -69,8 +69,8 @@ RUN cd /app/leaseslicensing/frontend/leaseslicensing ; npm run build
 RUN touch /app/.env
 RUN python manage.py collectstatic --no-input
 #RUN rm -rf node_modules/
-RUN git log --pretty=medium -30 > ./git_history_recent
-
+#RUN git log --pretty=medium -30 > ./git_history_recent
+COPY .git ./.git
 # Install the project (ensure that frontend projects have been built prior to this step).
 COPY ./timezone /etc/timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
