@@ -56,11 +56,11 @@ RUN poetry config virtualenvs.create false
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-dev --no-interaction --no-ansi
 
-WORKDIR leaseslicensing/frontend/leaseslicensing/
+#WORKDIR /app/frontend/leaseslicensing/
 #RUN npm install --production
 #RUN npm install --omit=dev
-RUN npm install
-RUN npm run build
+RUN cd /app/leaseslicensing/frontend/ ; npm install
+RUN cd /app/leaseslicensing/frontend/ ; npm run build
 WORKDIR /app
 RUN touch /app/.env
 RUN python manage.py collectstatic --no-input
