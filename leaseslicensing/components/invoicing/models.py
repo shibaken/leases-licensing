@@ -3,6 +3,7 @@ from datetime import datetime
 import pytz
 from ledger_api_client import settings_base
 from dateutil.relativedelta import relativedelta
+from ledger_api_client.ledger_models import Invoice
 
 
 class BaseModel(models.Model):
@@ -261,9 +262,18 @@ class InvoicingDetails(BaseModel):
         #     )
         # ]
 
-    def calculate_amounts(self, target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date(), span=relativedelta(years=1)):
+    def calculate_amount(self, target_date=datetime.now(pytz.timezone(settings_base.TIME_ZONE)).date(), span=relativedelta(years=1)):
         pass
-        # TODO: Calculate invoice amounts annually
+        # TODO: Calculate invoice amount
+        # 1. Check if it has been already created
+        #   OR
+        # 1. Calculate the last date which is covered by the invoices
+        # CHARGE_METHOD_ONCE_OFF_CHARGE
+        # CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_INCREMENT
+        # CHARGE_METHOD_BASE_FEE_PLUS_FIXED_ANNUAL_PERCENTAGE
+        # CHARGE_METHOD_BASE_FEE_PLUS_ANNUAL_CPI
+        # CHARGE_METHOD_PERCENTAGE_OF_GROSS_TURNOVER
+        # CHARGE_METHOD_NO_RENT_OR_LICENCE_CHARGE
 
 
 class FixedAnnualIncrementAmount(BaseModel):
@@ -330,7 +340,7 @@ class LeaseLicenceFee(BaseModel):
     This model handles each invoice and the information surrounding it.
     An object of this model is created at an invoicing date.
     """
-    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.SET_NULL)
+    invoicing_details = models.ForeignKey(InvoicingDetails, null=True, blank=True, on_delete=models.SET_NULL, related_name='lease_licence_fees')
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default="")
     invoice_cover_start_date = models.DateField(null=True, blank=True)
     invoice_cover_end_date = models.DateField(null=True, blank=True)
@@ -344,3 +354,22 @@ class LeaseLicenceFee(BaseModel):
             return 'Approval: {}, Invoice: {}'.format(self.invoicing_details.approval, self.invoice_reference)
         else:
             return 'Proposal: {}, Invoice: {}'.format(self.invoicing_details, self.invoice_reference)
+
+    @property
+    def invoice(self):
+        invoice = None
+        if self.invoice_reference:
+            invoice = Invoice.objects.get(reference=self.invoice_reference)
+        return invoice
+
+    @property
+    def amount(self):
+        amount = None
+        if self.invoice_reference:
+            invoice = Invoice.objects.get(reference=self.invoice_reference)
+            amount = invoice.amount
+        return amount
+
+
+
+
