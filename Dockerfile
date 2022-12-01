@@ -23,6 +23,11 @@ ENV BRANCH=$BRANCH_ARG
 ENV REPO=$REPO_ARG
 ENV REPO_NO_DASH=$REPO_NO_DASH_ARG
 
+# Use Australian Mirrors
+RUN sed 's/archive.ubuntu.com/au.archive.ubuntu.com/g' /etc/apt/sources.list > /etc/apt/sourcesau.list
+RUN mv /etc/apt/sourcesau.list /etc/apt/sources.list
+# Use Australian Mirrors
+
 RUN apt-get clean
 RUN apt-get update
 RUN apt-get upgrade -y
@@ -43,31 +48,38 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip install --upgrade pip
 
 WORKDIR /app
-RUN git clone -v -b $BRANCH https://github.com/dbca-wa/$REPO.git .
+#RUN git clone -v -b $BRANCH https://github.com/dbca-wa/$REPO.git .
 
 ENV POETRY_VERSION=1.1.13
 RUN pip install "poetry==$POETRY_VERSION"
-RUN poetry config virtualenvs.create false \
-  && poetry install --no-dev --no-interaction --no-ansi
+RUN poetry config virtualenvs.create false
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-dev --no-interaction --no-ansi
 
-WORKDIR $REPO_NO_DASH/frontend/$REPO_NO_DASH/
+#WORKDIR /app/frontend/leaseslicensing/
 #RUN npm install --production
 #RUN npm install --omit=dev
-RUN npm install
-RUN npm run build
-WORKDIR /app
+COPY leaseslicensing ./leaseslicensing
+COPY gunicorn.ini manage.py ./
+COPY startup.sh /
+
+RUN cd /app/leaseslicensing/frontend/leaseslicensing ; npm install
+RUN cd /app/leaseslicensing/frontend/leaseslicensing ; npm run build
+
 RUN touch /app/.env
 RUN python manage.py collectstatic --no-input
 #RUN rm -rf node_modules/
-RUN git log --pretty=medium -30 > ./git_history_recent
-
+#RUN git log --pretty=medium -30 > ./git_history_recent
+COPY .git ./.git
 # Install the project (ensure that frontend projects have been built prior to this step).
 COPY ./timezone /etc/timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Patch also required on local environments after a venv rebuild
 # (in local) patch /home/<username>/park-passes/.venv/lib/python3.8/site-packages/django/contrib/admin/migrations/0001_initial.py admin.patch.additional
-RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
+#RUN patch /usr/local/lib/python3.8/dist-packages/django/contrib/admin/migrations/0001_initial.py /app/admin.patch.additional
+
+
 
 RUN touch /app/rand_hash
 COPY ./cron /etc/cron.d/dockercron
